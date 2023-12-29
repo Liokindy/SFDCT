@@ -16,6 +16,7 @@ namespace SFR.OnlineServices;
 [HarmonyPatch]
 internal static class Browser
 {
+    /*
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
     private static bool PatchBrowser(SFDGameServerInstance value, GameBrowserMenuItem __instance)
@@ -142,4 +143,5 @@ internal static class Browser
 
         return false;
     }
+    */
 }

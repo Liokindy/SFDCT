@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using HarmonyLib;
+using System.Linq;
+using System.Reflection.Emit;
 using SFD;
 
 namespace SFR.Fighter;
@@ -61,5 +64,48 @@ internal static class AnimHandler
         return new AnimationData(frameData, newName);
     }
     */
+
+
+
+    /// <summary>
+    ///     Patches PlayerEmptyBoltActionAnimation and SFDPlayerEmptyShotgunPumpAnimation
+    /// </summary>
+    [HarmonyPatch]
+    private static class PlayerAnimation
+    {
+        private static readonly object get_PlayerPosition = AccessTools.PropertyGetter(typeof(Player), nameof(Player.Position));
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(PlayerEmptyBoltActionAnimation), nameof(PlayerEmptyBoltActionAnimation.OverrideUpperAnimationEnterFrame))]
+        private static IEnumerable<CodeInstruction> Patch_EmptyBolt(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            code.ElementAt(14).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(22).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
+            code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+            code.Insert(20+2, new CodeInstruction(OpCodes.Ldarg_1));
+            code.Insert(21+2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+
+            return code;
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(PlayerEmptyShotgunPumpAnimation), nameof(PlayerEmptyShotgunPumpAnimation.OverrideUpperAnimationEnterFrame))]
+        private static IEnumerable<CodeInstruction> Patch_ShotgunPump(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+            code.ElementAt(14).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(22).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
+            code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+            code.Insert(20 + 2, new CodeInstruction(OpCodes.Ldarg_1));
+            code.Insert(21 + 2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+
+            return code;
+        }
+    }
 
 }

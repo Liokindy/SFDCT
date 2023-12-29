@@ -10,6 +10,15 @@ namespace SFR.Game;
 [HarmonyPatch]
 internal static class SoundHandler
 {
+    internal static readonly Type typeof_soundHandler = typeof(SFD.Sounds.SoundHandler);
+    internal static readonly string nameof_soundHandlerPlaySound = nameof(SFD.Sounds.SoundHandler.PlaySound);
+    internal static readonly Type[] typeof_StringVector2Gameworld = new Type[]
+    {
+            typeof(string),
+            typeof(Microsoft.Xna.Framework.Vector2),
+            typeof(GameWorld)
+    };
+
     /// <summary>
     ///     Tweaks SoundHandler.PlaySound to use position
     /// </summary>
@@ -23,13 +32,9 @@ internal static class SoundHandler
         }
         if (gameWorld.GameOwner != GameOwnerEnum.Server)
         {
-            float soundPitch = 0f;
-            if (gameWorld.SlowmotionHandler.SlowmotionModifier != 1)
-            {
-                soundPitch = Microsoft.Xna.Framework.MathHelper.Lerp(-1f, 0f, gameWorld.SlowmotionHandler.SlowmotionModifier);
-            }
-
-            SFR.Game.SoundHandler.PlayGlobalPannedSound(soundID, worldPosition, volumeModifier, soundPitch);
+            // -1f to 1f
+            float soundPitch = (gameWorld.SlowmotionHandler.SlowmotionModifier) - 1f;
+            PlayGlobalPannedSound(soundID, worldPosition, volumeModifier, soundPitch);
             
             return false;
         }
@@ -43,7 +48,7 @@ internal static class SoundHandler
     }
 
     /// <summary>
-    ///     Plays a panned sound depending on ScreenPosition.
+    ///     Plays a screen-space panned sound. if Position equals Origin panning is disabled.
     /// </summary>
     private static void PlayGlobalPannedSound(string soundID, Vector2 worldPosition, float volumeModifier = 1f, float soundPitch = 0)
     {
@@ -60,7 +65,7 @@ internal static class SoundHandler
             if (worldPosition != Vector2.Zero)
             {
                 soundPanning = (worldCamPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf * 0.5f;
-                soundPanning = MathHelper.Clamp(soundPanning * 4.00f, -1f, 1f);
+                soundPanning = MathHelper.Clamp(soundPanning * SFR.Misc.Constants.SoundPanningStrength, -1f, 1f);
             }
 
             SFD.Sounds.SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier, soundPitch, soundPanning);

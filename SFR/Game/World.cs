@@ -1,5 +1,4 @@
-﻿using Box2D.XNA;
-using HarmonyLib;
+﻿using HarmonyLib;
 using SFD;
 using SFD.Projectiles;
 using SFD.Sounds;
@@ -69,17 +68,13 @@ internal static class World
     }
 
     /// <summary>
-    ///     This alters the low-hp effects threshold
-    ///     <0.25 to <0.5
+    ///     This alters the low-hp effects
     /// </summary>
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
     private static IEnumerable<CodeInstruction> Update(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(760).operand = 0.5f; // Initial Check
-        instructions.ElementAt(764).operand = 0.5f; // Divider
         instructions.ElementAt(770).operand = 1f; // Bias for saturation
-        // instructions.ElementAt(779).operand = 0.6f; // Heartbeat delay Max()
         return instructions;
     }
 
@@ -188,54 +183,4 @@ internal static class World
         return false;
     }
     */
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SFD.GameWorld), nameof(SFD.GameWorld.CheckProjectileHit))]
-    private static void Prefix_CheckProjectileHit(GameWorld __instance, out Projectile __state, Projectile projectile)
-    {
-        __state = projectile;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(SFD.GameWorld), nameof(SFD.GameWorld.CheckProjectileHit))]
-    private static void Postfix_CheckProjectileHit(GameWorld __instance, ref List<KeyValuePair<RayCastOutput, Fixture>> __result, Projectile __state)
-    {
-        // Return if we're a client.
-        if (__instance.GameOwner == GameOwnerEnum.Client) { return; }
-        if (__state.PlayerOwner == null || __state.PlayerOwner.IsRemoved) { return; }
-
-        // Check if any hit object is a player, and if so
-        // check if it's a teammate of the projectile's owner.
-        List<KeyValuePair<RayCastOutput, Fixture>> hits = new List<KeyValuePair<RayCastOutput, Fixture>>();
-        foreach (KeyValuePair<RayCastOutput, Fixture> value in __result)
-        {
-            ObjectData objectData = ObjectData.Read(value.Value);
-            bool flag = true;
-
-            if (objectData.IsPlayer)
-            {
-                Player player = (Player)objectData.InternalData;
-                if (!player.IsDead && __state.PlayerOwner.InSameTeam(player))
-                {
-                    // 0.9f * 0.85f = 0.72f
-                    if (SFD.Constants.RANDOM.NextDouble() < (double)__state.Properties.DodgeChance * 0.85f)
-                    {
-                        flag = false;
-
-                        // Declare projectile as missed
-                        player.m_projectileMissed.Add(__state);
-                        // Feedback
-                        player.Shake.Start(500f);
-                    }
-                }
-            }
-
-            if (flag)
-            {
-                hits.Add(value);
-            }
-        }
-
-        __result = hits;
-    }
 }
