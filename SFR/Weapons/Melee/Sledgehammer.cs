@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
 using SFD.Effects;
@@ -6,26 +6,27 @@ using SFD.Materials;
 using SFD.Objects;
 using SFD.Sounds;
 using SFD.Weapons;
-using SFR.Fighter;
-using SFR.Sync.Generic;
-using Constants = SFR.Misc.Constants;
+using SFDGameScriptInterface;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace SFR.Weapons.Melee;
 
 internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
 {
+    private const int ChargeThreshold = 500;
     private const float HeavyDamagePlayer = 35f;
     private const float HeavyDamageObject = 100f;
-    private const float WeakDamagePlayer = 8f;
-    private const float WeakDamageObject = 50f;
-    private const float HeavyChargeTime = 800f;
-    private const float AttackCooldown = 300f;
-    private const float WeakBlinkTime = 200f;
-    private const float HeavyBlinkTime = 450f;
-    private float _attackCooldown;
-    private float _chargedTimer;
+    private const float QuickDamagePlayer = 8f;
+    private const float QuickDamageObject = 50f;
+    private const int WeakThreshold = 50;
+    private const int BlinkTime = 200;
+    private const float GlobalCooldown = 300f;
+    private float _blinkTimer = -1f;
+    private float _chargedTimer = -1f;
+    private bool _comboCharged;
     private bool _isCharging;
-    internal float BlinkTimer;
+    private float _lastChargedTimer = -1f;
+    private float _lastSwungAttack = -1f;
 
     internal Sledgehammer()
     {
@@ -94,9 +95,9 @@ internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
         {
             if (player.Position.Y >= target.Position.Y && target.IsDead)
             {
-                if (player.CurrentAction == PlayerAction.MeleeAttack3 || (player.CurrentAction == PlayerAction.JumpAttack && Constants.Random.Next(2) == 0))
+                if (player.CurrentAction == PlayerAction.MeleeAttack3 || (player.CurrentAction == PlayerAction.JumpAttack && new Random().Next(2) == 0))
                 {
-                    GoreHandler.ApplyHeadshot(target, target.Position + new Vector2(0, 18));
+                    // GoreHandler.ApplyHeadshot(target, target.Position + new Vector2(0, 18));
                 }
             }
         }
@@ -104,7 +105,7 @@ internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
 
     public void OnHitObject(Player player, PlayerHitEventArgs args, ObjectData obj)
     {
-        // On heavy attack, detonate explosives
+        //On heavy attack, detonate explosives
         if (obj is ObjectExplosive or ObjectBarrelExplosive && player.CurrentAction == PlayerAction.MeleeAttack3)
         {
             ((ObjectDestructible)obj).Properties.Get(ObjectPropertyID.BarrelExplosive_Exploding).Value = true;
@@ -121,6 +122,17 @@ internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
 
     public void Update(Player player, float ms, float realMs) { }
     public void DrawExtra(SpriteBatch spritebatch, Player player, float ms) { }
+
+    public void BeforeHit(Player player, Player target)
+    {
+        if (target != null && player != null)
+        {
+            if (target.CurrentAction == PlayerAction.Block && player.CurrentAction == PlayerAction.MeleeAttack3)
+            {
+                target.TakeMeleeDamage(PlayerDamageEventType.Melee, HeavyDamagePlayer / 2 * player.MeleeDamageDealtModifier, player.ObjectID);
+            }
+        }
+    }
 
     public override MWeapon Copy() => new Sledgehammer(Properties, Visuals)
     {
@@ -139,85 +151,90 @@ internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
 
     public override void CustomHandlingPostUpdate(Player player, float totalMs)
     {
-        if (player.GameOwner == GameOwnerEnum.Client)
+        if (_isCharging)
         {
-            return;
-        }
-
-        if (player.LayingOnGround)
-        {
-            _chargedTimer = 0f;
-            _isCharging = false;
-        }
-        else if (_isCharging)
-        {
-            if (player.VirtualKeyboard.PressingKey(4, true))
+            if (player.Staggering || player.Rolling || player.MeleeHit || player.LedgeGrabbing || player.LayingOnGround || player.Diving ||
+                player.CurrentAction == PlayerAction.JumpKick)
             {
-                _chargedTimer -= totalMs;
-                if (_chargedTimer <= player.GameWorld.ElapsedTotalGameTime)
-                {
-                    SwingTheHammer(player, true);
-                }
+                _isCharging = false;
+                _lastChargedTimer = _chargedTimer = -1f;
             }
-            else
+            else if (_lastChargedTimer + WeakThreshold < player.GameWorld.ElapsedTotalGameTime)
             {
                 SwingTheHammer(player, false);
             }
         }
+
+        if (_comboCharged)
+        {
+            if (player.CurrentAction != PlayerAction.MeleeAttack2 && !_isCharging)
+            {
+                _comboCharged = false;
+            }
+        }
     }
 
+    //onKeyEvent: true = first frame, false = holding
     public override bool CustomHandlingOnAttackKey(Player player, bool onKeyEvent)
     {
-        if (player.GameOwner == GameOwnerEnum.Client)
+        if (onKeyEvent && (player.CurrentAction is PlayerAction.Idle || player.CurrentAction is PlayerAction.MeleeAttack2))
         {
-            return true;
-        }
+            if (!_isCharging)
+            {
+                if (player.CurrentAction == PlayerAction.MeleeAttack2)
+                {
+                    if (!_comboCharged)
+                    {
+                        _comboCharged = true;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
-        if (_attackCooldown > player.GameWorld.ElapsedTotalGameTime)
-        {
-            return true;
+                _chargedTimer = player.GameWorld.ElapsedTotalGameTime + ChargeThreshold;
+                _isCharging = true;
+                _blinkTimer = BlinkTime;
+                SoundHandler.PlaySound("LightCharge", player.Position, player.GameWorld);
+            }
         }
-
-        if (onKeyEvent && player.CurrentAction is PlayerAction.Idle && !_isCharging)
+        else if (_isCharging)
         {
-            _isCharging = true;
-            _chargedTimer = player.GameWorld.ElapsedTotalGameTime + HeavyChargeTime;
-            SyncBlinkTime(player, WeakBlinkTime);
-            SoundHandler.PlaySound("LightCharge", player.Position, player.GameWorld);
+            _lastChargedTimer = player.GameWorld.ElapsedTotalGameTime;
+            if (_chargedTimer < player.GameWorld.ElapsedTotalGameTime)
+            {
+                SwingTheHammer(player, true);
+            }
         }
 
         return true;
     }
 
-    private void SyncBlinkTime(Player player, float time)
-    {
-        if (player.GameOwner != GameOwnerEnum.Client)
-        {
-            BlinkTimer = time;
-            GenericData.SendGenericDataToClients(new GenericData(DataType.SledgehammerBlink, new SyncFlag[] { }, player.ObjectData.BodyID, time));
-        }
-    }
-
     private void SwingTheHammer(Player player, bool isHeavy)
     {
-        _isCharging = false;
-        _attackCooldown = player.GameWorld.ElapsedTotalGameTime + AttackCooldown;
+        if (_lastSwungAttack < player.GameWorld.ElapsedTotalGameTime)
+        {
+            _isCharging = false;
+            _chargedTimer = _lastChargedTimer = -1f;
+            if (isHeavy)
+            {
+                Properties.DamagePlayers = HeavyDamagePlayer;
+                Properties.DamageObjects = HeavyDamageObject;
+                player.DrainEnergy(10);
+                player.CurrentAction = PlayerAction.MeleeAttack3;
+                _blinkTimer = BlinkTime;
+                EffectHandler.PlayEffect("GLM", player.Position + new Vector2(-22f * (player.AimVector().X > 0 ? 1 : -1), 13f), player.GameWorld);
+                SoundHandler.PlaySound("HeavyCharge", player.Position, player.GameWorld);
+            }
+            else
+            {
+                Properties.DamagePlayers = QuickDamagePlayer;
+                Properties.DamageObjects = QuickDamageObject;
+                player.CurrentAction = PlayerAction.MeleeAttack2;
+            }
 
-        if (isHeavy)
-        {
-            Properties.DamagePlayers = HeavyDamagePlayer;
-            Properties.DamageObjects = HeavyDamageObject;
-            player.DrainEnergy(10);
-            player.CurrentAction = PlayerAction.MeleeAttack3;
-            SyncBlinkTime(player, HeavyBlinkTime);
-            EffectHandler.PlayEffect("GLM", player.Position + new Vector2(-22f * (player.AimVector().X > 0 ? 1 : -1), 13f), player.GameWorld);
-            SoundHandler.PlaySound("HeavyCharge", player.Position, player.GameWorld);
-        }
-        else
-        {
-            Properties.DamagePlayers = WeakDamagePlayer;
-            Properties.DamageObjects = WeakDamageObject;
-            player.CurrentAction = PlayerAction.MeleeAttack2;
+            _lastSwungAttack = player.GameWorld.ElapsedTotalGameTime + GlobalCooldown;
         }
     }
 
@@ -233,9 +250,9 @@ internal sealed class Sledgehammer : MWeapon, IExtendedWeapon
 
     public override Texture2D GetDrawnTexture(ref GetDrawnTextureArgs args)
     {
-        if (BlinkTimer > args.TimeMs)
+        if (_blinkTimer > 0f)
         {
-            BlinkTimer -= args.TimeMs;
+            _blinkTimer -= args.TimeMs;
             args.Postfix = "Blink";
         }
 

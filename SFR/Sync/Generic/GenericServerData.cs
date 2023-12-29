@@ -10,18 +10,10 @@ internal static class GenericServerData
     public static GenericData Read(NetIncomingMessage incomingMessage)
     {
         var type = (DataType)incomingMessage.ReadInt32();
+        byte length = incomingMessage.ReadByte();
+        object[] data = new object[length];
 
-        byte flagsLength = incomingMessage.ReadByte();
-        var flags = new SyncFlag[flagsLength];
-        for (int i = 0; i < flagsLength; i++)
-        {
-            flags[i] = (SyncFlag)incomingMessage.ReadInt32();
-        }
-
-        byte dataLength = incomingMessage.ReadByte();
-        object[] data = new object[dataLength];
-
-        for (int i = 0; i < dataLength; i++)
+        for (int i = 0; i < length; i++)
         {
             switch (incomingMessage.ReadRangedInteger(0, 3))
             {
@@ -40,75 +32,38 @@ internal static class GenericServerData
             }
         }
 
-        return new GenericData(type, flags, data);
+        return new GenericData(type, data);
     }
 
     public static NetOutgoingMessage Write(GenericData genericData, NetOutgoingMessage netOutgoingMessage)
     {
         NetMessage.WriteDataType((MessageType)63, netOutgoingMessage);
 
-        int count = 0;
-        foreach (object iter in genericData.Args)
-        {
-            if (iter is object[] arr)
-            {
-                count += arr.Length;
-            }
-            else
-            {
-                count++;
-            }
-        }
-
         netOutgoingMessage.Write((int)genericData.Type);
-
-        netOutgoingMessage.Write((byte)genericData.Flags.Length);
-        foreach (var flag in genericData.Flags)
-        {
-            netOutgoingMessage.Write((int)flag);
-        }
-
-        netOutgoingMessage.Write((byte)count);
+        netOutgoingMessage.Write((byte)genericData.Args.Length);
         foreach (object data in genericData.Args)
         {
-            if (data is object[] arr)
+            switch (data)
             {
-                foreach (object innerData in arr)
-                {
-                    WriteMessage(innerData, netOutgoingMessage);
-                }
-            }
-            else
-            {
-                WriteMessage(data, netOutgoingMessage);
+                case bool parsedBool:
+                    netOutgoingMessage.WriteRangedInteger(0, 3, 0);
+                    netOutgoingMessage.Write(parsedBool);
+                    break;
+                case int parsedInt:
+                    netOutgoingMessage.WriteRangedInteger(0, 3, 1);
+                    netOutgoingMessage.Write(parsedInt);
+                    break;
+                case float parsedFloat:
+                    netOutgoingMessage.WriteRangedInteger(0, 3, 2);
+                    netOutgoingMessage.Write(parsedFloat);
+                    break;
+                case string parsedString:
+                    netOutgoingMessage.WriteRangedInteger(0, 3, 3);
+                    netOutgoingMessage.Write(parsedString);
+                    break;
             }
         }
 
         return netOutgoingMessage;
-    }
-
-    private static bool WriteMessage(object data, NetOutgoingMessage netOutgoingMessage)
-    {
-        switch (data)
-        {
-            case bool parsedBool:
-                netOutgoingMessage.WriteRangedInteger(0, 3, 0);
-                netOutgoingMessage.Write(parsedBool);
-                return true;
-            case int parsedInt:
-                netOutgoingMessage.WriteRangedInteger(0, 3, 1);
-                netOutgoingMessage.Write(parsedInt);
-                return true;
-            case float parsedFloat:
-                netOutgoingMessage.WriteRangedInteger(0, 3, 2);
-                netOutgoingMessage.Write(parsedFloat);
-                return true;
-            case string parsedString:
-                netOutgoingMessage.WriteRangedInteger(0, 3, 3);
-                netOutgoingMessage.Write(parsedString);
-                return true;
-        }
-
-        return false;
     }
 }

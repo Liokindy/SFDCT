@@ -93,7 +93,6 @@ internal sealed class ObjectStickyBombThrown : ObjectGrenadeThrown
             {
                 m_timeBeforeEnablePlayerHit = 0f;
                 DisableUpdateObject();
-
                 if (Constants.Random.NextFloat() < GetDudChance())
                 {
                     EffectHandler.PlayEffect("GR_D", GetWorldPosition(), GameWorld);
@@ -116,6 +115,7 @@ internal sealed class ObjectStickyBombThrown : ObjectGrenadeThrown
             }
             else if (_stickiedObject is { Body: not null, RemovalInitiated: false })
             {
+                //Logger.LogDebug("okay");
                 var gamePos = _stickiedOffset;
                 SFDMath.RotatePosition(ref gamePos, _stickiedObject.GetAngle() - _stickiedAngle, out gamePos);
                 gamePos += _stickiedObject.GetWorldPosition();
@@ -216,22 +216,21 @@ internal sealed class ObjectStickyBombThrown : ObjectGrenadeThrown
 
         if (!Stickied)
         {
-            // Stickied = true;
-            // _stickiedPlayer = player;
-            // _stickiedOffset = GetWorldPosition() - player.Position;
-            // _stickiedAngle = player.LastDirectionX;
-            // ApplyStickyPlayer(player.ObjectID, _stickiedOffset.X, _stickiedOffset.Y, _stickiedAngle);
+            Stickied = true;
+            _stickiedPlayer = player;
+            _stickiedOffset = GetWorldPosition() - player.Position;
+            _stickiedAngle = player.LastDirectionX;
 
-            ApplyStickyPlayer(player, _stickiedOffset.X, _stickiedOffset.Y, _stickiedAngle);
-            if (GameOwner == GameOwnerEnum.Server)
+            if (GameOwner != GameOwnerEnum.Client)
             {
-                GenericData.SendGenericDataToClients(new GenericData(DataType.StickyGrenade, new SyncFlag[] { }, ObjectID, player.ObjectID, _stickiedOffset.X, _stickiedOffset.Y, _stickiedAngle));
+                GenericData.SendGenericDataToClients(new GenericData(DataType.StickyGrenade, ObjectID, player.ObjectData.BodyID, _stickiedOffset.X, _stickiedOffset.Y, _stickiedAngle));
             }
         }
     }
 
-    internal void ApplyStickyPlayer(Player player, float x, float y, float angle)
+    internal void ApplyStickyPlayer(int playerID, float x, float y, float angle)
     {
+        var player = GameWorld.GetPlayer(playerID);
         if (player != null)
         {
             _stickiedPlayer = player;

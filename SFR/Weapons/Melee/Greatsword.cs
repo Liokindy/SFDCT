@@ -8,7 +8,7 @@ using SFD.Weapons;
 
 namespace SFR.Weapons.Melee;
 
-internal sealed class Greatsword : MWeapon, ISharpMelee
+internal sealed class Greatsword : MWeapon, ISharpMelee, IMedievalMelee
 {
     private bool _doLanding;
 
@@ -68,6 +68,10 @@ internal sealed class Greatsword : MWeapon, ISharpMelee
     {
         SetPropertiesAndVisuals(weaponProperties, weaponVisuals);
     }
+
+    public float GetPoise() => 2f;
+
+    public bool CanParry() => false;
 
     public float GetDecapitationChance() => 1f;
 

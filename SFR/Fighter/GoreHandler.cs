@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using SFD;
 using SFD.Effects;
 using SFD.Objects;
@@ -23,6 +24,7 @@ internal static class GoreHandler
     private const float HeadThresholdCrouching = 5f;
     private const float HeadThresholdLaying = 3f;
     private const int MaxDamageChance = 40;
+    /*
 
     /// <summary>
     ///     Spawn more giblets on player dead.
@@ -33,7 +35,7 @@ internal static class GoreHandler
     {
         if (!__instance.IsRemoved && !__instance.m_removalRunning && __instance.PlayerHitEffect == PlayerHitEffect.Default)
         {
-            string[] giblets = { "Organ00", "Organ01", "Organ02", "Organ03", "Organ04", "Organ05" };
+            string[] giblets = { "Organ00", "Organ01", "Organ02", "Organ03", "Organ04", "Organ05", "Brain00" };
             foreach (string giblet in giblets)
             {
                 var value = Converter.ConvertBox2DToWorld(__instance.WorldBody.GetPosition());
@@ -49,7 +51,7 @@ internal static class GoreHandler
 
     /// <summary>
     ///     Check the damage and where the player has been hit.
-    ///     Decapitate it accordingly.
+    ///     The decapitate it accordingly.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.RunScriptOnProjectileHitCallbacks))]
@@ -201,7 +203,7 @@ internal static class GoreHandler
         return false;
     }
 
-    internal static void ApplyHeadshot(Player player, Vector2 position, string headshotType = "Normal")
+    private static void ApplyHeadshot(Player player, Vector2 position, string headshotType = "Normal")
     {
         // Check for special skins
         if (player.GetProfile().ToSFDProfile().Skin.Name.Contains("Headless") || GetCorrespondingSkin(player.GetProfile().ToSFDProfile().Skin.Name) == null)
@@ -233,19 +235,14 @@ internal static class GoreHandler
 
         if (headshotType == "Melee_Sharp")
         {
-            // var head = (ObjectHead)ObjectData.CreateNew(new ObjectDataStartParams(player.GameWorld.IDCounter.NextID(), 100, 0, "Head00", player.GameWorld.GameOwner));
-            var head = (ObjectHead)player.GameWorld.CreateObjectData("Head00");
-            player.GameWorld.CreateTile(new SpawnObjectInformation(head, player.Position + new Vector2(0, 16), 0, (short)player.LastDirectionX, new Vector2(Constants.Random.NextFloat(-0.5f, 0.5f), Constants.Random.NextFloat(6, 10)), Constants.Random.NextFloat(-6f, 6f)));
-            switch (player.GameOwner)
+            var head = (ObjectHead)ObjectData.CreateNew(new ObjectDataStartParams(player.GameWorld.IDCounter.NextID(), 100, 0, "Head00", player.GameWorld.GameOwner));
+            if (head.GameOwner != GameOwnerEnum.Client)
             {
-                case GameOwnerEnum.Server:
-                    GenericData.SendGenericDataToClients(new GenericData(DataType.Head, new[] { SyncFlag.MustSyncNewObjects }, head.ObjectID, ObjectHead.EquipmentToString(player.Equipment)));
-                    // head.SyncedMethod(new ObjectDataSyncedMethod(ObjectDataSyncedMethod.Methods.AnimationSetFrame, player.GameWorld.ElapsedTotalGameTime, ObjectHead.EquipmentToString(player.Equipment)));
-                    break;
-                case GameOwnerEnum.Local:
-                    head.ReplaceTexture = ObjectHead.TextureFromString(ObjectHead.EquipmentToString(player.Equipment));
-                    break;
+                GenericData.SendGenericDataToClients(new GenericData(DataType.Head, head.ObjectID, ObjectHead.EquipmentToString(player.Equipment)));
+                // head.SyncedMethod(new ObjectDataSyncedMethod(ObjectDataSyncedMethod.Methods.AnimationSetFrame, player.GameWorld.ElapsedTotalGameTime, ObjectHead.EquipmentToString(player.Equipment)));
             }
+
+            player.GameWorld.CreateTile(new SpawnObjectInformation(head, player.Position + new Vector2(0, 16), 0, (short)player.LastDirectionX, new Vector2(Constants.Random.NextFloat(-0.5f, 0.5f), Constants.Random.NextFloat(6, 10)), Constants.Random.NextFloat(-6f, 6f)));
         }
 
         // Apply profile
@@ -303,7 +300,7 @@ internal static class GoreHandler
         if (isZombie)
         {
             string[] zHats = { "Headless", "ExposedBrain", "HeadShot", "HeadShot2", "HeadShot3" };
-            hat = zHats[Constants.Random.Next(zHats.Length)];
+            hat = zHats[new Random().Next(zHats.Length)];
             if (hat.Contains("Brain"))
             {
                 color2 = "Brain";
@@ -312,7 +309,7 @@ internal static class GoreHandler
         else
         {
             string[] nHats = { "Headless", "HeadShot", "HeadShot2" };
-            hat = nHats[Constants.Random.Next(nHats.Length)];
+            hat = nHats[new Random().Next(nHats.Length)];
         }
 
         return headshotType switch
@@ -322,4 +319,5 @@ internal static class GoreHandler
             _ => hat.Contains("HeadShot") ? new IProfileClothingItem(hat, color1, color3, color2) : new IProfileClothingItem(hat, color1, color2, color3)
         };
     }
+    */
 }

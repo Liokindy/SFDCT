@@ -12,7 +12,7 @@ internal sealed class ObjectNukeTrigger : ObjectTriggerBase
         ScriptBridge = new ObjectScriptTriggerScriptBridge(this, (ObjectTriggerBaseScriptBridge)ScriptBridge);
         Use2XTexture();
     }
-
+    
     public override void SetProperties()
     {
         Properties.Add(ObjectPropertyID.ScriptTerminatePlayers_TerminateType);
@@ -34,10 +34,10 @@ internal sealed class ObjectNukeTrigger : ObjectTriggerBase
             TriggerTargetNodes(ScriptBridge);
         }
 
-        if (GameOwner != GameOwnerEnum.Client && !NukeHandler.IsActive)
-        {
-            NukeHandler.CreateNuke(GameWorld, GetPlayerTerminateType(), (string)Properties.Get(ObjectPropertyID.ScriptGameOverTrigger_GameOverText).Value, GetObjectTerminateType());
-        }
+        //if (GameOwner != GameOwnerEnum.Client && !NukeHandler.IsActive)
+        //{
+        //    NukeHandler.CreateNuke(GameWorld, GetPlayerTerminateType(), (string)Properties.Get(ObjectPropertyID.ScriptGameOverTrigger_GameOverText).Value, GetObjectTerminateType());
+        //}
 
         return true;
     }
@@ -50,4 +50,5 @@ internal sealed class ObjectNukeTrigger : ObjectTriggerBase
     private PlayerTerminateType GetPlayerTerminateType() => (PlayerTerminateType)(int)Properties.Get(ObjectPropertyID.ScriptTerminatePlayers_TerminateType).Value;
 
     private ObjectTerminateType GetObjectTerminateType() => (ObjectTerminateType)(int)Properties.Get(ObjectPropertyID.DestroyTargetsType).Value;
+    
 }

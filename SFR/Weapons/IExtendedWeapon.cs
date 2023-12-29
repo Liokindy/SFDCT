@@ -2,8 +2,8 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
+using SFD.Weapons;
 using SFR.Fighter;
-using SFR.Helper;
 
 namespace SFR.Weapons;
 
@@ -54,9 +54,9 @@ internal static class ExtendedWeapon
     [HarmonyPatch(typeof(Player), nameof(Player.HitByMelee))]
     private static void OnPlayerHit(Player hitBy, Player __instance)
     {
-        GoreHandler.MeleeHit(hitBy, __instance);
+        // GoreHandler.MeleeHit(hitBy, __instance);
 
-        var weapon = hitBy.GetCurrentMeleeWeaponInUse();
+        var weapon = __instance.GetCurrentMeleeWeaponInUse();
         if (weapon is IExtendedWeapon wep)
         {
             wep.OnHit(hitBy, __instance);
@@ -74,11 +74,27 @@ internal static class ExtendedWeapon
         }
     }
 
+    /// <summary>
+    ///     Helper method to return the current weapon in use
+    /// </summary>
+    /// <param name="player">A player</param>
+    /// <returns>The current weapon in use</returns>
+    internal static object GetCurrentWeapon(Player player)
+    {
+        return player.CurrentWeaponDrawn switch
+        {
+            WeaponItemType.Melee => player.GetCurrentMeleeWeaponInUse(),
+            WeaponItemType.Handgun or WeaponItemType.Rifle => player.GetCurrentRangedWeaponInUse(),
+            WeaponItemType.Thrown => player.GetCurrentThrownWeaponInUse(),
+            _ => null
+        };
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Player), nameof(Player.Update))]
     private static void Update(float ms, float realMs, Player __instance)
     {
-        object weapon = __instance.GetCurrentWeapon();
+        object weapon = GetCurrentWeapon(__instance);
         if (weapon is IExtendedWeapon wep)
         {
             wep.Update(__instance, ms, realMs);
@@ -89,7 +105,7 @@ internal static class ExtendedWeapon
     [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
     private static void DrawExtra(SpriteBatch spriteBatch, float ms, Player __instance)
     {
-        object weapon = __instance.GetCurrentWeapon();
+        object weapon = GetCurrentWeapon(__instance);
         if (weapon is IExtendedWeapon wep)
         {
             wep.DrawExtra(spriteBatch, __instance, ms);

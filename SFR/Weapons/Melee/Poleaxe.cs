@@ -8,7 +8,7 @@ using SFD.Weapons;
 
 namespace SFR.Weapons.Melee;
 
-internal sealed class Poleaxe : MWeapon, ISharpMelee
+internal sealed class Poleaxe : MWeapon, ISharpMelee, IMedievalMelee
 {
     internal Poleaxe()
     {
@@ -67,6 +67,10 @@ internal sealed class Poleaxe : MWeapon, ISharpMelee
     {
         SetPropertiesAndVisuals(weaponProperties, weaponVisuals);
     }
+
+    public float GetPoise() => 1.2f;
+
+    public bool CanParry() => false;
 
     public float GetDecapitationChance() => 0.66f;
 

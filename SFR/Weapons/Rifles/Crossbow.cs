@@ -88,7 +88,8 @@ internal sealed class Crossbow : RWeapon
                 break;
         }
 
-        if (args.SubAnimation is "UpperReloadBazooka")
+        string subAnimation;
+        if ((subAnimation = args.SubAnimation) != null && subAnimation == "UpperReloadBazooka")
         {
             args.Postfix = args.SubFrame switch
             {

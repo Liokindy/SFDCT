@@ -65,9 +65,8 @@ internal sealed class Snowball : TWeapon
         e.Action = TWeaponDeadlineAction.Drop;
     }
 
-    public override TWeapon Copy() =>
-        new Snowball(Properties, Visuals)
-        {
-            NumberOfThrowablesLeft = NumberOfThrowablesLeft
-        };
+    public override TWeapon Copy() => new Snowball(Properties, Visuals)
+    {
+        NumberOfThrowablesLeft = NumberOfThrowablesLeft
+    };
 }

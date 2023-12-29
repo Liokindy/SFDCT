@@ -5,6 +5,7 @@ using SFD;
 using SFD.Objects;
 using SFD.Tiles;
 using SFR.Helper;
+using SFR.Sync.Generic;
 
 namespace SFR.Objects;
 
@@ -29,6 +30,7 @@ internal sealed class ObjectHead : ObjectGiblet
             if (Properties.Get(290).Value != null)
             {
                 var targetPlayerProfileInfoObjects = GetObjectsFromProperty<ObjectPlayerProfileInfo>(ObjectPropertyID.ScriptPlayerSpawnProfileInfoTarget);
+                Logger.LogDebug(targetPlayerProfileInfoObjects.Count);
                 if (targetPlayerProfileInfoObjects.Count > 0)
                 {
                     var profile = targetPlayerProfileInfoObjects[0].GetProfile();
@@ -36,7 +38,7 @@ internal sealed class ObjectHead : ObjectGiblet
                     equipment.Equip(profile.EquippedItems[0]);
                     equipment.Equip(profile.EquippedItems[6]);
                     equipment.Equip(profile.EquippedItems[8]);
-                    // GenericData.SendGenericDataToClients(new GenericData(DataType.Head, new SyncFlags[] { }, ObjectID, EquipmentToString(equipment)));
+                    GenericData.SendGenericDataToClients(new GenericData(DataType.Head, ObjectID, EquipmentToString(equipment)));
                     // SyncedMethod(new ObjectDataSyncedMethod(ObjectDataSyncedMethod.Methods.AnimationSetFrame, GameWorld.ElapsedTotalGameTime, EquipmentToString(equipment)));
                 }
             }
@@ -56,32 +58,37 @@ internal sealed class ObjectHead : ObjectGiblet
         var skin = equipment.m_parts[0][0]?.GetTexture(0);
         if (skin != null)
         {
-            var task = Task.Run(() => equipment.m_parts[0][0]?.GetTexture(0, equipment.GetItemColors(0)));
+            var task = Task.Run(() =>
+                equipment.m_parts[0][0]?.GetTexture(0, equipment.GetItemColors(0))
+            );
             if (task.Wait(5))
             {
                 skin = task.Result;
             }
             else
             {
-                Logger.LogWarn("Timed out for Skin!");
+                Logger.LogDebug("Timed out for Skin!");
             }
         }
 
         var accessory = equipment.m_parts[6][0]?.GetTexture(0);
         if (accessory != null)
         {
-            var task1 = Task.Run(() => equipment.m_parts[6][0]?.GetTexture(0, equipment.GetItemColors(6)));
+            var task1 = Task.Run(() =>
+                equipment.m_parts[6][0]?.GetTexture(0, equipment.GetItemColors(6))
+            );
             if (task1.Wait(5))
             {
                 accessory = task1.Result;
             }
             else
             {
-                Logger.LogWarn("Timed out for Accessory!");
+                Logger.LogDebug("Timed out for Accessory!");
             }
         }
 
         var head = equipment.m_parts[8][0]?.GetTexture(0);
+        Logger.LogDebug("Getting head color: " + equipment.GetItemColors(8));
         if (head != null)
         {
             var task2 = Task.Run(() => equipment.m_parts[8][0]?.GetTexture(0, equipment.GetItemColors(8)));
@@ -91,12 +98,12 @@ internal sealed class ObjectHead : ObjectGiblet
             }
             else
             {
-                Logger.LogWarn("Timed out for Head!");
+                Logger.LogDebug("Timed out for Head!");
             }
         }
 
 
-        // Filter
+        //Filter
         if (equipment.GetItem(6) != null)
         {
             foreach (string str in DisallowedAccessories)
@@ -123,7 +130,7 @@ internal sealed class ObjectHead : ObjectGiblet
             head = null;
         }
 
-        // Get Colors
+        //Get Colors
         Texture2D texture = new(skin?.GraphicsDevice, 16, 16);
         var data = new Color[16 * 16];
         texture.GetData(data);
@@ -136,7 +143,7 @@ internal sealed class ObjectHead : ObjectGiblet
         var headData = new Color[16 * 16];
         head?.GetData(headData);
 
-        // Draw
+        //Draw
         for (int i = 0; i < data.Length; i++)
         {
             var color = Color.Transparent;
@@ -185,20 +192,18 @@ internal sealed class ObjectHead : ObjectGiblet
 
     internal static string EquipmentToString(Equipment eq)
     {
-        string str = eq.GetItem(0) == null
+        string str = "";
+        str += eq.GetItem(0) == null
             ? "NONE:0,0,0"
             : eq.GetItem(0).Filename + ":" + eq.GetItemColors(0)[0] + "," + eq.GetItemColors(0)[1] + "," + eq.GetItemColors(0)[2];
-
         str += "|";
         str += eq.GetItem(6) == null
             ? "NONE:0,0,0"
             : eq.GetItem(6).Filename + ":" + eq.GetItemColors(6)[0] + "," + eq.GetItemColors(6)[1] + "," + eq.GetItemColors(6)[2];
-
         str += "|";
         str += eq.GetItem(8) == null
             ? "NONE:0,0,0"
             : eq.GetItem(8).Filename + ":" + eq.GetItemColors(8)[0] + "," + eq.GetItemColors(8)[1] + "," + eq.GetItemColors(8)[2];
-
         return str;
     }
 

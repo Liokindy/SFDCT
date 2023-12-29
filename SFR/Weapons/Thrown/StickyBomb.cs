@@ -56,7 +56,7 @@ internal sealed class StickyBomb : TWeapon
 
     public override Texture2D GetDrawnTexture(ref GetDrawnTextureArgs args)
     {
-        if (_primed && args.Player is { CurrentThrownWeapon: not null })
+        if (_primed && args.Player is { CurrentThrownWeapon: { } })
         {
             return Visuals.Throwing;
         }
@@ -111,9 +111,8 @@ internal sealed class StickyBomb : TWeapon
         e.Action = TWeaponDeadlineAction.Drop;
     }
 
-    public override TWeapon Copy() =>
-        new StickyBomb(Properties, Visuals)
-        {
-            NumberOfThrowablesLeft = NumberOfThrowablesLeft
-        };
+    public override TWeapon Copy() => new StickyBomb(Properties, Visuals)
+    {
+        NumberOfThrowablesLeft = NumberOfThrowablesLeft
+    };
 }

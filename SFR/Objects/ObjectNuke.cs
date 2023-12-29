@@ -11,14 +11,15 @@ namespace SFR.Objects;
 
 internal sealed class ObjectNuke : ObjectData
 {
-    private const float CreateBoomInterval = 5;
-    private readonly List<Boom> _booms = new();
-    private float _createBoomTimer;
-    internal bool IsActive;
-    internal float Progress = 0f;
+    // private const float CreateBoomInterval = 5;
+    // private readonly List<Boom> _booms = new();
+    // private float _createBoomTimer;
+    // internal bool IsActive;
+    // internal float Progress = 0f;
 
     internal ObjectNuke(ObjectDataStartParams startParams) : base(startParams) { }
 
+    /*
     public override void Draw(SpriteBatch spriteBatch, float ms)
     {
         if (IsActive)
@@ -103,4 +104,5 @@ internal sealed class Boom
         int frame = (int)(_timer / FrameTime);
         spriteBatch.Draw(_sheet, _position, new Rectangle(frame * _sheet.Height, 0, _sheet.Height, _sheet.Height), new Color(0.5f, 0.5f, 0.5f, 1f), 0, new Vector2(0, 0), Camera.Zoom, SpriteEffects.None, 0f);
     }
+    */
 }

@@ -42,7 +42,6 @@ internal sealed class NailGun : RWeapon
         weaponVisuals.AnimFullLand = "FullLandHandgun";
         weaponVisuals.AnimToggleThrowingMode = "UpperToggleThrowing";
         weaponProperties.VisualText = "Nailgun";
-
         SetPropertiesAndVisuals(weaponProperties, weaponVisuals);
         CacheDrawnTextures(new[] { "Reload" });
     }

@@ -17,6 +17,7 @@ namespace SFR.Game;
 [HarmonyPatch]
 internal static class NukeHandler
 {
+    /*
     private const float ScreenWipeTime = 5000f;
     private const float SoundInterval = 50;
 
@@ -41,7 +42,8 @@ internal static class NukeHandler
     private static GameWorld _gameWorld;
 
     private static List<ObjectNuke> _nukeObjects = new();
-
+      
+    
     private static void Finish()
     {
         _screenWipeProgress = 0f;
@@ -63,19 +65,17 @@ internal static class NukeHandler
         }
 
         _gameWorld = gameWorld;
-        if (gameWorld.GameOwner == GameOwnerEnum.Server) // == Client
+        if (gameWorld.GameOwner != GameOwnerEnum.Client) // == Client
         {
             var bgNuke = (ObjectNuke)ObjectData.CreateNew(new ObjectDataStartParams(gameWorld.IDCounter.NextID(), 1, 0, "BgNuke", gameWorld.GameOwner));
             gameWorld.CreateTile(new SpawnObjectInformation(bgNuke, new Vector2(0, 0)));
             var fgNuke = (ObjectNuke)ObjectData.CreateNew(new ObjectDataStartParams(gameWorld.IDCounter.NextID(), 2, 0, "FgNuke", gameWorld.GameOwner));
             gameWorld.CreateTile(new SpawnObjectInformation(fgNuke, new Vector2(0, 0)));
 
-            // if (gameWorld.GameOwner == GameOwnerEnum.Server)
-            // {
-            GenericData.SendGenericDataToClients(new GenericData(DataType.Nuke, new[] { SyncFlag.MustSyncNewObjects }, fgNuke.ObjectID, bgNuke.ObjectID));
-            gameWorld.SlowmotionHandler.Reset();
-            gameWorld.SlowmotionHandler.AddSlowmotion(new Slowmotion(ScreenWipeTime * 0.25f, ScreenWipeTime * 0.8f, ScreenWipeTime * 0.2f, 0.2f, 0));
-            // }
+            if (gameWorld.GameOwner == GameOwnerEnum.Server)
+            {
+                GenericData.SendGenericDataToClients(new GenericData(DataType.Nuke, fgNuke.ObjectID, bgNuke.ObjectID));
+            }
 
             List<ObjectNuke> nukeObjects = new()
             {
@@ -88,6 +88,8 @@ internal static class NukeHandler
             _gameOverText = gameOverText;
 
             Begin(nukeObjects);
+            gameWorld.SlowmotionHandler.Reset();
+            gameWorld.SlowmotionHandler.AddSlowmotion(new Slowmotion(ScreenWipeTime * 0.25f, ScreenWipeTime * 0.8f, ScreenWipeTime * 0.2f, 0.2f, 0));
         }
     }
 
@@ -115,8 +117,9 @@ internal static class NukeHandler
             for (int i = _nukeObjects.Count - 1; i >= 0; i--)
             {
                 // Logger.LogDebug("2");
-                if (_nukeObjects[i] is { Tile: not null })
+                if (_nukeObjects[i] is { Tile: { } })
                 {
+                    // Logger.LogDebug("3");
                     _nukeObjects[i].IsActive = true;
                     if (_nukeObjects[i].Tile.Name == "BgNuke")
                     {
@@ -138,7 +141,7 @@ internal static class NukeHandler
             }
 
             // Logger.LogDebug("6");
-            // BurnPlayers(); // Error?
+            BurnPlayers();
 
             if (relativeProgress > KillTime && !_death)
             {
@@ -279,4 +282,5 @@ internal static class NukeHandler
             GameSFD.Saturation = saturation;
         }
     }
+    */
 }

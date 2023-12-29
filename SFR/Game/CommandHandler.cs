@@ -10,6 +10,7 @@ internal static class CommandHandler
 {
     private static bool _useHostMouse;
     private static readonly float[] DebugVar = new float[10];
+ 
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
@@ -47,11 +48,11 @@ internal static class CommandHandler
                         {
                             _useHostMouse = false;
                         }
-
                         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Mouse Control: " + _useHostMouse));
                     }
                 }
 
+                /*
 #if DEBUG
                 if (args.IsCommand("DEBUG", "D"))
                 {
@@ -68,19 +69,19 @@ internal static class CommandHandler
                     }
                 }
 #endif
+                */
             }
 
-#if DEBUG
-            if (args.ModeratorPrivileges)
-            {
-                if (args.IsCommand("NUKE"))
-                {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, args.SenderGameUser.GetProfileName() + " has set the world on fire", Color.Red));
-                    NukeHandler.CreateNuke(__instance.GameWorld);
-                }
-            }
-#endif
+            // if (args.ModeratorPrivileges)
+            // {
+            //     if (args.IsCommand("NUKE"))
+            //     {
+            //         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, args.SenderGameUser.GetProfileName() + " has set the world on fire", Color.Red));
+            //         NukeHandler.CreateNuke(__instance.GameWorld);
+            //     }
+            // }
 
+            /*
             if (args.IsCommand("HELP"))
             {
                 Color color = new(159, 255, 64);
@@ -98,6 +99,8 @@ internal static class CommandHandler
                 //     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/NUKE' You're a terrible person.", color, args.SenderGameUser));
                 // }
             }
+            */
         }
     }
+    
 }

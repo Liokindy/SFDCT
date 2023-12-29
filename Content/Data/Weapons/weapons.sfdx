@@ -1,7 +1,7 @@
 defaultTile(default_tile)
 {
 	drawCategory = ITM;
-	life = 0;
+ 	life = 0;
 	tileTexture = shell_small;
 	absorbProjectile = false;
 	projectileHit = false;
@@ -11,89 +11,21 @@ defaultTile(default_tile)
 	type = Dynamic;
 	sizeable = N;
 	editorEnabled = false;
-	gibpressure.total = 50 kg;
-	gibpressure.spike = 200 kg;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-1, -0.5), (1, -0.5), (1, 0.5), (-1, 0.5);
-		blockFire = false;
-	}
+	gibpressure.total = 50kg;
+	gibpressure.spike = 200kg;
+	fixture() { collisionGroup = debris; collisionPoints = (-1, -0.5), (1, -0.5), (1, 0.5), (-1, 0.5); blockFire = false; }
 	doTakeDamage.Fire = false;
 	material.resistance.fire.modifier = 0;
 }
-Tile(ShellSmall)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(ShellShotgun)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(ShellGLauncher)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(ShellBig)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(MagSmall)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(MagAssaultRifle)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(MagDrum)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
-Tile(MagSMG)
-{
-	material.DestroyEffect = none;
-	material.destroySound = none;
-	fixture()
-	{
-		mass = 0.1 kg;
-	}
-}
+
+Tile(ShellSmall){ material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(ShellShotgun) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(ShellGLauncher) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(ShellBig) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(MagSmall){ material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(MagAssaultRifle) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(MagDrum) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
+Tile(MagSMG) { material.DestroyEffect = none; material.destroySound = none; fixture(){mass = 0.1kg;} }
 
 // enable editorEnabled for items and weapons in editor
 defaultTile(default_tile)
@@ -101,6 +33,7 @@ defaultTile(default_tile)
 	editorEnabled = true;
 	canBeMissile = true;
 }
+
 Tile(WpnPistol)
 {
 	tileTexture = PistolM;
@@ -111,21 +44,10 @@ Tile(WpnPistol)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (3.5, 1.5), (3.5, 3.5), (-3.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (3.5, 1.5), (3.5, 3.5), (-3.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnPistol45)
 {
 	tileTexture = Pistol45M;
@@ -136,21 +58,10 @@ Tile(WpnPistol45)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (1.5, 1.5), (1.5, 3.5), (-3.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (1.5, 1.5), (1.5, 3.5), (-3.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnSilencedPistol)
 {
 	tileTexture = SilencedPistolM;
@@ -161,21 +72,10 @@ Tile(WpnSilencedPistol)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6.5, 1.5), (0.5, 1.5), (0.5, 3.5), (-6.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6.5, -1.5), (-4.5, -1.5), (-4.5, 1.5), (-6.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, 1.5), (0.5, 1.5), (0.5, 3.5), (-6.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, -1.5), (-4.5, -1.5), (-4.5, 1.5), (-6.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnMachinePistol)
 {
 	tileTexture = MPM;
@@ -186,28 +86,11 @@ Tile(WpnMachinePistol)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-4.5, 0.5), (4.5, 0.5), (4.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-4.5, -1.5), (-3.5, -1.5), (-3.5, 1), (-4.5, 1);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0.5, -3.5), (1.5, -3.5), (1.5, 1), (0.5, 1);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4.5, 0.5), (4.5, 0.5), (4.5, 1.5), (-4.5, 1.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4.5, -1.5), (-3.5, -1.5), (-3.5, 1), (-4.5, 1)); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -3.5), (1.5, -3.5), (1.5, 1), (0.5, 1)); blockFire = false; }
 }
+
 Tile(WpnMagnum)
 {
 	tileTexture = MagnumM;
@@ -218,21 +101,10 @@ Tile(WpnMagnum)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 4.5), (-2.5, 4.5), (-3.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1), (-1.5, -1), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 4.5), (-2.5, 4.5), (-3.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-1.5, -1), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnRevolver)
 {
 	tileTexture = RevolverM;
@@ -245,48 +117,10 @@ Tile(WpnRevolver)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 3.5), (-2.5, 3.5), (-3.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 3.5), (-2.5, 3.5), (-3.5, 2.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
-Tile(WpnAnaconda)
-{
-	tileTexture = AnacondaM;
-	material = metal;
-	material.blockExplosions = false;
-	pickupType = instant;
-	pickupRange = 10.0;
-	absorbProjectile = false;
-	projectileHit = false;
-	impactEffect = ImpactDefault;
-	impactSound = WeaponBounce;
-	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 3.5), (-2.5, 3.5), (-3.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
-}
+
 Tile(WpnPumpShotgun)
 {
 	tileTexture = ShotgunM;
@@ -297,28 +131,11 @@ Tile(WpnPumpShotgun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6, 1.5), (8.5, 1.5), (8.5, 3.5), (-4, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9.5, -0.5), (-4, 1.5), (-9.5, 1.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0.5, -0.5), (5.5, -0.5), (5.5, 2), (0.5, 2);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6, 1.5), (8.5, 1.5), (8.5, 3.5), (-4, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -0.5), (-4, 1.5), (-9.5, 1.5)); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -0.5), (5.5, -0.5), (5.5, 2), (0.5, 2); blockFire = false; }
 }
+
 Tile(WpnDarkShotgun)
 {
 	tileTexture = DarkShotgunM;
@@ -329,28 +146,11 @@ Tile(WpnDarkShotgun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6, 1.5), (8.5, 1.5), (8.5, 3.5), (-4, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, -0.5), (-4, 1.5), (-5.5, 1.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0.5, -0.5), (5.5, -0.5), (5.5, 2), (0.5, 2);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6, 1.5), (8.5, 1.5), (8.5, 3.5), (-4, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, -0.5), (-4, 1.5), (-5.5, 1.5)); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -0.5), (5.5, -0.5), (5.5, 2), (0.5, 2); blockFire = false; }
 }
+
 Tile(WpnTommygun)
 {
 	tileTexture = TommyGunM;
@@ -361,74 +161,12 @@ Tile(WpnTommygun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7.5, 1.5), (8.5, 1.5), (8.5, 3.5), (-7.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -0.5), (-4.5, -0.5), (-4.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-7.5, 1.5), (8.5, 1.5), (8.5, 3.5), (-7.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -0.5), (-4.5, -0.5), (-4.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5); blockFire = false; }
 }
-Tile(WpnAK47)
-{
-	tileTexture = AK47M;
-	pickupType = instant;
-	pickupRange = 10.0;
-	absorbProjectile = false;
-	projectileHit = false;
-	impactEffect = ImpactDefault;
-	impactSound = WeaponBounce;
-	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7.5, 1.5), (8.5, 1.5), (8.5, 3.5), (-7.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -0.5), (-4.5, -0.5), (-4.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
-}
+
 Tile(WpnSMG)
 {
 	tileTexture = SMGM;
@@ -439,35 +177,12 @@ Tile(WpnSMG)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7.5, 1.5), (7.5, 1.5), (7.5, 3.5), (-7.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9.5, -0.5), (-4.5, -0.5), (-4.5, 2.5), (-9.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-7.5, 1.5), (7.5, 1.5), (7.5, 3.5), (-7.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -0.5), (-4.5, -0.5), (-4.5, 2.5), (-9.5, 2.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -0.5), (4.5, -0.5), (4.5, 2.5), (2.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnM60)
 {
 	tileTexture = M60M;
@@ -477,36 +192,13 @@ Tile(WpnM60)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 20 | 20;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9.5, -0.5), (3.5, -0.5), (3.5, 3.5), (-9.5, 3.5);
-		blockFire = false;
-	}
-	fixture(barrel)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 0.5), (9.5, 0.5), (9.5, 2.5), (-5.5, 2.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, -1.5), (-3.5, -1.5), (-3.5, 1.5), (-5.5, 1.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (5.5, -1.5), (7.5, -1.5), (7.5, 1), (5.5, 1);
-		blockFire = false;
-	}
+	missileDamageMax = 20|20;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -0.5), (3.5, -0.5), (3.5, 3.5), (-9.5, 3.5); blockFire = false; }
+	fixture(barrel){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 0.5), (9.5, 0.5), (9.5, 2.5), (-5.5, 2.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, -1.5), (-3.5, -1.5), (-3.5, 1.5), (-5.5, 1.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (5.5, -1.5), (7.5, -1.5), (7.5, 1), (5.5, 1); blockFire = false; }
 }
+
 Tile(WpnPipeWrench)
 {
 	tileTexture = PipeM;
@@ -517,32 +209,12 @@ Tile(WpnPipeWrench)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-6.5, -0.5), (4.5, -0.5), (4.5, 1.5), (-6.5, 1.5);
-		mass = 1 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (1.5, -2.5), (5.5, -2.5), (5.5, 2.5), (1.5, 2.5);
-		mass = 1 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (-6.5, -0.5), (4.5, -0.5), (4.5, 1.5), (-6.5, 1.5); mass = 1kg; blockFire = false; }
+	fixture(head){ collisionGroup = debris; collisionPoints = (1.5, -2.5), (5.5, -2.5), (5.5, 2.5), (1.5, 2.5); mass = 1kg; blockFire = false; }
 }
-Tile(PipeDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
-}
+
+Tile(PipeDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2); blockFire = false; } }
+
 Tile(WpnChain)
 {
 	tileTexture = ChainM;
@@ -553,13 +225,9 @@ Tile(WpnChain)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5);
-		mass = 5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5); mass = 5kg; blockFire = false; }
 }
+
 Tile(WpnWhip)
 {
 	tileTexture = WhipM;
@@ -570,13 +238,9 @@ Tile(WpnWhip)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5);
-		mass = 5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5); mass = 5kg; blockFire = false; }
 }
+
 Tile(WpnHammer)
 {
 	tileTexture = HammerM;
@@ -586,33 +250,13 @@ Tile(WpnHammer)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = ImpactWood;
-	missileDamageMax = 11.5 | 11.5;
-	fixture()
-	{
-		collisionPoints = (-6.5, 0), (4.5, -0), (4.5, 2), (-6.5, 2);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (1.5, -2.5), (4.5, -2.5), (4.5, 3.5), (1.5, 3.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 11.5|11.5;
+	fixture(){ collisionPoints = (-6.5, 0), (4.5, -0), (4.5, 2), (-6.5, 2); mass = 2.5kg; blockFire = false; }
+	fixture(head){ collisionGroup = debris; collisionPoints = (1.5, -2.5), (4.5, -2.5), (4.5, 3.5), (1.5, 3.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(HammerDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-3.5, -1.5), (3.5, -1.5), (3.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(HammerDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-3.5, -1.5), (3.5, -1.5), (3.5, 1.5), (-3.5, 1.5); blockFire = false; } }
+
 Tile(WpnKatana)
 {
 	tileTexture = SwordM;
@@ -625,33 +269,13 @@ Tile(WpnKatana)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (-10.5, -0.5), (8, -0.5), (10, 2.5), (-10, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(guard)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-6, -1.5), (-5, -1.5), (-5, 3.5), (-6, 3.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (-10.5, -0.5), (8, -0.5), (10, 2.5), (-10, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(guard){ collisionGroup = debris; collisionPoints = (-6, -1.5), (-5, -1.5), (-5, 3.5), (-6, 3.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(SwordDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(SwordDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+
 Tile(WpnMachete)
 {
 	tileTexture = MacheteM;
@@ -664,33 +288,13 @@ Tile(WpnMachete)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 6;
-	missileDamageMax = 30 | 12;
-	fixture()
-	{
-		collisionPoints = (-3.5, -1.5), (5, -1.5), (6.5, 2.5), (-3.5, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|12;
+	fixture(){ collisionPoints = (-3.5, -1.5), (5, -1.5), (6.5, 2.5), (-3.5, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(grip){ collisionGroup = debris; collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(MacheteDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5);
-		blockFire = false;
-	}
-}
+
+Tile(MacheteDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5); blockFire = false; } }
+
 Tile(WpnChainsaw)
 {
 	tileTexture = ChainsawM;
@@ -702,45 +306,14 @@ Tile(WpnChainsaw)
 	impactSound = ImpactMetal;
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
-	missileDamageMax = 20 | 20;
-	fixture()
-	{
-		collisionPoints = (-3.5, -1.5), (5, -1.5), (6.5, 2.5), (-3.5, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 20|20;
+	fixture(){ collisionPoints = (-3.5, -1.5), (5, -1.5), (6.5, 2.5), (-3.5, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(grip){ collisionGroup = debris; collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(ChainsawDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5);
-		blockFire = false;
-	}
-}
-Tile(ChainsawDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5);
-		blockFire = false;
-	}
-}
+
+Tile(ChainsawDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5); blockFire = false; } }
+Tile(ChainsawDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -1.5), (1.5, -2.5), (1.5, 1.5), (-1.5, 2.5); blockFire = false; } }
+
 Tile(WpnKnife)
 {
 	tileTexture = KnifeM;
@@ -753,31 +326,13 @@ Tile(WpnKnife)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 6;
-	missileDamageMax = 35 | 10;
-	fixture()
-	{
-		collisionPoints = (-3.5, -1.5), (2, -1.5), (5, 2.5), (-3.5, 2.5);
-		mass = 2.5 kg;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		blockFire = false;
-		collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5);
-		mass = 2.5 kg;
-	}
+	missileDamageMax = 35|10;
+	fixture(){ collisionPoints = (-3.5, -1.5), (2, -1.5), (5, 2.5), (-3.5, 2.5); mass = 2.5kg; }
+	fixture(grip){ collisionGroup = debris; blockFire = false; collisionPoints = (-7.5, -0.5), (-3.5, -0.5), (-3.5, 2.5), (-7.5, 2.5); mass = 2.5kg; }
 }
-Tile(KnifeDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5);
-	}
-}
+
+Tile(KnifeDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5); } }
+
 Tile(WpnSawedOff)
 {
 	tileTexture = SawedOffM;
@@ -788,21 +343,10 @@ Tile(WpnSawedOff)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 12.5;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, -0.5), (3.5, -0.5), (6.5, 1.5), (6.5, 3.5), (-3.5, 3.5), (-5.5, 1.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, -1.5), (-3.5, -1.5), (-3.5, -0.5), (-5.5, -0.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, -0.5), (3.5, -0.5), (6.5, 1.5), (6.5, 3.5), (-3.5, 3.5), (-5.5, 1.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, -1.5), (-3.5, -1.5), (-3.5, -0.5), (-5.5, -0.5); blockFire = false; }
 }
+
 Tile(WpnBat)
 {
 	tileTexture = BatM;
@@ -813,13 +357,9 @@ Tile(WpnBat)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactWood;
 	missileDamageMax = 11.5;
-	fixture()
-	{
-		collisionPoints = (8, -1.5), (8.5, 0), (8, 1.5), (-6, 1.5), (-6.5, 0), (-6, -1.5);
-		mass = 5 kg;
-		blockFire = false;
-	}
+	fixture(){collisionPoints = (8, -1.5), (8.5, 0), (8, 1.5),  (-6, 1.5), (-6.5, 0), (-6, -1.5); mass = 5kg; blockFire = false; }
 }
+
 Tile(WpnBaton)
 {
 	tileTexture = BatonM;
@@ -830,53 +370,13 @@ Tile(WpnBaton)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactWood;
 	missileDamageMax = 10.5;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-8.5, -0.5), (7.5, -0.5), (7.5, 1.5), (-8.5, 1.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(g)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-4, 0), (-4, -3.5), (-3, -3.5), (-3, 0);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; collisionPoints = (-8.5, -0.5), (7.5, -0.5), (7.5, 1.5), (-8.5, 1.5); mass = 2.5kg; blockFire = false; }
+	fixture(g){ collisionGroup = debris; collisionPoints = (-4, 0), (-4, -3.5), (-3, -3.5), (-3, 0); mass = 2.5kg; blockFire = false; }
 }
-Tile(BatonDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-1, -3.5), (1, -3.5), (1, 3.5), (-1, 3.5);
-		blockFire = false;
-	}
-}
-Tile(BatonDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-3, -3), (-2, -3), (-2, 3), (-3, 3);
-		blockFire = false;
-	}
-	fixture(g)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-3, 2), (3, 2), (3, 3), (-3, 3);
-		blockFire = false;
-	}
-}
+
+Tile(BatonDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionGroup = debris; collisionPoints = (-1, -3.5), (1, -3.5), (1, 3.5), (-1, 3.5); blockFire = false; } }
+Tile(BatonDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionGroup = debris; collisionPoints = (-3, -3), (-2, -3), (-2, 3), (-3, 3); blockFire = false; } fixture(g){ collisionGroup = debris; collisionPoints = (-3, 2), (3, 2), (3, 3), (-3, 3); blockFire = false; } }
+
 Tile(WpnShockBaton)
 {
 	tileTexture = ShockBatonM;
@@ -887,53 +387,13 @@ Tile(WpnShockBaton)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactWood;
 	missileDamageMax = 10.5;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-8.5, -0.5), (7.5, -0.5), (7.5, 1.5), (-8.5, 1.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(g)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-4, 0), (-4, -3.5), (-3, -3.5), (-3, 0);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; collisionPoints = (-8.5, -0.5), (7.5, -0.5), (7.5, 1.5), (-8.5, 1.5); mass = 2.5kg; blockFire = false; }
+	fixture(g){ collisionGroup = debris; collisionPoints = (-4, 0), (-4, -3.5), (-3, -3.5), (-3, 0); mass = 2.5kg; blockFire = false; }
 }
-Tile(ShockBatonDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-1, -3.5), (1, -3.5), (1, 3.5), (-1, 3.5);
-		blockFire = false;
-	}
-}
-Tile(ShockBatonDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-3, -3), (-2, -3), (-2, 3), (-3, 3);
-		blockFire = false;
-	}
-	fixture(g)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-3, 2), (3, 2), (3, 3), (-3, 3);
-		blockFire = false;
-	}
-}
+
+Tile(ShockBatonDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionGroup = debris; collisionPoints = (-1, -3.5), (1, -3.5), (1, 3.5), (-1, 3.5); blockFire = false; } }
+Tile(ShockBatonDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionGroup = debris; collisionPoints = (-3, -3), (-2, -3), (-2, 3), (-3, 3); blockFire = false; } fixture(g){ collisionGroup = debris; collisionPoints = (-3, 2), (3, 2), (3, 3), (-3, 3); blockFire = false; } }
+
 Tile(WpnLeadPipe)
 {
 	tileTexture = LeadPipeM;
@@ -944,14 +404,9 @@ Tile(WpnLeadPipe)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 10.5;
-	fixture()
-	{
-		collisionGroup = debris;
-		collisionPoints = (-8.5, -0.5), (5.5, -0.5), (4.5, 1.5), (-8.5, 1.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; collisionPoints = (-8.5, -0.5), (5.5, -0.5), (4.5, 1.5), (-8.5, 1.5); mass = 2.5kg; blockFire = false; }
 }
+
 Tile(WpnUzi)
 {
 	tileTexture = UziM;
@@ -962,21 +417,10 @@ Tile(WpnUzi)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (2.5, 1.5), (4.5, 2.5), (4.5, 4.5), (-3.5, 4.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-1.5, -1.5), (1.5, -1.5), (1.5, 1.5), (-1.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (2.5, 1.5), (4.5, 2.5), (4.5, 4.5), (-3.5, 4.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-1.5, -1.5), (1.5, -1.5), (1.5, 1.5), (-1.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnSilencedUzi)
 {
 	tileTexture = SilencedUziM;
@@ -987,21 +431,10 @@ Tile(WpnSilencedUzi)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 1.5), (0.5, 1.5), (2.5, 2.5), (2.5, 4.5), (-5.5, 4.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 1.5), (0.5, 1.5), (2.5, 2.5), (2.5, 4.5), (-5.5, 4.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1.5), (-1.5, -1.5), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnBazooka)
 {
 	tileTexture = BazookaM;
@@ -1011,29 +444,12 @@ Tile(WpnBazooka)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -1.5), (9.5, -1.5), (9.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-4.5, -3.5), (-2.5, -3.5), (-2.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -5.5), (3.5, -5.5), (3.5, 0), (2.5, 0);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -1.5), (9.5, -1.5), (9.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4.5, -3.5), (-2.5, -3.5), (-2.5, 1.5), (-4.5, 1.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -5.5), (3.5, -5.5), (3.5, 0), (2.5, 0); blockFire = false; }
 }
+
 Tile(WpnAxe)
 {
 	tileTexture = AxeM;
@@ -1046,72 +462,13 @@ Tile(WpnAxe)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (7, -0.5), (7, 2.5), (-8, 2.5), (-8.5, 1), (-8, -0.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (7.5, 4), (2.5, -3.5), (7.5, -3.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (7, -0.5), (7, 2.5),  (-8, 2.5), (-8.5, 1), (-8, -0.5); mass = 2.5kg; blockFire = false; }
+	fixture(head){ collisionGroup = debris; collisionPoints = (7.5, 4), (2.5, -3.5), (7.5, -3.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(AxeDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-3.5, 2.5), (3.5, -2.5), (3.5, 2.5);
-		blockFire = false;
-	}
-}
-Tile(WpnScythe)
-{
-	tileTexture = ScytheM;
-	pickupType = instant;
-	pickupRange = 15.0;
-	absorbProjectile = false;
-	projectileHit = false;
-	impactEffect = ImpactDefault;
-	impactSound = ImpactWood;
-	missileThrownHitEffectID = HIT_S;
-	missileThrownHitSoundID = MeleeHitSharp;
-	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints =  (8, -1), (8, 1), (-11, 2), (-11, 0);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(head) //so no head? ;)
-	{
-		collisionGroup = debris;
-		collisionPoints = (2, -11), (7, -5.5), (7.5, 0), (3.5, 0);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-}
-Tile(ScytheDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-3.5, 2.5), (3.5, -2.5), (3.5, 2.5);
-		blockFire = false;
-	}
-}
+
+Tile(AxeDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-3.5, 2.5), (3.5, -2.5), (3.5, 2.5); blockFire = false; } }
+
 Tile(WpnAssaultRifle)
 {
 	tileTexture = AssaultRifleM;
@@ -1122,28 +479,11 @@ Tile(WpnAssaultRifle)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -0.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1), (-0.5, -1), (-0.5, 2.5), (-3.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -0.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-0.5, -1), (-0.5, 2.5), (-3.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnMP50)
 {
 	tileTexture = MP50M;
@@ -1154,28 +494,11 @@ Tile(WpnMP50)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7.5, 1.5), (8.5, 1.5), (8.5, 3.5), (-7.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7.5, -1), (-6.5, -1), (-6.5, 2.5), (-7.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0.5, -2.5), (1.5, -2.5), (1.5, 2.5), (0.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-7.5, 1.5), (8.5, 1.5), (8.5, 3.5), (-7.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-7.5, -1), (-6.5, -1), (-6.5, 2.5), (-7.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -2.5), (1.5, -2.5), (1.5, 2.5), (0.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnSniperRifle)
 {
 	tileTexture = SniperRifleM;
@@ -1186,28 +509,11 @@ Tile(WpnSniperRifle)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 16;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -0.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1), (-0.5, -1), (-0.5, 2.5), (-3.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -0.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-0.5, -1), (-0.5, 2.5), (-3.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnCarbine)
 {
 	tileTexture = CarbineM;
@@ -1218,28 +524,11 @@ Tile(WpnCarbine)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -1.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1), (0.5, -1), (0.5, 2.5), (-3.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 1.5), (10.5, 1.5), (10.5, 3.5), (-5.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -1.5), (-5.5, 0.5), (-5.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (0.5, -1), (0.5, 2.5), (-3.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnFlamethrower)
 {
 	tileTexture = FlamethrowerM;
@@ -1249,29 +538,12 @@ Tile(WpnFlamethrower)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6.5, 0.5), (8.5, 0.5), (8.5, 3.5), (-6.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9.5, -1.5), (-4.5, 0.5), (-4.5, 2.5), (-9.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-2.5, -3), (1.5, -3), (1.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, 0.5), (8.5, 0.5), (8.5, 3.5), (-6.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -1.5), (-4.5, 0.5), (-4.5, 2.5), (-9.5, 2.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-2.5, -3), (1.5, -3), (1.5, 2), (-2.5, 2); blockFire = false; }
 }
+
 Tile(ItemPills)
 {
 	tileTexture = Pills;
@@ -1279,13 +551,9 @@ Tile(ItemPills)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 3.5), (-2.5, 3.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 3.5), (-2.5, 3.5); blockFire = false; }
 }
+
 Tile(ItemMedkit)
 {
 	tileTexture = Medkit;
@@ -1293,83 +561,47 @@ Tile(ItemMedkit)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 4.5), (-4.5, 4.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 4.5), (-4.5, 4.5); blockFire = false; }
 }
+
 Tile(ItemSlomo5)
 {
 	tileTexture = SloMo5;
 	pickupType = instant;
 	pickupRange = 10.0;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 2.5), (-4.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 2.5), (-4.5, 2.5); blockFire = false; }
 }
+
 Tile(ItemSlomo10)
 {
 	tileTexture = SloMo10;
 	pickupType = instant;
 	pickupRange = 10.0;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 2.5), (-4.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -2.5), (4.5, -2.5), (4.5, 2.5), (-4.5, 2.5); blockFire = false; }
 }
-Tile(ItemAdrenalineBoost)
-{
-	tileTexture = AdrenalineBoost;
-	pickupType = instant;
-	pickupRange = 10.0;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
-}
+
 Tile(ItemStrengthBoost)
 {
 	tileTexture = StrengthBoost;
 	pickupType = instant;
 	pickupRange = 10.0;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5); blockFire = false; }
 }
+
 Tile(ItemSpeedBoost)
 {
 	tileTexture = SpeedBoost;
 	pickupType = instant;
 	pickupRange = 10.0;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5); blockFire = false; }
 }
+
 Tile(ItemStrengthBoostEmpty)
 {
 	tileTexture = StrengthBoostEmpty;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -0.5), (0.5, -0.5), (4.5, 0.5), (0.5, 1.5), (-4.5, 1.5); blockFire = false; }
 }
+
 Tile(ItemLaserSight)
 {
 	tileTexture = LazerM;
@@ -1377,13 +609,9 @@ Tile(ItemLaserSight)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5); blockFire = false; }
 }
+
 Tile(ItemBouncingAmmo)
 {
 	tileTexture = BouncingAmmoM;
@@ -1391,13 +619,9 @@ Tile(ItemBouncingAmmo)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5); blockFire = false; }
 }
+
 Tile(ItemFireAmmo)
 {
 	tileTexture = FireAmmoM;
@@ -1405,13 +629,9 @@ Tile(ItemFireAmmo)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -3.5), (5.5, -3.5), (5.5, 4.5), (-4.5, 4.5); blockFire = false; }
 }
+
 Tile(WpnGrenades)
 {
 	tileTexture = GrenadeM;
@@ -1419,62 +639,41 @@ Tile(WpnGrenades)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = GrenadeBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = debris;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
-	fixture(pin)
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2, 2), (1.5, 2), (1.5, 4), (-2, 4);
-		blockFire = false;
-	}
+	fixture(){ mass = 5kg; collisionGroup = debris; circle = (-0.5, 0.5, 2); blockFire = false; }
+	fixture(pin){ mass = 2.5kg; collisionGroup = debris; collisionPoints = (-2, 2), (1.5, 2), (1.5, 4), (-2, 4); blockFire = false; }
 }
+
 Tile(WpnGrenadesThrown)
 {
-	absorbProjectile = true;
-	projectileHit = true;
-	tileTexture = GrenadeT;
-	drawCategory = THRN;
-	mainLayer = 1;
-	editorEnabled = true;
-	material.restitution = 0.3;
-	material.blockExplosions = false;
-	material.hit.melee.sound = MeleeBlock;
-	material.hit.melee.effect = HIT;
-	material.hit.Melee.Prio = 10;
-	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
-	kickable = true;
-	punchable = true;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	 absorbProjectile = true;
+	 projectileHit = true;
+	 tileTexture = GrenadeT;
+	 drawCategory = THRN;
+	 mainLayer = 1;
+	 editorEnabled = true;
+	 material.restitution = 0.3;
+	 material.blockExplosions = false;
+	 material.hit.melee.sound = MeleeBlock;
+	 material.hit.melee.effect = HIT;
+	 material.hit.Melee.Prio = 10;
+	 material.resistance.impact.modifier = 0.0;
+	 gibpressure.total = 250kg;
+	 gibpressure.spike = 1600kg;
+	 kickable = true;
+	 punchable = true;
+	 impactEffect = ImpactDefault;
+	 impactSound = GrenadeBounce;
+	 type = Dynamic; fixture() { mass = 5kg; collisionGroup = dynamics_thrown; circle = (-0.5, 0.5, 2); blockFire = false; }
 }
+
 Tile(WpnGrenadePin)
 {
 	canBeMissile = false;
 	tileTexture = GrenadePin;
 	editorEnabled = false;
-	fixture()
-	{
-		collisionPoints = (0, 2), (-2, -2), (2, -2);
-		mass = 0.5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (0, 2), (-2, -2), (2, -2); mass = 0.5kg; blockFire = false; }
 }
+
 Tile(WpnMolotovs)
 {
 	tileTexture = MolotovM;
@@ -1484,52 +683,32 @@ Tile(WpnMolotovs)
 	material.blockExplosions = false;
 	impactEffect = ImpactDefault;
 	impactSound = ImpactGlass;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionPoints = (-3.5, -3.5), (1.5, -3.5), (1.5, 2.5), (-3.5, 2.5);
-		blockFire = false;
-	}
-	fixture(neck)
-	{
-		mass = 2 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, 1.5), (0.5, 1.5), (0.5, 4.5), (-2.5, 4.5);
-		blockFire = false;
-	}
+	fixture(){ mass = 3kg; collisionPoints = (-3.5, -3.5), (1.5, -3.5), (1.5, 2.5), (-3.5, 2.5); blockFire = false; }
+	fixture(neck){ mass = 2kg; collisionGroup = debris; collisionPoints = (-2.5, 1.5), (0.5, 1.5), (0.5, 4.5), (-2.5, 4.5); blockFire = false; }
 }
+
 Tile(WpnMolotovsThrown)
 {
-	canBeMissile = true;
-	absorbProjectile = true;
-	projectileHit = true;
-	tileTexture = MolotovT;
-	drawCategory = THRN;
-	mainLayer = 1;
-	editorEnabled = true;
-	material.restitution = 0.3;
-	material.blockExplosions = false;
-	material.hit.melee.sound = MeleeBlock;
-	material.hit.melee.effect = HIT;
-	material.hit.Melee.Prio = 10;
-	material.resistance.impact.modifier = 999.0;
-	kickable = true;
-	punchable = true;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionPoints = (-3.5, -3.5), (1.5, -3.5), (1.5, 2.5), (-3.5, 2.5);
-		blockFire = false;
-	}
-	fixture(neck)
-	{
-		mass = 2 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, 1.5), (0.5, 1.5), (0.5, 4.5), (-2.5, 4.5);
-		blockFire = false;
-	}
+	 canBeMissile = true;
+	 absorbProjectile = true;
+	 projectileHit = true;
+	 tileTexture = MolotovT;
+	 drawCategory = THRN;
+	 mainLayer = 1;
+	 editorEnabled = true;
+	 material.restitution = 0.3;
+	 material.blockExplosions = false;
+	 material.hit.melee.sound = MeleeBlock;
+	 material.hit.melee.effect = HIT;
+	 material.hit.Melee.Prio = 10;
+	 material.resistance.impact.modifier = 999.0;
+	 kickable = true;
+	 punchable = true;
+	 type = Dynamic;
+	 fixture(){ mass = 3kg; collisionPoints = (-3.5, -3.5), (1.5, -3.5), (1.5, 2.5), (-3.5, 2.5); blockFire = false; }
+	 fixture(neck){ mass = 2kg; collisionGroup = debris; collisionPoints = (-2.5, 1.5), (0.5, 1.5), (0.5, 4.5), (-2.5, 4.5); blockFire = false; }
 }
+
 Tile(WpnC4)
 {
 	tileTexture = C4M;
@@ -1538,14 +717,9 @@ Tile(WpnC4)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
+	fixture(){ mass = 2.5kg; collisionGroup = debris; collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 2), (-2.5, 2); blockFire = false; }
 }
+
 Tile(WpnC4Thrown)
 {
 	absorbProjectile = false;
@@ -1560,21 +734,16 @@ Tile(WpnC4Thrown)
 	material.hit.melee.effect = HIT;
 	material.hit.Melee.Prio = 10;
 	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
+	gibpressure.total = 250kg;
+	gibpressure.spike = 1600kg;
 	kickable = true;
 	punchable = true;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
+	fixture(){ mass = 2.5kg; collisionGroup = debris; collisionPoints = (-2.5, -2.5), (1.5, -2.5), (1.5, 2), (-2.5, 2); blockFire = false; }
 }
+
 Tile(WpnC4Detonator)
 {
 	tileTexture = C4DetonatorM;
@@ -1583,14 +752,9 @@ Tile(WpnC4Detonator)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionGroup = debris;
-		collisionPoints = (-0.5, -2.5), (0.5, -2.5), (0.5, 2), (-0.5, 2);
-		blockFire = false;
-	}
+	fixture(){ mass = 3kg; collisionGroup = debris; collisionPoints = (-0.5, -2.5), (0.5, -2.5), (0.5, 2), (-0.5, 2); blockFire = false; }
 }
+
 Tile(WpnMines)
 {
 	tileTexture = MineM;
@@ -1599,14 +763,9 @@ Tile(WpnMines)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 4 kg;
-		collisionGroup = debris;
-		collisionPoints = (-4, -1.5), (3, -1.5), (3, 1.5), (-4, 1.5);
-		blockFire = false;
-	}
+	fixture(){  mass = 4kg;collisionGroup = debris; collisionPoints = (-4, -1.5), (3, -1.5), (3, 1.5), (-4, 1.5); blockFire = false; }
 }
+
 Tile(WpnMineThrown)
 {
 	absorbProjectile = true;
@@ -1621,35 +780,25 @@ Tile(WpnMineThrown)
 	material.hit.melee.effect = HIT;
 	material.hit.Melee.Prio = 10;
 	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
+	gibpressure.total = 250kg;
+	gibpressure.spike = 1600kg;
 	kickable = true;
 	punchable = true;
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 4 kg;
-		collisionGroup = debris;
-		collisionPoints = (-4, -1.5), (3, -1.5), (3, 1.5), (-4, 1.5);
-		blockFire = false;
-	}
+	fixture(){  mass = 4kg;collisionGroup = debris; collisionPoints = (-4, -1.5), (3, -1.5), (3, 1.5), (-4, 1.5); blockFire = false; }
 }
+
 Tile(WpnShuriken)
 {
 	tileTexture = ShurikenM;
 	pickupType = instant;
 	pickupRange = 10.0;
 	impactSound = ImpactMetal;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, 0), (0, -2.5), (2.5, 0), (0, 2.5);
-		blockFire = false;
-	}
+	fixture(){ mass = 3kg; collisionGroup = debris; collisionPoints = (-2.5, 0), (0, -2.5), (2.5, 0), (0, 2.5); blockFire = false; }
 }
+
 Tile(WpnShurikenThrown)
 {
 	absorbProjectile = true;
@@ -1664,37 +813,27 @@ Tile(WpnShurikenThrown)
 	material.hit.melee.effect = HIT;
 	material.hit.Melee.Prio = 10;
 	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
+	gibpressure.total = 250kg;
+	gibpressure.spike = 1600kg;
 	kickable = true;
 	punchable = true;
 	impactSound = ImpactMetal;
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 6;
-	missileDamageMax = 17 | 10;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionGroup = dynamics_thrown;
-		collisionPoints = (-2, 0), (0, -2), (2, 0), (0, 2);
-		blockFire = false;
-	}
+	missileDamageMax = 17|10;
+	fixture(){ mass = 3kg; collisionGroup = dynamics_thrown; collisionPoints = (-2, 0), (0, -2), (2, 0), (0, 2); blockFire = false; }
 }
+
 Tile(WpnBow)
 {
 	tileTexture = BowM;
 	pickupType = instant;
 	pickupRange = 10.0;
 	impactSound = ImpactMetal;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2.5, -6.5), (0, -5.5), (1.5, -3.5), (1.5, 3.5), (0, 5.5), (-2.5, 6.5);
-		blockFire = false;
-	}
+	fixture(){ mass = 3kg; collisionGroup = debris; collisionPoints = (-2.5, -6.5), (0, -5.5), (1.5, -3.5), (1.5, 3.5), (0, 5.5), (-2.5, 6.5); blockFire = false; }
 }
+
 Tile(WpnFlareGun)
 {
 	tileTexture = FlareGunM;
@@ -1705,21 +844,10 @@ Tile(WpnFlareGun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (3.5, 1.5), (3.5, 4.5), (-2.5, 4.5), (-3.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, -1), (-1.5, -1), (-1.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (3.5, 1.5), (3.5, 4.5), (-2.5, 4.5), (-3.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-1.5, -1), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(WpnGrenadeLauncher)
 {
 	tileTexture = GLauncherM;
@@ -1729,29 +857,12 @@ Tile(WpnGrenadeLauncher)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-4, 0.5), (7.5, 0.5), (7.5, 3.5), (-4, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9.5, -0.5), (-6.5, -0.5), (-3.5, 0.5), (-3.5, 2), (-9.5, 2);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0, -0.5), (5, -0.5), (5, 2), (0, 2);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4, 0.5), (7.5, 0.5), (7.5, 3.5), (-4, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -0.5), (-6.5, -0.5), (-3.5, 0.5), (-3.5, 2), (-9.5, 2); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0, -0.5), (5, -0.5), (5, 2), (0, 2); blockFire = false; }
 }
+
 Tile(WpnBlade)
 {
 	tileTexture = BladeM;
@@ -1764,33 +875,13 @@ Tile(WpnBlade)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (-3, -1.5), (6, -1.5), (10.5, 3), (-3, 3);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(guard)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-8, -1), (-3, -1), (-3, 4), (-8, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (-3.5, -1.5), (8, -2.5), (11, 2.5), (-3.5, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(guard){ collisionGroup = debris; collisionPoints = (-8.5, -1), (-3, -1), (-2.5, 4.5), (-8.5, 3.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(BladeDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(BladeDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+
 Tile(WpnAA12)
 {
 	tileTexture = AA12M;
@@ -1801,34 +892,10 @@ Tile(WpnAA12)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-9, 0), (14, 0), (10.5, 4), (-9, 4);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 0.5 kg;
-		collisionPoints = (-4, -2.5), (3.5, -2.5), (3.5, -2), (-4, -2);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 1 kg;
-		collisionPoints = (-4, -2), (-2, -2), (-2, 0), (-4, 0);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 0.5 kg;
-		collisionPoints = (1, -2), (3.5, -2), (3.5, 0), (1, 0);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9, 0), (14, 0), (10.5, 4), (-9, 4); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 0.5kg; collisionPoints = (-4, -2.5), (3.5, -2.5), (3.5, -2), (-4, -2); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 1kg; collisionPoints = (-4, -2), (-2, -2), (-2, 0), (-4, 0); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 0.5kg; collisionPoints = (1, -2), (3.5, -2), (3.5, 0), (1, 0); blockFire = false; }
 }
 
 
@@ -1842,44 +909,13 @@ Tile(WpnCaber)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-6.5, -1.5), (4, -1.5), (4, 1.5), (-6.5, 1.5);
-		mass = 1 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (1, -2.5), (5.5, -2.5), (5.5, 2.5), (1, 2.5);
-		mass = 1 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (-6.5, -0.5), (4.5, -0.5), (4.5, 1.5), (-6.5, 1.5); mass = 1kg; blockFire = false; }
+	fixture(head){ collisionGroup = debris; collisionPoints = (1.5, -2.5), (5.5, -2.5), (5.5, 2.5), (1.5, 2.5); mass = 1kg; blockFire = false; }
 }
-Tile(CaberDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
-}
-Tile(CaberDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
-}
+
+Tile(CaberDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2); blockFire = false; } }
+Tile(CaberDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2); blockFire = false; } }
+
 Tile(WpnFlintlock)
 {
 	tileTexture = FlintlockM;
@@ -1890,21 +926,10 @@ Tile(WpnFlintlock)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 0.5), (5.5, 0.5), (6.5, 3.5), (-1.5, 3.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5, -2), (-3.5, -2), (-1.5, 0.5), (-3.5, 0.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 0.5), (5.5, 0.5), (6.5, 3.5), (-1.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5, -2), (-3.5, -2), (-1.5, 0.5), (-3.5, 0.5); blockFire = false; }
 }
+
 Tile(WpnNailgun)
 {
 	tileTexture = NailgunM;
@@ -1915,21 +940,10 @@ Tile(WpnNailgun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5, -1.5), (4.5, -1.5), (4.5, 4.5), (-5, 4.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-4.5, -2.5), (-0.5, -2.5), (-0.5, 0), (-4.5, 0);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, -1.5), (4.5, -1.5), (4.5, 4.5), (-5.5, 4.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4.5, -2.5), (-0.5, -2.5), (-0.5, 0), (-4.5, 0)); blockFire = false; }
 }
+
 Tile(WpnSnowball)
 {
 	tileTexture = SnowballM;
@@ -1939,15 +953,9 @@ Tile(WpnSnowball)
 	material.blockExplosions = false;
 	impactEffect = ImpactDefault;
 	impactSound = ImpactGlass;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	type = Dynamic; fixture() { mass = 5kg; collisionGroup = dynamics_thrown; circle = (-0.5, 0.5, 2); blockFire = false; }
 }
+
 Tile(WpnSnowballThrown)
 {
 	absorbProjectile = true;
@@ -1962,21 +970,15 @@ Tile(WpnSnowballThrown)
 	material.hit.melee.effect = HIT;
 	material.hit.Melee.Prio = 10;
 	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
+	gibpressure.total = 250kg;
+	gibpressure.spike = 1600kg;
 	kickable = true;
 	punchable = true;
 	impactEffect = ImpactDefault;
 	impactSound = GrenadeBounce;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	type = Dynamic; fixture() { mass = 5kg; collisionGroup = dynamics_thrown; circle = (-0.5, 0.5, 2); blockFire = false; }
 }
+
 Tile(WpnRapier)
 {
 	tileTexture = RapierM;
@@ -1989,32 +991,13 @@ Tile(WpnRapier)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (-9.5, 0.5), (9, 0.5), (11, 2.5), (-9.5, 2.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(guard)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-4, -2.5), (-2, -2.5), (-2, 5.5), (-4, 5.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (-10.5, 0.5), (8, 0.5), (10, 2.5), (-10, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(guard){ collisionGroup = debris; collisionPoints = (-4, -2.5), (-2, -2.5), (-2, 5.5), (-4, 5.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(RapierDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5);
-	}
-}
+
+Tile(RapierDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5); } }
+
 Tile(ItemHealthPouch)
 {
 	tileTexture = HealthPouch;
@@ -2022,13 +1005,9 @@ Tile(ItemHealthPouch)
 	pickupRange = 10.0;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionPoints = (-4.5, -2.5), (3.5, -2.5), (3.5, 0.5), (1.5, 3.5), (-2.5, 3.5), (-4.5, 0.5);
-		blockFire = false;
-	}
+	fixture(){mass = 5kg; collisionPoints = (-4.5, -2.5), (3.5, -2.5), (3.5, 0.5), (1.5, 3.5), (-2.5, 3.5), (-4.5, 0.5); blockFire = false; }
 }
+
 Tile(WpnSledgehammer)
 {
 	tileTexture = SledgehammerM;
@@ -2041,33 +1020,13 @@ Tile(WpnSledgehammer)
 	missileThrownHitEffectID = Smack;
 	missileThrownHitSoundID = MeleeHitBlunt;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 15 | 15;
-	fixture()
-	{
-		collisionPoints = (-11, -1), (10, -1), (10, 3), (-11, 3);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (4, -3), (9, -3), (9, 5), (4, 5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 15|15;
+	fixture(){ collisionPoints = (-10.5, -0.5), (10, -0.5), (10, 2.5), (-10, 2.5); mass = 2.5kg; blockFire = false; }
+	fixture(guard){ collisionGroup = debris; collisionPoints = (4, -2.5), (9, -2.5), (9, 4.5), (4, 4.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(SledgehammerDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-3.5, -1.5), (3.5, -1.5), (3.5, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(SledgehammerDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-3.5, -1.5), (3.5, -1.5), (3.5, 1.5), (-3.5, 1.5); blockFire = false; } }
+
 Tile(Broom00)
 {
 	punchable = false;
@@ -2099,6 +1058,7 @@ Tile(Broom00)
 		collisionPoints = (-3.5, 6.5), (3.5, 6.5), (3.5, 9.5), (-3.5, 9.5);
 	}
 }
+
 Tile(WpnDoubleBarrel)
 {
 	tileTexture = DoubleBarrelM;
@@ -2109,124 +1069,81 @@ Tile(WpnDoubleBarrel)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 3.5 kg;
-		collisionPoints = (-2, 0.5), (14.5, 0.5), (14.5, 3.5), (0, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 3.5 kg;
-		collisionPoints = (-6.5, -1.5), (-1, -1), (0, 2.5), (-6.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 3.5kg; collisionPoints = (-2, 0.5), (14.5, 0.5), (14.5, 3.5), (0, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 3.5kg; collisionPoints = (-6.5, -1.5), (-1, -1), (0, 2.5), (-6.5, 2.5)); blockFire = false; }
 }
+
 Tile(WpnFragGrenades)
 {
-	tileTexture = FragGrenadeM;
-	pickupType = instant;
-	pickupRange = 10.0;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = debris;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
-	fixture(pin)
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2, 2), (1.5, 2), (1.5, 4), (-2, 4);
-		blockFire = false;
-	}
+	tileTexture=FragGrenadeM;
+	pickupType=instant;
+	pickupRange=10.0;
+	//type=WeaponItem;
+	impactEffect=ImpactDefault;
+	impactSound=GrenadeBounce;
+	fixture(){ mass=5kg; collisionGroup=debris; circle=(-0.5,0.5,2); blockFire=false; }
+	fixture(pin){ mass=2.5kg; collisionGroup=debris; collisionPoints=(-2,2),(1.5,2),(1.5,4),(-2,4); blockFire=false; }
 }
+
 Tile(WpnFragGrenadesThrown)
 {
-	absorbProjectile = true;
-	projectileHit = true;
-	tileTexture = FragGrenadeT;
-	drawCategory = THRN;
-	mainLayer = 1;
-	editorEnabled = true;
-	material.restitution = 0.3;
-	material.blockExplosions = false;
-	material.hit.melee.sound = MeleeBlock;
-	material.hit.melee.effect = HIT;
-	material.hit.Melee.Prio = 10;
-	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
-	kickable = true;
-	punchable = true;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	 absorbProjectile=true;
+	 projectileHit=true;
+	 tileTexture=FragGrenadeT;
+	 drawCategory=THRN; // grenade thrown
+	 mainLayer=1;
+	 editorEnabled=true;
+	 material.restitution=0.3;
+	 material.blockExplosions=false;
+	 material.hit.melee.sound=MeleeBlock;
+	 material.hit.melee.effect=HIT;
+	 material.hit.Melee.Prio=10;
+	 material.resistance.impact.modifier=0.0;
+	 gibpressure.total=250kg;
+	 gibpressure.spike=1600kg;
+	 kickable=true;
+	 punchable=true;
+	 impactEffect=ImpactDefault;
+	 impactSound=GrenadeBounce;
+	 type=Dynamic; fixture() { mass=5kg; collisionGroup=dynamics_thrown; circle=(-0.5,0.5,2); blockFire=false; }
 }
+
 Tile(WpnImpactGrenades)
 {
-	tileTexture = ImpactGrenadeM;
-	pickupType = instant;
-	pickupRange = 10.0;
+	tileTexture=ImpactGrenadeM;
+	pickupType=instant;
+	pickupRange=10.0;
 	kickable = true;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = debris;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
-	fixture(pin)
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-2, 2), (1.5, 2), (1.5, 4), (-2, 4);
-		blockFire = false;
-	}
+	//type=WeaponItem;
+	impactEffect=ImpactDefault;
+	impactSound=GrenadeBounce;
+	fixture(){ mass=5kg; collisionGroup=debris; circle=(-0.5,0.5,2); blockFire=false; }
+	fixture(pin){ mass=2.5kg; collisionGroup=debris; collisionPoints=(-2,2),(1.5,2),(1.5,4),(-2,4); blockFire=false; }
 }
+
 Tile(WpnImpactGrenadesThrown)
 {
-	absorbProjectile = true;
-	projectileHit = true;
-	tileTexture = ImpactGrenadeT;
-	drawCategory = THRN;
-	mainLayer = 1;
-	editorEnabled = true;
-	material.restitution = 0.3;
-	material.blockExplosions = false;
-	material.hit.melee.sound = MeleeBlock;
-	material.hit.melee.effect = HIT;
-	material.hit.Melee.Prio = 10;
-	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
-	kickable = true;
-	punchable = true;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	 absorbProjectile=true;
+	 projectileHit=true;
+	 tileTexture=ImpactGrenadeT;
+	 drawCategory=THRN; // grenade thrown
+	 mainLayer=1;
+	 editorEnabled=true;
+	 material.restitution=0.3;
+	 material.blockExplosions=false;
+	 material.hit.melee.sound=MeleeBlock;
+	 material.hit.melee.effect=HIT;
+	 material.hit.Melee.Prio=10;
+	 material.resistance.impact.modifier=0.0;
+	 gibpressure.total=250kg;
+	 gibpressure.spike=1600kg;
+	 kickable=true;
+	 punchable=true;
+	 impactEffect=ImpactDefault;
+	 impactSound=GrenadeBounce;
+	 type=Dynamic; fixture() { mass=5kg; collisionGroup=dynamics_thrown; circle=(-0.5,0.5,2); blockFire=false; }
 }
+
 Tile(WpnCrossbow)
 {
 	tileTexture = CrossbowM;
@@ -2237,21 +1154,10 @@ Tile(WpnCrossbow)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6.5, 1.5), (6.5, 1.5), (6.5, 3.5), (-5.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-12.5, -0.5), (-5.5, -0.5), (-4, 1.5), (-12.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6, 1.5), (6.5, 1.5), (6.5, 3.5), (-4, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-12.5, -0.5), (-4, 1.5), (-12.5, 1.5)); blockFire = false; }
 }
+
 Tile(CrossbowBolt00)
 {
 	life = 50;
@@ -2263,14 +1169,16 @@ Tile(CrossbowBolt00)
 	material.destroySound = DestroySmall;
 	doTakeDamage.fire = true;
 	objectStrength = 25.0;
+	//isCloud = true;
 	absorbProjectile = false;
 	fixture()
 	{
 		collisionGroup = dynamics_g1;
-		mass = 2.5 kg;
+		mass = 2.5kg;
 		collisionPoints = (-3.5, -0.5), (3.5, -0.5), (3.5, 0.5), (-3.5, 0.5);
-	}
+	};
 }
+
 Tile(CrossbowBolt01)
 {
 	drawCategory = SLD;
@@ -2281,10 +1189,11 @@ Tile(CrossbowBolt01)
 	fixture()
 	{
 		collisionGroup = none;
-		mass = 2.5 kg;
+		mass = 2.5kg;
 		collisionPoints = (-3.5, -0.5), (3.5, -0.5), (3.5, 0.5), (-3.5, 0.5);
 	};
 }
+
 Tile(WpnCrowbar)
 {
 	tileTexture = CrowbarM;
@@ -2295,32 +1204,12 @@ Tile(WpnCrowbar)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-6, -0.5), (7, -0.5), (7, 1.5), (-6, 1.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(head)
-	{
-		collisionGroup = debris;
-		collisionPoints = (8, -0.5), (5, -0.5), (5, -3.5), (7, -3.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (8, -0.5), (7, 1.5),  (-6.5, 1.5), (-6, -0.5); mass = 2.5kg; blockFire = false; }
+	fixture(blade){ collisionGroup = debris; collisionPoints = (5, -0.5), (8, -0.5), (7, -3.5), (5, -3.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(CrowbarDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2);
-		blockFire = false;
-	}
-}
+
+Tile(CrowbarDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 2), (-2.5, 2); blockFire = false; } }
+
 Tile(WpnRCM)
 {
 	tileTexture = RCMM;
@@ -2330,117 +1219,73 @@ Tile(WpnRCM)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -1.5), (9.5, -1.5), (9.5, 2.5), (-10.5, 2.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (2.5, -5.5), (4.5, -5.5), (4.5, -1.5), (2.5, -1.5);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -1.5), (9.5, -1.5), (9.5, 2.5), (-10.5, 2.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-4.5, -3.5), (-2.5, -3.5), (-2.5, 1.5), (-4.5, 1.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (2.5, -5.5), (3.5, -5.5), (3.5, 0), (2.5, 0); blockFire = false; }
 }
+
 Tile(WpnStickyBomb)
 {
-	tileTexture = StickyBombM;
-	pickupType = instant;
-	pickupRange = 10.0;
+	tileTexture=StickyBombM;
+	pickupType=instant;
+	pickupRange=10.0;
 	kickable = true;
-	impactEffect = ImpactDefault;
-	impactSound = GrenadeBounce;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = debris;
-		circle = (0, 0, 2);
-		blockFire = false;
-	}
-	fixture(pin)
-	{
-		mass = 2.5 kg;
-		collisionGroup = debris;
-		collisionPoints = (-1.5, -5.5), (1.5, -5.5), (1.5, -2), (-1.5, -2);
-		blockFire = false;
-	}
+	//type=WeaponItem;
+	impactEffect=ImpactDefault;
+	impactSound=GrenadeBounce;
+	fixture(){ mass=5kg; collisionGroup=debris; circle=(0,0,2); blockFire=false; }
+	fixture(pin){ mass=2.5kg; collisionGroup=debris; collisionPoints=(-1.5,-5.5),(1.5,-5.5),(1.5,-2),(-1.5,-2); blockFire=false; }
 }
+
 Tile(WpnStickyBombThrown)
 {
-	absorbProjectile = true;
-	projectileHit = true;
-	tileTexture = StickyBombT;
-	drawCategory = THRN;
-	mainLayer = 1;
-	editorEnabled = true;
-	material.restitution = 0.3;
-	material.blockExplosions = false;
-	material.hit.melee.sound = MeleeBlock;
-	material.hit.melee.effect = HIT;
-	material.hit.Melee.Prio = 10;
-	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
-	kickable = true;
-	punchable = true;
-	impactEffect = Smack;
-	impactSound = ImpactFlesh;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 5 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (0, 0, 2);
-		blockFire = false;
-	}
-}
-Tile(StickyBombDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1);
-		blockFire = false;
-	}
+	 absorbProjectile=true;
+	 projectileHit=true;
+	 tileTexture=StickyBombT;
+	 drawCategory=THRN;
+	 mainLayer=1;
+	 editorEnabled=true;
+	 material.restitution=0.3;
+	 material.blockExplosions=false;
+	 material.hit.melee.sound=MeleeBlock;
+	 material.hit.melee.effect=HIT;
+	 material.hit.Melee.Prio=10;
+	 material.resistance.impact.modifier=0.0;
+	 gibpressure.total=250kg;
+	 gibpressure.spike=1600kg;
+	 kickable=true;
+	 punchable=true;
+	 impactEffect=Smack;
+	 impactSound=ImpactFlesh;
+	 type=Dynamic; fixture() { mass=5kg; collisionGroup=dynamics_thrown; circle=(0,0,2); blockFire=false; }
 }
 
-Tile(ItemJetpack)
-{
-	tileTexture = ItemJetpack;
-	pickupType = instant;
-	pickupRange = 10.0;
-	impactEffect = ImpactDefault;
-	impactSound = WeaponBounce;
-	fixture(){mass = 5kg; collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; }
-}
-Tile(ItemJetpackEditor)
-{
-	tileTexture = ItemJetpack;
-	pickupType = instant;
-	pickupRange = 10.0;
-	impactEffect = ImpactDefault;
-	impactSound = WeaponBounce;
-	fixture(){mass = 5kg; collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; }
-}
-Tile(JetpackDebris){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; } }
+Tile(StickyBombDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -1), (1.5, -1), (1.5, 1), (-1.5, 1); blockFire = false; } }
 
-Tile(ItemGunpack)
-{
-	tileTexture = ItemGunpack;
-	pickupType = instant;
-	pickupRange = 10.0;
-	impactEffect = ImpactDefault;
-	impactSound = WeaponBounce;
-	fixture(){mass = 5kg; collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; }
-}
-Tile(GunpackDebris){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; } }
+//Tile(ItemJetpack)
+//{
+//	tileTexture = ItemJetpack;
+//	pickupType = instant;
+//	pickupRange = 10.0;
+//	impactEffect = ImpactDefault;
+//	impactSound = WeaponBounce;
+//	fixture(){mass = 5kg; collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; }
+//}
+
+//Tile(JetpackDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; } }
+
+//Tile(ItemGunpack)
+//{
+//	tileTexture = ItemGunpack;
+//	pickupType = instant;
+//	pickupRange = 10.0;
+//	impactEffect = ImpactDefault;
+//	impactSound = WeaponBounce;
+//	fixture(){mass = 5kg; collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; }
+//}
+
+//Tile(JetpackDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-6, -4), (6, -4), (6, 4), (-6, 4); blockFire = false; } }
 
 Tile(WpnWinchester)
 {
@@ -2452,21 +1297,11 @@ Tile(WpnWinchester)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5, 1.5), (10.5, 1.5), (10.5, 3.5), (-3, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10, -3), (-3, 1.5), (-10, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6, 1.5), (8.5, 1.5), (8.5, 3.5), (-4, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-9.5, -0.5), (-4, 1.5), (-9.5, 1.5)); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -0.5), (5.5, -0.5), (5.5, 2), (0.5, 2); blockFire = false; }
 }
+
 Tile(WpnBarrett)
 {
 	tileTexture = BarrettM;
@@ -2477,21 +1312,12 @@ Tile(WpnBarrett)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 16;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5.5, 1), (13.5, 1), (13.5, 3.5), (-5.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-10.5, -1.5), (-5.5, 0.5), (-5.5, 3.5), (-10.5, 3.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-5.5, 0.5), (12.5, 0.5), (12.5, 3.5), (-5.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-10.5, -1.5), (-5.5, 0.5), (-5.5, 4.5), (-10.5, 4.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0.5, -1), (4.5, -1), (4.5, 2.5), 0.5, 2.5); blockFire = false; }
+	fixture(barrel){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (12.5, 0.5), (19.5, 0.5), (19.5, 2.5), (12.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnMusket)
 {
 	tileTexture = MusketM;
@@ -2502,20 +1328,8 @@ Tile(WpnMusket)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 3.5 kg;
-		collisionPoints = (-3, 1.5), (13.5, 1.5), (13.5, 3.5), (-3, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 3.5 kg;
-		collisionPoints = (-7.5, -1.5), (-3, 1), (-3, 2.5), (-7.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 3.5kg; collisionPoints = (-3, 1.5), (14.5, 1.5), (14.5, 3.5), (-3, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 3.5kg; collisionPoints = (-7.5, -1.5), (-3, 1), (-3, 2.5), (-7.5, 2.5); blockFire = false; }
 }
 Tile(CannonBall00)
 {
@@ -2535,14 +1349,9 @@ Tile(CannonBall00)
 	material.destroySound = DestroySmall;
 	ImpactSound = ImpactMetal;
 	ImpactEffect = ImpactDefault;
-	fixture()
-	{
-		mass = 20 kg;
-		collisionGroup = dynamics_g1;
-		circle = (0, 0, 4);
-		blockFire = false;
-	}
+	fixture(){ mass = 20kg; collisionGroup = dynamics_g1; circle = (0, 0, 4); blockFire = false; }
 }
+
 Tile(WpnBlunderbuss)
 {
 	tileTexture = BlunderbussM;
@@ -2553,21 +1362,10 @@ Tile(WpnBlunderbuss)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-1.5, 0.5), (10.5, 0.5), (10.5, 3.5), (-1.5, 3.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-6.5, -1.5), (-1.5, -1.5), (-1.5, 2.5), (-6.5, 2.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3, 0.5), (10.5, 0.5), (10.5, 3.5), (-1, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, -2.5), (-0.5, -2), (0, 2), (-6.5, 2)); blockFire = false; }
 }
+
 Tile(WpnClaymore)
 {
 	tileTexture = ClaymoreM;
@@ -2576,14 +1374,9 @@ Tile(WpnClaymore)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 4 kg;
-		collisionGroup = debris;
-		collisionPoints = (-3, -3), (4, -3), (4, 4), (-3, 4);
-		blockFire = false;
-	}
+	fixture(){  mass = 4kg;collisionGroup = debris; collisionPoints = (-3, -2.5), (4, -2.5), (4, 3.5), (-3, 3.5); blockFire = false; }
 }
+
 Tile(WpnClaymoreThrown)
 {
 	absorbProjectile = true;
@@ -2598,21 +1391,16 @@ Tile(WpnClaymoreThrown)
 	material.hit.melee.effect = HIT;
 	material.hit.Melee.Prio = 10;
 	material.resistance.impact.modifier = 0.0;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
+	gibpressure.total = 250kg;
+	gibpressure.spike = 1600kg;
 	kickable = true;
 	punchable = true;
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	type = Dynamic;
-	fixture()
-	{
-		mass = 4 kg;
-		collisionGroup = debris;
-		collisionPoints = (-3, -2.5), (4, -2.5), (4, 3.5), (-3, 3.5);
-		blockFire = false;
-	}
+	fixture(){  mass = 4kg;collisionGroup = debris; collisionPoints = (-3, -2.5), (4, -2.5), (4, 3.5), (-3, 3.5); blockFire = false; }
 }
+
 Tile(WpnGreatsword)
 {
 	tileTexture = GreatswordM;
@@ -2625,40 +1413,14 @@ Tile(WpnGreatsword)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (-15, 0), (-9, 0), (-9, 3), (-15, 3);
-		mass = 1.5 kg;
-		blockFire = false;
-	}
-	fixture(guard)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-9, -2.5), (-7, -2.5), (-7, 5.5), (-9, 5.5);
-		mass = 1.5 kg;
-		blockFire = false;
-	}
-	fixture(blade)
-	{
-		collisionGroup = debris;
-		collisionPoints = (-8, -0.5), (9, -0.5), (11.5, 1.75), (9, 4), (-8, 4);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (-14, 0.5), (-8, 0.5), (-8, 2.5), (-14, 2.5); mass = 1.5kg; blockFire = false; }
+	fixture(guard){ collisionGroup = debris; collisionPoints = (-8, -2.5), (-7, -2.5), (-7, 5.5), (-8, 5.5); mass = 1.5kg; blockFire = false; }
+	fixture(blade){ collisionGroup = debris; collisionPoints = (-8, -1.5), (13, -1.5), (16, 1.5), (13, 4.5), (-8, 4.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(GreatswordDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(GreatswordDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+
 Tile(WpnMorningstar)
 {
 	tileTexture = MorningstarM;
@@ -2669,37 +1431,12 @@ Tile(WpnMorningstar)
 	impactEffect = ImpactDefault;
 	impactSound = ImpactMetal;
 	missileDamageMax = 11;
-	fixture()
-	{
-		collisionPoints = (-2.5, -2), (2.5, -2), (2.5, 4), (-2.5, 4);
-		mass = 5 kg;
-		blockFire = false;
-	}
+	fixture(){ collisionPoints = (-2.5, -2.5), (2.5, -2.5), (2.5, 2.5), (-2.5, 2.5); mass = 5kg; blockFire = false; }
 }
-Tile(MorningstarDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
-Tile(MorningstarDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(MorningstarDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+Tile(MorningstarDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+
 Tile(WpnPoleaxe)
 {
 	tileTexture = PoleaxeM;
@@ -2712,45 +1449,14 @@ Tile(WpnPoleaxe)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 9;
-	missileDamageMax = 30 | 15;
-	fixture()
-	{
-		collisionPoints = (-13, -1.5), (12, -1.5), (12, 0.5), (-13, 0.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
-	fixture(blade) //goodbye old friend ;( #K
-	{
-		collisionGroup = debris;
-		collisionPoints = (7.5, 4.5), (3, -4.5), (7.5, -6), (12, -4.5);
-		mass = 2.5 kg;
-		blockFire = false;
-	}
+	missileDamageMax = 30|15;
+	fixture(){ collisionPoints = (13, -0.5), (12, 1),  (-13, 1), (-13, -0.5); mass = 2.5kg; blockFire = false; }
+	fixture(blade){ collisionGroup = debris; collisionPoints = (12, -3.5), (7.5, -4), (3, -3.5), (7.5, 4.5); mass = 2.5kg; blockFire = false; }
 }
-Tile(PoleaxeDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
-Tile(PoleaxeDebris2)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5);
-		blockFire = false;
-	}
-}
+
+Tile(PoleaxeDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+Tile(PoleaxeDebris2){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1.5, -2.5), (1.5, -2.5), (1.5, 2.5), (-1.5, 1.5); blockFire = false; } }
+
 Tile(WpnParryingDagger)
 {
 	tileTexture = ParryingdaggerM;
@@ -2763,38 +1469,13 @@ Tile(WpnParryingDagger)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 6;
-	missileDamageMax = 35 | 10;
-	fixture()
-	{
-		blockFire = false;
-		collisionPoints = (-3, -0.5), (5.5, -0.5), (6.5, 2.5), (-3, 2.5);
-		mass = 2.5 kg;
-	}
-	fixture(guard)
-	{
-		blockFire = false;
-		collisionPoints = (-6, -2), (-3, -2), (-3, 4), (-6, 4);
-		mass = 2.5 kg;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		blockFire = false;
-		collisionPoints = (-10, -0.5), (-6, -0.5), (-6, 2.5), (-10, 2.5);
-		mass = 2.5 kg;
-	}
+	missileDamageMax = 35|10;
+	fixture(){ collisionPoints = (-3.5, -0.5), (5.5, -0.5), (6.5, 2.5), (-3.5, 2.5); mass = 2.5kg; }
+	fixture(grip){ collisionGroup = debris; blockFire = false; collisionPoints = (-8.5, 0), (-3.5, 0), (-3.5, 2.5), (-8.5, 2.5); mass = 2.5kg; }
 }
-Tile(ParryingdaggerDebris1)
-{
-	editorEnabled = false;
-	punchable = true;
-	kickable = true;
-	material = metal;
-	fixture()
-	{
-		collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5);
-	}
-}
+
+Tile(ParryingdaggerDebris1){ editorEnabled = false; punchable = true; kickable = true; material = metal; fixture(){ collisionPoints = (-1, -1.5), (0, -2.5), (1, -1.5), (1, 1.5), (0, 2.5), (-1, 1.5); } }
+
 Tile(WpnMinigun)
 {
 	tileTexture = MinigunM;
@@ -2805,28 +1486,11 @@ Tile(WpnMinigun)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 15;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-1, -3.5), (15.5, -3.5), (15.5, 0.5), (-1, 0.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (1, -6), (5, -6), (5, -2), (1, -2);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3, -2), (-1, -2), (-1, 2), (-3, 2);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-0.5, -3.5), (15.5, -3.5), (15.5, 0.5), (-0.5, 0.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (1, -6), (5, -6), (5, -2), (1, -2); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-0.5, -1), (-0.5, 2.5), (-3.5, 2.5); blockFire = false; }
 }
+
 Tile(WpnQuadLauncher)
 {
 	tileTexture = QuadLauncherM;
@@ -2837,29 +1501,12 @@ Tile(WpnQuadLauncher)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5, -2.5), (10.5, -2.5), (10.5, 2.5), (-5, 2.5);
-		blockFire = false;
-	}
-	fixture(stock)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-7, -4), (-5, -4), (-5, 4), (-7, 4);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-2.5, -5.5), (-0.5, -5.5), (-0.5, -2.5), (-2.5, -2.5);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, -2.5), (9.5, -2.5), (9.5, 3.5), (-6.5, 3.5); blockFire = false; }
+	fixture(stock){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-6.5, -3.5), (-4.5, -3.5), (-4.5, 4.5), (-6.5, 4.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -5.5), (-0.5, -5.5), (-0.5, 0), (-3.5, 0); blockFire = false; }
 }
+
 Tile(WpnUnkemptHarold)
 {
 	tileTexture = UnkemptHaroldM;
@@ -2870,47 +1517,29 @@ Tile(WpnUnkemptHarold)
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
 	missileDamageMax = 10;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3.5, 1.5), (6, 1.5), (6, 4.5), (-3.5, 4.5);
-		blockFire = false;
-	}
-	fixture(grip)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-5, -2.5), (-2.5, -2.5), (-1, 1.5), (-3.5, 1.5);
-		blockFire = false;
-	}
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, 1.5), (5.5, 1.5), (5.5, 4.5), (-2.5, 4.5), (-3.5, 3.5); blockFire = false; }
+	fixture(grip){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3.5, -1), (-1.5, -1), (-1.5, 1.5), (-3.5, 1.5); blockFire = false; }
 }
+
 Tile(ProjectileSticky)
 {
-	absorbProjectile = false;
-	projectileHit = false;
-	drawCategory = ITM;
-	material = metal;
-	material.blockExplosions = false;
-	material.hit.melee.effect = HIT;
-	material.resistance.impact.modifier = 0.0;
-	material.restitution = 1;
-	gibpressure.total = 250 kg;
-	gibpressure.spike = 1600 kg;
-	kickable = true;
-	punchable = true;
-	impactSound = WeaponBounce;
-	canBeMissile = true;
-	missileDamageMax = 8.5;
-	type = Dynamic;
-	fixture()
-	{
-		mass = 3 kg;
-		collisionGroup = dynamics_thrown;
-		circle = (-0.5, 0.5, 2);
-		blockFire = false;
-	}
+	 absorbProjectile=false;
+	 projectileHit=false;
+	 drawCategory=ITM;
+	 material=metal;
+	 material.blockExplosions=false;
+	 material.hit.melee.effect=HIT;
+	 material.resistance.impact.modifier=0.0;
+	 material.restitution = 1;
+	 gibpressure.total=250kg;
+	 gibpressure.spike=1600kg;
+	 kickable=true;
+	 punchable=true;
+	 impactSound=WeaponBounce;
+	 canBeMissile=true; missileDamageMax=8.5;
+	 type=Dynamic; fixture() { mass=3kg; collisionGroup=dynamics_thrown; circle=(-0.5,0.5,2); blockFire=false; }
 }
+
 Tile(WpnStickyLauncher)
 {
 	tileTexture = StickyLauncherM;
@@ -2920,22 +1549,11 @@ Tile(WpnStickyLauncher)
 	projectileHit = false;
 	impactEffect = ImpactDefault;
 	impactSound = WeaponBounce;
-	missileDamageMax = 17 | 17;
-	fixture()
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (-3, 0.5), (8.5, 0.5), (8.5, 3.5), (-3, 3.5);
-		blockFire = false;
-	}
-	fixture(mag)
-	{
-		collisionGroup = debris;
-		mass = 2.5 kg;
-		collisionPoints = (0, -0.5), (4, -0.5), (4, 2), (0, 2);
-		blockFire = false;
-	}
+	missileDamageMax = 17|17;
+	fixture(){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (-3, 0.5), (8.5, 0.5), (8.5, 3.5), (-3, 3.5); blockFire = false; }
+	fixture(mag){ collisionGroup = debris; mass = 2.5kg; collisionPoints = (0, -0.5), (4, -0.5), (4, 2), (0, 2); blockFire = false; }
 }
+
 Tile(WpnSwitchblade)
 {
 	tileTexture = SwitchbladeM;
@@ -2949,13 +1567,10 @@ Tile(WpnSwitchblade)
 	missileThrownHitEffectID = HIT_S;
 	missileThrownHitSoundID = MeleeHitSharp;
 	missileDamageFactorThrown = 6;
-	missileDamageMax = 35 | 10;
-	fixture()
-	{
-		collisionPoints = (-6.5, 0.5), (5.5, 0.5), (5.5, 3.5), (-4.5, 3.5);
-		mass = 2.5 kg;
-	}
+	missileDamageMax = 35|10;
+	fixture(){ collisionPoints = (-6.5, 0.5), (5.5, 0.5), (5.5, 3.5), (-4.5, 3.5); mass = 2.5kg; }
 }
+
 //Tile(WpnRiotShield)
 //{
 //	tileTexture = RiotShieldM;
@@ -2968,6 +1583,7 @@ Tile(WpnSwitchblade)
 //	missileDamageMax = 17|17;
 //	fixture(){ collisionPoints = (-8.5, -3.5), (7.5, -3.5), (7.5, 6.5), (-8.5, 6.5); mass = 2.5kg; }
 //}
+
 
 // disable editorEnabled again
 defaultTile(default_tile)

@@ -19,11 +19,9 @@ namespace SFR.Weapons;
 [HarmonyPatch]
 internal static class Database
 {
-    private static List<WeaponItem> _weapons;
+    // private static List<WeaponItem> _weapons;
+    /*
 
-    /// <summary>
-    ///     Fix an issue that prevents new weapons from spawning correctly.
-    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectData), nameof(ObjectData.CreateNew))]
     private static bool FixDrop(ObjectDataStartParams startParams, ref ObjectData __result)
@@ -42,7 +40,7 @@ internal static class Database
     [HarmonyPatch(typeof(WeaponDatabase), nameof(WeaponDatabase.Load))]
     private static void LoadWeapons()
     {
-        WeaponDatabase.m_weapons = new WeaponItem[110];
+        WeaponDatabase.m_weapons = new WeaponItem[103];
 
         _weapons ??= new List<WeaponItem>
         {
@@ -63,14 +61,12 @@ internal static class Database
             // new(WeaponItemType.Melee, new RiotShield()), // 82
             new(WeaponItemType.Melee, new Sledgehammer()), // 83
             new(WeaponItemType.Melee, new Switchblade()), // 84
-            new(WeaponItemType.Melee, new Scythe()), // 108
 
             // Handgun
             new(WeaponItemType.Handgun, new Flintlock()), // 69
             new(WeaponItemType.Handgun, new NailGun()), // 70
             new(WeaponItemType.Handgun, new UnkemptHarold()), // 85
             new(WeaponItemType.Handgun, new StickyLauncher()), // 86
-            new(WeaponItemType.Handgun, new Anaconda()), // 109
 
             // Throwable
             new(WeaponItemType.Thrown, new Claymore()), // 87
@@ -90,20 +86,16 @@ internal static class Database
             new(WeaponItemType.Rifle, new RCM()), // 100
             new(WeaponItemType.Rifle, new Winchester()), // 101
             new(WeaponItemType.Rifle, new Minigun()), // 102
-            new(WeaponItemType.Rifle, new AK47()), // 107
 
             // Pickup
-            new(WeaponItemType.Powerup, new HealthPouch()), // 92
-            new(WeaponItemType.Powerup, new AdrenalineBoost()), // 103
-            new(WeaponItemType.InstantPickup, new Jetpack()), // 104
-            new(WeaponItemType.InstantPickup, new JetpackEditor()), // 105
-            new(WeaponItemType.InstantPickup, new Gunpack()) // 106
+            new(WeaponItemType.Powerup, new HealthPouch()) // 92
         };
 
         foreach (var weapon in _weapons)
         {
             WeaponDatabase.m_weapons[weapon.BaseProperties.WeaponID] = weapon;
         }
+        
     }
 
     [HarmonyTranspiler]
@@ -187,47 +179,41 @@ internal static class Database
             { 65, 8 }, // Whip
             { 66, 12 }, // Bouncing ammo
             { 67, 8 }, // Fire ammo
-            { 68, 13 }, // Drone
-            { 69, 13 }, // Flintlock
-            { 70, 14 }, // NailGun
+            { 68, 14 }, // Drone
+            { 69, 14 }, // Flintlock
+            { 70, 15 }, // NailGun
             // 71, Brick
             // 72, Broom
             // 73, Cannon ball
-            { 74, 13 }, // Blade
-            { 75, 10 }, // Caber
-            { 76, 18 }, // Crowbar
-            { 77, 6 }, // GreatSword
+            { 74, 21 }, // Blade
+            { 75, 6 }, // Caber
+            { 76, 24 }, // Crowbar
+            { 77, 9 }, // GreatSword
             { 78, 10 }, // Morningstar
-            { 79, 8 }, //ParryingDagger
-            { 80, 8 }, // Poleaxe
-            { 81, 15 }, // Rapier
+            { 79, 11 }, //ParryingDagger
+            { 80, 17 }, // Poleaxe
+            { 81, 29 }, // Rapier
             // { 82, 16 }, // RiotShield,
-            { 83, 16 }, // Sledgehammer
-            { 84, 18 }, // Switchblade
-            // { 85, 4 }, // UnkemptHarold
+            { 83, 22 }, // Sledgehammer
+            { 84, 21 }, // Switchblade
+            { 85, 6 }, // UnkemptHarold
             { 86, 9 }, // StickyLauncher
             { 87, 15 }, // Claymore
-            { 88, 16 }, // Frag grenade
-            { 89, 12 }, // Impact grenade
+            { 88, 19 }, // Frag grenade
+            { 89, 16 }, // Impact grenade
             // { 90, 1 }, // Snowball
-            { 91, 11 }, // Sticky bomb
-            { 92, 22 }, // Health pouch
-            { 93, 12 }, // AA12
-            { 94, 8 }, // Barrett
-            { 95, 9 }, // Blunderbuss
-            { 96, 15 }, // Crossbow
-            { 97, 8 }, // Double barrel
-            { 98, 18 }, // Musket
-            { 99, 7 }, // Quad launcher
-            { 100, 8 }, // RCM
-            { 101, 12 }, // Winchester
-            { 102, 6 }, // Minigun
-            { 103, 12 }, // Adrenaline boost
-            { 104, 17 }, // Jetpack
-            // 105, Jetpack editor
-            { 107, 12 }, // AK47
-            { 108, 10 }, // Scythe
-            { 109, 12 } // Anaconda
+            { 91, 7 }, // Sticky bomb
+            { 92, 11 }, // Health pouch
+            { 93, 17 }, // AA12
+            { 94, 14 }, // Barrett
+            { 95, 22 }, // Blunderbuss
+            { 96, 28 }, // Crossbow
+            { 97, 11 }, // Double barrel
+            { 98, 23 }, // Musket
+            { 99, 8 }, // Quad launcher
+            { 100, 6 }, // RCM
+            { 101, 19 }, // Winchester
+            { 102, 11 } // Minigun
         };
 
         __result = WeaponItem.ID.m_wpns;
@@ -335,13 +321,7 @@ internal static class Database
         QuadLauncher,
         RCM,
         Winchester,
-        Minigun,
-        AdrenalineBoost,
-        AK47,
-        Scythe,
-        Anaconda,
-        Jetpack,
-        JetpackEditor,
-        Gunpack
+        Minigun
     }
+    */
 }

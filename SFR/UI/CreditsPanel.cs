@@ -23,17 +23,25 @@ internal sealed class CreditsPanel : Panel
             new MenuItemSeparator("ARTISTS"),
             new MenuItemLabel("Shock", Align.Center, Color.Lime),
             new MenuItemLabel("Dxse", Align.Center, Color.Lime),
-            new MenuItemLabel("KLI", Align.Center, Color.Lime),
+            new MenuItemLabel("KL1", Align.Center, Color.Lime),
+            new MenuItemLabel("Casey", Align.Center, Color.Lime),
             new MenuItemLabel("Danila015", Align.Center, Color.Lime),
             new MenuItemLabel("Eiga", Align.Center, Color.Lime),
+            new MenuItemLabel("Tomfer", Align.Center, Color.Lime),
 
             new MenuItemSeparator("COMPOSERS"),
             new MenuItemLabel("Samwow", Align.Center, Color.Red),
+            new MenuItemLabel("Chickibo", Align.Center, Color.Red),
+
+            new MenuItemSeparator("TESTERS"),
+            new MenuItemLabel("Emmet Brown", Align.Center, Color.Coral),
+            new MenuItemLabel("Dark", Align.Center, Color.Coral),
+            new MenuItemLabel("Pricey", Align.Center, Color.Coral),
+            new MenuItemLabel("GoreDemon", Align.Center, Color.Coral),
 
             new MenuItemSeparator("SPECIAL THANKS"),
             new MenuItemLabel("Odex64 - Founder & Project Leader", Align.Center, Color.Gold),
             new MenuItemLabel("Eiga, Heapons, Olv - Moderation", Align.Center, Color.Gold),
-            new MenuItemLabel("Mimyuu - For the special font ", Align.Center, Color.Gold),
             new MenuItemLabel("Motto73 - For his extensive work on the mod", Align.Center, Color.Gold),
             new MenuItemLabel("NearHuscarl - For his amazing items editor", Align.Center, Color.Gold)
         };

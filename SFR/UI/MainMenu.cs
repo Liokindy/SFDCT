@@ -10,6 +10,7 @@ namespace SFR.UI;
 [HarmonyPatch]
 internal static class MainMenu
 {
+    /*
     private const string Website = "superfightersredux.tk";
     private static Action<Panel> OpenSubPanel;
 
@@ -35,4 +36,5 @@ internal static class MainMenu
         instructions.ElementAt(10).opcode = OpCodes.Ldc_I4_8;
         return instructions;
     }
+    */
 }
