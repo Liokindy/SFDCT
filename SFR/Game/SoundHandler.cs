@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using SFD;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using SFD;
+using Constants = SFR.Misc.Constants;
 
 namespace SFR.Game;
 
@@ -32,9 +31,7 @@ internal static class SoundHandler
         }
         if (gameWorld.GameOwner != GameOwnerEnum.Server)
         {
-            // -1f to 1f
-            float soundPitch = (gameWorld.SlowmotionHandler.SlowmotionModifier) - 1f;
-            PlayGlobalPannedSound(soundID, worldPosition, volumeModifier, soundPitch);
+            PlayGlobalPannedSound(soundID, gameWorld, worldPosition, volumeModifier);
             
             return false;
         }
@@ -48,9 +45,10 @@ internal static class SoundHandler
     }
 
     /// <summary>
-    ///     Plays a screen-space panned sound. if Position equals Origin panning is disabled.
+    ///     Plays a screen-space panned sound. if Position
+    ///     equals WorldOrigin panning is disabled.
     /// </summary>
-    private static void PlayGlobalPannedSound(string soundID, Vector2 worldPosition, float volumeModifier = 1f, float soundPitch = 0)
+    private static void PlayGlobalPannedSound(string soundID, GameWorld gameWorld, Vector2 worldPosition, float volumeModifier = 1f)
     {
         if (SFD.Sounds.SoundHandler.m_soundsDisabled)
         {
@@ -59,15 +57,40 @@ internal static class SoundHandler
         SFD.Sounds.SoundHandler.SoundEffectGroup soundEffectGroup = SFD.Sounds.SoundHandler.soundEffects.Find(soundID);
         if (soundEffectGroup != null)
         {
-            // Panning
-            float worldCamPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
-            float soundPanning = 0f;
-            if (worldPosition != Vector2.Zero)
-            {
-                soundPanning = (worldCamPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf * 0.5f;
-                soundPanning = MathHelper.Clamp(soundPanning * SFR.Misc.Constants.SoundPanningStrength, -1f, 1f);
-            }
+            // Sound pitch
+            float soundPitch = (gameWorld.SlowmotionHandler.SlowmotionModifier) - 1f; // -1f to 1f
 
+            // Sound Panning
+            float soundPanning = 0f;
+            if (worldPosition != Vector2.Zero && Constants.SoundPanning_Strength > 0f)
+            {
+                float listenerPosX;
+                if (Constants.SoundPanning_IsScreenSpace || (gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsRemoved))
+                {
+                    listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
+                    soundPanning = (listenerPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf*0.5f;
+                }
+                else
+                {
+                    listenerPosX = gameWorld.PrimaryLocalPlayer.Position.X;
+                    float soundPosXDiff = worldPosition.X-listenerPosX;
+                    if (Math.Abs(soundPosXDiff) >= Constants.SoundPanning_InWorld_Threshold)
+                    {
+                        if (soundPosXDiff > 0)
+                        {
+                            soundPosXDiff -= Constants.SoundPanning_InWorld_Threshold;
+                        }
+                        else
+                        {
+                            soundPosXDiff += Constants.SoundPanning_InWorld_Threshold;
+                        }
+                        soundPanning = soundPosXDiff / Constants.SoundPanning_InWorld_Distance;
+                    }
+                }
+                soundPanning = MathHelper.Clamp(soundPanning * Constants.SoundPanning_Strength, -1f, 1f);
+            }
+            
+            // Play the sound
             SFD.Sounds.SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier, soundPitch, soundPanning);
             return;
         }

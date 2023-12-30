@@ -1,10 +1,7 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
 using SFD;
-using SFD.Sounds;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
+using HarmonyLib;
 
 namespace SFR.Fighter;
 

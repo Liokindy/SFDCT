@@ -1,7 +1,10 @@
-using HarmonyLib;
+using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
 using SFD.Objects;
+using HarmonyLib;
+using Box2D.XNA;
 
 namespace SFR.Fighter;
 
@@ -77,8 +80,127 @@ internal static class GadgetHandler
 
         return true;
     }
-}
 
+    // Draw local players at full saturation
+    /*
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
+    private static bool DrawPlayer(Player __instance, SpriteBatch spriteBatch, float ms)
+    {
+        if (__instance.IsNullProfile)
+        {
+            return false;
+        }
+
+        if (__instance.WorldBody != null)
+        {
+            __instance.UpdatePlayerPositionToBox2DPosition(ms);
+        }
+
+        // Update shake
+        Vector2 vector = __instance.Position;
+        __instance.Shake.UpdateShake(ms / __instance.GameWorld.SlowmotionHandler.SlowmotionModifier);
+        vector = __instance.Shake.ApplyShake(vector);
+
+        // Update hurt level if we
+        // arent a burnt corpse
+        int hurtLevel = 0;
+        if (!__instance.Burned)
+        {
+            float fullness = __instance.Health.Fullness;
+            hurtLevel = ((__instance.Health.Fullness <= 0.12f) ? 2 : ((fullness <= 0.25f) ? 1 : 0));
+            // hurtLevel = ((__instance.Health.Fullness <= 0.12f) ? 2 : ((fullness <= 0.25f) ? 1 : 0));
+        }
+        __instance.Equipment.EnsureHurtLevelEquipped(hurtLevel);
+
+        // Smoothly grow/shrink draw scale
+        // if it changed.
+        float drawScale = __instance.DrawScale;
+        if (__instance.m_currentDrawScale != drawScale)
+        {
+            // Instantly set it if we are just created.
+            if (__instance.GameWorld.ElapsedTotalRealTime - __instance.CreateTime < 100f)
+            {
+                __instance.m_currentDrawScale = __instance.DrawScale;
+            }
+            else if (__instance.m_currentDrawScale < drawScale)
+            {
+                __instance.m_currentDrawScale += 0.0003f * ms;
+                if (__instance.m_currentDrawScale > drawScale)
+                {
+                    __instance.m_currentDrawScale = drawScale;
+                }
+            }
+            else
+            {
+                __instance.m_currentDrawScale -= 0.0003f * ms;
+                if (__instance.m_currentDrawScale < drawScale)
+                {
+                    __instance.m_currentDrawScale = drawScale;
+                }
+            }
+        }
+        
+        Vector2 drawPosition = __instance.Shake.ApplyShake(__instance.Position);
+        Color drawColor = GetPlayerDrawColor(__instance);
+
+        // Draw Speedboost's delayed copy
+        if (__instance.SpeedBoostActive)
+        {
+            // Speedboost copy is see-through
+            Color SB_drawColor = drawColor;
+            drawColor.A = 40;
+
+            // Update delayed copy position
+            Vector2 vec2 = (drawPosition - __instance.m_speedBoostDelayedPos);
+            float num = vec2.CalcSafeLengthSquared(); // Minor optimization, use SqrLength instead of Length
+            if (num > 6f)
+            {
+                vec2.Normalize();
+                if (vec2.IsValid())
+                {
+                    __instance.m_speedBoostDelayedPos = drawPosition - vec2 * 5.99f;
+                }
+            }
+            else
+            {
+                vec2.Normalize();
+                if (vec2.IsValid())
+                {
+                    // Minor optimization, multiply by 1/13 instead of ms/13
+                    __instance.m_speedBoostDelayedPos += vec2 * Math.Min(ms * 0.0769230769f, (float)Math.Sqrt(num));
+                }
+            }
+
+            // Draw speedboost copy
+            __instance.m_subAnimations[0].Draw(
+                spriteBatch,
+                __instance.m_speedBoostDelayedPos,
+                __instance.m_currentDrawScale,
+                __instance.GetAnimationDirection(),
+                __instance.Rotation + __instance.m_subAnimations[0].Rotation,
+                __instance.Equipment,
+                SB_drawColor,
+                ms
+            );
+        }
+
+        // Draw player
+        __instance.m_subAnimations[0].Draw(
+            spriteBatch,
+            drawPosition,
+            __instance.m_currentDrawScale,
+            __instance.GetAnimationDirection(),
+            __instance.Rotation + __instance.m_subAnimations[0].Rotation,
+            __instance.Equipment,
+            drawColor,
+            ms
+        );
+
+        return false;
+    }
+    */
+}
 internal struct DevIcon
 {
     internal Team Team;

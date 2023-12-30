@@ -131,6 +131,7 @@
     <Compile Include="Helper\Randomizer.cs" />
     <Compile Include="Helper\Vector.cs" />
     <Compile Include="Editor\MapData.cs" />
+    <Compile Include="Misc\ConfigIni.cs" />
     <Compile Include="Misc\Tweaks.cs" />
     <Compile Include="Objects\Animal\ObjectAnimal.cs" />
     <Compile Include="Objects\Animal\ObjectFroggy.cs" />
@@ -183,7 +184,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\MenuItemLabel.cs" />
-    <Compile Include="UI\ConsoleOutput.cs" />
+    <Compile Include="UI\SetupPanel.cs" />
     <Compile Include="UI\VersionLabel.cs" />
     <Compile Include="Weapons\Database.cs" />
     <Compile Include="Weapons\Handguns\Flintlock.cs" />

@@ -16,7 +16,10 @@ namespace SFR.OnlineServices;
 [HarmonyPatch]
 internal static class Browser
 {
-    /*
+    // I have no idea why, but for now I
+    // need to uncomment this in order to join vanilla servers.
+    // Before it wasn't. Weird.
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
     private static bool PatchBrowser(SFDGameServerInstance value, GameBrowserMenuItem __instance)
@@ -61,6 +64,7 @@ internal static class Browser
         return true;
     }
 
+   
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SFD.Constants), nameof(SFD.Constants.VersionCheckDifference), typeof(string))]
     private static bool VersionCheckPatch(string versionToCheck, ref VersionDifference __result)
@@ -143,5 +147,4 @@ internal static class Browser
 
         return false;
     }
-    */
 }
