@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using HarmonyLib;
 using Lidgren.Network;
 using SFD;
+using SFDGameScriptInterface;
 using SFR.Game;
 using SFR.Helper;
 using SFR.Objects;
@@ -26,10 +29,8 @@ namespace SFR.Sync;
 internal static class SyncHandler
 {
     private const byte MaxAttempts = 18;
-
     internal static readonly Dictionary<int, byte> Attempts = new();
     /*
-
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(NetMessage), nameof(NetMessage.WriteDataType))]
     private static IEnumerable<CodeInstruction> ExtendWriteData(IEnumerable<CodeInstruction> instructions)

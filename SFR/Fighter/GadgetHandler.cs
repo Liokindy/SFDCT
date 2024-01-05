@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using SFD.Objects;
 using HarmonyLib;
+using System.Linq;
 using Box2D.XNA;
 
 namespace SFR.Fighter;
@@ -14,6 +15,7 @@ namespace SFR.Fighter;
 [HarmonyPatch]
 internal static class GadgetHandler
 {
+    /*
     private static DevIcon _devIcon;
 
     [HarmonyPrefix]
@@ -80,14 +82,41 @@ internal static class GadgetHandler
 
         return true;
     }
+    */
 
-    // Draw local players at full saturation
     /*
+    private static void DrawPlayerOutline(Player player, SpriteBatch spriteBatch, float ms)
+    {
+        int teamCount = player.GameWorld.Players.Where(p => p.InSameTeam(player.GameWorld.GUI_TeamDisplay_LocalGameUserTeam)).Count();
+        if (teamCount > 0)
+        {
+            Equipment equipmentOnlyClothingItems = player.Equipment;
+            // Skip rendering hurt level
+            if (equipmentOnlyClothingItems.m_equippedItems[9] != null)
+            {
+                equipmentOnlyClothingItems.Unequip(9);
+            }
+
+            Color outlineCol = SFR.Helper.PlayerHUD.GetPlayerTeamOutlineColor(player);
+            outlineCol.A = 128; // This give an antialiasing-like look
+            float outlineOffset = 2f / Camera.Zoom;
+
+            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(-outlineOffset, outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
+            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(outlineOffset, outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
+            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(outlineOffset, -outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
+            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(-outlineOffset, -outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
     private static bool DrawPlayer(Player __instance, SpriteBatch spriteBatch, float ms)
     {
         if (__instance.IsNullProfile)
+        {
+            return false;
+        }
+        if (__instance.GameWorld == null)
         {
             return false;
         }
@@ -97,110 +126,119 @@ internal static class GadgetHandler
             __instance.UpdatePlayerPositionToBox2DPosition(ms);
         }
 
-        // Update shake
-        Vector2 vector = __instance.Position;
-        __instance.Shake.UpdateShake(ms / __instance.GameWorld.SlowmotionHandler.SlowmotionModifier);
-        vector = __instance.Shake.ApplyShake(vector);
-
-        // Update hurt level if we
-        // arent a burnt corpse
-        int hurtLevel = 0;
+        // Show hurt level if we arent a burnt corpse
         if (!__instance.Burned)
         {
-            float fullness = __instance.Health.Fullness;
-            hurtLevel = ((__instance.Health.Fullness <= 0.12f) ? 2 : ((fullness <= 0.25f) ? 1 : 0));
-            // hurtLevel = ((__instance.Health.Fullness <= 0.12f) ? 2 : ((fullness <= 0.25f) ? 1 : 0));
+            float healthFullness = __instance.Health.Fullness;
+            int hurtLevel = (healthFullness <= 0.12f) ? 2 : ((healthFullness <= 0.25f) ? 1 : 0);
+            __instance.Equipment.EnsureHurtLevelEquipped(hurtLevel);
         }
-        __instance.Equipment.EnsureHurtLevelEquipped(hurtLevel);
 
-        // Smoothly grow/shrink draw scale
-        // if it changed.
-        float drawScale = __instance.DrawScale;
-        if (__instance.m_currentDrawScale != drawScale)
+        // Grow or shrink smoothly
+        if (__instance.m_currentDrawScale != __instance.DrawScale)
         {
-            // Instantly set it if we are just created.
             if (__instance.GameWorld.ElapsedTotalRealTime - __instance.CreateTime < 100f)
             {
                 __instance.m_currentDrawScale = __instance.DrawScale;
             }
-            else if (__instance.m_currentDrawScale < drawScale)
+            else if (__instance.m_currentDrawScale < __instance.DrawScale)
             {
                 __instance.m_currentDrawScale += 0.0003f * ms;
-                if (__instance.m_currentDrawScale > drawScale)
+                if (__instance.m_currentDrawScale > __instance.DrawScale)
                 {
-                    __instance.m_currentDrawScale = drawScale;
+                    __instance.m_currentDrawScale = __instance.DrawScale;
                 }
             }
             else
             {
                 __instance.m_currentDrawScale -= 0.0003f * ms;
-                if (__instance.m_currentDrawScale < drawScale)
+                if (__instance.m_currentDrawScale < __instance.DrawScale)
                 {
-                    __instance.m_currentDrawScale = drawScale;
+                    __instance.m_currentDrawScale = __instance.DrawScale;
                 }
             }
         }
-        
-        Vector2 drawPosition = __instance.Shake.ApplyShake(__instance.Position);
-        Color drawColor = GetPlayerDrawColor(__instance);
 
-        // Draw Speedboost's delayed copy
+        // Get position with shake
+        __instance.Shake.UpdateShake(ms / __instance.GameWorld.SlowmotionHandler.SlowmotionModifier);
+        Vector2 drawingPosition = __instance.Shake.ApplyShake(__instance.Position);
+
+        // Draw speedboost's delayed copy
         if (__instance.SpeedBoostActive)
         {
-            // Speedboost copy is see-through
-            Color SB_drawColor = drawColor;
-            drawColor.A = 40;
+            Vector2 vector2 = drawingPosition - __instance.m_speedBoostDelayedPos;
 
-            // Update delayed copy position
-            Vector2 vec2 = (drawPosition - __instance.m_speedBoostDelayedPos);
-            float num = vec2.CalcSafeLengthSquared(); // Minor optimization, use SqrLength instead of Length
+            float num = vector2.CalcSafeLength();
             if (num > 6f)
             {
-                vec2.Normalize();
-                if (vec2.IsValid())
+                vector2.Normalize();
+                if (vector2.IsValid())
                 {
-                    __instance.m_speedBoostDelayedPos = drawPosition - vec2 * 5.99f;
+                    __instance.m_speedBoostDelayedPos = drawingPosition - vector2 * 5.99f;
                 }
             }
             else
             {
-                vec2.Normalize();
-                if (vec2.IsValid())
+                vector2.Normalize();
+                if (vector2.IsValid())
                 {
-                    // Minor optimization, multiply by 1/13 instead of ms/13
-                    __instance.m_speedBoostDelayedPos += vec2 * Math.Min(ms * 0.0769230769f, (float)Math.Sqrt(num));
+                    __instance.m_speedBoostDelayedPos += vector2 * Math.Min(ms / 13f, num);
                 }
             }
 
-            // Draw speedboost copy
-            __instance.m_subAnimations[0].Draw(
-                spriteBatch,
-                __instance.m_speedBoostDelayedPos,
-                __instance.m_currentDrawScale,
-                __instance.GetAnimationDirection(),
-                __instance.Rotation + __instance.m_subAnimations[0].Rotation,
-                __instance.Equipment,
-                SB_drawColor,
-                ms
-            );
+            Color sbDrawColor = __instance.DrawColor;
+            sbDrawColor.A = 40;
+
+            __instance.m_subAnimations[0].Draw(spriteBatch, __instance.m_speedBoostDelayedPos, __instance.m_currentDrawScale, __instance.GetAnimationDirection(), __instance.Rotation + __instance.m_subAnimations[0].Rotation, __instance.Equipment, sbDrawColor, ms);
+        }
+
+        if (!__instance.IsDead && GameInfo.LocalPlayerCount <= 1 && __instance.InSameTeam(__instance.GameWorld.GUI_TeamDisplay_LocalGameUserTeam))
+        {
+            DrawPlayerOutline(__instance, spriteBatch, ms);
         }
 
         // Draw player
-        __instance.m_subAnimations[0].Draw(
-            spriteBatch,
-            drawPosition,
-            __instance.m_currentDrawScale,
-            __instance.GetAnimationDirection(),
-            __instance.Rotation + __instance.m_subAnimations[0].Rotation,
-            __instance.Equipment,
-            drawColor,
-            ms
-        );
-
+        __instance.m_subAnimations[0].Draw(spriteBatch, drawingPosition, __instance.m_currentDrawScale, __instance.GetAnimationDirection(), __instance.Rotation + __instance.m_subAnimations[0].Rotation, __instance.Equipment, __instance.DrawColor, ms);
+            
         return false;
     }
     */
+
+    // - TODO: Somehow store more data in the PlayerGUIInformation class
+    //  so we can store information for more data
+    // - TODO: Implement SFR's extendedplayer class
+    //  so we can store information for data's (last) top limit
+    //  and not hard code the upper limit
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawMainPanel))]
+    private static void DrawOmenBar(PlayerHUD __instance, int x, int y, Player player, GameUser user, PlayerStatus playerStatus, SpriteBatch spriteBatch, float elapsed)
+    {
+        float omenFullness = 0f;        
+        // The player's slowmotion
+        if (player.SlowmotionFactor != 1f && player.GameWorld != null)
+        {
+            List<Slowmotion> sm_l = player.GameWorld.SlowmotionHandler.GetSlowmotions();
+            if (sm_l.Count > 0)
+            {
+                if (sm_l.LastOrDefault().PlayerOwnerID == player.ObjectID)
+                {
+                    Slowmotion sm = sm_l.Last();
+                    float sm_TotalTime = sm.FadeInTime + sm.ActiveTime + sm.FadeOutTime;
+                    omenFullness = (sm_TotalTime - sm.Progress) / sm_TotalTime;
+                }
+            }
+        }
+
+        int healthY = y - 22 - 18 - 2;
+        omenFullness = Math.Max(Math.Min(omenFullness, 1f), 0f);
+        if (omenFullness > 0f)
+        {
+            SFR.Helper.PlayerHUD.DrawBar(spriteBatch, SFD.Constants.COLORS.ARMOR_BAR, omenFullness, x + 56, healthY + 13, 184, 4);
+        }
+    }
 }
+
+/*
 internal struct DevIcon
 {
     internal Team Team;
@@ -212,3 +250,4 @@ internal struct DevIcon
         Account = account;
     }
 }
+*/

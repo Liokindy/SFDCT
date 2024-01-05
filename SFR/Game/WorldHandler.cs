@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using Microsoft.Xna.Framework.Graphics;
 using SFD;
 using SFD.Projectiles;
 using SFD.Sounds;
 using SFDGameScriptInterface;
+using SFR.Helper;
 using SFR.Sync;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +16,7 @@ namespace SFR.Game;
 ///     This class contain patches that affect all the rounds, such as how the game is supposed to dispose objects.
 /// </summary>
 [HarmonyPatch]
-internal static class World
+internal static class WorldHandler
 {
     /*
     [HarmonyPostfix]

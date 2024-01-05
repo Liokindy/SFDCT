@@ -2,10 +2,13 @@
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Collections;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using SFR.Helper;
 using SFR.Misc;
+using System.Collections.Generic;
 
 namespace SFR;
 
@@ -14,14 +17,14 @@ namespace SFR;
 /// </summary>
 internal static class Program
 {
-    private const string VersionURI = "https://raw.githubusercontent.com/Odex64/SFR/master/version";
-    private static string _gameURI = "https://github.com/Odex64/SFR/releases/download/GAMEVERSION/SFR.zip";
+    // private const string VersionURI = "https://raw.githubusercontent.com/Odex64/SFR/master/version";
+    // private static string _gameURI = "https://github.com/Odex64/SFR/releases/download/GAMEVERSION/SFR.zip";
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
+    // private static WebClient _webClient;
     private static readonly Harmony Harmony = new("superfightersredux.tk");
-    private static WebClient _webClient;
-
     private static int Main(string[] args)
     {
+        /*
 #if (!DEBUG)
         if (Choice("Check for updates? (Y/n)"))
         {
@@ -31,15 +34,17 @@ internal static class Program
             }
         }
 #endif
-
-        Logger.LogWarn("Patching");
+        */
+        
+        Logger.LogInfo("Patching...");
         Harmony.PatchAll();
-        Logger.LogError("Starting SFR");
+        Logger.LogInfo("Starting...");
         SFD.Program.Main(args);
 
         return 0;
     }
 
+    /*
     private static bool CheckUpdate()
     {
         string remoteVersion;
@@ -66,6 +71,7 @@ internal static class Program
         Logger.LogInfo("No updates found. Starting");
         return false;
     }
+    */
 
     private static bool Choice(string message)
     {
@@ -73,6 +79,7 @@ internal static class Program
         return Console.ReadLine() is "y" or "Y";
     }
 
+    /*
     private static void ReplaceOldFile(string file)
     {
         string newExtension = Path.ChangeExtension(file, "old");
@@ -136,4 +143,5 @@ internal static class Program
         Logger.LogWarn("Ignoring update.");
         return false;
     }
+    */
 }

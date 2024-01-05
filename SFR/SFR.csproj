@@ -125,9 +125,10 @@
     <Compile Include="Game\NukeHandler.cs" />
     <Compile Include="Game\SlowmotionHandler.cs" />
     <Compile Include="Game\SoundHandler.cs" />
-    <Compile Include="Game\World.cs" />
+    <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Helper\Math.cs" />
+    <Compile Include="Helper\PlayerHUD.cs" />
     <Compile Include="Helper\Randomizer.cs" />
     <Compile Include="Helper\Vector.cs" />
     <Compile Include="Editor\MapData.cs" />
@@ -174,9 +175,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Settings\Values.cs" />
     <Compile Include="Sync\Generic\DataType.cs" />
     <Compile Include="Sync\Generic\GenericData.cs" />
     <Compile Include="Sync\Generic\GenericServerData.cs" />
+    <Compile Include="OnlineServices\Host.cs" />
     <Compile Include="Sync\SyncHandler.cs" />
     <Compile Include="UI\CreditsPanel.cs" />
     <Compile Include="UI\MainMenu.cs" />
@@ -185,7 +188,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\MenuItemLabel.cs" />
     <Compile Include="UI\SetupPanel.cs" />
-    <Compile Include="UI\VersionLabel.cs" />
+    <Compile Include="UI\CornerLabelHandler.cs" />
     <Compile Include="Weapons\Database.cs" />
     <Compile Include="Weapons\Handguns\Flintlock.cs" />
     <Compile Include="Weapons\Handguns\NailGun.cs" />

@@ -20,11 +20,11 @@ namespace SFR.Fighter;
 [HarmonyPatch]
 internal static class GoreHandler
 {
+    /*
     private const float HeadThresholdStanding = 5f;
     private const float HeadThresholdCrouching = 5f;
     private const float HeadThresholdLaying = 3f;
     private const int MaxDamageChance = 40;
-    /*
 
     /// <summary>
     ///     Spawn more giblets on player dead.

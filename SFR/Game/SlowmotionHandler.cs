@@ -29,7 +29,7 @@ internal static class SlowmotionHandler
                 if (player != null)
                 {
                     float currentIntensity = slowmotion.GetCurrentIntensity();
-                    player.SlowmotionFactor = 1f / (1f - (1f - currentIntensity) * 1f); // * 1f
+                    player.SlowmotionFactor = 1f / (1f - (1f - currentIntensity) * 1f); // * 0.25f
                     player.SlowmotionProjectileFactor = 1f / (1f - (1f - currentIntensity) * 1f); // * 0.5f
                 }
             }
