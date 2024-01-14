@@ -4,7 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using SFD.MenuControls;
 
-namespace SFR.UI;
+namespace SFDCT.UI;
 
 [HarmonyPatch]
 internal static class SetupPanel

@@ -1,106 +1,137 @@
 ﻿using HarmonyLib;
+using System;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
+using SFD.Core;
 using SFD.States;
+using SFD.Voting;
+using SFD.ManageLists;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using SFDCT.Helper;
 
-namespace SFR.Game;
+namespace SFDCT.Game;
 
 [HarmonyPatch]
 internal static class CommandHandler
 {
-    private static bool _useHostMouse;
-    private static readonly float[] DebugVar = new float[10];
- 
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static void DebugMouse(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
-    {
-        //if ( isLast && Program.IsGame && __instance.GameOwner != GameOwnerEnum.Client && __instance.m_game.CurrentState is State.EditorTestRun or State.MainMenu) return; //Already handled
-
-        if (isLast && SFD.Program.IsGame && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu && __instance.GameOwner != GameOwnerEnum.Client)
-        {
-            if (_useHostMouse)
-            {
-                __instance.UpdateDebugMouse();
-            }
-        }
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
     private static void HandleCommands(ProcessCommandArgs args, GameInfo __instance)
     {
-        if (__instance.GameOwner != GameOwnerEnum.Client)
+        // Only server or local can handle commands.
+        if (__instance.GameOwner == GameOwnerEnum.Client)
         {
-            if (args.HostPrivileges)
+            return;
+        }
+        
+        // Host-only commands
+        if (args.HostPrivileges)
+        {
+            // Debug mouse
+            if (args.IsCommand("MOUSE", "M") && args.Parameters.Count > 0)
             {
-                if (args.IsCommand("MOUSE", "M"))
+                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
                 {
-                    if (args.Parameters.Count > 0)
-                    {
-                        if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
-                        {
-                            _useHostMouse = true;
-                        }
-
-                        if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
-                        {
-                            _useHostMouse = false;
-                        }
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Mouse Control: " + _useHostMouse));
-                    }
+                    Commands.DebugMouse.IsEnabled = true;
+                }
+                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
+                {
+                    Commands.DebugMouse.IsEnabled = false;
                 }
 
-                /*
-#if DEBUG
-                if (args.IsCommand("DEBUG", "D"))
-                {
-                    if (args.Parameters.Count == 2)
-                    {
-                        if (int.TryParse(args.Parameters[0], out int index))
-                        {
-                            if (float.TryParse(args.Parameters[1], out float num))
-                            {
-                                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Debug float: " + num));
-                                DebugVar[index] = num;
-                            }
-                        }
-                    }
-                }
-#endif
-                */
+                string mess = "Mouse control " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
+                args.Feedback.Add( new ProcessCommandMessage(args.SenderGameUser, mess) );
+                return;
             }
 
-            // if (args.ModeratorPrivileges)
-            // {
-            //     if (args.IsCommand("NUKE"))
-            //     {
-            //         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, args.SenderGameUser.GetProfileName() + " has set the world on fire", Color.Red));
-            //         NukeHandler.CreateNuke(__instance.GameWorld);
-            //     }
-            // }
-
-            /*
-            if (args.IsCommand("HELP"))
+            // Enable/disable vote-kicking
+            if (args.IsCommand("VOTEKICKING") && args.Parameters.Count > 0)
             {
-                Color color = new(159, 255, 64);
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "SFR Commands: ", color, args.SenderGameUser));
-                if (args.HostPrivileges)
+                bool value = Settings.Values.GetBool("VOTE_KICKING_ENABLED");
+                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
                 {
-#if DEBUG
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/DEBUG [INDEX] [VALUE]' debug purposes", color, args.SenderGameUser));
-#endif
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MOUSE [1/0]' Drag stuff with mouse", color, args.SenderGameUser));
+                    value = true;
+                }
+                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
+                {
+                    value = false;
                 }
 
-                // if (args.ModeratorPrivileges)
-                // {
-                //     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/NUKE' You're a terrible person.", color, args.SenderGameUser));
-                // }
+                if (value != Settings.Values.GetBool("VOTE_KICKING_ENABLED"))
+                {
+                    Settings.Values.SetSetting("VOTE_KICKING_ENABLED", value);
+
+                    string mess = "Vote-kicking is now " + (value ? "enabled" : "disabled");
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
+                }
+                return;
             }
-            */
+        }
+
+        if (args.IsCommand("VOTEKICK", "VK") && args.Parameters.Count > 0)
+        {
+            if (GameSFD.Handle.CurrentState != State.Game || GameSFD.Handle.CurrentState == State.GameOffline)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't start a vote-kick right now.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if ( !Settings.Values.GetBool("VOTE_KICKING_ENABLED") )
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Vote-kicks are disabled.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (!Voting.GameVoteKick.CanBeCalled())
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Vote-kicking is in cooldown.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (__instance.VoteInfo.ActiveVotes.Count > 0)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "There is a vote already in progress.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (!(args.SenderGameUser.IsHost || args.SenderGameUser.IsModerator) && (DateTime.Now.Hour <= args.SenderGameUser.JoinTime.Hour && (DateTime.Now.Minute - args.SenderGameUser.JoinTime.Minute) <= 2))
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You must be atleast 2 minutes in the server before initiating a vote-kick.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+
+            GameUser userTokick = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+            string voteReason = (args.Parameters.Count > 1 ? args.Parameters[1] : "");
+
+            if (userTokick == null)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Couldn't find user.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (userTokick.UserIdentifier == args.SenderGameUserIdentifier)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against yourself.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (userTokick.IsBot)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against bots.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+            if (userTokick.IsHost || userTokick.IsModerator)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against that user.", Color.Red, args.SenderGameUser, null));
+                return;
+            }
+
+            Server server = GameSFD.Handle.Server;
+            if (server != null)
+            {
+                GameVote gameVoteKick = new Voting.GameVoteKick(GameVote.GetNextVoteID(), voteReason, userTokick, args.SenderGameUser);
+                gameVoteKick.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                
+                __instance.VoteInfo.AddVote(gameVoteKick);
+                server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(gameVoteKick, false));
+            }
+            return;
         }
     }
-    
 }

@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD.MenuControls;
 
-namespace SFR.UI;
+namespace SFDCT.UI;
 
 internal class MenuItemLabel : MenuItem
 {

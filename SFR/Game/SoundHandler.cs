@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD;
-using SFRSettings = SFR.Settings.Values;
+using SFRSettings = SFDCT.Settings.Values;
 
-namespace SFR.Game;
+namespace SFDCT.Game;
 
 [HarmonyPatch]
 internal static class SoundHandler
@@ -14,7 +16,7 @@ internal static class SoundHandler
     internal static readonly Type[] typeof_StringVector2Gameworld = new Type[]
     {
             typeof(string),
-            typeof(Microsoft.Xna.Framework.Vector2),
+            typeof(Vector2),
             typeof(GameWorld)
     };
 

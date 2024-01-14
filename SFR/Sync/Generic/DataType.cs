@@ -1,4 +1,4 @@
-﻿namespace SFR.Sync.Generic;
+﻿namespace SFDCT.Sync.Generic;
 
 internal enum DataType
 {

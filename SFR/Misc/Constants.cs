@@ -3,22 +3,25 @@ using SFD;
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
-using SFRSettings = SFR.Settings.Values;
+using SFRSettings = SFDCT.Settings.Values;
 
-namespace SFR.Misc;
+namespace SFDCT.Misc;
 
 public static class Constants
 {
-    public const string SFRVersion = "v.1.3.7d"; // "v.1.0.3b_dev";
-    internal static readonly string ServerVersion = "v.1.3.7d";// SFRVersion.Replace("v.1", "v.2");
-    internal static readonly Random Random = new();
+    // public const string SFRVersion = "v.1.3.7d"; // "v.1.0.3b_dev";
+    // internal static readonly string ServerVersion = "v.1.3.7d";// SFRVersion.Replace("v.1", "v.2");
+    // internal static readonly Random Random = new();
     public struct Paths
     {
-        public static string Content = Path.Combine(Program.GameDirectory, @"SFR\Content");
-        public static string OfficialMaps = Path.Combine(Paths.Content, @"Data\Maps\Official");
-        public static string ConfigurationIni = Path.Combine(Paths.Content, @"config.ini");
+        public static string Custom = Path.Combine(Program.GameDirectory, @"SFDCT");
+        public static string ConfigurationIni = Path.Combine(Paths.Custom, @"config.ini");
     }
-    
+    public struct Version
+    {
+        public const string SFD = "v.1.3.7d";
+        public const string SFDCT = "v.1.0.0";
+    }
     public struct Security
     {
         public static bool CanUseObfuscatedNames

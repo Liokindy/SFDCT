@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using SFD.Code;
-using SFR.Helper;
-using SFR.Misc;
+using SFDCT.Helper;
+using SFDCT.Misc;
 
-namespace SFR.Settings;
+namespace SFDCT.Settings;
 
 public static class Values
 {
@@ -22,8 +22,13 @@ public static class Values
             return;
         }
 
+        // Here you can add more settings to be written in the config.ini,
+        // and read them later in code.
         Add("Security settings", "USE_OBFUSCATED_HOST_ACCOUNT_NAME", false, IniSettingType.Bool);
         Add("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed", IniSettingType.String);
+        Add("VOTE_KICKING_ENABLED", true, IniSettingType.Bool);
+        Add("VOTE_KICKING_COOLDOWN_MINUTES", 3, IniSettingType.Int);
+        Add("VOTE_KICKING_DURATION_SECONDS", 35, IniSettingType.Int);
 
         Add("Misc customization settings", "MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
         Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
@@ -35,7 +40,6 @@ public static class Values
         Add("SOUNDPANNING_INWORLD_DISTANCE", 360f, IniSettingType.Float);
         b_initialized = true;
     }
-    
     public static void ApplyOverrides()
     {
         Logger.LogDebug("CONFIG.INI: Overriding SFD values...");
@@ -48,7 +52,6 @@ public static class Values
 
         Logger.LogDebug("CONFIG.INI: SFD Values overwritten");
     }
-
     private static void Add(string valueDesc, string key, object value, IniSettingType type)
     {
         List.Add(key.ToUpper(), new IniSetting(key.ToUpper(), value, type, valueDesc));
@@ -56,6 +59,15 @@ public static class Values
     private static void Add(string key, object value, IniSettingType type)
     {
         Values.Add("", key, value, type);
+    }
+    public static bool SetSetting(string key, object newValue)
+    {
+        if (List.ContainsKey(key.ToUpper()))
+        {
+            List[key.ToUpper()].Value = newValue;
+            return true;
+        }
+        return false;
     }
     public static float GetFloat(string key)
     {
@@ -78,6 +90,7 @@ public static class Values
         return (bool)List[key.ToUpper()].Get();
     }
 
+    // Settings base class
     public enum IniSettingType
     {
         Float = 0,
@@ -106,7 +119,7 @@ public static class Values
             Logger.LogDebug($"CONFIG.INI: Saving value... '{this.Key}', Type: {this.Type}");
             if (!string.IsNullOrEmpty(this.Description))
             {
-                Handler.ReadLine("; " + this.Description);
+                Handler.ReadLine(";" + this.Description);
             }
 
             switch (this.Type)
@@ -127,7 +140,6 @@ public static class Values
             Logger.LogDebug($"CONFIG.INI: Reading value... '{this.Key}', Type: {this.Type}");
             if (Handler.TryReadValue(this.Key, out temp))
             {
-                Logger.LogDebug($"CONFIG.INI: '{this.Key}' found.");
                 switch (this.Type)
                 {
                     case IniSettingType.Float:
@@ -148,6 +160,7 @@ public static class Values
                         this.Value = bool.Parse(temp);
                         break;
                 }
+                Logger.LogDebug($"CONFIG.INI: '{this.Key}' found - {this.Value.ToString()}");
             }
             else
             {

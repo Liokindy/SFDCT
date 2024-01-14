@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyCompany("Superfighters Redux")]
-[assembly: AssemblyCopyright("Copyright © Superfighters Redux 2023")]
-[assembly: AssemblyTrademark("Superfighters Redux")]
-[assembly: AssemblyProduct("Superfighters Redux")]
+[assembly: AssemblyCompany("Superfighters Deluxe Custom")]
+[assembly: AssemblyCopyright("Copyright © Superfighters Deluxe Custom 2024")]
+[assembly: AssemblyTrademark("Superfighters Deluxe Custom")]
+[assembly: AssemblyProduct("Superfighters Deluxe Custom")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion("1.0.0.4")]

@@ -66,7 +66,7 @@ internal static class Program
         // string[] filesSFR = Directory.GetFiles(Path.Combine(_data, path), "*.xnb", SearchOption.AllDirectories);
         // foreach (string file in filesSFR)
         // {
-        //     if (!objectsSFR.Contains(ToTile(file), StringComparison.OrdinalIgnoreCase))
+        //     if (!objectsSFDCT.Contains(ToTile(file), StringComparison.OrdinalIgnoreCase))
         //     {
         //         LogError($"[SFR] {Path.GetFileNameWithoutExtension(file)} not found in sfdx!");
         //     }
@@ -74,7 +74,7 @@ internal static class Program
 
         LogSuccess("\nDuplicate entries in sfdx and missing files in folder");
         LogDuplicatesAndMissing(objects.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList(), files.ToList());
-        // LogDuplicatesAndMissing(objectsSFR.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList(), filesSFR.ToList(), true);
+        // LogDuplicatesAndMissing(objectsSFDCT.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList(), filesSFDCT.ToList(), true);
     }
 
     private static void LogDuplicatesAndMissing(List<string> lines, List<string> files)

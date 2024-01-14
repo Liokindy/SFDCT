@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework;
 using SFD;
 using SFD.MenuControls;
 using SFD.SFDOnlineServices;
-using Constants = SFR.Misc.Constants;
+using Constants = SFDCT.Misc.Constants;
 
-namespace SFR.OnlineServices;
+namespace SFDCT.OnlineServices;
 
 /// <summary>
 ///     Handles in-game browser and server join requests.
@@ -16,10 +16,6 @@ namespace SFR.OnlineServices;
 [HarmonyPatch]
 internal static class Browser
 {
-    // I have no idea why, but for now I
-    // need to uncomment this in order to join vanilla servers.
-    // Before it wasn't. Weird.
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
     private static bool PatchBrowser(SFDGameServerInstance value, GameBrowserMenuItem __instance)
@@ -32,14 +28,16 @@ internal static class Browser
                 var color = Color.Red;
                 if (__instance.m_game is { SFDGameServer: { } })
                 {
-                    if (__instance.m_game.SFDGameServer.Version == Constants.ServerVersion)
+                    if (__instance.m_game.SFDGameServer.Version == Constants.Version.SFD)
                     {
                         color = Color.White;
                     }
+                    /*
                     else if (__instance.m_game.SFDGameServer.Version == "v.1.3.7d")
                     {
                         color = Color.Yellow;
                     }
+                    */
                 }
 
                 foreach (var label in __instance.labels)
@@ -58,7 +56,7 @@ internal static class Browser
     {
         if (value == "v.1.3.7x")
         {
-            value = Constants.ServerVersion;
+            value = Constants.Version.SFD;
         }
 
         return true;
@@ -69,7 +67,7 @@ internal static class Browser
     [HarmonyPatch(typeof(SFD.Constants), nameof(SFD.Constants.VersionCheckDifference), typeof(string))]
     private static bool VersionCheckPatch(string versionToCheck, ref VersionDifference __result)
     {
-        __result = versionToCheck == Constants.ServerVersion ? VersionDifference.Same : VersionDifference.Older;
+        __result = versionToCheck == Constants.Version.SFD ? VersionDifference.Same : VersionDifference.Older;
 
         return false;
     }
@@ -80,7 +78,7 @@ internal static class Browser
     {
         if (__instance.Version == "v.1.3.7x")
         {
-            __instance.Version = Constants.ServerVersion;
+            __instance.Version = Constants.Version.SFD;
         }
     }
 
@@ -97,7 +95,7 @@ internal static class Browser
 
             if (instruction.operand.Equals("v.1.3.7x"))
             {
-                instruction.operand = Constants.ServerVersion;
+                instruction.operand = Constants.Version.SFD;
             }
         }
 
@@ -110,7 +108,7 @@ internal static class Browser
     {
         if (__instance.Version == "v.1.3.7x")
         {
-            __instance.Version = Constants.ServerVersion;
+            __instance.Version = Constants.Version.SFD;
         }
     }
 
@@ -134,7 +132,7 @@ internal static class Browser
                 result.CryptPhraseB = netIncomingMessage.ReadString();
             }
 
-            result.ServerPInstance = result.Version == Constants.ServerVersion ? new Guid(netIncomingMessage.ReadBytes(16)) : Guid.Empty;
+            result.ServerPInstance = result.Version == Constants.Version.SFD ? new Guid(netIncomingMessage.ReadBytes(16)) : Guid.Empty;
         }
         catch (Exception)
         {

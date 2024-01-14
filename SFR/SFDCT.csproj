@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{907E970D-7E11-4461-AC55-999E0E6CF42A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SFR</RootNamespace>
-    <AssemblyName>SFR</AssemblyName>
+    <RootNamespace>SFDCT</RootNamespace>
+    <AssemblyName>SFDCT</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
@@ -52,7 +52,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SFR.Program</StartupObject>
+    <StartupObject>SFDCT.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -118,13 +118,13 @@
     <Compile Include="API\Sandbox.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\GadgetHandler.cs" />
-    <Compile Include="Fighter\GoreHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
     <Compile Include="Game\CommandHandler.cs" />
-    <Compile Include="Game\NukeHandler.cs" />
+    <Compile Include="Game\Commands\DebugMouse.cs" />
     <Compile Include="Game\SlowmotionHandler.cs" />
     <Compile Include="Game\SoundHandler.cs" />
+    <Compile Include="Game\Voting\VoteKick.cs" />
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Helper\Math.cs" />
@@ -134,42 +134,9 @@
     <Compile Include="Editor\MapData.cs" />
     <Compile Include="Misc\ConfigIni.cs" />
     <Compile Include="Misc\Tweaks.cs" />
-    <Compile Include="Objects\Animal\ObjectAnimal.cs" />
-    <Compile Include="Objects\Animal\ObjectFroggy.cs" />
-    <Compile Include="Objects\Animal\ObjectMonkey.cs" />
-    <Compile Include="Objects\ObjectNuke.cs" />
-    <Compile Include="Objects\ObjectNukeTrigger.cs" />
-    <Compile Include="Objects\ObjectsHandler.cs" />
-    <Compile Include="Objects\ObjectCannon.cs" />
-    <Compile Include="Objects\ObjectClaymoreThrown.cs" />
-    <Compile Include="Objects\ObjectCrossbowBolt.cs" />
-    <Compile Include="Objects\ObjectDoor.cs" />
-    <Compile Include="Objects\ObjectFragGrenadeThrown.cs" />
-    <Compile Include="Objects\ObjectHead.cs" />
-    <Compile Include="Objects\ObjectImpactGrenadeThrown.cs" />
-    <Compile Include="Objects\ObjectInvisibleBlockWeak.cs" />
-    <Compile Include="Objects\ObjectPirateItemGiver.cs" />
-    <Compile Include="Objects\ObjectPirateShip.cs" />
-    <Compile Include="Objects\ObjectSnowballThrown.cs" />
-    <Compile Include="Objects\ObjectStickyBombThrown.cs" />
-    <Compile Include="Objects\ObjectStickyProjectile.cs" />
     <Compile Include="Objects\SFDObjectTweaks.cs" />
     <Compile Include="OnlineServices\Browser.cs" />
-    <Compile Include="Projectiles\Database.cs" />
-    <Compile Include="Projectiles\IExtendedProjectile.cs" />
-    <Compile Include="Projectiles\ProjectileBarrett.cs" />
-    <Compile Include="Projectiles\ProjectileBlunderbuss.cs" />
-    <Compile Include="Projectiles\ProjectileCrossbow.cs" />
-    <Compile Include="Projectiles\ProjectileDoubleBarrel.cs" />
-    <Compile Include="Projectiles\ProjectileFlintlock.cs" />
-    <Compile Include="Projectiles\ProjectileMinigun.cs" />
-    <Compile Include="Projectiles\ProjectileQuad.cs" />
     <Compile Include="Projectiles\SFDProjectileTweaks.cs" />
-    <Compile Include="Projectiles\ProjectileUnkemptHarold.cs" />
-    <Compile Include="Projectiles\ProjectileMusket.cs" />
-    <Compile Include="Projectiles\ProjectileNailGun.cs" />
-    <Compile Include="Projectiles\ProjectileRCM.cs" />
-    <Compile Include="Projectiles\ProjectileWinchester.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -189,43 +156,6 @@
     <Compile Include="UI\MenuItemLabel.cs" />
     <Compile Include="UI\SetupPanel.cs" />
     <Compile Include="UI\CornerLabelHandler.cs" />
-    <Compile Include="Weapons\Database.cs" />
-    <Compile Include="Weapons\Handguns\Flintlock.cs" />
-    <Compile Include="Weapons\Handguns\NailGun.cs" />
-    <Compile Include="Weapons\Handguns\StickyLauncher.cs" />
-    <Compile Include="Weapons\Handguns\UnkemptHarold.cs" />
-    <Compile Include="Weapons\IExtendedWeapon.cs" />
-    <Compile Include="Weapons\IMedievalMelee.cs" />
-    <Compile Include="Weapons\ISharpMelee.cs" />
-    <Compile Include="Weapons\Makeshift\Brick.cs" />
-    <Compile Include="Weapons\Makeshift\Broom.cs" />
-    <Compile Include="Weapons\Makeshift\CannonBall.cs" />
-    <Compile Include="Weapons\Melee\Blade.cs" />
-    <Compile Include="Weapons\Melee\Caber.cs" />
-    <Compile Include="Weapons\Melee\Crowbar.cs" />
-    <Compile Include="Weapons\Melee\Greatsword.cs" />
-    <Compile Include="Weapons\Melee\Morningstar.cs" />
-    <Compile Include="Weapons\Melee\ParryingDagger.cs" />
-    <Compile Include="Weapons\Melee\Poleaxe.cs" />
-    <Compile Include="Weapons\Melee\Rapier.cs" />
-    <Compile Include="Weapons\Melee\Sledgehammer.cs" />
-    <Compile Include="Weapons\Melee\Switchblade.cs" />
-    <Compile Include="Weapons\Others\HealthPouch.cs" />
-    <Compile Include="Weapons\Rifles\AA12.cs" />
-    <Compile Include="Weapons\Rifles\Barrett.cs" />
-    <Compile Include="Weapons\Rifles\Blunderbuss.cs" />
-    <Compile Include="Weapons\Rifles\Crossbow.cs" />
-    <Compile Include="Weapons\Rifles\DoubleBarrel.cs" />
-    <Compile Include="Weapons\Rifles\Minigun.cs" />
-    <Compile Include="Weapons\Rifles\Musket.cs" />
-    <Compile Include="Weapons\Rifles\QuadLauncher.cs" />
-    <Compile Include="Weapons\Rifles\RCM.cs" />
-    <Compile Include="Weapons\Rifles\Winchester.cs" />
-    <Compile Include="Weapons\Thrown\Claymore.cs" />
-    <Compile Include="Weapons\Thrown\FragGrenade.cs" />
-    <Compile Include="Weapons\Thrown\ImpactGrenade.cs" />
-    <Compile Include="Weapons\Thrown\Snowball.cs" />
-    <Compile Include="Weapons\Thrown\StickyBomb.cs" />
     <Compile Include="Weapons\SFDWeaponTweaks.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +165,7 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8.1">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.8.1 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.8.1 %28x86 y x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

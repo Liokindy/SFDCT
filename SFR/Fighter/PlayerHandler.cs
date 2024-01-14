@@ -9,7 +9,7 @@ using HarmonyLib;
 using SFD.Objects;
 using Box2D.XNA;
 
-namespace SFR.Fighter;
+namespace SFDCT.Fighter;
 
 /// <summary>
 ///     This class contains all patches regarding players movements, delays etc...
@@ -17,6 +17,7 @@ namespace SFR.Fighter;
 [HarmonyPatch]
 internal static class PlayerHandler
 {
+    // Keep for future use
     /*
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Player), nameof(Player.CheckLedgeGrab))]

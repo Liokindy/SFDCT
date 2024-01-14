@@ -5,10 +5,10 @@ using System.Security.Permissions;
 using System.Security.Policy;
 using HarmonyLib;
 
-namespace SFR.API;
+namespace SFDCT.API;
 
 /// <summary>
-///     For unknown reasons scripts won't work in SFR. This class fixes them.
+///     For unknown reasons scripts won't work in SFDCT. This class fixes them.
 /// </summary>
 [HarmonyPatch(typeof(ScriptEngine.Sandbox))]
 internal static class Sandbox

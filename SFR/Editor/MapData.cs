@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace SFR.Editor;
+namespace SFDCT.Editor;
 
 /// <summary>
 ///     This class is used to retain the validation map token, in order to mark a custom map as official through HEX editors.

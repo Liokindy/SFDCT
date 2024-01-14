@@ -6,19 +6,19 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using SFR.Helper;
-using SFR.Misc;
+using SFDCT.Helper;
+using SFDCT.Misc;
 using System.Collections.Generic;
 
-namespace SFR;
+namespace SFDCT;
 
 /// <summary>
-///     Entry point of SFR. This class will simply check for available updates, patch SFD and start the game.
+///     Entry point of SFDCT. This class will simply check for available updates, patch SFD and start the game.
 /// </summary>
 internal static class Program
 {
     // private const string VersionURI = "https://raw.githubusercontent.com/Odex64/SFR/master/version";
-    // private static string _gameURI = "https://github.com/Odex64/SFR/releases/download/GAMEVERSION/SFR.zip";
+    // private static string _gameURI = "https://github.com/Odex64/SFR/releases/download/GAMEVERSION/SFDCT.zip";
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
     // private static WebClient _webClient;
     private static readonly Harmony Harmony = new("superfightersredux.tk");
@@ -97,7 +97,7 @@ internal static class Program
         if (Choice($"All files in {contentDirectory} will be erased. Proceed? (Y/n):"))
         {
             Logger.LogInfo("Downloading files...");
-            string archivePath = Path.Combine(GameDirectory, "SFR.zip");
+            string archivePath = Path.Combine(GameDirectory, "SFDCT.zip");
 
             try
             {
@@ -114,7 +114,7 @@ internal static class Program
             }
 
             ReplaceOldFile(Assembly.GetExecutingAssembly().Location);
-            ReplaceOldFile(Path.Combine(GameDirectory, "SFR.exe.config"));
+            ReplaceOldFile(Path.Combine(GameDirectory, "SFDCT.exe.config"));
 
             foreach (string file in Directory.GetFiles(contentDirectory, "*.dll", SearchOption.TopDirectoryOnly))
             {

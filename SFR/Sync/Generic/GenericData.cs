@@ -1,6 +1,6 @@
 ﻿using SFD;
 
-namespace SFR.Sync.Generic;
+namespace SFDCT.Sync.Generic;
 
 /// <summary>
 ///     Use this class to send any kind of data to clients or server.

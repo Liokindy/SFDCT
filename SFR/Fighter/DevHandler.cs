@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using SFD.Tiles;
 
-namespace SFR.Fighter;
+namespace SFDCT.Fighter;
 
 /// <summary>
 ///     Official team members will have a special icon in-game.
 /// </summary>
+// Doesn't have use, but would be unethical to
+// remove it, right?
 /*
 internal static class NameIconHandler
 {

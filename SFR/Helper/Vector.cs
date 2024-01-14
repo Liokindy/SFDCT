@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SFR.Helper;
+namespace SFDCT.Helper;
 
 internal static class Vector
 {

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using SFD;
 using HarmonyLib;
 
-namespace SFR.Game;
+namespace SFDCT.Game;
 
 [HarmonyPatch]
 internal static class SlowmotionHandler
 {
+    // Keep for future use
     /*
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SFD.SlowmotionHandler), nameof(SFD.SlowmotionHandler.UpdatePlayerSlowmotions))]

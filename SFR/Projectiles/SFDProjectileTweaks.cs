@@ -2,10 +2,10 @@
 using System.Reflection.Emit;
 using System.Linq;
 using SFD.Projectiles;
-using SFRSound = SFR.Game.SoundHandler;
+using SFRSound = SFDCT.Game.SoundHandler;
 using HarmonyLib;
 
-namespace SFR.Projectiles;
+namespace SFDCT.Projectiles;
 
 /// <summary>
 ///     Tweaks to the vanilla SFD projectile class

@@ -1,4 +1,4 @@
-﻿namespace SFR.Helper;
+﻿namespace SFDCT.Helper;
 
 internal static class Math
 {

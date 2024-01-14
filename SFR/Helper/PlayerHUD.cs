@@ -1,9 +1,9 @@
 ﻿using SFD;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SFR.Misc;
+using SFDCT.Misc;
 
-namespace SFR.Helper;
+namespace SFDCT.Helper;
 
 internal static class PlayerHUD
 {
@@ -39,22 +39,22 @@ internal static class PlayerHUD
         {
             switch(player.CurrentTeam)
             {
-                case Team.Team1: return SFR.Misc.Constants.Colors.Outline_Team_1;
-                case Team.Team2: return SFR.Misc.Constants.Colors.Outline_Team_2;
-                case Team.Team3: return SFR.Misc.Constants.Colors.Outline_Team_3;
-                case Team.Team4: return SFR.Misc.Constants.Colors.Outline_Team_4;
+                case Team.Team1: return SFDCT.Misc.Constants.Colors.Outline_Team_1;
+                case Team.Team2: return SFDCT.Misc.Constants.Colors.Outline_Team_2;
+                case Team.Team3: return SFDCT.Misc.Constants.Colors.Outline_Team_3;
+                case Team.Team4: return SFDCT.Misc.Constants.Colors.Outline_Team_4;
             };
-            return SFR.Misc.Constants.Colors.Outline_Team_Independent;
+            return SFDCT.Misc.Constants.Colors.Outline_Team_Independent;
         }
         else
         {
             bool isEnemy = player.GameWorld.GUI_TeamDisplay_LocalGameUserIdentifier != player.m_userIdentifier && SFD.Constants.IsEnemyTeams(player.GameWorld.GUI_TeamDisplay_LocalGameUserTeam, player.CurrentTeam);
             switch(SFD.Constants.TEAM_DISPLAY_MODE) 
             {
-                case TeamDisplayMode.GreenRed: return (isEnemy ? SFR.Misc.Constants.Colors.Outline_Team_EnemyRed : SFR.Misc.Constants.Colors.Outline_Team_AllyGreen);
-                case TeamDisplayMode.BlueRed: return (isEnemy ? SFR.Misc.Constants.Colors.Outline_Team_EnemyRed : SFR.Misc.Constants.Colors.Outline_Team_AllyBlue);
+                case TeamDisplayMode.GreenRed: return (isEnemy ? SFDCT.Misc.Constants.Colors.Outline_Team_EnemyRed : SFDCT.Misc.Constants.Colors.Outline_Team_AllyGreen);
+                case TeamDisplayMode.BlueRed: return (isEnemy ? SFDCT.Misc.Constants.Colors.Outline_Team_EnemyRed : SFDCT.Misc.Constants.Colors.Outline_Team_AllyBlue);
             };
-            return SFR.Misc.Constants.Colors.Outline_Team_Independent;
+            return SFDCT.Misc.Constants.Colors.Outline_Team_Independent;
         }
     }
 }

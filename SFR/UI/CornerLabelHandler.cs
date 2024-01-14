@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
 using SFD.MenuControls;
-using CSecurity = SFR.Misc.Constants.Security;
+using CSecurity = SFDCT.Misc.Constants.Security;
 
-namespace SFR.UI;
+namespace SFDCT.UI;
 
 /// <summary>
 ///     Patches the labels shown on the corner of the screen.
@@ -23,7 +23,7 @@ internal static class CornerLabelHandler
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(76).operand = Misc.Constants.SFRVersion;
+        code.ElementAt(76).operand = Misc.Constants.Version.SFD + " - " + Misc.Constants.Version.SFDCT;
         return code;
     }
 

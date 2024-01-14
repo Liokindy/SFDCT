@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SFD.MenuControls;
 
-namespace SFR.UI;
+namespace SFDCT.UI;
 
 internal sealed class CreditsPanel : Panel
 {

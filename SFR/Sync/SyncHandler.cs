@@ -5,13 +5,12 @@ using HarmonyLib;
 using Lidgren.Network;
 using SFD;
 using SFDGameScriptInterface;
-using SFR.Game;
-using SFR.Helper;
-using SFR.Objects;
-using SFR.Sync.Generic;
-using SFR.Weapons.Rifles;
+using SFDCT.Game;
+using SFDCT.Helper;
+using SFDCT.Objects;
+using SFDCT.Sync.Generic;
 
-namespace SFR.Sync;
+namespace SFDCT.Sync;
 
 /// <summary>
 ///     This class handles the sync between clients & server.
@@ -28,9 +27,9 @@ namespace SFR.Sync;
 // [HarmonyPatch]
 internal static class SyncHandler
 {
+    /*
     private const byte MaxAttempts = 18;
     internal static readonly Dictionary<int, byte> Attempts = new();
-    /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(NetMessage), nameof(NetMessage.WriteDataType))]
     private static IEnumerable<CodeInstruction> ExtendWriteData(IEnumerable<CodeInstruction> instructions)

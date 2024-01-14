@@ -4,15 +4,16 @@ using System.Linq;
 using System.Reflection.Emit;
 using SFD;
 
-namespace SFR.Fighter;
+namespace SFDCT.Fighter;
 
 /// <summary>
-///     Here we load or programmatically create custom animations to be used in-game.
+///     Here we patch stuff related to animations, timings, sounds, etc.
 /// </summary>
 internal static class AnimHandler
 {
-    //private static List<AnimationData> _animations;
+    // Keep for future use
     /*
+    private static List<AnimationData> _animations;
     internal static List<AnimationData> GetAnimations(AnimationsData data)
     {
         _animations ??= new List<AnimationData>
@@ -65,8 +66,6 @@ internal static class AnimHandler
     }
     */
 
-
-
     /// <summary>
     ///     Patches PlayerEmptyBoltActionAnimation and SFDPlayerEmptyShotgunPumpAnimation
     /// </summary>
@@ -81,8 +80,8 @@ internal static class AnimHandler
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(14).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(22).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
             code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
             code.Insert(20+2, new CodeInstruction(OpCodes.Ldarg_1));
@@ -97,8 +96,8 @@ internal static class AnimHandler
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(14).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(22).operand = AccessTools.Method(SFR.Game.SoundHandler.typeof_soundHandler, SFR.Game.SoundHandler.nameof_soundHandlerPlaySound, SFR.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
             code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
             code.Insert(20 + 2, new CodeInstruction(OpCodes.Ldarg_1));

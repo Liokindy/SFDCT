@@ -1,7 +1,7 @@
 ﻿using Lidgren.Network;
 using SFD;
 
-namespace SFR.Sync.Generic;
+namespace SFDCT.Sync.Generic;
 
 internal static class GenericServerData
 {

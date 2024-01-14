@@ -2,9 +2,9 @@
 using HarmonyLib;
 using SFD;
 using SFDGameScriptInterface;
-using SFR.Weapons;
+using SFDCT.Weapons;
 
-namespace SFR.Misc;
+namespace SFDCT.Misc;
 
 /// <summary>
 ///     Here we tweak some system methods (non-SFD) in order to fix some bugs.

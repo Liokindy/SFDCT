@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using SFD.Code;
-using SFR.Helper;
-using SFR.Fighter;
+using SFDCT.Helper;
+using SFDCT.Fighter;
 using SFD;
 using System.Threading;
 using System.Windows.Forms;
-using SFRSettings = SFR.Settings.Values;
+using SFRSettings = SFDCT.Settings.Values;
 
-namespace SFR.Misc;
+namespace SFDCT.Misc;
 
 internal static class ConfigIni
 {
@@ -36,7 +36,9 @@ internal static class ConfigIni
             }
             Thread.Sleep(50);
 
-            Handler.ReadLine(";Liokindy was here");
+            Handler.ReadLine(";Liokindy was here.");
+            Handler.ReadLine(";You are advised to not mess with the settings values too much, as they");
+            Handler.ReadLine(";currently have no maximum/minimum values set. Meaning you could break them.");
             // Write default values to it
             foreach (KeyValuePair<string, SFRSettings.IniSetting> kvp in SFRSettings.List)
             {

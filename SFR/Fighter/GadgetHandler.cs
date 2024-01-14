@@ -7,7 +7,7 @@ using HarmonyLib;
 using System.Linq;
 using Box2D.XNA;
 
-namespace SFR.Fighter;
+namespace SFDCT.Fighter;
 
 /// <summary>
 ///     Here we handle all the HUD or visual effects regarding players, such as dev icons.
@@ -15,99 +15,8 @@ namespace SFR.Fighter;
 [HarmonyPatch]
 internal static class GadgetHandler
 {
+    // Keep for future use
     /*
-    private static DevIcon _devIcon;
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ObjectStreetsweeper), nameof(ObjectStreetsweeper.GetOwnerTeam))]
-    private static bool FixDroneTeam(ref Team __result)
-    {
-        __result = _devIcon.Team;
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Constants), nameof(Constants.GetTeamIcon))]
-    private static bool DrawDevIcon(Team team, ref Texture2D __result)
-    {
-        int num = (int)team;
-        if (num == -1 && _devIcon.Account != null)
-        {
-            __result = NameIconHandler.GetDeveloperIcon(_devIcon.Account);
-            return false;
-        }
-
-        return true;
-    }
-
-    internal static Team GetActualTeam(this Player player)
-    {
-        if (!player.IsBot)
-        {
-            var user = player.GetGameUser();
-            if (user != null && _devIcon.Account == user.Account)
-            {
-                return _devIcon.Team;
-            }
-        }
-
-        return player.CurrentTeam;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Player), nameof(Player.DrawPlates))]
-    private static bool DrawPlates(Player __instance)
-    {
-        if (__instance is { IsBot: false, IsDead: false })
-        {
-            var user = __instance.GetGameUser();
-            if (user != null && NameIconHandler.IsDeveloper(user.Account))
-            {
-                if (_devIcon.Account == null)
-                {
-                    _devIcon = new DevIcon(__instance.CurrentTeam, user.Account);
-                }
-                else if (_devIcon.Account != user.Account)
-                {
-                    _devIcon.Account = user.Account;
-                }
-                else if (__instance.CurrentTeam >= 0)
-                {
-                    _devIcon.Team = __instance.CurrentTeam;
-                }
-
-                __instance.m_currentTeam = (Team)(-1);
-            }
-        }
-
-        return true;
-    }
-    */
-
-    /*
-    private static void DrawPlayerOutline(Player player, SpriteBatch spriteBatch, float ms)
-    {
-        int teamCount = player.GameWorld.Players.Where(p => p.InSameTeam(player.GameWorld.GUI_TeamDisplay_LocalGameUserTeam)).Count();
-        if (teamCount > 0)
-        {
-            Equipment equipmentOnlyClothingItems = player.Equipment;
-            // Skip rendering hurt level
-            if (equipmentOnlyClothingItems.m_equippedItems[9] != null)
-            {
-                equipmentOnlyClothingItems.Unequip(9);
-            }
-
-            Color outlineCol = SFR.Helper.PlayerHUD.GetPlayerTeamOutlineColor(player);
-            outlineCol.A = 128; // This give an antialiasing-like look
-            float outlineOffset = 2f / Camera.Zoom;
-
-            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(-outlineOffset, outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
-            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(outlineOffset, outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
-            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(outlineOffset, -outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
-            player.m_subAnimations[0].Draw(spriteBatch, player.Position + new Vector2(-outlineOffset, -outlineOffset), player.m_currentDrawScale, player.GetAnimationDirection(), player.Rotation + player.m_subAnimations[0].Rotation, equipmentOnlyClothingItems, outlineCol, ms);
-        }
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
     private static bool DrawPlayer(Player __instance, SpriteBatch spriteBatch, float ms)
@@ -204,11 +113,6 @@ internal static class GadgetHandler
     }
     */
 
-    // - TODO: Somehow store more data in the PlayerGUIInformation class
-    //  so we can store information for more data
-    // - TODO: Implement SFR's extendedplayer class
-    //  so we can store information for data's (last) top limit
-    //  and not hard code the upper limit
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawMainPanel))]
     private static void DrawOmenBar(PlayerHUD __instance, int x, int y, Player player, GameUser user, PlayerStatus playerStatus, SpriteBatch spriteBatch, float elapsed)
@@ -233,21 +137,7 @@ internal static class GadgetHandler
         omenFullness = Math.Max(Math.Min(omenFullness, 1f), 0f);
         if (omenFullness > 0f)
         {
-            SFR.Helper.PlayerHUD.DrawBar(spriteBatch, SFD.Constants.COLORS.ARMOR_BAR, omenFullness, x + 56, healthY + 13, 184, 4);
+            SFDCT.Helper.PlayerHUD.DrawBar(spriteBatch, SFD.Constants.COLORS.ARMOR_BAR, omenFullness, x + 56, healthY + 13, 184, 4);
         }
     }
 }
-
-/*
-internal struct DevIcon
-{
-    internal Team Team;
-    internal string Account;
-
-    internal DevIcon(Team team, string account)
-    {
-        Team = team;
-        Account = account;
-    }
-}
-*/

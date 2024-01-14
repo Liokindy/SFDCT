@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Threading;
 using HarmonyLib;
 using SFD.MenuControls;
+using SFD.States;
 
-namespace SFR.UI;
+namespace SFDCT.UI;
 
 [HarmonyPatch]
 internal static class MainMenu
