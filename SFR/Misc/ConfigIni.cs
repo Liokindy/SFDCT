@@ -8,7 +8,7 @@ using SFDCT.Fighter;
 using SFD;
 using System.Threading;
 using System.Windows.Forms;
-using SFRSettings = SFDCT.Settings.Values;
+using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Misc;
 
@@ -25,7 +25,7 @@ internal static class ConfigIni
         Handler = new IniHandler();
 
         // Initialize settings list
-        SFRSettings.Init();
+        CSettings.Init();
 
         // Create config.ini if it doesnt exist.
         if (!File.Exists(Constants.Paths.ConfigurationIni))
@@ -40,7 +40,7 @@ internal static class ConfigIni
             Handler.ReadLine(";You are advised to not mess with the settings values too much, as they");
             Handler.ReadLine(";currently have no maximum/minimum values set. Meaning you could break them.");
             // Write default values to it
-            foreach (KeyValuePair<string, SFRSettings.IniSetting> kvp in SFRSettings.List)
+            foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
             {
                 kvp.Value.Save(Handler);
             }
@@ -66,10 +66,10 @@ internal static class ConfigIni
 
         Handler.Clear();
         Handler.ReadFile(Constants.Paths.ConfigurationIni);
-        foreach (KeyValuePair<string, SFRSettings.IniSetting> kvp in SFRSettings.List)
+        foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
         {
             kvp.Value.Load(Handler);
         }
-        SFRSettings.ApplyOverrides();
+        CSettings.ApplyOverrides();
     }
 }

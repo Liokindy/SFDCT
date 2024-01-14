@@ -17,25 +17,10 @@ namespace SFDCT;
 /// </summary>
 internal static class Program
 {
-    // private const string VersionURI = "https://raw.githubusercontent.com/Odex64/SFR/master/version";
-    // private static string _gameURI = "https://github.com/Odex64/SFR/releases/download/GAMEVERSION/SFDCT.zip";
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
-    // private static WebClient _webClient;
-    private static readonly Harmony Harmony = new("superfightersredux.tk");
+    private static readonly Harmony Harmony = new("SuperfightersDeluxeCustom");
     private static int Main(string[] args)
     {
-        /*
-#if (!DEBUG)
-        if (Choice("Check for updates? (Y/n)"))
-        {
-            if (CheckUpdate())
-            {
-                return 0;
-            }
-        }
-#endif
-        */
-        
         Logger.LogInfo("Patching...");
         Harmony.PatchAll();
         Logger.LogInfo("Starting...");
@@ -72,12 +57,6 @@ internal static class Program
         return false;
     }
     */
-
-    private static bool Choice(string message)
-    {
-        Logger.LogWarn(message, false);
-        return Console.ReadLine() is "y" or "Y";
-    }
 
     /*
     private static void ReplaceOldFile(string file)

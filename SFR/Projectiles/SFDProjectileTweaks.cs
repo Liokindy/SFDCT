@@ -2,7 +2,7 @@
 using System.Reflection.Emit;
 using System.Linq;
 using SFD.Projectiles;
-using SFRSound = SFDCT.Game.SoundHandler;
+using CSound = SFDCT.Game.SoundHandler;
 using HarmonyLib;
 
 namespace SFDCT.Projectiles;
@@ -19,7 +19,7 @@ internal static class SFDProjectileTweaks
     private static IEnumerable<CodeInstruction> DefaultHitObject(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(33).operand = AccessTools.Method(SFRSound.typeof_soundHandler, SFRSound.nameof_soundHandlerPlaySound, SFRSound.typeof_StringVector2Gameworld);
+        code.ElementAt(33).operand = AccessTools.Method(CSound.typeof_soundHandler, CSound.nameof_soundHandlerPlaySound, CSound.typeof_StringVector2Gameworld);
         code.Insert(31, new CodeInstruction(OpCodes.Ldarg_0));
         code.Insert(32, new CodeInstruction(OpCodes.Call, get_ProjectilePosition));
         return code;
@@ -30,7 +30,7 @@ internal static class SFDProjectileTweaks
     private static IEnumerable<CodeInstruction> DefaultHitPlayer(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(22).operand = AccessTools.Method(SFRSound.typeof_soundHandler, SFRSound.nameof_soundHandlerPlaySound, SFRSound.typeof_StringVector2Gameworld);
+        code.ElementAt(22).operand = AccessTools.Method(CSound.typeof_soundHandler, CSound.nameof_soundHandlerPlaySound, CSound.typeof_StringVector2Gameworld);
         code.Insert(20, new CodeInstruction(OpCodes.Ldarg_0));
         code.Insert(21, new CodeInstruction(OpCodes.Call, get_ProjectilePosition));
         return code;
@@ -41,8 +41,8 @@ internal static class SFDProjectileTweaks
     private static IEnumerable<CodeInstruction> Bow_HitPlayer(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(22).operand = AccessTools.Method(SFRSound.typeof_soundHandler, SFRSound.nameof_soundHandlerPlaySound, SFRSound.typeof_StringVector2Gameworld);
-        code.ElementAt(35).operand = AccessTools.Method(SFRSound.typeof_soundHandler, SFRSound.nameof_soundHandlerPlaySound, SFRSound.typeof_StringVector2Gameworld);
+        code.ElementAt(22).operand = AccessTools.Method(CSound.typeof_soundHandler, CSound.nameof_soundHandlerPlaySound, CSound.typeof_StringVector2Gameworld);
+        code.ElementAt(35).operand = AccessTools.Method(CSound.typeof_soundHandler, CSound.nameof_soundHandlerPlaySound, CSound.typeof_StringVector2Gameworld);
 
         code.Insert(20, new CodeInstruction(OpCodes.Ldarg_0));
         code.Insert(21, new CodeInstruction(OpCodes.Call, get_ProjectilePosition));

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD;
-using SFRSettings = SFDCT.Settings.Values;
+using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Game;
 
@@ -64,10 +64,12 @@ internal static class SoundHandler
 
             // Sound Panning
             float soundPanning = 0f;
-            if (worldPosition != Vector2.Zero && SFRSettings.GetFloat("SOUNDPANNING_STRENGTH") > 0f)
+            if (worldPosition != Vector2.Zero && CSettings.GetFloat("SOUNDPANNING_STRENGTH") > 0f)
             {
                 float listenerPosX;
-                if (SFRSettings.GetBool("SOUNDPANNING_SCREEN_SPACE") || (gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsRemoved))
+                // Use screen-space if told to, if playing locally,
+                // or the current player is dead/removed/null
+                if (CSettings.GetBool("SOUNDPANNING_SCREEN_SPACE") || (gameWorld.LocalGameUsers.Length > 0 || gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved))
                 {
                     listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
                     soundPanning = (listenerPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf*0.5f;
@@ -76,20 +78,20 @@ internal static class SoundHandler
                 {
                     listenerPosX = gameWorld.PrimaryLocalPlayer.Position.X;
                     float soundPosXDiff = worldPosition.X-listenerPosX;
-                    if (Math.Abs(soundPosXDiff) >= SFRSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD"))
+                    if (Math.Abs(soundPosXDiff) >= CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD"))
                     {
                         if (soundPosXDiff > 0)
                         {
-                            soundPosXDiff -= SFRSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
+                            soundPosXDiff -= CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
                         }
                         else
                         {
-                            soundPosXDiff += SFRSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
+                            soundPosXDiff += CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
                         }
-                        soundPanning = soundPosXDiff / SFRSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
+                        soundPanning = soundPosXDiff / CSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
                     }
                 }
-                soundPanning = MathHelper.Clamp(soundPanning * SFRSettings.GetFloat("SOUNDPANNING_STRENGTH"), -1f, 1f);
+                soundPanning = MathHelper.Clamp(soundPanning * CSettings.GetFloat("SOUNDPANNING_STRENGTH"), -1f, 1f);
             }
             
             // Play the sound

@@ -6,7 +6,6 @@ using SFD;
 using SFDCT.Helper;
 using SFDCT.Sync;
 using HarmonyLib;
-using SFRSound = SFDCT.Game.SoundHandler;
 
 namespace SFDCT.Game;
 

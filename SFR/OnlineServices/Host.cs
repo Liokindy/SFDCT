@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using SFD;
 using CSecurity = SFDCT.Misc.Constants.Security;
-using SFRSettings = SFDCT.Settings.Values;
+using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Sync;
 
@@ -22,7 +22,7 @@ internal static class Host
             {
                 CSecurity.RealPersonaName = __result.ToString();
             }
-            __result = SFRSettings.GetString("OBFUSCATED_HOST_ACCOUNT_NAME");
+            __result = CSettings.GetString("OBFUSCATED_HOST_ACCOUNT_NAME");
         }
     }
 }

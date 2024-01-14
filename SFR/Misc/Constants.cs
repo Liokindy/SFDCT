@@ -3,15 +3,13 @@ using SFD;
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
-using SFRSettings = SFDCT.Settings.Values;
+using CSettings= SFDCT.Settings.Values;
 
 namespace SFDCT.Misc;
 
 public static class Constants
 {
-    // public const string SFRVersion = "v.1.3.7d"; // "v.1.0.3b_dev";
-    // internal static readonly string ServerVersion = "v.1.3.7d";// SFRVersion.Replace("v.1", "v.2");
-    // internal static readonly Random Random = new();
+    public static readonly Random Random = new();
     public struct Paths
     {
         public static string Custom = Path.Combine(Program.GameDirectory, @"SFDCT");
@@ -32,7 +30,7 @@ public static class Constants
                 {
                     return false;
                 }
-                if (!SFRSettings.GetBool("USE_OBFUSCATED_HOST_ACCOUNT_NAME"))
+                if (!CSettings.GetBool("USE_OBFUSCATED_HOST_ACCOUNT_NAME"))
                 {
                     return false;
                 }
