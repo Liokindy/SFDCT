@@ -1,41 +1,34 @@
-<p align="center"><img src="https://superfightersredux.tk/assets/LogoBig.png" align="center"><br><br></p>
+A modification for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe), forked from [Superfighters Redux](https://github.com/Odex64/SFR)
+
+# How to install
+1. Get the latest release [here](https://github.com/Liokindy/SFDCT/releases). Go to SFD in Steam, right-click it, go to "Manage", and then "Browse local files". Extract the zip contents in there.
+
+![Image](https://raw.githubusercontent.com/Liokindy/SFDCT/master/docs/SFD_browseLocalFiles.png)
+![Image](https://raw.githubusercontent.com/Liokindy/SFDCT/master/docs/SFDCT_inSFDFolder.png)
+
+2. Next, go back to Steam and right-click SFD, then "Properties...". Go to launch options, and type `/k "%command%\..\SFDCT.exe"`. This will tell Steam to open SFDCT in a cmd instead of SFD directly.
+
+![Image](https://raw.githubusercontent.com/Liokindy/SFDCT/master/docs/SFD_properties.png)
+![Image](https://raw.githubusercontent.com/Liokindy/SFDCT/master/docs/SFD_launchOptions.png)
+
+3. When you open SFD, it will launch as SFDCT. You should be good to go!
 
 # F.A.Q.
-### What is it?
-SFR is an open source mod for [SFD](https://mythologicinteractive.com/SuperfightersDeluxe). It adds new content, mechanics and tweaks exisiting game features for a whole new experience.
+### **IMPORTANT** - SFDCT got flagged as a malicious app/file
+Sadly this is a **known** problem, most people can download and launch SFDCT just fine, however, on some cases it may get flagged as being a **malicious app** by your browser and/or OS.
+
+Due to this, if SFDCT gets flagged on your end, you'll have to create an exception for it. We're sorry for this issue.
+
+### What is this?
+SFDCT is a fork of [SFR](https://github.com/Odex64/SFR), we preserve compatiblity with *vanilla servers*, while adding new or modifying existing features. This means that you can join other *vanilla servers* hosted by people, *while using* SFDCT. And other people, *with or without SFDCT*, can join your server too.
 
 ### How does it work?
-We add new (regular) objects through `.sfdx` files. We also patch or add game code through reflection and [HarmonyLib](https://harmony.pardeike.net/) in order to add and/or modify exisitng mechanics that are present in SFD.
+Code is patched, modified and added through reflection and [HarmonyLib](https://harmony.pardeike.net/).
 
-### Do you have devs consent?
-Yes, we do. However read the [license](https://github.com/Odex64/SFR/blob/master/LICENSE.txt) for some clarification.
+# License
+> The **Superfighters Redux** mod is allowed to **adapt and modify Superfighters Deluxe** and it's content to allow for **other mod integration that is not Superfighters Redux.**
 
-### Can I contribute or create my own mods?
-Yes. Everyone with intermetiade coding knowledge can create his own mods or even contribute to the main mod branch if authorized, however you **must** read and include the same license as in this repository. You're advised to change SFR version in your own mods, to avoid conflicts with other servers.<br><br>
+SFDCT is a fork of [SFR](https://github.com/Odex64/SFR). You can read the [SFR license file](https://github.com/Odex64/SFR/blob/master/LICENSE.txt) for further clarification and details.
 
-## Download
-You can download this mod [here](https://github.com/Odex64/SFR/releases).<br><br><br>
-
-# Developing your own mods
-Here's some instructions for contributing or developing your own mods.
-### Prerequisites
-* [Visual Studio](https://visualstudio.microsoft.com/) with ".NET Desktop development" and .NET Framework 4.7.2 SDK installed.
-* [dnSpy](https://github.com/dnSpyEx/dnSpy).
-* [Git](https://git-scm.com/).
-* Fork this repo.
-
-**Clone** your forked repository and open its solution with Visual Studio, then wait for NuGet to install all the required dependencies.<br>
-
-Right click on SFR project and choose properties; then change your configuration from `Active` to `All Configurations`.<br>
-In the `Debug` section change your working directory to your SFD installation (by default `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe`); and external program to `SFR.exe` (must be in the same directory).<br>
-<img src="https://i.imgur.com/CalS6n4.png"><br>
-**NOTE:** if you don't have a `SFR.exe` to select, create a dummy file and chose that as external program.<br>
-
-If you have installed SFD in a another directory or drive, you must modify `build.bat` as well. You need to change `SFD` variable with your actual installation path.<br>
-
-One last step is to create a `SFR` folder inside your Superfighters Deluxe installation, and manually copy `Core.dll` and `Content` folder from Superfighters Redux solution to the newly created folder.
-Now in Visual Studio try to build the solution, if you don't see any errors you're good to go!<br>
-
-You can open `Core.dll` with dnSpy in order to inspect SFD code. It is a slightly modified and non-obfuscated `Superfighters Deluxe.exe` assembly.
-
-You can submit your changes to the main mod branch through a pull request.
+# How to Build
+You can follow [SFR's building guide](https://github.com/Odex64/SFR/blob/master/CONTRIBUTE.md), as the process is quite similar, if not the same for both.
