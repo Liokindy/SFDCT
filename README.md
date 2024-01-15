@@ -1,4 +1,8 @@
-A modification for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe), forked from [Superfighters Redux](https://github.com/Odex64/SFR)
+An **un-official mod** for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe)
+
+<img src="docs/SFD_titleLoop.gif" alt="drawing" width="414"/>
+
+Forked from [Superfighters Redux](https://github.com/Odex64/SFR)
 
 # Current Features.
 > [!NOTE]
