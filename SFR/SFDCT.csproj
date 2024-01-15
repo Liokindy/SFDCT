@@ -55,7 +55,7 @@
     <StartupObject>SFDCT.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>SuperFightersDeluxe_Custom.pfx</AssemblyOriginatorKeyFile>
