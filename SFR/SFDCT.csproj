@@ -124,6 +124,7 @@
     <Compile Include="Fighter\PlayerHandler.cs" />
     <Compile Include="Game\CommandHandler.cs" />
     <Compile Include="Game\Commands\DebugMouse.cs" />
+    <Compile Include="Game\LazerDrawing.cs" />
     <Compile Include="Game\SlowmotionHandler.cs" />
     <Compile Include="Game\SoundHandler.cs" />
     <Compile Include="Game\Voting\VoteKick.cs" />

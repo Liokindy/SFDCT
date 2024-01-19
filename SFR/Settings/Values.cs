@@ -32,6 +32,7 @@ public static class Values
 
         Add("Misc customization settings", "MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
         Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
+        Add("LAZER_USE_REAL_ACCURACY", true, IniSettingType.Bool);
 
         Add("Sound panning settings", "SOUNDPANNING_ENABLED", true, IniSettingType.Bool);
         Add("SOUNDPANNING_STRENGTH", 1f, IniSettingType.Float);
