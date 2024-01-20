@@ -18,15 +18,7 @@ internal static class SFDObjectTweaks
 {
     // Patch most objects using PlaySound
     // without including a position argument
-
     internal static readonly object method_ObjectDataGetWorldPosition = AccessTools.Method(typeof(ObjectData), nameof(ObjectData.GetWorldPosition));
-    //private static readonly string SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound = nameof(SoundHandler.PlaySound);
-    //private static readonly System.Type[] SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld = new System.Type[] 
-    //{
-    //    typeof(string),
-    //    typeof(Microsoft.Xna.Framework.Vector2),
-    //    typeof(GameWorld)
-    //};
 
     // ObjectData, this fixes most objects getting destroyed.
     [HarmonyTranspiler]

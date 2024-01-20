@@ -129,7 +129,7 @@ internal static class GadgetHandler
         Vector2 lazerDir = __instance.m_lookDirection;
 
         float distToCamEdge = Math.Max(Camera.WorldRight - Camera.WorldLeft, Camera.WorldTop - Camera.WorldBottom);
-        float accuracyShake = (CSettings.GetBool("LAZER_USE_REAL_ACCURACY") ? 0.075f * 0.5f : 0.002f) * Game.LazerDrawing.GetNoise(__instance.ObjectID);
+        float accuracyShake = (CSettings.GetBool("LAZER_USE_REAL_ACCURACY") ? 0.075f * 0.18f : 0.002f) * Game.LazerDrawing.GetNoise(__instance.ObjectID);
         SFDMath.RotatePosition(ref lazerDir, accuracyShake, out lazerDir);
 
         GameWorld.RayCastResult lazer_rcR = __instance.GameWorld.RayCast(lazerStart, lazerDir, 0f, distToCamEdge, new GameWorld.RayCastFixtureCheck(__instance.Gun.LazerRayCastCollision), new GameWorld.RayCastPlayerCheck(__instance.Gun.LazerRayCastPlayerCollision));
@@ -175,7 +175,7 @@ internal static class GadgetHandler
             // Get an estimate distance of the laser to the world's edge
             float distToCamEdge = Math.Max(Camera.WorldRight - Camera.WorldLeft, Camera.WorldTop - Camera.WorldBottom);
             
-            float accuracyShake = (CSettings.GetBool("LAZER_USE_REAL_ACCURACY") ? 0.5f * 0.25f * rweapon.Properties.AccuracyDeflection : 0.002f) * Game.LazerDrawing.GetNoise(__instance.ObjectID);
+            float accuracyShake = (CSettings.GetBool("LAZER_USE_REAL_ACCURACY") ? 0.18f * 0.25f * rweapon.Properties.AccuracyDeflection : 0.002f) * Game.LazerDrawing.GetNoise(__instance.ObjectID);
             SFDMath.RotatePosition(ref lazerDir, accuracyShake, out lazerDir);
             GameWorld.RayCastResult lazer_rcR_noise = __instance.GameWorld.RayCast(lazerPos, lazerDir, rweapon.Properties.LazerPosition.X + 4f, distToCamEdge, new GameWorld.RayCastFixtureCheck(__instance.LazerRayCastCollision), new GameWorld.RayCastPlayerCheck(__instance.LazerRayCastPlayerCollision));
             if (!lazer_rcR_noise.TunnelCollision)

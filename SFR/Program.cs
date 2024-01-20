@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using SFDCT.Helper;
-using SFDCT.Misc;
-using System.Collections.Generic;
 
 namespace SFDCT;
 
@@ -18,9 +18,19 @@ namespace SFDCT;
 internal static class Program
 {
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
+    internal static Icon GameIcon;
     private static readonly Harmony Harmony = new("SuperfightersDeluxeCustom");
     private static int Main(string[] args)
     {
+        try
+        {
+            GameIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+        }
+        catch(Exception ex)
+        {
+            Logger.LogError("Exception trying to get app icon - " + ex.Message);
+        }
+
         Logger.LogInfo("Patching...");
         Harmony.PatchAll();
         Logger.LogInfo("Starting...");

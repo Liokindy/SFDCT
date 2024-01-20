@@ -108,6 +108,7 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
@@ -118,6 +119,7 @@
     </Compile>
     <Compile Include="Bootstrap\Assets.cs" />
     <Compile Include="API\Sandbox.cs" />
+    <Compile Include="Editor\FormTweaks.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\GadgetHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="Editor\MapData.cs" />
     <Compile Include="Misc\ConfigIni.cs" />
     <Compile Include="Misc\Tweaks.cs" />
+    <Compile Include="Objects\ObjectDataHandler.cs" />
     <Compile Include="Objects\SFDObjectTweaks.cs" />
     <Compile Include="OnlineServices\Browser.cs" />
     <Compile Include="Projectiles\SFDProjectileTweaks.cs" />
