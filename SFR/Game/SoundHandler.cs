@@ -69,7 +69,7 @@ internal static class SoundHandler
                 float listenerPosX;
                 // Use screen-space if told to, if playing locally,
                 // or the current player is dead/removed/null
-                if (CSettings.GetBool("SOUNDPANNING_SCREEN_SPACE") || (gameWorld.LocalGameUsers.Length > 0 || gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved))
+                if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") || (gameWorld.LocalGameUsers.Length > 0 || gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved))
                 {
                     listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
                     soundPanning = (listenerPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf*0.5f;
