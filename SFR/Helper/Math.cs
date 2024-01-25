@@ -6,16 +6,29 @@ internal static class Math
 
     internal static float InverseLerp(float a, float b, float f) => (f - a) / (b - a);
 
-    internal static float Clamp(float a)
+    internal static int Clamp(int val, int max, int min)
     {
-        switch (a)
+        if (val < min)
         {
-            case < 0:
-                return 0;
-            case > 1:
-                return 1;
-            default:
-                return a;
+            return min;
         }
+        if (val > max)
+        {
+            return max;
+        }
+        return val;
+    }
+
+    internal static float ClampF(float val, float max, float min)
+    {
+        if (val < min)
+        {
+            return min;
+        }
+        if (val > max)
+        {
+            return max;
+        }
+        return val;
     }
 }

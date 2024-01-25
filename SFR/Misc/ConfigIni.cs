@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using SFD.Code;
 using SFDCT.Helper;
-using SFDCT.Fighter;
-using SFD;
 using System.Threading;
-using System.Windows.Forms;
 using CSettings = SFDCT.Settings.Values;
+using HarmonyLib;
 
 namespace SFDCT.Misc;
 
+[HarmonyPatch]
+internal static class RefreshIni
+{
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SFD.ConsoleOutput), nameof(SFD.ConsoleOutput.Show))]
+    private static void RefreshIniOnConsoleOutputShow()
+    {
+        ConfigIni.Refresh();
+    }
+}
 internal static class ConfigIni
 {
     private static IniHandler Handler;
@@ -34,11 +41,10 @@ internal static class ConfigIni
             {
                 fileStream.Close();
             }
-            Thread.Sleep(50);
+            Thread.Sleep(100);
 
-            Handler.ReadLine(";Liokindy was here.");
-            Handler.ReadLine(";You are advised to not mess with the settings values too much, as they");
-            Handler.ReadLine(";currently have no maximum/minimum values set. Meaning you could break them.");
+            Handler.ReadLine(";Remember that floats are written with ',' instead of '.' i.e: Value=0,75");
+            Handler.ReadLine(";If setting order seems chaotic or shuffled randomly you might want to make a copy of this 'config.ini', rename it and let the game create a new 'config.ini'. Then manually copy your custom settings to it.");
             // Write default values to it
             foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
             {
@@ -70,6 +76,7 @@ internal static class ConfigIni
         {
             kvp.Value.Load(Handler);
         }
+        Handler.SaveFile(Constants.Paths.ConfigurationIni);
         CSettings.ApplyOverrides();
     }
 }

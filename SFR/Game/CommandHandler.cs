@@ -9,13 +9,38 @@ using SFD.Voting;
 using SFD.ManageLists;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
-using SFDCT.Helper;
+using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.Game;
 
 [HarmonyPatch]
 internal static class CommandHandler
 {
+    private static string GetSlotState(int slotIndex, int slotState, int slotTeam)
+    {
+        string state = slotState == 0 ? "Opened" : "Closed";
+        Team team = (Team)Math.Max(Math.Min(slotTeam, 4), 0);
+
+        if (slotState >= 2)
+        {
+            string diff = "Expert";
+            switch(slotState)
+            {
+                case 2:
+                    diff = "Easy";
+                    break;
+                case 4:
+                    diff = "Normal";
+                    break;
+                case 5:
+                    diff = "Hard";
+                    break;
+            }
+            state = $"Bot ({diff})";
+        }
+
+        return $"({slotIndex}) {state} - {team}";
+    }
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
     private static void HandleCommands(ProcessCommandArgs args, GameInfo __instance)
@@ -25,7 +50,7 @@ internal static class CommandHandler
         {
             return;
         }
-        
+
         // Host-only commands
         if (args.HostPrivileges)
         {
@@ -42,29 +67,89 @@ internal static class CommandHandler
                 }
 
                 string mess = "Mouse control " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
-                args.Feedback.Add( new ProcessCommandMessage(args.SenderGameUser, mess) );
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
                 return;
             }
 
-            // Enable/disable vote-kicking
-            if (args.IsCommand("VOTEKICKING") && args.Parameters.Count > 0)
+            // List slot states
+            if (args.IsCommand("SLOTS"))
             {
-                bool value = Settings.Values.GetBool("VOTE_KICKING_ENABLED");
-                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
+                for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
                 {
-                    value = true;
+                    string mess = "- " + GetSlotState(i, CConst.HOST_GAME_SLOT_STATES[i], (int)CConst.HOST_GAME_SLOT_TEAMS[i]);
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.Yellow));
                 }
-                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
-                {
-                    value = false;
-                }
+                return;
+            }
 
-                if (value != Settings.Values.GetBool("VOTE_KICKING_ENABLED"))
+            // Manually set a slot state and team
+            if (args.IsCommand("SETSLOT", "SSLOT") && args.Parameters.Count > 1)
+            {
+                if (int.TryParse(args.Parameters[0], out int slotIndex))
                 {
-                    Settings.Values.SetSetting("VOTE_KICKING_ENABLED", value);
+                    slotIndex = Math.Min(Math.Max(slotIndex, 0), CConst.HOST_GAME_SLOT_COUNT - 1);
+                    int slotState = 0;
+                    int slotTeam = (int)Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex);
 
-                    string mess = "Vote-kicking is now " + (value ? "enabled" : "disabled");
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
+                    if (args.Parameters[1] is "OPENED" or "0")
+                    {
+                        slotState = 0;
+                    }
+                    else if (args.Parameters[1] is "CLOSED" or "1")
+                    {
+                        slotState = 0;
+                    }
+                    else if (args.Parameters[1] is "EASY" or "2")
+                    {
+                        slotState = 0;
+                    }
+                    else if (args.Parameters[1] is "NORMAL" or "3" or "4")
+                    {
+                        slotState = 0;
+                    }
+                    else if (args.Parameters[1] is "HARD" or "5")
+                    {
+                        slotState = 0;
+                    }
+                    else if (args.Parameters[1] is "EXPERT" or "6")
+                    {
+                        slotState = 0;
+                    }
+
+                    if (args.Parameters.Count > 2)
+                    {
+                        if (args.Parameters[2] is "INDEPENDENT" or "0")
+                        {
+                            slotTeam = 0;
+                        }
+                        else if (args.Parameters[2] is "TEAM1" or "1")
+                        {
+                            slotTeam = 1;
+                        }
+                        else if (args.Parameters[2] is "TEAM2" or "2")
+                        {
+                            slotTeam = 2;
+                        }
+                        else if (args.Parameters[2] is "TEAM3" or "3")
+                        {
+                            slotTeam = 3;
+                        }
+                        else if (args.Parameters[2] is "TEAM4" or "4")
+                        {
+                            slotTeam = 4;
+                        }
+                    }
+
+                    string messSlotBefore = GetSlotState(slotIndex, Constants.GET_HOST_GAME_SLOT_STATE(slotIndex), (int)Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
+                    string messSlotAfter = GetSlotState(slotIndex, slotState, slotTeam);
+                    string mess = messSlotBefore + " -> " + messSlotAfter;
+
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.ForestGreen));
+
+                    LobbyCommandHandler.LobbyTeam_LobbySlotValueChanged(__instance, slotIndex, slotTeam);
+                    LobbyCommandHandler.LobbyStatus_LobbySlotValueChanged(__instance, slotIndex, slotState);
+
+                    GameSFD.Handle.Server?.SyncGameSlotsInfo();
                 }
                 return;
             }
@@ -72,14 +157,12 @@ internal static class CommandHandler
 
         if (args.IsCommand("VOTEKICK", "VK") && args.Parameters.Count > 0)
         {
-            if (GameSFD.Handle.CurrentState != State.Game || GameSFD.Handle.CurrentState == State.GameOffline)
+            if (!Settings.Values.GetBool("VOTE_KICKING_ENABLED"))
             {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't start a vote-kick right now.", Color.Red, args.SenderGameUser, null));
                 return;
             }
-            if ( !Settings.Values.GetBool("VOTE_KICKING_ENABLED") )
+            if (GameSFD.Handle.CurrentState != State.Game || GameSFD.Handle.CurrentState == State.GameOffline)
             {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Vote-kicks are disabled.", Color.Red, args.SenderGameUser, null));
                 return;
             }
             if (!Voting.GameVoteKick.CanBeCalled())
@@ -127,7 +210,7 @@ internal static class CommandHandler
             {
                 GameVote gameVoteKick = new Voting.GameVoteKick(GameVote.GetNextVoteID(), voteReason, userTokick, args.SenderGameUser);
                 gameVoteKick.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
-                
+
                 __instance.VoteInfo.AddVote(gameVoteKick);
                 server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(gameVoteKick, false));
             }

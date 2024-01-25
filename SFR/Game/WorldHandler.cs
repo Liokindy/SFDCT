@@ -6,6 +6,7 @@ using SFD;
 using SFDCT.Helper;
 using SFDCT.Sync;
 using HarmonyLib;
+using Box2D.XNA;
 
 namespace SFDCT.Game;
 
@@ -63,6 +64,7 @@ internal static class WorldHandler
         Game.LazerDrawing.Dispose();
     }
 
+    /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
     private static IEnumerable<CodeInstruction> PatchSaturationEffects(IEnumerable<CodeInstruction> instructions)
@@ -79,4 +81,5 @@ internal static class WorldHandler
         // instructions.ElementAt(796).operand = 1f;
         return instructions;
     }
+    */
 }

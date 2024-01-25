@@ -32,29 +32,4 @@ internal static class PlayerHUD
             sb.Draw(SFD.Constants.WhitePixel, new Rectangle(x, y, 2, height), m_colorSideTop);
         }
     }
-
-    public static Color GetPlayerTeamOutlineColor(Player player)
-    {
-        if (SFD.Constants.TEAM_DISPLAY_MODE == TeamDisplayMode.TeamColors || GameInfo.LocalPlayerCount >= 2 || GameSFD.Handle.CurrentState == SFD.States.State.MainMenu)
-        {
-            switch(player.CurrentTeam)
-            {
-                case Team.Team1: return SFDCT.Misc.Constants.Colors.Outline_Team_1;
-                case Team.Team2: return SFDCT.Misc.Constants.Colors.Outline_Team_2;
-                case Team.Team3: return SFDCT.Misc.Constants.Colors.Outline_Team_3;
-                case Team.Team4: return SFDCT.Misc.Constants.Colors.Outline_Team_4;
-            };
-            return SFDCT.Misc.Constants.Colors.Outline_Team_Independent;
-        }
-        else
-        {
-            bool isEnemy = player.GameWorld.GUI_TeamDisplay_LocalGameUserIdentifier != player.m_userIdentifier && SFD.Constants.IsEnemyTeams(player.GameWorld.GUI_TeamDisplay_LocalGameUserTeam, player.CurrentTeam);
-            switch(SFD.Constants.TEAM_DISPLAY_MODE) 
-            {
-                case TeamDisplayMode.GreenRed: return (isEnemy ? SFDCT.Misc.Constants.Colors.Outline_Team_EnemyRed : SFDCT.Misc.Constants.Colors.Outline_Team_AllyGreen);
-                case TeamDisplayMode.BlueRed: return (isEnemy ? SFDCT.Misc.Constants.Colors.Outline_Team_EnemyRed : SFDCT.Misc.Constants.Colors.Outline_Team_AllyBlue);
-            };
-            return SFDCT.Misc.Constants.Colors.Outline_Team_Independent;
-        }
-    }
 }

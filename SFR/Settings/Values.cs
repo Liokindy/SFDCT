@@ -12,54 +12,40 @@ namespace SFDCT.Settings;
 
 public static class Values
 {
-    public static Dictionary<string, IniSetting> List = new();
+    public static Dictionary<string, IniSetting> List = [];
     private static bool b_initialized = false;
     public static void Init()
     {
         if (b_initialized)
         {
-            Logger.LogWarn("CONFIG.INI: Tried to initialize settings list while it is already initialized");
             return;
         }
 
-        // Here you can add more settings to be written in the config.ini,
-        // and read them later in code.
-        Add("Security settings", "USE_OBFUSCATED_HOST_ACCOUNT_NAME", false, IniSettingType.Bool);
-        Add("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed", IniSettingType.String);
-        Add("VOTE_KICKING_ENABLED", true, IniSettingType.Bool);
+        Add("USE_OBFUSCATED_HOST_ACCOUNT_NAME", false, IniSettingType.Bool, true);
+        Add("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed", IniSettingType.String, true);
+        Add("VOTE_KICKING_ENABLED", false, IniSettingType.Bool);
         Add("VOTE_KICKING_COOLDOWN_MINUTES", 3, IniSettingType.Int);
         Add("VOTE_KICKING_DURATION_SECONDS", 35, IniSettingType.Int);
-
-        Add("Misc customization settings", "MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
+        Add("MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
         Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
         Add("LAZER_USE_REAL_ACCURACY", true, IniSettingType.Bool);
-
-        Add("Sound panning settings", "SOUNDPANNING_ENABLED", true, IniSettingType.Bool);
+        Add("SOUNDPANNING_ENABLED", true, IniSettingType.Bool);
         Add("SOUNDPANNING_STRENGTH", 1f, IniSettingType.Float);
-        Add("SOUNDPANNING_SCREEN_SPACE", false, IniSettingType.Bool);
+        Add("SOUNDPANNING_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
         Add("SOUNDPANNING_INWORLD_THRESHOLD", 64f, IniSettingType.Float);
         Add("SOUNDPANNING_INWORLD_DISTANCE", 360f, IniSettingType.Float);
         b_initialized = true;
     }
     public static void ApplyOverrides()
     {
-        Logger.LogDebug("CONFIG.INI: Overriding SFD values...");
-
         SFD.Constants.COLORS.MENU_BLUE = Values.GetColor("MENU_COLOR");
         SFD.Constants.COLORS.PLAYER_FLASH_LIGHT = Values.GetColor("PLAYER_BLINK_COLOR");
 
-        SFD.Constants.PREFFERED_GAMEWORLD_SIMULATION_CHUNK_SIZE = 5f; // 30f;
-        SFD.Constants.PREFFERED_GAMEWORLD_SIMULATION_UPDATE_FPS = 11f; // 66f;
-
-        Logger.LogDebug("CONFIG.INI: SFD Values overwritten");
+        Logger.LogDebug("CONFIG.INI: Applied values to SFD's internals");
     }
-    private static void Add(string valueDesc, string key, object value, IniSettingType type)
+    private static void Add(string key, object value, IniSettingType type, bool experimental = false)
     {
-        List.Add(key.ToUpper(), new IniSetting(key.ToUpper(), value, type, valueDesc));
-    }
-    private static void Add(string key, object value, IniSettingType type)
-    {
-        Values.Add("", key, value, type);
+        List.Add(key.ToUpper(), new IniSetting(key.ToUpper(), value, type, "", experimental));
     }
     public static bool SetSetting(string key, object newValue)
     {
@@ -107,17 +93,20 @@ public static class Values
         public object Value;
         public readonly object Default;
         public string Description;
-        public IniSetting(string saveKey, object saveValue, IniSettingType saveType, string valueDesc = "")
+        public bool IsExperimental;
+        public IniSetting(string saveKey, object saveValue, IniSettingType saveType, string valueDesc = "", bool experimental = false)
         {
             this.Key = saveKey.ToUpper();
             this.Value = saveValue;
             this.Default = this.Value;
             this.Type = saveType;
             this.Description = valueDesc;
+            this.IsExperimental = experimental;
         }
         public void Save(IniHandler Handler, bool saveAsDefault = false)
         {
-            Logger.LogDebug($"CONFIG.INI: Saving value... '{this.Key}', Type: {this.Type}");
+            if (this.IsExperimental) { return; }
+
             if (!string.IsNullOrEmpty(this.Description))
             {
                 Handler.ReadLine(";" + this.Description);
@@ -134,12 +123,12 @@ public static class Values
                     Handler.ReadLine(this.Key + "=" + colorString);
                     break;
             }
+
+            Logger.LogDebug($"CONFIG.INI: Saved '{this.Key}', {this.Type}: {this.Value}");
         }
         public void Load(IniHandler Handler)
         {
-            string temp;
-            Logger.LogDebug($"CONFIG.INI: Reading value... '{this.Key}', Type: {this.Type}");
-            if (Handler.TryReadValue(this.Key, out temp))
+            if (Handler.TryReadValue(this.Key, out string temp))
             {
                 switch (this.Type)
                 {
@@ -161,11 +150,17 @@ public static class Values
                         this.Value = bool.Parse(temp);
                         break;
                 }
-                Logger.LogDebug($"CONFIG.INI: '{this.Key}' found - {this.Value.ToString()}");
+
+                if (this.IsExperimental) { return; }
+
+                Logger.LogDebug($"CONFIG.INI: Loaded '{this.Key}', {this.Type}: {this.Value}");
             }
             else
             {
-                Logger.LogError($"CONFIG.INI: '{this.Key}' not found.");
+                if (this.IsExperimental) { return; }
+
+                Logger.LogWarn($"CONFIG.INI: '{this.Key}', {this.Type} was not found in the current ini, adding...");
+                this.Save(Handler, true);
             }
         }
         public object Get()

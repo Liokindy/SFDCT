@@ -15,6 +15,9 @@ internal static class FormTweaks
     private static void PatchEditorWindowIcon(StateEditor __instance)
     {
         // Fix the editor window displaying SFD icon
-        __instance.m_mapEditorForm.Icon = Program.GameIcon;
+        if (Program.GameIcon != null)
+        {
+            __instance.m_mapEditorForm.Icon = Program.GameIcon;
+        }
     }
 }

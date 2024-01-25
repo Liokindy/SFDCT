@@ -9,7 +9,6 @@ namespace SFDCT.Misc;
 
 public static class Constants
 {
-    public static readonly Random Random = new();
     public struct Paths
     {
         public static string Custom = Path.Combine(Program.GameDirectory, @"SFDCT");
@@ -18,7 +17,7 @@ public static class Constants
     public struct Version
     {
         public const string SFD = "v.1.3.7d";
-        public const string SFDCT = "v.1.0.0";
+        public const string SFDCT = "v.1.0.0a";
     }
     public struct Security
     {
@@ -75,18 +74,22 @@ public static class Constants
             return true;
         }
     }
-    
-    public struct Colors
+
+    public static bool SetSlots(int num)
     {
-        public static Color Outline_Team_Independent = new Color(192, 192, 192);
-        public static Color Outline_Team_1 = new Color(192, 192, 255);
-        public static Color Outline_Team_2 = new Color(255, 168, 168);
-        public static Color Outline_Team_3 = new Color(144, 255, 144);
-        public static Color Outline_Team_4 = new Color(240, 240, 128);
-        // public static Color Outline_Team_5 = new Color(240, 187, 255);
-        // public static Color Outline_Team_6 = new Color(128, 239, 255);
-        public static Color Outline_Team_AllyBlue = Outline_Team_1;
-        public static Color Outline_Team_AllyGreen = Outline_Team_3;
-        public static Color Outline_Team_EnemyRed = Outline_Team_2;
+        if (num < 8 || num > 32)
+        {
+            // Slowdown cowboy!
+            return false;
+        }
+
+        HOST_GAME_SLOT_COUNT = num;
+        HOST_GAME_SLOT_STATES = new byte[num];
+        HOST_GAME_SLOT_TEAMS = new Team[num];
+        return true;
     }
+
+    public static int HOST_GAME_SLOT_COUNT = 8;
+    public static byte[] HOST_GAME_SLOT_STATES = new byte[HOST_GAME_SLOT_COUNT];
+    public static Team[] HOST_GAME_SLOT_TEAMS = new Team[HOST_GAME_SLOT_COUNT];
 }
