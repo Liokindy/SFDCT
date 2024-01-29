@@ -16,7 +16,7 @@ namespace SFDCT.Game;
 [HarmonyPatch]
 internal static class CommandHandler
 {
-    private static string GetSlotState(int slotIndex, int slotState, int slotTeam)
+    private static string GetSlotState(int slotIndex, int slotState, int slotTeam, bool occupiedByHuman = false)
     {
         string state = slotState == 0 ? "Opened" : "Closed";
         Team team = (Team)Math.Max(Math.Min(slotTeam, 4), 0);
@@ -38,6 +38,10 @@ internal static class CommandHandler
             }
             state = $"Bot ({diff})";
         }
+        if (occupiedByHuman)
+        {
+            state = "Player";
+        }
 
         return $"({slotIndex}) {state} - {team}";
     }
@@ -45,7 +49,7 @@ internal static class CommandHandler
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
     private static void HandleCommands(ProcessCommandArgs args, GameInfo __instance)
     {
-        // Only server or local can handle commands.
+        // Server commands.
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
             return;
@@ -72,18 +76,18 @@ internal static class CommandHandler
             }
 
             // List slot states
-            if (args.IsCommand("SLOTS"))
+            if (CConst.HOST_GAME_SLOT_COUNT > 8 && args.IsCommand("SLOTS"))
             {
                 for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
                 {
-                    string mess = "- " + GetSlotState(i, CConst.HOST_GAME_SLOT_STATES[i], (int)CConst.HOST_GAME_SLOT_TEAMS[i]);
+                    string mess = "- " + GetSlotState(__instance.GetGameSlotByIndex(i).GameSlotIndex, CConst.HOST_GAME_SLOT_STATES[i], (int)CConst.HOST_GAME_SLOT_TEAMS[i], __instance.GetGameSlotByIndex(i).IsOccupiedByUser);
                     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.Yellow));
                 }
                 return;
             }
 
             // Manually set a slot state and team
-            if (args.IsCommand("SETSLOT", "SSLOT") && args.Parameters.Count > 1)
+            if (CConst.HOST_GAME_SLOT_COUNT > 8 && args.IsCommand("SETSLOT", "SSLOT") && args.Parameters.Count >= 2)
             {
                 if (int.TryParse(args.Parameters[0], out int slotIndex))
                 {
@@ -91,65 +95,67 @@ internal static class CommandHandler
                     int slotState = 0;
                     int slotTeam = (int)Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex);
 
-                    if (args.Parameters[1] is "OPENED" or "0")
+                    if (args.Parameters[1].ToUpper() == "OPENED" || args.Parameters[1].ToUpper() == "0")
                     {
                         slotState = 0;
                     }
-                    else if (args.Parameters[1] is "CLOSED" or "1")
+                    else if (args.Parameters[1].ToUpper() == "CLOSED" || args.Parameters[1].ToUpper() == "1")
                     {
-                        slotState = 0;
+                        slotState = 1;
                     }
-                    else if (args.Parameters[1] is "EASY" or "2")
+                    else if (args.Parameters[1].ToUpper() == "EASY" || args.Parameters[1].ToUpper() == "2")
                     {
-                        slotState = 0;
+                        slotState = 2;
                     }
-                    else if (args.Parameters[1] is "NORMAL" or "3" or "4")
+                    else if (args.Parameters[1].ToUpper() == "NORMAL" || args.Parameters[1].ToUpper() == "4")
                     {
-                        slotState = 0;
+                        slotState = 3;
                     }
-                    else if (args.Parameters[1] is "HARD" or "5")
+                    else if (args.Parameters[1].ToUpper() == "HARD" || args.Parameters[1].ToUpper() == "5")
                     {
-                        slotState = 0;
+                        slotState = 5;
                     }
-                    else if (args.Parameters[1] is "EXPERT" or "6")
+                    else if (args.Parameters[1].ToUpper() == "EXPERT" || args.Parameters[1].ToUpper() == "6")
                     {
-                        slotState = 0;
+                        slotState = 6;
                     }
 
-                    if (args.Parameters.Count > 2)
+                    if (args.Parameters.Count >= 3)
                     {
-                        if (args.Parameters[2] is "INDEPENDENT" or "0")
+                        if (args.Parameters[2].ToUpper() == "INDEPENDENT" || args.Parameters[2].ToUpper() == "0")
                         {
                             slotTeam = 0;
                         }
-                        else if (args.Parameters[2] is "TEAM1" or "1")
+                        else if (args.Parameters[2].ToUpper() == "TEAM1" || args.Parameters[2].ToUpper() == "1")
                         {
                             slotTeam = 1;
                         }
-                        else if (args.Parameters[2] is "TEAM2" or "2")
+                        else if (args.Parameters[2].ToUpper() == "TEAM2" || args.Parameters[2].ToUpper() == "2")
                         {
                             slotTeam = 2;
                         }
-                        else if (args.Parameters[2] is "TEAM3" or "3")
+                        else if (args.Parameters[2].ToUpper() == "TEAM3" || args.Parameters[2].ToUpper() == "3")
                         {
                             slotTeam = 3;
                         }
-                        else if (args.Parameters[2] is "TEAM4" or "4")
+                        else if (args.Parameters[2].ToUpper() == "TEAM4" || args.Parameters[2].ToUpper() == "4")
                         {
                             slotTeam = 4;
                         }
                     }
 
                     string messSlotBefore = GetSlotState(slotIndex, Constants.GET_HOST_GAME_SLOT_STATE(slotIndex), (int)Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
-                    string messSlotAfter = GetSlotState(slotIndex, slotState, slotTeam);
-                    string mess = messSlotBefore + " -> " + messSlotAfter;
 
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.ForestGreen));
-
-                    LobbyCommandHandler.LobbyTeam_LobbySlotValueChanged(__instance, slotIndex, slotTeam);
+                    __instance.GameSlots[slotIndex].CurrentTeam = (Team)slotTeam;
+                    __instance.GameSlots[slotIndex].NextTeam = (Team)slotTeam;
+                    Constants.SET_HOST_GAME_SLOT_TEAM(slotIndex, (Team)slotTeam);
                     LobbyCommandHandler.LobbyStatus_LobbySlotValueChanged(__instance, slotIndex, slotState);
 
-                    GameSFD.Handle.Server?.SyncGameSlotsInfo();
+                    string messSlotAfter = GetSlotState(slotIndex, slotState, slotTeam);
+                    string mess = messSlotBefore + " -> " + messSlotAfter;
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.ForestGreen));
+
+                    GameSFD.Handle.Server.SyncGameSlotsInfo();
                 }
                 return;
             }

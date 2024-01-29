@@ -80,11 +80,33 @@ internal static class Host
         return code;
     }
 
+    /// <summary>
+    ///     Allow the host to send messages quickly
+    /// </summary>
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameConnectionTag), nameof(GameConnectionTag.ConsumeFreeChatTicket))]
+    private static bool GameConnectionTag_ConsumeFreeChatTicket(GameConnectionTag __instance, ref bool __result)
+    {
+        if (__instance.IsHost)
+        {
+            __result = true;
+            return false;
+        }
+        return true;
+    }
+
     // Steam Persona
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SFD.SteamIntegration.Steam), nameof(SFD.SteamIntegration.Steam.PersonaNameShort), MethodType.Getter)]
     private static void Get_PersonaNameShort(ref string __result)
     {
+        if (!CSecurity.ValidateObfuscatedName(CSettings.GetString("OBFUSCATED_HOST_ACCOUNT_NAME"), out string errorMessage))
+        {
+            CSettings.SetSetting("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed");
+            CSettings.SetSetting("USE_OBFUSCATED_HOST_ACCOUNT_NAME", false);
+            return;
+        }
+
         if (CSecurity.CanUseObfuscatedNames && !(GameSFD.Handle.m_waterlogo != "" || SFD.Constants.Account.ID == 666U || CSecurity.RealPersonaName.Contains("666:")))
         {
             if (CSecurity.RealPersonaName != __result.ToString())

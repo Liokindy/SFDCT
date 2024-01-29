@@ -7,6 +7,7 @@ using System.Net;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Reflection;
 using HarmonyLib;
 using SFDCT.Helper;
@@ -33,6 +34,7 @@ internal static class Program
             Logger.LogDebug("Choose game.");
             Logger.LogWarn("0. SFDCT; 1. SFD" + (hasSFR ? "; 2. SFR" : ""));
             Logger.LogWarn("Start option: ", false);
+            DateTime selectionStart = DateTime.Now;
             ConsoleKey selection = Console.ReadKey().Key;
             Console.SetCursorPosition(0, Console.CursorTop + 1);
 
@@ -66,13 +68,13 @@ internal static class Program
             {
                 case 1:
                     Logger.LogInfo("Starting Superfighters Deluxe");
-
+                    RevertVanillaSFDConfig();
                     string SFD_exe = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
                     Process.Start(SFD_exe, string.Join(" ", args));
                     break;
                 case 2:
                     Logger.LogInfo("Starting Superfighters Redux");
-
+                    RevertVanillaSFDConfig();
                     string SFR_exe = Path.Combine(GameDirectory, "SFR.exe");
                     Process.Start(SFR_exe, "-SFR " + string.Join(" ", args));
                     break;
@@ -134,6 +136,54 @@ internal static class Program
         return 0;
     }
 
+    /// <summary>
+    ///     Some values set in the config.ini might crash the game when it boots without any patching. This
+    ///     class will check for those values and revert them to a normal vanilla-range, however, this
+    ///     does requires the user to boot the game atleast once with SFDCT. 
+    /// </summary>
+    public static void RevertVanillaSFDConfig()
+    {
+        Logger.LogDebug("Checking to revert values in SFD's config.ini...");
+        string documentsFolder = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Superfighters Deluxe"));
+        string pathToSFDConfig = Path.Combine(documentsFolder, "config.ini");
+        bool needsToSave = false;
+
+        if (File.Exists(pathToSFDConfig))
+        {
+            Logger.LogDebug("Found Superfighters Deluxe/config.ini");
+            string[] iniLines = File.ReadAllLines(pathToSFDConfig, Encoding.Default);
+            for (int index = 0; index < iniLines.Length; index++)
+            {
+                string line = iniLines[index];
+
+                // PLAYER_[1-8]_PROFILE will crash the game if set to above 8
+                if (line.StartsWith("PLAYER_"))
+                {
+                    int.TryParse(line.Substring(7, 1), out int playerSlot);
+                    int.TryParse(line.Substring(17), out int profileSlot);
+
+                    if (profileSlot >= 9)
+                    {
+                        Logger.LogDebug($"Reverting 'PLAYER_{playerSlot}_PROFILE={profileSlot}'...");
+                        iniLines[index] = line.Substring(0, 17) + "0";
+                        needsToSave = true;
+                    }
+                }
+            }
+
+            if (needsToSave)
+            {
+                Logger.LogDebug("Saving...");
+                using StreamWriter sw = new(pathToSFDConfig, false, Encoding.Default);
+                foreach (string line in iniLines)
+                {
+                    sw.WriteLine(line);
+                }
+                sw.Close();
+            }
+        }
+
+    }
     /*
     private static bool CheckUpdate()
     {
@@ -162,7 +212,6 @@ internal static class Program
         return false;
     }
     */
-
     /*
     private static void ReplaceOldFile(string file)
     {

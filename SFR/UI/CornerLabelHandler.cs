@@ -23,7 +23,7 @@ internal static class CornerLabelHandler
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(76).operand = Misc.Constants.Version.SFD + " - " + Misc.Constants.Version.SFDCT;
+        code.ElementAt(76).operand = $"{Misc.Constants.Version.SFD} - {Misc.Constants.Version.SFDCT}";
         return code;
     }
 

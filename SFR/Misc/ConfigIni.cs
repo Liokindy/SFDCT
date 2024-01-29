@@ -6,22 +6,28 @@ using SFDCT.Helper;
 using System.Threading;
 using CSettings = SFDCT.Settings.Values;
 using HarmonyLib;
+using System.Runtime.CompilerServices;
 
 namespace SFDCT.Misc;
 
 [HarmonyPatch]
 internal static class RefreshIni
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(SFD.ConsoleOutput), nameof(SFD.ConsoleOutput.Show))]
-    private static void RefreshIniOnConsoleOutputShow()
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SFD.GameSFD), nameof(SFD.GameSFD.StateKeyUpEvent))]
+    private static void RefreshIniOnKeyUp(Microsoft.Xna.Framework.Input.Keys key)
     {
-        ConfigIni.Refresh();
+        if (key == Microsoft.Xna.Framework.Input.Keys.F6)
+        {
+            ConfigIni.Refresh();
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshed 'SFDCT/config.ini'");
+        }
     }
 }
 internal static class ConfigIni
 {
     private static IniHandler Handler;
+    public static bool NeedsSaving = false;
 
     /// <summary>
     ///     Initializes the config.ini, if it doesnt exist 
@@ -78,5 +84,31 @@ internal static class ConfigIni
         }
         Handler.SaveFile(Constants.Paths.ConfigurationIni);
         CSettings.ApplyOverrides();
+    }
+    public static void Save()
+    {
+        if (!ConfigIni.NeedsSaving)
+        {
+            return;
+        }
+
+        Logger.LogDebug("CONFIG.INI: Saving...");
+        if (!File.Exists(Constants.Paths.ConfigurationIni))
+        {
+            Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
+            return;
+        }
+        if (Handler == null || Handler.IsDisposed)
+        {
+            Logger.LogError("CONFIG.INI: Handler is null or disposed");
+            return;
+        }
+
+        foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
+        {
+            kvp.Value.Save(Handler);
+        }
+        Handler.SaveFile(Constants.Paths.ConfigurationIni);
+        Logger.LogDebug("CONFIG.INI: Saving finished.");
     }
 }

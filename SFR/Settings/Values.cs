@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,14 +35,48 @@ public static class Values
         Add("SOUNDPANNING_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
         Add("SOUNDPANNING_INWORLD_THRESHOLD", 64f, IniSettingType.Float);
         Add("SOUNDPANNING_INWORLD_DISTANCE", 360f, IniSettingType.Float);
+
+        for(int i = 1; i <= 8; i++)
+        {
+            Add($"EXTENDEDPROFILES_{i}_PROFILE", 0, IniSettingType.Int);
+        }
+
         b_initialized = true;
     }
     public static void ApplyOverrides()
     {
         SFD.Constants.COLORS.MENU_BLUE = Values.GetColor("MENU_COLOR");
         SFD.Constants.COLORS.PLAYER_FLASH_LIGHT = Values.GetColor("PLAYER_BLINK_COLOR");
+        SFD.Constants.PLAYER_1_PROFILE = Values.GetInt("EXTENDEDPROFILES_1_PROFILE");
+        SFD.Constants.PLAYER_2_PROFILE = Values.GetInt("EXTENDEDPROFILES_2_PROFILE");
+        SFD.Constants.PLAYER_3_PROFILE = Values.GetInt("EXTENDEDPROFILES_3_PROFILE");
+        SFD.Constants.PLAYER_4_PROFILE = Values.GetInt("EXTENDEDPROFILES_4_PROFILE");
+        SFD.Constants.PLAYER_5_PROFILE = Values.GetInt("EXTENDEDPROFILES_5_PROFILE");
+        SFD.Constants.PLAYER_6_PROFILE = Values.GetInt("EXTENDEDPROFILES_6_PROFILE");
+        SFD.Constants.PLAYER_7_PROFILE = Values.GetInt("EXTENDEDPROFILES_7_PROFILE");
+        SFD.Constants.PLAYER_8_PROFILE = Values.GetInt("EXTENDEDPROFILES_8_PROFILE");
 
         Logger.LogDebug("CONFIG.INI: Applied values to SFD's internals");
+    }
+    public static void CheckOverrides()
+    {
+        for(int i = 1; i <= 8; i++)
+        {
+            int profVal = 0;
+            switch (i)
+            {
+                case 1: profVal = SFD.Constants.PLAYER_1_PROFILE; break;
+                case 2: profVal = SFD.Constants.PLAYER_2_PROFILE; break;
+                case 3: profVal = SFD.Constants.PLAYER_3_PROFILE; break;
+                case 4: profVal = SFD.Constants.PLAYER_4_PROFILE; break;
+                case 5: profVal = SFD.Constants.PLAYER_5_PROFILE; break;
+                case 6: profVal = SFD.Constants.PLAYER_6_PROFILE; break;
+                case 7: profVal = SFD.Constants.PLAYER_7_PROFILE; break;
+                case 8: profVal = SFD.Constants.PLAYER_8_PROFILE; break;
+            }
+
+            Values.SetSetting($"EXTENDEDPROFILES_{i}_PROFILE", profVal);
+        }
     }
     private static void Add(string key, object value, IniSettingType type, bool experimental = false)
     {
@@ -52,6 +87,7 @@ public static class Values
         if (List.ContainsKey(key.ToUpper()))
         {
             List[key.ToUpper()].Value = newValue;
+            ConfigIni.NeedsSaving = true;
             return true;
         }
         return false;

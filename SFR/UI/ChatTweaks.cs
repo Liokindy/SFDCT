@@ -28,23 +28,27 @@ internal static class ChatTweaks
     [HarmonyPatch(typeof(GameChat), nameof(GameChat.Update))]
     private static void Update()
     {
-        if (!GameChat.m_showChatHistory)
+        if (GameChat.m_chatActive)
         {
-            if (!GameChat.m_chatActive && GameChat.m_rows != m_rowSizeNormal)
-            {
-                GameChat.m_rows = m_rowSizeNormal;
-            }
-            else if (GameChat.m_chatActive && GameChat.m_rows != m_rowSizeTyping)
+            if (GameChat.m_rows != m_rowSizeTyping)
             {
                 GameChat.m_rows = m_rowSizeTyping;
             }
+            return;
         }
-        else if (GameChat.m_showChatHistory &&
-                 GameChat.m_rows != m_rowSizeShowHistory &&
-                 (GameSFD.Handle.CurrentState is not State.MainMenu)
-                 )
+
+        if (GameChat.m_showChatHistory && GameSFD.Handle?.CurrentState is not State.MainMenu)
         {
-            GameChat.m_rows = m_rowSizeShowHistory;
+            if (GameChat.m_rows != m_rowSizeShowHistory)
+            {
+                GameChat.m_rows = m_rowSizeShowHistory;
+            }
+            return;
+        }
+
+        if (GameChat.m_rows != m_rowSizeNormal)
+        {
+            GameChat.m_rows = m_rowSizeNormal;
         }
     }
 

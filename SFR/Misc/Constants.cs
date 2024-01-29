@@ -9,15 +9,17 @@ namespace SFDCT.Misc;
 
 public static class Constants
 {
-    public struct Paths
+    public readonly struct Paths
     {
-        public static string Custom = Path.Combine(Program.GameDirectory, @"SFDCT");
-        public static string ConfigurationIni = Path.Combine(Paths.Custom, @"config.ini");
+        public static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
+        public static string Content = Path.Combine(Paths.SFDCT, "Content");
+        public static string ConfigurationIni = Path.Combine(Paths.SFDCT, "config.ini");
+        public static string Profiles = Path.Combine(Content, "Profile");
     }
-    public struct Version
+    public readonly struct Version
     {
-        public const string SFD = "v.1.3.7d";
-        public const string SFDCT = "v.1.0.0a";
+        public static string SFD = "v.1.3.7d";
+        public static string SFDCT = "v.1.0.1";
     }
     public struct Security
     {
@@ -25,11 +27,11 @@ public static class Constants
         {
             get
             {
-                if (RealPersonaName.Length > 32 || GameSFD.Handle.cracky || GameSFD.Handle.m_cracky_initialized || GameSFD.Handle.m_cracky_kicky)
+                if (!CSettings.GetBool("USE_OBFUSCATED_HOST_ACCOUNT_NAME"))
                 {
                     return false;
                 }
-                if (!CSettings.GetBool("USE_OBFUSCATED_HOST_ACCOUNT_NAME"))
+                if (RealPersonaName.Length > 32 || GameSFD.Handle.cracky || GameSFD.Handle.m_cracky_initialized || GameSFD.Handle.m_cracky_kicky)
                 {
                     return false;
                 }
@@ -49,27 +51,23 @@ public static class Constants
             }
         }
         public static string RealPersonaName = "";
-        public static bool ValidateObfuscatedName(string name, out string resultName, out string errorMessage)
+        public static bool ValidateObfuscatedName(string name, out string errorMessage)
         {
             if (string.IsNullOrEmpty(name))
             {
-                resultName = "Unnamed";
                 errorMessage = "Empty or null";
                 return true;
             }
             if (name.Length > 32)
             {
-                resultName = name.Substring(0, 32);
                 errorMessage = "Length is over Steam's max account name length (32 characters)";
                 return false;
             }
             if (name.ToUpper() == "GURT" || name.ToUpper() == "COM" || name.ToUpper() == "HJARPE")
             {
-                resultName = "Unnamed";
                 errorMessage = "Name is reserved";
                 return false;
             }
-            resultName = name;
             errorMessage = "";
             return true;
         }
