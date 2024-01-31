@@ -45,14 +45,29 @@ internal static class CommandHandler
 
         return $"({slotIndex}) {state} - {team}";
     }
-    [HarmonyPostfix]
+    
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
-    private static void HandleCommands(ProcessCommandArgs args, GameInfo __instance)
+    private static bool GameInfo_HandleCommands(ref bool __result, ProcessCommandArgs args, GameInfo __instance)
     {
-        // Server commands.
+        // We check to see if we handle custom commands before vanilla ones,
+        // this also allows us to replace them.
+        if (CommandHandler.HandleCommands(args, __instance))
+        {
+            __result = true;
+            return false;
+        }
+
+        // No custom commands ran
+        return true;
+    }
+
+    private static bool HandleCommands(ProcessCommandArgs args, GameInfo __instance)
+    {
+        // These commands are ran server side
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
-            return;
+            return false;
         }
 
         // Host-only commands
@@ -72,7 +87,7 @@ internal static class CommandHandler
 
                 string mess = "Mouse control " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
-                return;
+                return true;
             }
 
             // List slot states
@@ -83,7 +98,7 @@ internal static class CommandHandler
                     string mess = "- " + GetSlotState(__instance.GetGameSlotByIndex(i).GameSlotIndex, CConst.HOST_GAME_SLOT_STATES[i], (int)CConst.HOST_GAME_SLOT_TEAMS[i], __instance.GetGameSlotByIndex(i).IsOccupiedByUser);
                     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.Yellow));
                 }
-                return;
+                return true;
             }
 
             // Manually set a slot state and team
@@ -157,7 +172,7 @@ internal static class CommandHandler
 
                     GameSFD.Handle.Server.SyncGameSlotsInfo();
                 }
-                return;
+                return true;
             }
         }
 
@@ -165,26 +180,26 @@ internal static class CommandHandler
         {
             if (!Settings.Values.GetBool("VOTE_KICKING_ENABLED"))
             {
-                return;
+                return false;
             }
             if (GameSFD.Handle.CurrentState != State.Game || GameSFD.Handle.CurrentState == State.GameOffline)
             {
-                return;
+                return false;
             }
             if (!Voting.GameVoteKick.CanBeCalled())
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Vote-kicking is in cooldown.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
             if (__instance.VoteInfo.ActiveVotes.Count > 0)
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "There is a vote already in progress.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
             if (!(args.SenderGameUser.IsHost || args.SenderGameUser.IsModerator) && (DateTime.Now.Hour <= args.SenderGameUser.JoinTime.Hour && (DateTime.Now.Minute - args.SenderGameUser.JoinTime.Minute) <= 2))
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You must be atleast 2 minutes in the server before initiating a vote-kick.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
 
             GameUser userTokick = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
@@ -193,22 +208,22 @@ internal static class CommandHandler
             if (userTokick == null)
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Couldn't find user.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
             if (userTokick.UserIdentifier == args.SenderGameUserIdentifier)
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against yourself.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
             if (userTokick.IsBot)
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against bots.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
             if (userTokick.IsHost || userTokick.IsModerator)
             {
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against that user.", Color.Red, args.SenderGameUser, null));
-                return;
+                return true;
             }
 
             Server server = GameSFD.Handle.Server;
@@ -219,8 +234,11 @@ internal static class CommandHandler
 
                 __instance.VoteInfo.AddVote(gameVoteKick);
                 server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(gameVoteKick, false));
+                return true;
             }
-            return;
         }
+
+        // None of the commands ran
+        return false;
     }
 }

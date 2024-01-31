@@ -59,27 +59,31 @@ internal static class WorldHandler
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.DisposeAllObjects))]
     private static void DisposeData()
     {
-        // Keep for future use
         // SyncHandler.Attempts.Clear();
         Game.LazerDrawing.Dispose();
     }
 
-    /*
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static IEnumerable<CodeInstruction> PatchSaturationEffects(IEnumerable<CodeInstruction> instructions)
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.GetStartupPlayerFlashTime))]
+    private static bool GetStartupPlayerFlashTime(GameWorld __instance, ref float __result)
     {
-        // This lowers how much low-hp affects
-        // the saturation reduction.
-        // --
-        // When below 25% health,
-        // Saturation = 1 - (1 - hpFullness / 0.25) * [VALUE]
-        instructions.ElementAt(770).operand = 0.9f;
+        // 1.25s without startup sequence, 2.25s by default
+        // 1.5s without startup or iris, 2.55s with both
 
-        // Saturation when above 25% health,
-        // and NOT hiding all HUD elements.
-        // instructions.ElementAt(796).operand = 1f;
-        return instructions;
+        __result = 1500f;
+
+        // The transition may cover the player for some time on startup
+        if (__instance.ObjectWorldData.StartupIrisSwipeEnabled)
+        {
+            __result += 300f;
+        }
+
+        // The GET READY... FIGHT! may cover the player and/or distract the user
+        if (__instance.ObjectWorldData.StartupSequenceEnabled)
+        {
+            __result += 750f;
+        }
+
+        return false;
     }
-    */
 }

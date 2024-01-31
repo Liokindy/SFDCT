@@ -72,7 +72,11 @@ public static class Constants
             return true;
         }
     }
-
+    public struct Colors
+    {
+        public static Color OmenFlash = Color.White;
+        public static Color OmenBar = new(120, 152, 255);
+    }
     public static bool SetSlots(int num)
     {
         if (num < 8 || num > 32)

@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using SFD;
+using SFD.Objects;
+using SFD.Weapons;
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SFD;
-using HarmonyLib;
-using System.Linq;
 using Box2D.XNA;
-using SFD.Weapons;
 using CSettings = SFDCT.Settings.Values;
-using SFD.Objects;
+using CConst = SFDCT.Misc.Constants;
+using SFD.Projectiles;
 
 namespace SFDCT.Fighter;
 
@@ -121,29 +123,151 @@ internal static class GadgetHandler
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawMainPanel))]
-    private static void DrawOmenBar(PlayerHUD __instance, int x, int y, Player player, GameUser user, PlayerStatus playerStatus, SpriteBatch spriteBatch, float elapsed)
+    private static void DrawOmenBar_OnHUD(PlayerHUD __instance, int x, int y, Player player, GameUser user, PlayerStatus playerStatus, SpriteBatch spriteBatch, float elapsed)
     {
-        float omenFullness = 0f;        
-        // The player's slowmotion
-        if (player.SlowmotionFactor != 1f && player.GameWorld != null)
+        if (player == null || player.IsRemoved || player.IsDisposed)
         {
-            List<Slowmotion> sm_l = player.GameWorld.SlowmotionHandler.GetSlowmotions();
-            if (sm_l.Count > 0)
-            {
-                if (sm_l.LastOrDefault().PlayerOwnerID == player.ObjectID)
-                {
-                    Slowmotion sm = sm_l.Last();
-                    float sm_TotalTime = sm.FadeInTime + sm.ActiveTime + sm.FadeOutTime;
-                    omenFullness = (sm_TotalTime - sm.Progress) / sm_TotalTime;
-                }
-            }
+            return;
         }
 
-        int healthY = y - 22 - 18 - 2;
-        omenFullness = Math.Max(Math.Min(omenFullness, 1f), 0f);
+        float omenFullness = GetOmenBar(player, out bool omenIsWarning);
+
         if (omenFullness > 0f)
         {
-            SFDCT.Helper.PlayerHUD.DrawBar(spriteBatch, SFD.Constants.COLORS.ARMOR_BAR, omenFullness, x + 56, healthY + 13, 184, 4);
+            Color omenBarColor = CConst.Colors.OmenBar;
+
+            if (omenIsWarning && (int)(GameSFD.LastUpdateNetTimeMS * 0.005f) % 2 == 0)
+            {
+                omenBarColor = CConst.Colors.OmenFlash;
+            }
+
+            SFDCT.Helper.PlayerHUD.DrawBar(spriteBatch, omenBarColor, omenFullness, x + 56, y - 42 + 12, 184, 4);
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Player), nameof(Player.DrawPlates))]
+    private static void DrawOmenBar_OnStatusBar(Player __instance)
+    {
+        if (!__instance.IsLocal || __instance.IsDead)
+        {
+            return;
+        }
+        if ((__instance.DrawStatusInfo & Player.DrawStatusInfoFlags.StatusBars) != Player.DrawStatusInfoFlags.StatusBars)
+        {
+            return;
+        }
+        if (__instance.GetCurrentHealthMode() == Player.HealthMode.RocketRideOverHealth)
+        {
+            return;
+        }
+
+        float omenFullness = GetOmenBar(__instance, out bool omenIsWarning);
+        if (omenFullness == 0f)
+        {
+            return;
+        }
+
+        float zoomScale = Math.Max(Camera.Zoom * 0.5f, 1f);
+
+        Vector2 vec = Camera.ConvertWorldToScreen(__instance.Position + new Vector2(0, 24f));
+        vec.Y -= 11f * zoomScale;
+
+        Rectangle destinationRectangle = new((int)(vec.X - 32 * zoomScale * 0.5f), (int)(vec.Y), (int)(32 * zoomScale), (int)(2f * zoomScale));
+
+        Color omenBarColor = CConst.Colors.OmenBar;
+        if (omenIsWarning && (int)(GameSFD.LastUpdateNetTimeMS * 0.005f) % 2 == 0)
+        {
+            omenBarColor = CConst.Colors.OmenFlash;
+        }
+
+        if(__instance.GetCurrentHealthMode() == Player.HealthMode.StrengthBoostOverHealth || __instance.Health.CheckRecentlyModified(2000f) || __instance.Energy.CheckRecentlyModified(2000f))
+        {
+            // Keep the health bars visible
+            destinationRectangle.Y += 1;
+            destinationRectangle.Height -= 1;
+            omenBarColor.A = 200;
+        }
+        else
+        {
+            // Draw outline and background
+            Rectangle borderRectangle = destinationRectangle;
+            borderRectangle.Inflate((int)(zoomScale), (int)(zoomScale));
+
+            __instance.m_spriteBatch.Draw(Constants.WhitePixel, borderRectangle, Color.Black);
+            __instance.m_spriteBatch.Draw(Constants.WhitePixel, destinationRectangle, new Color(32, 32, 32));
+        }
+
+        destinationRectangle.Width = (int)(destinationRectangle.Width * omenFullness);
+        __instance.m_spriteBatch.Draw(Constants.WhitePixel, destinationRectangle, ColorCorrection.FromXNAToCustom(omenBarColor));
+    }
+
+    private static float GetOmenBar(Player player, out bool IsFlashing)
+    {
+        float omenFullness = 0f;
+        IsFlashing = false;
+        if (player == null || player.IsDead || player.IsDisposed || player.IsRemoved)
+        {
+            return omenFullness;
+        }
+
+        // Omen bar uses, ordered in low-to-high priority.
+        try
+        {
+            // The player's slowmotion
+            if (player.SlowmotionFactor != 1f && player.GameWorld != null)
+            {
+                List<Slowmotion> sm_l = player.GameWorld.SlowmotionHandler.GetSlowmotions();
+                if (sm_l != null && sm_l.Count > 0)
+                {
+                    if (sm_l.LastOrDefault().PlayerOwnerID == player.ObjectID)
+                    {
+                        Slowmotion sm = sm_l.Last();
+                        float sm_TotalTime = sm.FadeInTime + sm.ActiveTime + sm.FadeOutTime;
+                        omenFullness = (sm_TotalTime - sm.Progress) / sm_TotalTime;
+                    }
+                }
+            }
+
+            // Boosts time
+            if (player.StrengthBoostActive || player.SpeedBoostActive)
+            {
+                if (player.TimeSequence.TimeSpeedBoostActive <= 15000f)
+                {
+                    omenFullness = player.TimeSequence.TimeSpeedBoostActive / 15000f;
+                }
+
+                // Prioritize strengthboost
+                if (player.TimeSequence.TimeStrengthBoostActive <= 15000f)
+                {
+                    omenFullness = player.TimeSequence.TimeStrengthBoostActive / 15000f;
+
+                    if (player.GetCurrentHealthMode() == Player.HealthMode.StrengthBoostOverHealth)
+                    {
+                        IsFlashing = true;
+                    }
+                }
+            }
+        
+            // Rocket riding time
+            if (player.RocketRideProjectileWorldID > 0 && player.RocketRideProjectile != null && player.RocketRideProjectile is ProjectileBazooka)
+            {
+                // 10s of rocket riding
+                omenFullness = (10000f - ((ProjectileBazooka)player.RocketRideProjectile).m_rocketRideTime) * 0.0001f;
+                IsFlashing = true;
+            }
+        }
+        catch (Exception) { }
+
+        if (omenFullness > 1)
+        {
+            omenFullness = 1;
+        }
+        else if (omenFullness < 0)
+        {
+            omenFullness = 0;
+        }
+
+        return omenFullness;
     }
 }
