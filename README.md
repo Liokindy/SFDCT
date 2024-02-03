@@ -8,6 +8,9 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 > [!NOTE]
 > The mod is still a work-in-progress. Features may break, be added, removed, or changed entirely.
 
+> [!TIP]
+> Settings are currently accessed and changed by editing `SFDCT/config.ini` with a text editor. You can refresh your settings in-game using `F6`
+
 ### Sound Panning
 - Sounds will pan to the left or right depending on where they come from
 - Sound will distort and sound slowed down or speed up according to the time modifier.
@@ -48,7 +51,7 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 
 1. Get the latest release [here](https://github.com/Liokindy/SFDCT/releases). Go to SFD's root folder and extract the zip contents there.
 
-2. Go to SFD's launch options in Steam and type `/c "%command%\..\SFDCT.exe"`. This will tell Steam to open SFDCT instead of SFD.
+2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`. This will tell Steam to open SFDCT instead of SFD.
 
 3. When you launch SFD, you will get asked to choose between SFDCT, SFD or [SFR](https://github.com/Odex64/SFR) (if you have a release already installed). You can also skip this and start a game automatically by adding their corresponding start parameter. (`-SFDCT`, `-SFD`, or `-SFR`)
 
