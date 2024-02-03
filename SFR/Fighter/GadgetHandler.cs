@@ -186,7 +186,6 @@ internal static class GadgetHandler
             // Keep the health bars visible
             destinationRectangle.Y += 1;
             destinationRectangle.Height -= 1;
-            omenBarColor.A = 200;
         }
         else
         {
@@ -214,22 +213,28 @@ internal static class GadgetHandler
         // Omen bar uses, ordered in low-to-high priority.
         try
         {
-            // The player's slowmotion
+            // The player's active slowmotions
             if (player.SlowmotionFactor != 1f && player.GameWorld != null)
             {
                 List<Slowmotion> sm_l = player.GameWorld.SlowmotionHandler.GetSlowmotions();
                 if (sm_l != null && sm_l.Count > 0)
                 {
-                    if (sm_l.LastOrDefault().PlayerOwnerID == player.ObjectID)
+                    Slowmotion sm;
+                    for (int i = 0; i < sm_l.Count; i++)
                     {
-                        Slowmotion sm = sm_l.Last();
-                        float sm_TotalTime = sm.FadeInTime + sm.ActiveTime + sm.FadeOutTime;
-                        omenFullness = (sm_TotalTime - sm.Progress) / sm_TotalTime;
+                        sm = sm_l.ElementAtOrDefault(i);
+                        if (sm.PlayerOwnerID == player.ObjectID)
+                        {
+                            float sm_TotalTime = sm.FadeInTime + sm.ActiveTime + sm.FadeOutTime;
+                            omenFullness = (sm_TotalTime - sm.Progress) / sm_TotalTime;
+                        }
                     }
                 }
             }
 
             // Boosts time
+            // NOT NETWORKED - TODO: Implement a local prediction
+            /*
             if (player.StrengthBoostActive || player.SpeedBoostActive)
             {
                 if (player.TimeSequence.TimeSpeedBoostActive <= 15000f)
@@ -248,7 +253,8 @@ internal static class GadgetHandler
                     }
                 }
             }
-        
+            */
+
             // Rocket riding time
             if (player.RocketRideProjectileWorldID > 0 && player.RocketRideProjectile != null && player.RocketRideProjectile is ProjectileBazooka)
             {

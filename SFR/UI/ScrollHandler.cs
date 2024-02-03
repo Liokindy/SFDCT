@@ -7,6 +7,7 @@ using HarmonyLib;
 using SFDCT.Helper;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Drawing.Text;
 
 namespace SFDCT.UI;
 
@@ -23,6 +24,7 @@ internal static class ScrollHandler
     [HarmonyPatch(typeof(Panel), nameof(Panel.MouseClick))]
     private static bool PanelMouseClick(Panel __instance, Rectangle mouseSelection)
     {
+        // Logger.LogDebug(mouseSelection.ToString());
         if (__instance.subPanel != null)
         {
             __instance.subPanel.MouseClick(mouseSelection);
@@ -31,9 +33,7 @@ internal static class ScrollHandler
 
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            Rectangle memberRect = GetElementArea(__instance.members[i].Area);
-
-            if (mouseSelection.Intersects(memberRect))
+            if (mouseSelection.Intersects(GetElementArea(__instance.members[i].Area)))
             {
                 __instance.SelectMember(i);
                 __instance.members[i].MouseClick(mouseSelection);
@@ -54,9 +54,7 @@ internal static class ScrollHandler
         }
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            Rectangle memberRect = GetElementArea(__instance.members[i].Area);
-
-            if (currentSelection.Intersects(memberRect))
+            if (currentSelection.Intersects(GetElementArea(__instance.members[i].Area)))
             {
                 __instance.SelectMember(i);
                 __instance.members[i].MouseMove(currentSelection, previousSelection);
@@ -76,76 +74,82 @@ internal static class ScrollHandler
         }
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            Rectangle memberRect = GetElementArea(__instance.members[i].Area);
-
-            if (mouseSelection.Intersects(memberRect))
+            if (mouseSelection.Intersects(GetElementArea(__instance.members[i].Area)))
             {
                 __instance.members[i].MouseDown(mouseSelection);
             }
         }
         return false;
     }
-    
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DropdownPanel), nameof(DropdownPanel.MouseClick))]
+    private static bool DropdownPanelMouseClick(DropdownPanel __instance, Rectangle mouseSelection)
+    {
+        Rectangle memberRect = GetElementArea(__instance.Area);
+        if (!mouseSelection.Intersects(memberRect))
+        {
+            __instance.Close();
+            return false;
+        }
+
+        ScrollHandler.PanelMouseClick(__instance, mouseSelection);
+        return false;
+    }
+
     /// <summary>
     ///     This makes it possible to click the edges of menus,
     ///     making scrollbars click-eable again.
     /// </summary>
-    private static Rectangle GetElementArea(Rectangle elementArea)
+    private static Rectangle GetElementArea(Rectangle area)
     {
-        elementArea.Inflate(12, 12);
+        Rectangle elementArea = area;
+        elementArea.Inflate(14, 14);
         return elementArea;
     }
 
     /// <summary>
     ///     The scroll bar uses a while statement to scroll towards the mouse. It can get stucked
     ///     if the mouse clicks near the bottom/top as it will try to go lower/higher but the actual
-    ///     position wont change.
+    ///     position wont change. Causing an infinite loop and crashing the game.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ScrollBar), nameof(ScrollBar.MouseClick))]
     private static bool ScrollBarMouseClick(ScrollBar __instance, Rectangle mouseSelection)
     {
-        if (mouseSelection.Y > __instance.handlePosition)
+        if (mouseSelection.Y > HandleCenter(__instance.handlePosition))
         {
-            int lastHandlePosition = __instance.handlePosition;
-            while (mouseSelection.Y > __instance.handlePosition)
+            int lastHandlePosition = HandleCenter(__instance.handlePosition);
+            while (mouseSelection.Y > HandleCenter(__instance.handlePosition))
             {
                 __instance.parentMenu.Scroll(1);
-                if (lastHandlePosition != __instance.handlePosition)
+                if (lastHandlePosition != HandleCenter(__instance.handlePosition))
                 {
-                    lastHandlePosition = __instance.handlePosition;
+                    lastHandlePosition = HandleCenter(__instance.handlePosition);
                 }
                 else { break; }
             }
             return false;
         }
-        else if (mouseSelection.Y < __instance.handlePosition)
+        else if (mouseSelection.Y < HandleCenter(__instance.handlePosition))
         {
-            int lastHandlePosition = __instance.handlePosition;
-            while (mouseSelection.Y < __instance.handlePosition)
+            int lastHandlePosition = HandleCenter(__instance.handlePosition);
+            while (mouseSelection.Y < HandleCenter(__instance.handlePosition))
             {
                 __instance.parentMenu.Scroll(-1);
-                if (lastHandlePosition != __instance.handlePosition)
+                if (lastHandlePosition != HandleCenter(__instance.handlePosition))
                 {
-                    lastHandlePosition = __instance.handlePosition;
+                    lastHandlePosition = HandleCenter(__instance.handlePosition);
                 }
                 else { break; }
             }
         }
         return false;
     }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ScrollBar), nameof(ScrollBar.Area), MethodType.Getter)]
-    private static void ScrollBarGetArea(ref Rectangle __result)
+    private static int HandleCenter(int positionY)
     {
-        __result.Width = 10;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ScrollBar), nameof(ScrollBar.handle), MethodType.Getter)]
-    private static void ScrollBarGetHandle(ref Rectangle __result)
-    {
-        __result.Width = 10;
+        // Scrollbar's handle is 28 pixels high
+        positionY += 14;
+        return positionY;
     }
 }

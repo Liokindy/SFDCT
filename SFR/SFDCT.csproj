@@ -120,7 +120,7 @@
     </Compile>
     <Compile Include="Bootstrap\Assets.cs" />
     <Compile Include="API\Sandbox.cs" />
-    <Compile Include="Editor\FormTweaks.cs" />
+    <Compile Include="Editor\Tweaks.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\GadgetHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />

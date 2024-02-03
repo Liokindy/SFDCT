@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Reflection.Emit;
+using Microsoft.Xna.Framework;
 using SFD;
 using SFD.MenuControls;
+using SFD.Weapons;
 using HarmonyLib;
-using Microsoft.Xna.Framework;
 using SFDCT.Helper;
 
 namespace SFDCT.Fighter;
@@ -17,6 +18,43 @@ internal static class ExtendedProfiles
     private static readonly int ExtendedProfileCount = 9;
     private static readonly int ProfilesPerRow = 6;
     private static readonly int ProfileSeparation = 88;
+
+    /// <summary>
+    ///     Make the player in the preview cycle through some animations,
+    ///     so it looks fancier.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ProfileCustomizationPanel), nameof(ProfileCustomizationPanel.Update))]
+    private static void UpdateCustomizationPreviewPlayer(ProfileCustomizationPanel __instance)
+    {
+        if (__instance.m_previewPlayer == null)
+        {
+            return;
+        }
+
+        float time = (float)(Lidgren.Network.NetTime.Now % 15f);
+        switch(time)
+        {
+            case var t when t > 7 && t < 7.35f:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack1);
+                break;
+            case var t when t > 7.35f && t < 7.65f:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.Block);
+                break;
+            case var t when t > 7.65f && t < 8:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack1);
+                break;
+            case var t when t > 8 && t < 8.35f:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack2);
+                break;
+            case var t when t > 8.35f && t < 8.9:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack3);
+                break;
+            default:
+                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.Idle);
+                break;
+        }
+    }
 
     /// <summary>
     ///     Remove the call for RefreshGrid and only call it after we add
@@ -145,38 +183,7 @@ internal static class ExtendedProfiles
                 __instance.members[i].NeighborDownId = menuID;
             }
         }
-        /*
-        // Top
-        SetupNeighborID(__instance.members[0], -1, -1, 1, 6);
-        SetupNeighborID(__instance.members[1], 0, -1, 2, 7);
-        SetupNeighborID(__instance.members[2], 1, -1, 3, 8);
-        SetupNeighborID(__instance.members[3], 2, -1, 4, 9);
-        SetupNeighborID(__instance.members[4], 3, -1, 5, 10);
-        SetupNeighborID(__instance.members[5], 4, -1, -1, 11);
-        // Middle
-        SetupNeighborID(__instance.members[6], -1, 0, 7, 12);
-        SetupNeighborID(__instance.members[7], 6, 1, 8, 13);
-        SetupNeighborID(__instance.members[8], 7, 2, 9, 14);
-        SetupNeighborID(__instance.members[9], 8, 3, 10, 15);
-        SetupNeighborID(__instance.members[10], 9, 4, 11, 16);
-        SetupNeighborID(__instance.members[11], 10, 5, -1, 17);
-        // Bottom
-        SetupNeighborID(__instance.members[12], -1, 6, 13, menuID);
-        SetupNeighborID(__instance.members[13], 12, 7, 14, menuID);
-        SetupNeighborID(__instance.members[14], 13, 8, 15, menuID);
-        SetupNeighborID(__instance.members[15], 14, 9, 16, menuID);
-        SetupNeighborID(__instance.members[16], 15, 10, 17, menuID);
-        SetupNeighborID(__instance.members[17], 16, 11, -1, menuID);
-        */
-
         __instance.RefreshGrid();
-    }
-    private static void SetupNeighborID(Element element, int left, int up, int right, int down)
-    {
-        element.NeighborLeftId = left;
-        element.NeighborUpId = up;
-        element.NeighborRightId = right;
-        element.NeighborDownId = down;
     }
 
     /// <summary>
