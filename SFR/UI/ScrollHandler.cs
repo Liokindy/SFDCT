@@ -33,7 +33,16 @@ internal static class ScrollHandler
 
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            if (mouseSelection.Intersects(GetElementArea(__instance.members[i].Area)))
+            Rectangle memberArea = __instance.members[i].Area;
+            if (__instance.members[i] is Menu)
+            {
+                if (((Menu)__instance.members[i]).showScrollBar)
+                {
+                    memberArea = GetElementArea(__instance.members[i].Area);
+                }
+            }
+
+            if (mouseSelection.Intersects(memberArea))
             {
                 __instance.SelectMember(i);
                 __instance.members[i].MouseClick(mouseSelection);
@@ -54,7 +63,16 @@ internal static class ScrollHandler
         }
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            if (currentSelection.Intersects(GetElementArea(__instance.members[i].Area)))
+            Rectangle memberArea = __instance.members[i].Area;
+            if (__instance.members[i] is Menu)
+            {
+                if (((Menu)__instance.members[i]).showScrollBar)
+                {
+                    memberArea = GetElementArea(__instance.members[i].Area);
+                }
+            }
+
+            if (currentSelection.Intersects(memberArea))
             {
                 __instance.SelectMember(i);
                 __instance.members[i].MouseMove(currentSelection, previousSelection);
@@ -74,7 +92,16 @@ internal static class ScrollHandler
         }
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            if (mouseSelection.Intersects(GetElementArea(__instance.members[i].Area)))
+            Rectangle memberArea = __instance.members[i].Area;
+            if (__instance.members[i] is Menu)
+            {
+                if (((Menu)__instance.members[i]).showScrollBar)
+                {
+                    memberArea = GetElementArea(__instance.members[i].Area);
+                }
+            }
+
+            if (mouseSelection.Intersects(memberArea))
             {
                 __instance.members[i].MouseDown(mouseSelection);
             }
@@ -82,6 +109,10 @@ internal static class ScrollHandler
         return false;
     }
 
+    /// <summary>
+    ///     If the user clicks near the scrollbar the game thinks it's outside
+    ///     the dropdown panel and closes it. This patches that.
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DropdownPanel), nameof(DropdownPanel.MouseClick))]
     private static bool DropdownPanelMouseClick(DropdownPanel __instance, Rectangle mouseSelection)
