@@ -1,15 +1,17 @@
-﻿using HarmonyLib;
-using System;
-using Lidgren.Network;
+﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
 using SFD.States;
 using SFD.Voting;
 using SFD.ManageLists;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
+using SFD.Objects;
+using SFD.Weapons;
+using Lidgren.Network;
+using HarmonyLib;
 using CConst = SFDCT.Misc.Constants;
+using System.Security.AccessControl;
 
 namespace SFDCT.Game;
 
@@ -50,26 +52,81 @@ internal static class CommandHandler
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
     private static bool GameInfo_HandleCommands(ref bool __result, ProcessCommandArgs args, GameInfo __instance)
     {
+        bool ranCustomCommand = false;
+
         // We check to see if we handle custom commands before vanilla ones,
         // this also allows us to replace them.
-        if (CommandHandler.HandleCommands(args, __instance))
+        if (__instance.GameOwner != GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local)
         {
-            __result = true;
-            return false;
+            // Client
+            ranCustomCommand = ClientCommands(args, __instance);
+        }
+        if (__instance.GameOwner == GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local)
+        {
+            // Server
+            ranCustomCommand = ServerCommands(args, __instance);
         }
 
-        // No custom commands ran
-        return true;
+        // Don't execute the original method if a custom command was run.
+        __result = ranCustomCommand;
+        return !ranCustomCommand;
     }
-
-    private static bool HandleCommands(ProcessCommandArgs args, GameInfo __instance)
+    private static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
     {
-        // These commands are ran server side
-        if (__instance.GameOwner == GameOwnerEnum.Client)
+        if (args.IsCommand(
+            "PLAYERS",
+            "LISTPLAYERS",
+            "SHOWPLAYERS",
+            "USERS",
+            "LISTUSERS",
+            "SHOWUSERS"
+        ))
         {
-            return false;
-        }
+            int players = 0;
+            int bots = 0;
 
+            string header = "- Listing all users in the lobby...";
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser));
+
+            foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
+            {
+                if (gameUser.IsDedicatedPreview) { continue; } // Vanilla hides the dedicated preview from the list
+
+                string slotIndex, latency, profileName, accountName, powerStatus;
+                slotIndex = gameUser.GameSlotIndex.ToString();
+                latency = Math.Min(gameUser.Ping, 9999) + "ms";
+
+                // Modified clients can illegaly modify these, bypassing their maximum lengths.
+                profileName = gameUser.GetProfileName().Substring(0, Math.Min(gameUser.GetProfileName().Length, 32));
+                accountName = gameUser.AccountName.Substring(0, Math.Min(gameUser.AccountName.Length, 32));
+            
+                // Check IsHost first, hosts are counted as moderators
+                powerStatus = gameUser.IsHost ? "- HOST" : (gameUser.IsModerator ? "- MOD" : "");
+
+                string mess = "?";
+                if (gameUser.IsBot)
+                {
+                    // Bots don't have ping, or an account. Less clutter
+                    mess = $"{slotIndex}: \"{profileName}\" - BOT";
+                    bots++;
+                }
+                else
+                {
+                    mess = $"{slotIndex} - {latency}: \"{profileName}\" ({accountName}) {powerStatus}";
+                    players++;
+                }
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.LightBlue, args.SenderGameUser));
+            }
+
+            string info = $"- {players} player(s)" + (bots > 0 ? $" and {bots} bot(s)" : "");
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, info, Color.ForestGreen, args.SenderGameUser));
+
+            return true;
+        }
+        return false;
+    }
+    private static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
+    {
         // Host-only commands
         if (args.HostPrivileges)
         {
@@ -175,70 +232,246 @@ internal static class CommandHandler
                 return true;
             }
         }
-
-        if (args.IsCommand("VOTEKICK", "VK") && args.Parameters.Count > 0)
+        
+        // Moderator commands
+        if (args.HostPrivileges || args.ModeratorPrivileges)
         {
-            if (!Settings.Values.GetBool("VOTE_KICKING_ENABLED"))
+            // Commands that interact with the gameworld, such as GIVE
+            if (__instance.GameWorld != null)
             {
-                return false;
-            }
-            if (GameSFD.Handle.CurrentState != State.Game || GameSFD.Handle.CurrentState == State.GameOffline)
-            {
-                return false;
-            }
-            if (!Voting.GameVoteKick.CanBeCalled())
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Vote-kicking is in cooldown.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
-            if (__instance.VoteInfo.ActiveVotes.Count > 0)
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "There is a vote already in progress.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
-            if (!(args.SenderGameUser.IsHost || args.SenderGameUser.IsModerator) && (DateTime.Now.Hour <= args.SenderGameUser.JoinTime.Hour && (DateTime.Now.Minute - args.SenderGameUser.JoinTime.Minute) <= 2))
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You must be atleast 2 minutes in the server before initiating a vote-kick.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
+                // Better /GIVE command, allows for multiple weapons in a single command.
+                // i.e /GIVE ME KNIFE MAGNUM 21 SNIPER_RIFLE BOUNCING_AMMO GRENADES
+                if (args.IsCommand("GIVE") && args.CanUseModeratorCommand("GIVE") && args.Parameters.Count > 1)
+                {
+                    Color fbColor = Color.ForestGreen;
 
-            GameUser userTokick = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-            string voteReason = (args.Parameters.Count > 1 ? args.Parameters[1] : "");
+                    GameUser selectedUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    Player worldPlayer;
+                
+                    if (selectedUser == null)
+                    {
+                        return false;
+                    }
 
-            if (userTokick == null)
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Couldn't find user.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
-            if (userTokick.UserIdentifier == args.SenderGameUserIdentifier)
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against yourself.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
-            if (userTokick.IsBot)
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against bots.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
-            if (userTokick.IsHost || userTokick.IsModerator)
-            {
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "You can't initiate a vote-kick against that user.", Color.Red, args.SenderGameUser, null));
-                return true;
-            }
+                    worldPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(selectedUser.UserIdentifier);
+                    if (worldPlayer == null || worldPlayer.IsDisposed || worldPlayer.IsRemoved)
+                    {
+                        return false;
+                    }
 
-            Server server = GameSFD.Handle.Server;
-            if (server != null)
-            {
-                GameVote gameVoteKick = new Voting.GameVoteKick(GameVote.GetNextVoteID(), voteReason, userTokick, args.SenderGameUser);
-                gameVoteKick.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                    // Start at 1 so we don't use the user parameter
+                    for(int i = 1; i < args.Parameters.Count; i++)
+                    {
+                        string parameter = args.Parameters[i].ToUpper();
+                        if (string.IsNullOrEmpty(parameter))
+                        {
+                            continue;
+                        }
 
-                __instance.VoteInfo.AddVote(gameVoteKick);
-                server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(gameVoteKick, false));
-                return true;
+                        // Heal the player to full health
+                        if (parameter == "LIFE" || parameter == "HEAL" || parameter == "HEALTH")
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was healed.", fbColor));
+                            worldPlayer.HealAmount(worldPlayer.Health.MaxValue);
+
+                            // Visual and audio feedback for the player
+                            worldPlayer.GrabWeaponItem(WeaponDatabase.GetWeapon("+50"));
+                            continue;
+                        }
+
+                        // Give player ammo for his handgun and rifle
+                        if (parameter == "AMMO")
+                        {
+                            bool resupplyAmmo = false;
+
+                            if (worldPlayer.CurrentHandgunWeapon != null)
+                            {
+                                worldPlayer.CurrentHandgunWeapon.FillAmmoMax();
+                                resupplyAmmo = true;
+                            }
+                            if (worldPlayer.CurrentRifleWeapon != null)
+                            {
+                                worldPlayer.CurrentRifleWeapon.FillAmmoMax();
+                                resupplyAmmo = true;
+                            }
+
+                            if (resupplyAmmo)
+                            {
+                                args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was supplied with ammo.", fbColor));
+                            }
+                            continue;
+                        }
+
+                        // Funny
+                        if (args.HostPrivileges && parameter == "ALL")
+                        {
+                            short[] WeaponIDs = [
+                                // 22, 7, 68
+                                24,1,28,2,17,6,5,19,26,
+                                3,4,31,8,11,41,10,12,18,
+                                13,14,15,16,20,25,27,29,9,23,
+                                42,43,44,45,21,30,32,33,58,34,
+                                35,36,37,38,39,40,49,47,48,46,
+                                50,51,52,53,55,54,57,56,59,62,
+                                61,63,64,65,66,67
+                            ];
+
+                            foreach(short id in WeaponIDs)
+                            {
+                                worldPlayer.GrabWeaponItem(WeaponDatabase.GetWeapon(id));
+                            }
+
+                            args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} received a lot of weapons.", fbColor));
+                            break;
+                        }
+
+                        // Spawn a streetsweeper or streetsweepercrate
+                        if (parameter == "SW" || parameter == "SWC" || parameter == "STREETSWEEPER" || parameter == "STREETSWEEPERCRATE")
+                        {
+                            string objectName = (parameter == "SW" ? "STREETSWEEPER" : (parameter == "SWC" ? "STREETSWEEPERCRATE" : parameter));
+                            args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was delivered a {objectName}.", fbColor));
+
+                            SpawnObjectInformation spawnObject = new(__instance.GameWorld.CreateObjectData(objectName), worldPlayer.PreWorld2DPosition + new Vector2((float)(-(float)worldPlayer.LastDirectionX) * 2f, 8f), 0f, 1, Vector2.Zero, 0f);
+                            ObjectData objectData = ObjectData.Read(__instance.GameWorld.CreateTile(spawnObject));
+
+                            // Make the streetsweeper an ally, if spawned without a crate
+                            if (objectData is ObjectStreetsweeper objStreetsweeper)
+                            {
+                                objStreetsweeper.SetOwnerPlayer(worldPlayer);
+                                objStreetsweeper.SetOwnerTeam(worldPlayer.CurrentTeam, false);
+                            }
+                            continue;
+                        }
+
+                        // Get a weapon with it's name
+                        WeaponItem wpn = WeaponDatabase.GetWeapon(parameter);
+                        short weaponID = 0;
+                        if (wpn == null)
+                        {
+                            if (!short.TryParse(parameter, out weaponID))
+                            {
+                                args.Feedback.Add(new(args.SenderGameUser, $"Could not find weapon with name \"{parameter}\"", Color.Red, args.SenderGameUser));
+                                continue;
+                            }
+                            else
+                            {
+                                // Try using the parsed ID instead
+                                wpn = WeaponDatabase.GetWeapon(weaponID);
+                        
+                                if (wpn == null)
+                                {
+                                    args.Feedback.Add(new(args.SenderGameUser, $"Could not find weapon with ID \"{parameter}\"", Color.Red, args.SenderGameUser));
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (!wpn.BaseProperties.WeaponCanBeEquipped)
+                        {
+                            continue;
+                        }
+
+                        worldPlayer.GrabWeaponItem(wpn);
+                        args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} received \"{wpn.BaseProperties.WeaponNameID}\" ({wpn.BaseProperties.WeaponID})", fbColor));
+                    }
+
+                    return true;
+
+                }
+                
+                // Create a slowmotion with an owner
+                // (In slowmotions, the owner and his projectiles are slightly faster)
+                if (args.IsCommand("SLOWMOTION", "SM") && args.CanUseModeratorCommand("SLOWMOTION", "SM") && args.Parameters.Count > 0)
+                {
+                    // /SLOWMOTION [INTENSITY] NONE "INFINITE" 100 100
+                    // /SLOWMOTION [INTENSITY] [OWNER] [DURATION] [FADEIN] [FADEOUT]
+                    if (float.TryParse(args.Parameters[0], out float smIntensity))
+                    {
+                        int smOwnerPlayerID = -1;
+                        float smDuration = 86400f * 1000f;
+                        float smFadeIn = 100f;
+                        float smFadeOut = 100f;
+
+                        if (args.Parameters.Count > 1)
+                        {
+                            GameUser selectedGameUser = __instance.GetGameUserByStringInput(args.Parameters[1], args.SenderGameUser);
+                            if (selectedGameUser != null)
+                            {
+                                Player selectedPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(selectedGameUser.UserIdentifier);
+                                if (selectedPlayer != null)
+                                {
+                                    smOwnerPlayerID = selectedPlayer.ObjectID;
+                                }
+                            }
+                        }
+                        float.TryParse(args.Parameters.ElementAtOrDefault(2), out smDuration);
+                        float.TryParse(args.Parameters.ElementAtOrDefault(4), out smFadeOut);
+                        float.TryParse(args.Parameters.ElementAtOrDefault(3), out smFadeIn);
+
+                        __instance.GameWorld.SlowmotionHandler.AddSlowmotion(new(
+                            smFadeIn, smDuration, smFadeOut, smIntensity, smOwnerPlayerID    
+                        ));
+
+                        string mess = "Slowmotion added";
+                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen));
+                        return true;
+                    }
+                }
             }
         }
 
-        // None of the commands ran
+        if (CConst.SlotCount != 8)
+        {
+            // Players will only see "?0" when listing players,
+            // so we send them a server-sided list instead.
+
+            // (This is taken from ClientCommands!)
+            if (args.IsCommand(
+                "SCOREBOARD"
+            ))
+            {
+                string header = "- SCOREBOARD -";
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser, null));
+
+                int num = 0;
+                foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
+                {
+                    if (gameUser.IsDedicatedPreview) { continue; }
+
+                    string slotIndex = gameUser.GameSlotIndex.ToString();
+                    string profName = gameUser.GetProfileName();
+                    string accName = gameUser.AccountName;
+                    string ping = gameUser.Ping.ToString();
+                    string tWins = gameUser.Score.TotalWins.ToString();
+                    string tLoss = gameUser.Score.TotalLosses.ToString();
+                    string tGames = gameUser.Score.TotalGames.ToString();
+
+                    string team = "Team?";
+                    if (gameUser.GameSlot != null)
+                    {
+                        team = gameUser.GameSlot.CurrentTeam.ToString();  
+                    }
+
+                    Color messCol = Color.LightBlue * (num % 2 == 0 ? 1f : 0.625f);
+                    messCol.A = 255;
+                    num++;
+                    
+                    string mess1;
+                    
+                    if (gameUser.IsBot)
+                    {
+                        mess1 = $"{slotIndex}: \"{profName}\" (BOT) - {team}";
+                    }
+                    else
+                    {
+                        mess1 = $"{slotIndex}: {accName} - {team} | {tWins}/{tLoss} ({tGames})";
+                    }
+
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess1, messCol, args.SenderGameUser, null));
+                }
+                return true;
+            }
+        }
         return false;
     }
 }

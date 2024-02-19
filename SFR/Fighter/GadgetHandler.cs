@@ -20,6 +20,93 @@ namespace SFDCT.Fighter;
 [HarmonyPatch]
 internal static class GadgetHandler
 {
+    /// <summary>
+    ///     Overrides the Streetsweeper drawing method to include
+    ///     status bars.
+    /// </summary>
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ObjectStreetsweeper), nameof(ObjectStreetsweeper.Draw))]
+    private static bool DrawStreetsweeper(ObjectStreetsweeper __instance, SpriteBatch spriteBatch, float ms)
+    {
+        if (__instance == null || __instance.IsDisposed)
+        {
+            return false;
+        }
+
+        // Damage flashing
+        Color baseColor = Color.Gray;
+        __instance.GetDrawColor(ref baseColor);
+
+        Vector2 box2dPosition = __instance.Body.GetPosition() + __instance.GameWorld.DrawingBox2DSimulationTimestepOver * __instance.Body.GetLinearVelocity();
+        Vector2 worldPosition = Converter.Box2DToWorld(box2dPosition);
+        Vector2 screenPosition = Camera.ConvertBox2DToScreen(box2dPosition);
+
+        // Body
+        __instance.CurrentAnimation?.Draw(spriteBatch, __instance.Texture, screenPosition, __instance.Body.GetAngle(), SpriteEffects.None, 0.5f);
+
+        // Eye
+        Vector2 lookDirVector = new Vector2((float)Math.Cos(__instance.m_lookRotation), -(float)Math.Sin(__instance.m_lookRotation));
+        lookDirVector.Normalize();
+        lookDirVector *= 1.5f;
+        __instance.m_eyePosition = Vector2.SmoothStep(__instance.m_eyePosition, lookDirVector, 0.05f * ms);
+
+        Vector2 eyeTextureOffset = new Vector2(__instance.m_eyeTexture.Width * 0.5f, __instance.m_eyeTexture.Height * 0.5f);
+        Color eyeColor = __instance.m_blinking ? ColorCorrection.CreateCustom(Constants.COLORS.LAZER_FULL_STRENGTH) : baseColor;
+        __instance.DrawTexture(spriteBatch, worldPosition, __instance.m_eyeTexture, __instance.m_eyePosition, eyeTextureOffset, 0f, eyeColor, SpriteEffects.None, 1f);
+
+        // Lazer and Gun
+        ObjectStreetsweeper.AttackStateEnum attackState = __instance.GetAttackState();
+        if (attackState is ObjectStreetsweeper.AttackStateEnum.Aiming or ObjectStreetsweeper.AttackStateEnum.Attacking)
+        {
+            __instance.DrawLazer(spriteBatch, worldPosition, __instance.m_eyePosition);
+        }
+        __instance.Gun.DrawTexture(spriteBatch, worldPosition, baseColor);
+        
+        // Health bar and name/plate
+        if (__instance.m_showNamePlate)
+        {
+            Vector2 platesPosition = Camera.ConvertWorldToScreen(worldPosition + new Vector2(0, 18f));
+            float zoomScale = MathHelper.Max(Camera.Zoom * 0.5f, 1f);
+
+            // Health and Gun cooldown
+            if (__instance.Health.CheckRecentlyModified(2000f) || (__instance.GetAttackState() is ObjectStreetsweeper.AttackStateEnum.Aiming or ObjectStreetsweeper.AttackStateEnum.Attacking))
+            {
+                Rectangle barRect = new((int)(platesPosition.X - 32 * zoomScale * 0.5f), (int)(platesPosition.Y - 6f * zoomScale), (int)(32 * zoomScale), (int)(2f * zoomScale));
+                Rectangle outlineRect = barRect;
+                outlineRect.Inflate((int)zoomScale, (int)zoomScale);
+                Color healthBarColor = __instance.Health.CheckRecentlyModified(50f) ? Color.White : ColorCorrection.FromXNAToCustom(Constants.COLORS.LIFE_BAR);
+
+                // Black outside outline
+                spriteBatch.Draw(Constants.WhitePixel, outlineRect, Color.Black);
+                // Inner background
+                outlineRect.Inflate(-(int)zoomScale, -(int)zoomScale);
+                spriteBatch.Draw(Constants.WhitePixel, outlineRect, new Color(64,64,64));
+                // Health
+                barRect.Width = (int)(barRect.Width * __instance.Health.Fullness);
+                spriteBatch.Draw(Constants.WhitePixel, barRect, healthBarColor);
+            }
+
+
+            Team ownerTeam = __instance.GetOwnerTeam();
+
+            Vector2 namePosition = platesPosition - new Vector2(0f, __instance.m_nameTextSize.Y * zoomScale * 0.75f);
+            Color nameColor = __instance.GetTeamTextColor(ownerTeam);
+            Constants.DrawString(spriteBatch, Constants.Font1Outline, __instance.m_name, namePosition, nameColor, 0f, __instance.m_nameTextSize * 0.5f, zoomScale * 0.5f, SpriteEffects.None, 0);
+
+            Texture2D teamBadge = Constants.GetTeamIcon(ownerTeam);
+            if (teamBadge != null)
+            {
+                Vector2 badgePosition = new Vector2(platesPosition.X - __instance.m_nameTextSize.X * 0.25f * zoomScale - teamBadge.Width * zoomScale, platesPosition.Y - __instance.m_nameTextSize.Y * zoomScale);
+                spriteBatch.Draw(teamBadge, badgePosition, null, Color.Gray, 0f, Vector2.Zero, zoomScale, SpriteEffects.None, 1f);
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Overrides the lazer drawing method of Streetsweepers
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectStreetsweeper), nameof(ObjectStreetsweeper.DrawLazer))]
     private static bool DrawSWLazer(ObjectStreetsweeper __instance, SpriteBatch spriteBatch, Vector2 worldPosition, Vector2 eyeOffset)
@@ -47,6 +134,10 @@ internal static class GadgetHandler
         return false;
     }
 
+    /// <summary>
+    ///     Overrides the lazer drawing method to include perlin-like noise
+    ///     in it's wobbing, making it smoother.
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Player), nameof(Player.DrawAim))]
     private static bool DrawPlayerAimLazer(Player __instance, float ms, Player.DrawAimMode aimMode)
@@ -101,6 +192,10 @@ internal static class GadgetHandler
         return false;
     }
 
+    /// <summary>
+    ///     Fixes the lazer attachment not being drawn in the HUD
+    ///     (weapons are directly drawn using their model texture)
+    /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawWeaponSlots))]
     private static void DrawWeaponSlotsLazerAttachment(PlayerHUD __instance, int x, int y, SpriteBatch spriteBatch)
@@ -121,6 +216,9 @@ internal static class GadgetHandler
         }
     }
 
+    /// <summary>
+    ///     Draw a player omen bar on the HUD
+    /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawMainPanel))]
     private static void DrawOmenBar_OnHUD(PlayerHUD __instance, int x, int y, Player player, GameUser user, PlayerStatus playerStatus, SpriteBatch spriteBatch, float elapsed)
@@ -145,6 +243,9 @@ internal static class GadgetHandler
         }
     }
 
+    /// <summary>
+    ///     Draw a player omen bar on their status bars
+    /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Player), nameof(Player.DrawPlates))]
     private static void DrawOmenBar_OnStatusBar(Player __instance)
@@ -184,8 +285,11 @@ internal static class GadgetHandler
         if(__instance.GetCurrentHealthMode() == Player.HealthMode.StrengthBoostOverHealth || __instance.Health.CheckRecentlyModified(2000f) || __instance.Energy.CheckRecentlyModified(2000f))
         {
             // Keep the health bars visible
-            destinationRectangle.Y += 1;
-            destinationRectangle.Height -= 1;
+            int hHalf = destinationRectangle.Height / 2;
+            int hOffset = destinationRectangle.Height - hHalf;
+
+            destinationRectangle.Y += hOffset;
+            destinationRectangle.Height -= hHalf;
         }
         else
         {
@@ -201,6 +305,9 @@ internal static class GadgetHandler
         __instance.m_spriteBatch.Draw(Constants.WhitePixel, destinationRectangle, ColorCorrection.FromXNAToCustom(omenBarColor));
     }
 
+    /// <summary>
+    ///     Gets the fullness of a player's omenbar
+    /// </summary>
     private static float GetOmenBar(Player player, out bool IsFlashing)
     {
         float omenFullness = 0f;

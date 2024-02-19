@@ -7,7 +7,6 @@ using Lidgren.Network;
 using SFD;
 using SFDCT.Helper;
 using CConst = SFDCT.Misc.Constants;
-using CSecurity = SFDCT.Misc.Constants.Security;
 using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Sync;
@@ -19,6 +18,8 @@ internal static class Host
     [HarmonyPatch(typeof(Constants), nameof(Constants.GET_HOST_GAME_SLOT_STATE))]
     private static bool Slots_GetGameSlotState(ref byte __result, int index)
     {
+        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
+
         __result = CConst.HOST_GAME_SLOT_STATES[index];
         return false;
     }
@@ -26,6 +27,8 @@ internal static class Host
     [HarmonyPatch(typeof(Constants), nameof(Constants.GET_HOST_GAME_SLOT_TEAM))]
     private static bool Slots_GetGameSlotTeam(ref Team __result, int index)
     {
+        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
+
         __result = CConst.HOST_GAME_SLOT_TEAMS[index];
         return false;
     }
@@ -34,6 +37,8 @@ internal static class Host
     [HarmonyPatch(typeof(Constants), nameof(Constants.SET_HOST_GAME_SLOT_STATE))]
     private static bool Slots_GetGameSlotState(int index, byte value)
     {
+        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
+
         CConst.HOST_GAME_SLOT_STATES[index] = value;
         return false;
     }
@@ -42,6 +47,8 @@ internal static class Host
     [HarmonyPatch(typeof(Constants), nameof(Constants.SET_HOST_GAME_SLOT_TEAM))]
     private static bool Slots_GetGameSlotTeam(int index, Team value)
     {
+        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
+
         CConst.HOST_GAME_SLOT_TEAMS[index] = value;
         return false;
     }
@@ -52,10 +59,9 @@ internal static class Host
     [HarmonyPatch(typeof(GameInfo), MethodType.Constructor, new Type[] { typeof(GameOwnerEnum) })]
     private static IEnumerable<CodeInstruction> Slots_GameSlotsArray(IEnumerable<CodeInstruction> instructions)
     {
-        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(94).opcode = OpCodes.Ldc_I4_S;
-        code.ElementAt(94).operand = CConst.HOST_GAME_SLOT_COUNT;
-        return code;
+        instructions.ElementAt(94).opcode = OpCodes.Ldc_I4_S;
+        instructions.ElementAt(94).operand = CConst.HOST_GAME_SLOT_COUNT;
+        return instructions;
     }
 
     // Increase maximum connections
@@ -63,10 +69,9 @@ internal static class Host
     [HarmonyPatch(typeof(Server), nameof(Server.Start))]
     private static IEnumerable<CodeInstruction> Server_Start(IEnumerable<CodeInstruction> instructions)
     {
-        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(26).opcode = OpCodes.Ldc_I4_S;
-        code.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 1;
-        return code;
+        instructions.ElementAt(26).opcode = OpCodes.Ldc_I4_S;
+        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 4; // 12
+        return instructions;
     }
 
     // Init all slots
@@ -74,10 +79,9 @@ internal static class Host
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.InitOpenGameSlots))]
     private static IEnumerable<CodeInstruction> Slots_InitOpenSlots(IEnumerable<CodeInstruction> instructions)
     {
-        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(54).opcode = OpCodes.Ldc_I4_S;
-        code.ElementAt(54).operand = CConst.HOST_GAME_SLOT_COUNT;
-        return code;
+        instructions.ElementAt(54).opcode = OpCodes.Ldc_I4_S;
+        instructions.ElementAt(54).operand = CConst.HOST_GAME_SLOT_COUNT;
+        return instructions;
     }
 
     /// <summary>
@@ -95,25 +99,24 @@ internal static class Host
         return true;
     }
 
-    // Steam Persona
+    /// <summary>
+    ///     Modified clients can bypass the chat box's 120 character limit.
+    ///     Large chat messages cause stuttering on other clients, so we
+    ///     reject those messages as spam.
+    /// </summary>
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(SFD.SteamIntegration.Steam), nameof(SFD.SteamIntegration.Steam.PersonaNameShort), MethodType.Getter)]
-    private static void Get_PersonaNameShort(ref string __result)
+    [HarmonyPatch(typeof(Server), nameof(Server.HandleChatMessage))]
+    private static void Server_HandleChatMessage(ref bool __result, GameUser senderGameUser, string stringMsg)
     {
-        if (!CSecurity.ValidateObfuscatedName(CSettings.GetString("OBFUSCATED_HOST_ACCOUNT_NAME"), out string errorMessage))
+        // Message got denied by other means
+        if (!__result)
         {
-            CSettings.SetSetting("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed");
-            CSettings.SetSetting("USE_OBFUSCATED_HOST_ACCOUNT_NAME", false);
             return;
         }
 
-        if (CSecurity.CanUseObfuscatedNames && !(GameSFD.Handle.m_waterlogo != "" || SFD.Constants.Account.ID == 666U || CSecurity.RealPersonaName.Contains("666:")))
+        if (stringMsg.Length > 120)
         {
-            if (CSecurity.RealPersonaName != __result.ToString())
-            {
-                CSecurity.RealPersonaName = __result.ToString();
-            }
-            __result = CSettings.GetString("OBFUSCATED_HOST_ACCOUNT_NAME");
+            __result = false;
         }
     }
 }

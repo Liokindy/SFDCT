@@ -22,11 +22,6 @@ public static class Values
             return;
         }
 
-        Add("USE_OBFUSCATED_HOST_ACCOUNT_NAME", false, IniSettingType.Bool, true);
-        Add("OBFUSCATED_HOST_ACCOUNT_NAME", "Unnamed", IniSettingType.String, true);
-        Add("VOTE_KICKING_ENABLED", false, IniSettingType.Bool);
-        Add("VOTE_KICKING_COOLDOWN_MINUTES", 3, IniSettingType.Int);
-        Add("VOTE_KICKING_DURATION_SECONDS", 35, IniSettingType.Int);
         Add("MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
         Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
         Add("LAZER_USE_REAL_ACCURACY", true, IniSettingType.Bool);

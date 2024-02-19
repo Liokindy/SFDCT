@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using HarmonyLib;
+using SFD;
 using SFD.MapEditor;
 using SFD.States;
 using CConst = SFDCT.Misc.Constants;
@@ -9,7 +12,7 @@ using CConst = SFDCT.Misc.Constants;
 namespace SFDCT.Editor;
 
 [HarmonyPatch]
-internal static class Tweaks
+internal static class Form
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(StateEditor), nameof(StateEditor.Load))]
