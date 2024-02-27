@@ -24,12 +24,11 @@ internal static class PlayerHandler
     ///     Teammates cannot catch other teammates in dives, unless
     ///     the other teammate was caught in a dive/grab
     /// </summary>
+    /*
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Player), nameof(Player.PlayerWithinDiveReach))]
     private static void Teammate_DiveCheck(ref bool __result, Player __instance, Player player)
     {
-        return;
-
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
             return;
@@ -43,44 +42,31 @@ internal static class PlayerHandler
             }
         }
     }
+    */
 
     /// <summary>
-    ///     NOT IMPLEMENTED.
-    ///     
-    ///     Vanilla client predict the projectile hitting the player and
-    ///     removes it from the client realm. May get confusing in online
-    ///     situations with latency.
+    ///     Players look glitchy when held by the debug mouse, as they
+    ///     think they're stuck in the falling state, and try to recover.
     /// </summary>
-    /*
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Player), nameof(Player.TestProjectileHit))]
-    private static void Teammate_ProjectileHit(ref bool __result, Player __instance, Projectile projectile)
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Player), nameof(Player.CheckResolveStuckInFalling))]
+    private static bool DebugMouseFix(Player __instance)
     {
+        // Fix is server-sided
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
-            return;
+            return true;
         }
 
-        // Dodged the projectile by other means
-        if (!__result)
+        if (__instance.GameWorld != null && __instance.GameWorld.m_debugMouseObject != null && !__instance.GameWorld.m_debugMouseObject.IsDisposed)
         {
-            return;
-        }
-
-        // Hit corpses as normal
-        if (__instance.IsDead)
-        {
-            return;
-        }
-
-        if (projectile != null && projectile.PlayerOwner != null && !projectile.PlayerOwner.IsDisposed && !projectile.PlayerOwner.IsRemoved)
-        {
-            if (projectile.TotalDistanceTraveled <= 20 && projectile.PlayerOwner.InSameTeam(__instance) && !__instance.Falling)
+            if (__instance.GameWorld.m_debugMouseObject.ObjectID == __instance.ObjectID)
             {
-                __result = false;
-                return;
+                return false;
             }
         }
+
+
+        return true;
     }
-    */
 }

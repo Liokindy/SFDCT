@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD;
+using SFD.Sounds;
 using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Game;
 
 [HarmonyPatch]
-internal static class SoundHandler
+internal static class SoundPatches
 {
-    internal static readonly Type typeof_soundHandler = typeof(SFD.Sounds.SoundHandler);
-    internal static readonly string nameof_soundHandlerPlaySound = nameof(SFD.Sounds.SoundHandler.PlaySound);
+    internal static readonly Type typeof_soundHandler = typeof(SoundHandler);
+    internal static readonly string nameof_soundHandlerPlaySound = nameof(SoundHandler.PlaySound);
     internal static readonly Type[] typeof_StringVector2Gameworld = new Type[]
     {
             typeof(string),
@@ -24,7 +25,7 @@ internal static class SoundHandler
     ///     Tweaks SoundHandler.PlaySound to use position
     /// </summary>
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(SFD.Sounds.SoundHandler), nameof(SFD.Sounds.SoundHandler.PlaySound), new Type[] { typeof(string), typeof(Vector2), typeof(float), typeof(GameWorld) })]
+    [HarmonyPatch(typeof(SoundHandler), nameof(SoundHandler.PlaySound), new Type[] { typeof(string), typeof(Vector2), typeof(float), typeof(GameWorld) })]
     private static bool PlaySound(string soundID, Vector2 worldPosition, float volumeModifier, GameWorld gameWorld)
     {
         if (gameWorld == null || gameWorld.InLoading || gameWorld.MuteSounds)
@@ -37,11 +38,11 @@ internal static class SoundHandler
             
             return false;
         }
-        if (SFD.Sounds.SoundHandler.game.Server == null)
+        if (SoundHandler.game.Server == null)
         {
             throw new Exception("Error: SoundHandler.PlaySound() parameter isServer is true even though the server doesn't exist");
         }
-        SFD.Sounds.SoundHandler.game.Server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data(soundID, false, Converter.WorldToBox2D(worldPosition), volumeModifier));
+        SoundHandler.game.Server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data(soundID, false, Converter.WorldToBox2D(worldPosition), volumeModifier));
 
         return false;
     }
@@ -52,11 +53,12 @@ internal static class SoundHandler
     /// </summary>
     private static void PlayGlobalPannedSound(string soundID, GameWorld gameWorld, Vector2 worldPosition, float volumeModifier = 1f)
     {
-        if (SFD.Sounds.SoundHandler.m_soundsDisabled)
+        if (SoundHandler.m_soundsDisabled)
         {
             return;
         }
-        SFD.Sounds.SoundHandler.SoundEffectGroup soundEffectGroup = SFD.Sounds.SoundHandler.soundEffects.Find(soundID);
+
+        SoundHandler.SoundEffectGroup soundEffectGroup = SoundHandler.soundEffects.Find(soundID);
         if (soundEffectGroup != null)
         {
             // Sound pitch
@@ -64,41 +66,41 @@ internal static class SoundHandler
 
             // Sound Panning
             float soundPanning = 0f;
-            if (worldPosition != Vector2.Zero && CSettings.GetFloat("SOUNDPANNING_STRENGTH") > 0f)
+            if (worldPosition != Vector2.Zero && CSettings.GetBool("SOUNDPANNING_ENABLED") && CSettings.GetFloat("SOUNDPANNING_STRENGTH") != 0f)
             {
                 float listenerPosX;
                 // Use screen-space if told to, if playing locally,
                 // or the current player is dead/removed/null
-                if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") || (gameWorld.LocalGameUsers.Length > 0 || gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved))
+                if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") || (GameInfo.LocalPlayerCount >= 2 || gameWorld.PrimaryLocalPlayer == null || gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved || gameWorld.PrimaryLocalPlayer.IsDisposed))
                 {
                     listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
-                    soundPanning = (listenerPosX-GameSFD.GAME_WIDTHf*0.5f) / GameSFD.GAME_WIDTHf*0.5f;
+                    soundPanning = (listenerPosX - GameSFD.GAME_WIDTHf * 0.5f) / GameSFD.GAME_WIDTHf * 0.5f;
                 }
                 else
                 {
-                    listenerPosX = gameWorld.PrimaryLocalPlayer.Position.X;
-                    float soundPosXDiff = worldPosition.X-listenerPosX;
-                    if (Math.Abs(soundPosXDiff) >= CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD"))
+                    float worldThreshold = CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
+                    float worldDistance = CSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
+                    float distX = worldPosition.X - gameWorld.PrimaryLocalPlayer.Position.X;
+
+                    // The side of the panning is decided by the X position difference.
+                    // Negative is left. Positive is right.
+                    
+                    // The distance from the player to the sound is over the threshold.
+                    // If it's below, it will not have any panning.
+                    if (Math.Abs(distX) >= worldThreshold)
                     {
-                        if (soundPosXDiff > 0)
-                        {
-                            soundPosXDiff -= CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
-                        }
-                        else
-                        {
-                            soundPosXDiff += CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
-                        }
-                        soundPanning = soundPosXDiff / CSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
+                        soundPanning = (distX - worldThreshold) / worldDistance;
                     }
                 }
                 soundPanning = MathHelper.Clamp(soundPanning * CSettings.GetFloat("SOUNDPANNING_STRENGTH"), -1f, 1f);
             }
             
             // Play the sound
-            SFD.Sounds.SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier, soundPitch, soundPanning);
+            SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier, soundPitch, soundPanning);
             return;
         }
-        if (soundID == "NONE")
+
+        if (soundID == "NONE" || string.IsNullOrEmpty(soundID))
         {
             return;
         }

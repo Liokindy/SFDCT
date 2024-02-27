@@ -26,10 +26,10 @@ public static class Values
         Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
         Add("LAZER_USE_REAL_ACCURACY", true, IniSettingType.Bool);
         Add("SOUNDPANNING_ENABLED", true, IniSettingType.Bool);
-        Add("SOUNDPANNING_STRENGTH", 1f, IniSettingType.Float);
+        Add("SOUNDPANNING_STRENGTH", 0.8f, IniSettingType.Float);
         Add("SOUNDPANNING_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
-        Add("SOUNDPANNING_INWORLD_THRESHOLD", 64f, IniSettingType.Float);
-        Add("SOUNDPANNING_INWORLD_DISTANCE", 360f, IniSettingType.Float);
+        Add("SOUNDPANNING_INWORLD_THRESHOLD", 80f, IniSettingType.Float);
+        Add("SOUNDPANNING_INWORLD_DISTANCE", 1000f, IniSettingType.Float);
 
         for(int i = 1; i <= 8; i++)
         {

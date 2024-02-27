@@ -25,6 +25,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameSlotChange), nameof(NetMessage.GameInfo.GameSlotChange.Read))]
             private static bool Read(ref NetMessage.GameInfo.GameSlotChange.Data __result, NetIncomingMessage netIncomingMessage)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 NetMessage.GameInfo.GameSlotChange.Data result;
                 result.SlotIndex = netIncomingMessage.ReadRangedInteger(0, CConst.SlotCount - 1);
                 result.DataToChange = (NetMessage.GameInfo.GameSlotChange.DataChangeType)netIncomingMessage.ReadRangedInteger(0, 3);
@@ -38,6 +40,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameSlotChange), nameof(NetMessage.GameInfo.GameSlotChange.Write))]
             private static bool Write(ref NetOutgoingMessage __result, ref NetMessage.GameInfo.GameSlotChange.Data dataToWrite, NetOutgoingMessage netOutgoingMessage)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 NetMessage.WriteDataType(MessageType.GameInfo_GameSlotChange, netOutgoingMessage);
                 netOutgoingMessage.WriteRangedInteger(0, CConst.SlotCount - 1, dataToWrite.SlotIndex);
                 netOutgoingMessage.WriteRangedInteger(0, 3, (int)dataToWrite.DataToChange);
@@ -55,6 +59,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameSlotUpdate), nameof(NetMessage.GameInfo.GameSlotUpdate.Read))]
             private static bool Read(GameSlot[] connectionSlotsDestination, NetIncomingMessage netIncomingMessage)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 int num = netIncomingMessage.ReadRangedInteger(0, CConst.SlotCount - 1);
                 GameSlot gameSlot = connectionSlotsDestination[num];
                 gameSlot.CurrentState = (GameSlot.State)netIncomingMessage.ReadRangedInteger(0, 7);
@@ -68,6 +74,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameSlotUpdate), nameof(NetMessage.GameInfo.GameSlotUpdate.Write))]
             public static bool Write(ref NetOutgoingMessage __result, ref NetMessage.GameInfo.GameSlotUpdate.DataWrite dataToWrite, NetOutgoingMessage netOutgoingMessage)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 NetMessage.WriteDataType(MessageType.GameInfo_GameSlotUpdate, netOutgoingMessage);
                 GameSlot gameSlot = dataToWrite.ConnectionSlots[dataToWrite.ConnectionSlotIndex];
                 netOutgoingMessage.WriteRangedInteger(0, CConst.SlotCount - 1, dataToWrite.ConnectionSlotIndex);
@@ -87,6 +95,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameUserUpdate), nameof(NetMessage.GameInfo.GameUserUpdate.Read))]
             private static bool Read(ref NetMessage.GameInfo.GameUserUpdate.Data __result, NetIncomingMessage netIncomingMessage, Profile.ValidateProfileType validateProfileType)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 NetMessage.GameInfo.GameUserUpdate.Data result = default(NetMessage.GameInfo.GameUserUpdate.Data);
                 netIncomingMessage.ReadBoolean();
                 result.StartIndex = netIncomingMessage.ReadRangedInteger(0, 31);
@@ -151,6 +161,8 @@ internal static class NetMessages
             [HarmonyPatch(typeof(NetMessage.GameInfo.GameUserUpdate), nameof(NetMessage.GameInfo.GameUserUpdate.Write))]
             private static bool Write(ref NetOutgoingMessage __result, ref NetMessage.GameInfo.GameUserUpdate.Data dataToWrite, NetOutgoingMessage netOutgoingMessage)
             {
+                if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
+
                 NetMessage.WriteDataType(MessageType.GameInfo_GameUserUpdate, netOutgoingMessage);
                 netOutgoingMessage.Write(dataToWrite.MultiMode);
                 netOutgoingMessage.WriteRangedInteger(0, 31, dataToWrite.StartIndex);

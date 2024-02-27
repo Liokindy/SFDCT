@@ -9,19 +9,24 @@ using SFD;
 using SFD.GUI.Text;
 using SFD.MenuControls;
 using SFD.States;
-using SFDCT.Helper;
+using Logger = SFDCT.Helper.Logger;
+using static SFD.GameChat;
 
 namespace SFDCT.UI;
 
 [HarmonyPatch]
 internal static class ChatTweaks
 {
-    private static readonly int m_rowSizeNormal = 10;
-    private static readonly int m_rowSizeShowHistory = 16;
-    private static readonly int m_rowSizeTyping = 13;
+    private static int m_rowSizeNormal = 10;
+    private static int m_rowSizeShowHistory = 16;
+    private static int m_rowSizeTyping = 13;
+    private static bool IsWordSeparator(char c)
+    {
+        return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
+    }
 
     private static int m_lastMessageIndex = 0;
-    private static readonly int m_lastMessagesListMax = 128;
+    private static int m_lastMessagesListMax = 128;
     private static List<string> m_lastMessagesList = new(m_lastMessagesListMax);
 
     [HarmonyPostfix]
@@ -56,32 +61,60 @@ internal static class ChatTweaks
     [HarmonyPatch(typeof(GameChat), nameof(GameChat.KeyPress))]
     private static bool KeyPress(ref bool __result, Keys key, bool isRepeat = false)
     {
-        if ((key == Keys.Up || key == Keys.Down) && GameChat.ChatActive && m_lastMessagesList != null && m_lastMessagesList.Any() )
+        if (GameChat.ChatActive)
         {
-            Client client = GameSFD.Handle.Client;
-            if (client != null && client.IsRunning)
+            if ((key == Keys.Up || key == Keys.Down) && m_lastMessagesList != null && m_lastMessagesList.Any() )
             {
-                __result = false;
-
-                int listIndex = (m_lastMessagesList.Count - 1) - m_lastMessageIndex;
-                string message = m_lastMessagesList.ElementAtOrDefault(listIndex);
-
-                m_lastMessageIndex += (key == Keys.Up ? 1 : -1);
-                if (m_lastMessageIndex < 0)
+                Client client = GameSFD.Handle.Client;
+                if (client != null && client.IsRunning)
                 {
-                    m_lastMessageIndex = m_lastMessagesList.Count - 1;
+                    __result = false;
+
+                    int listIndex = (m_lastMessagesList.Count - 1) - m_lastMessageIndex;
+                    string message = m_lastMessagesList.ElementAtOrDefault(listIndex);
+
+                    m_lastMessageIndex += (key == Keys.Up ? 1 : -1);
+                    if (m_lastMessageIndex < 0)
+                    {
+                        m_lastMessageIndex = m_lastMessagesList.Count - 1;
+                    }
+                    if (m_lastMessageIndex > m_lastMessagesList.Count - 1)
+                    {
+                        m_lastMessageIndex = 0;
+                    }
+
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        GameChat.m_textbox.SetText(message);
+                    }
                 }
-                if (m_lastMessageIndex > m_lastMessagesList.Count - 1)
+                return false;
+            }
+            if (key == Keys.Back && GameChat.m_textbox.Text.Length > 0)
+            {
+                bool ctrlHeld = false;
+                if (GameSFD.Handle.GetRunningState() != null && GameSFD.Handle.GetRunningState().GetActiveGameWorld() != null && !GameSFD.Handle.GetRunningState().GetActiveGameWorld().IsDisposed)
                 {
-                    m_lastMessageIndex = 0;
+                    ctrlHeld = GameSFD.Handle.GetRunningState().GetActiveGameWorld().IsControlPressed();
                 }
 
-                if (!string.IsNullOrEmpty(message))
+                if (ctrlHeld)
                 {
-                    GameChat.m_textbox.SetText(message);
+                    string textboxText = GameChat.m_textbox.Text;
+                    int charIndex = textboxText.Length;
+                    while(charIndex >= 0)
+                    {
+                        charIndex--;
+                        if (charIndex != textboxText.Length - 1 && IsWordSeparator(textboxText.ElementAtOrDefault(charIndex)))
+                        {
+                            charIndex = Math.Min(charIndex + 1, textboxText.Length - 1);
+                            break;
+                        }
+                    }
+
+                    GameChat.m_textbox.SetText(textboxText.Substring(0, charIndex));
                 }
             }
-            return false;
         }
 
         if (m_lastMessageIndex != 0)

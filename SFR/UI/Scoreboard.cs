@@ -16,7 +16,7 @@ internal static class Scoreboard
     [HarmonyPatch(typeof(ScoreboardPanel), nameof(ScoreboardPanel.Update))]
     private static void Update(ScoreboardPanel __instance, float elapsed)
     {
-        if (CConst.SlotCount == 8)
+        if (!CConst.HOST_GAME_EXTENDED_SLOTS)
         {
             return;
         }
@@ -35,7 +35,7 @@ internal static class Scoreboard
     [HarmonyPatch(typeof(ScoreboardPanel), nameof(ScoreboardPanel.FillPlayerList))]
     private static bool FillPlayerList(ScoreboardPanel __instance)
     {
-        if (CConst.SlotCount == 8)
+        if (!CConst.HOST_GAME_EXTENDED_SLOTS)
         {
             return true;
         }

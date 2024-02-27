@@ -1,6 +1,6 @@
 ﻿namespace SFDCT.Helper;
 
-internal static class Math
+internal static class ExtendedMath
 {
     internal static float Lerp(float a, float b, float f) => a * (1.0f - f) + b * f;
 

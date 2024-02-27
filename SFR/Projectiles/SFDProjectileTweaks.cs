@@ -2,7 +2,7 @@
 using System.Reflection.Emit;
 using System.Linq;
 using SFD.Projectiles;
-using CSound = SFDCT.Game.SoundHandler;
+using CSound = SFDCT.Game.SoundPatches;
 using HarmonyLib;
 
 namespace SFDCT.Projectiles;

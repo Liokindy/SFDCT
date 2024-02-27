@@ -36,8 +36,8 @@ internal static class SFDWeaponTweaks
 
             // Change PlaySound method so it uses a position,
             // do this before inserting so we dont offset the index.
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             // Load the player var to the stack
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
@@ -62,8 +62,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -83,7 +83,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -101,8 +101,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -122,9 +122,9 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(17).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(33).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(17).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(33).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(15, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(16, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -142,8 +142,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(49, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(50, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -159,7 +159,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -177,8 +177,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -198,8 +198,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -219,8 +219,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -240,8 +240,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -261,8 +261,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -282,8 +282,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -303,8 +303,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -324,8 +324,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -345,8 +345,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -366,9 +366,9 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(17).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(33).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(17).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(33).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(15, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(16, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -386,7 +386,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -400,8 +400,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(49, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(50, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -422,8 +422,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -443,8 +443,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -460,7 +460,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(7).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(7).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(5, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(6, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -477,8 +477,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -498,8 +498,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -519,8 +519,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -540,8 +540,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -557,8 +557,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(51).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(59).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(49, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(50, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -578,8 +578,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -599,8 +599,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(25).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -624,7 +624,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -641,7 +641,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -658,7 +658,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -675,7 +675,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -692,7 +692,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -709,7 +709,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -726,8 +726,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(52).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(52).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -744,9 +744,9 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(30).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(35).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(18).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(30).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(35).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(16, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(17, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -766,8 +766,8 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(155).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
-            code.ElementAt(203).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(155).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+            code.ElementAt(203).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
 
             code.Insert(153, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(154, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
@@ -788,7 +788,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -805,7 +805,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -822,7 +822,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -839,7 +839,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -856,7 +856,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -873,7 +873,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -890,7 +890,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -907,7 +907,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -924,7 +924,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -941,7 +941,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -958,7 +958,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -975,7 +975,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -992,7 +992,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -1009,7 +1009,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -1026,7 +1026,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
@@ -1043,7 +1043,7 @@ internal static class SFDWeaponTweaks
         {
             List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundHandler.typeof_soundHandler, SFDCT.Game.SoundHandler.nameof_soundHandlerPlaySound, SFDCT.Game.SoundHandler.typeof_StringVector2Gameworld);
+            code.ElementAt(3).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
             code.Insert(1, new CodeInstruction(OpCodes.Ldarg_1));
             code.Insert(2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 

@@ -65,7 +65,7 @@ internal static class GadgetHandler
         // Health bar and name/plate
         if (__instance.m_showNamePlate)
         {
-            Vector2 platesPosition = Camera.ConvertWorldToScreen(worldPosition + new Vector2(0, 18f));
+            Vector2 platesPosition = Camera.ConvertWorldToScreen(worldPosition + new Vector2(0, 16f));
             float zoomScale = MathHelper.Max(Camera.Zoom * 0.5f, 1f);
 
             // Health and Gun cooldown

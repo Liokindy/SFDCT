@@ -16,6 +16,13 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class Browser
 {
+    public static Color ServerNormal = Color.White;
+    public static Color ServerError = Color.Red;
+    public static Color ServerSFR = new(222, 66, 165);
+
+    public static float ServerFullMultiplier = 0.70f;
+    public static float ServerEmptyMultiplier = 0.50f;
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
     private static bool PatchBrowser(SFDGameServerInstance value, GameBrowserMenuItem __instance)
@@ -23,24 +30,38 @@ internal static class Browser
         if (__instance.m_game != value)
         {
             __instance.m_game = value;
-            if (__instance.labels != null)
+            if (__instance.labels != null && __instance.m_game != null && __instance.m_game.SFDGameServer != null)
             {
-                var color = Color.Red;
-                if (__instance.m_game is { SFDGameServer: { } })
+                var color = ServerError;
+                if (__instance.m_game.SFDGameServer.Version == Constants.Version.SFD)
                 {
-                    if (__instance.m_game.SFDGameServer.Version == Constants.Version.SFD)
-                    {
-                        color = Color.White;
-                    }
-                    /*
-                    else if (__instance.m_game.SFDGameServer.Version == "v.1.3.7d")
-                    {
-                        color = Color.Yellow;
-                    }
-                    */
+                    color = ServerNormal;
+                }
+                else if (__instance.m_game.SFDGameServer.Version.StartsWith("v.2"))
+                {
+                    color = ServerSFR;
+                }
+                
+                if (__instance.m_game.SFDGameServer.Players <= 0)
+                {
+                    color *= ServerEmptyMultiplier;
+                }
+                else if (__instance.m_game.SFDGameServer.Players == __instance.m_game.SFDGameServer.MaxPlayers)
+                {
+                    color *= ServerFullMultiplier;
                 }
 
-                foreach (var label in __instance.labels)
+                // Third party programs can send false servers with false information
+                // to the server browser, causing a lot of clutter.
+                if (__instance.m_game.SFDGameServer.Players > 32 || __instance.m_game.SFDGameServer.MaxPlayers > 32 ||
+                    (__instance.m_game.SFDGameServer.Players > __instance.m_game.SFDGameServer.MaxPlayers)
+                )
+                {
+                    color = ServerError;
+                    color *= ServerEmptyMultiplier;
+                }
+
+                foreach (Label label in __instance.labels)
                 {
                     label.Color = color;
                 }

@@ -13,6 +13,17 @@ using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.Bootstrap;
 
+/// <summary>
+///     This class is used to dump raw PNG files from the clothing
+///     items, and raw TXT files from the animations XNB file.
+///     
+///     Animations TXT files are dumped in the format used by Animations.LoadAnimationsDataPipeline
+///     
+///     Items are dumped into folders with PNGs and a properties TXT, they can be loaded
+///     using Dumping.LoadItemDump however, it's reasonably slower than raw XNBs.
+/// 
+///     (This class has no use in-SFDCT yet)
+/// </summary>
 internal static class Dumping
 {
     public static bool DoAssetDump = false;
@@ -44,7 +55,7 @@ internal static class Dumping
         }
         return true;
     }
-    
+
     public static void DumpItems()
     {
         if (!DoAssetDump) { return; }

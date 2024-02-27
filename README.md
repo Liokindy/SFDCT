@@ -15,13 +15,6 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 - Sounds will pan to the left or right depending on where they come from
 - Sound will distort and sound slowed down or speed up according to the time modifier.
 
-### Vote-Kicking
-- Players can start a vote-kick against another player and provide a short reason for it.
-- After a vote, vote-kicking will not be available for some time. (3 minutes by default)
-- Only players that have spent some time in the server can start a vote. (2 minutes old by default)
-
-<img src="docs/voteKicking.gif" alt="VoteKicking"/>
-
 ### More profiles
 - You have twice the amount of profiles to use, from 9 to a whopping 18.
 
@@ -29,10 +22,16 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 
 ### More slots
 > [!WARNING]
-> This is feature is experimental and untested. It may break maps and scripts, or may also break on its own.
+> This is feature is still in an experimental and WIP state. It may break maps and scripts that assume there's only 8 slots available, or there may be other yet-unknown issues.
+
+> [!TIP]
+> Other players will see the scoreboard glitched, and the `/PLAYERS` command will not work. A server-side replacement is in place for players to see others score and team, `/SCOREBOARD`
+
+- Expanded scoreboard to show more than 8 players, after 16 slots it may look glitched in some resolutions like 720p.
 - Set more than 8 slots for players or bots to use in your server.
 - Activated with the `-SLOTS [8-32]` start parameter.
 
+<img src="docs/10SlotsScoreboard.png" alt="10SlotsScoreboard"/>
 <img src="docs/20slotsChaos.gif" alt="20SlotsChaos"/>
 
 ### QoL and Customization
@@ -53,7 +52,7 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 
 2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`. This will tell Steam to open SFDCT instead of SFD.
 
-3. When you launch SFD, you will get asked to choose between SFDCT, SFD or [SFR](https://github.com/Odex64/SFR) (if you have a release already installed). You can also skip this and start a game automatically by adding their corresponding start parameter. (`-SFDCT`, `-SFD`, or `-SFR`)
+3. When you launch SFD, a cmd will appear, and SFDCT will boot instead.
 
 # Credits
 SFDCT is made using [SFR](https://github.com/Odex64/SFR) as a base, however, assets, features, etc. From SFR are not included.

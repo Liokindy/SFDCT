@@ -20,37 +20,34 @@ public static class Constants
     {
         public static string SFD = "v.1.3.7d";
         public static string SFDCT = "v.1.0.2";
+        public static bool InDev = false;
+        public static string Label
+        {
+            get
+            {
+                return SFDCT + (InDev ? " (Dev)" : "");
+            }
+        }
     }
     public struct Colors
     {
         public static Color OmenFlash = Color.White;
         public static Color OmenBar = new(120, 152, 255);
     }
-    public static bool SetSlots(int num)
-    {
-        if (num < 8 || num > 32)
-        {
-            return false;
-        }
-
-        HOST_GAME_SLOT_COUNT = num;
-        HOST_GAME_SLOT_STATES = new byte[num];
-        HOST_GAME_SLOT_TEAMS = new Team[num];
-        return true;
-    }
 
     public static int SlotCount
     {
         get
         {
-            if (GameSFD.Handle.ImHosting && HOST_GAME_SLOT_COUNT > 8)
+            if (HOST_GAME_EXTENDED_SLOTS && GameSFD.Handle.ImHosting)
             {
                 return HOST_GAME_SLOT_COUNT;
             }
-            return HOST_GAME_SLOT_COUNT;
+            return 8;
         }
     }
 
+    public static bool HOST_GAME_EXTENDED_SLOTS = false;
     public static int HOST_GAME_SLOT_COUNT = 8;
     public static byte[] HOST_GAME_SLOT_STATES = new byte[HOST_GAME_SLOT_COUNT];
     public static Team[] HOST_GAME_SLOT_TEAMS = new Team[HOST_GAME_SLOT_COUNT];

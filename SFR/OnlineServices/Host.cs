@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Threading;
 using HarmonyLib;
 using Lidgren.Network;
 using SFD;
@@ -97,6 +98,93 @@ internal static class Host
             return false;
         }
         return true;
+    }
+
+    /// <summary>
+    ///     Users that have ForcedServerMovementToggleTime set to -1
+    ///     will be have forced server movement regardless of latency.
+    /// </summary>
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Server), nameof(Server.updateForcedServerMovement))]
+    private static bool Server_updateForcedServerMovement(Server __instance, float time)
+    {
+        __instance.m_updateForcedServerMovementTime -= time;
+        if (__instance.m_updateForcedServerMovementTime > 0)
+        {
+            return false;
+        }
+        __instance.m_updateForcedServerMovementTime = 100f;
+
+        int svMovCount = 0;
+        bool svMovActive = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK;
+        bool svMovForced = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0;
+        float svMovPing = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING * 0.001f;
+        float svMovToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
+
+        lock (Server.ServerUpdateLockObject)
+        {
+            List<NetConnection> netConns = __instance.m_server.Connections;
+            for(int i = netConns.Count - 1; i >= 0; i--)
+            {
+                NetConnection netConn = netConns[i];
+                GameConnectionTag gameConnTag = netConn.GameConnectionTag();
+                if (gameConnTag == null)
+                {
+                    continue;
+                }
+
+                bool SvMovWasSet = (gameConnTag.ForcedServerMovementToggleTime == -1f);
+                bool doSvMov = svMovForced || (svMovActive && gameConnTag.Ping > svMovPing);
+                if (gameConnTag.ForceServerMovement != doSvMov && !SvMovWasSet)
+                {
+                    gameConnTag.ForcedServerMovementToggleTime += 100f;
+                    if (svMovForced || gameConnTag.ForcedServerMovementToggleTime > svMovToggleTime)
+                    {
+                        gameConnTag.ForceServerMovement = doSvMov;
+                        if (gameConnTag.GameUsers != null)
+                        {
+                            for(int j = 0; j < gameConnTag.GameUsers.Length; j++)
+                            {
+                                GameUser gu = gameConnTag.GameUsers[j];
+                                gu.ForceServerMovement = doSvMov;
+
+                                Player playerByUserID = __instance.GameInfo.GameWorld.GetPlayerByUserIdentifier(gu.UserIdentifier);
+                                playerByUserID?.UpdateCanDoPlayerAction();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (!SvMovWasSet)
+                    {
+                        gameConnTag.ForcedServerMovementToggleTime = 0f;
+                    }
+                }
+
+                if (gameConnTag.ForceServerMovement)
+                {
+                    svMovCount++;
+                }
+            }
+        }
+        __instance.m_forcedServerMovementConnectionCount = svMovCount;
+        
+        return false;
+    }
+
+    /// <summary>
+    ///     Modified clients can enter the server and use an empty AccountName
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
+    private static void ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
+    {
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName.Length == 0)
+        {
+            // Possible modified client
+            __result = false;
+        }
     }
 
     /// <summary>

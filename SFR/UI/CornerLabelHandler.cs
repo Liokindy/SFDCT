@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
 using SFD.MenuControls;
+using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.UI;
 
@@ -21,8 +22,7 @@ internal static class CornerLabelHandler
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.DrawInner))]
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
-        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code.ElementAt(76).operand = $"{Misc.Constants.Version.SFD} - {Misc.Constants.Version.SFDCT}";
-        return code;
+        instructions.ElementAt(76).operand = $"{CConst.Version.SFD} - {CConst.Version.Label}";
+        return instructions;
     }
 }
