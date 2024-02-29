@@ -74,7 +74,9 @@ internal static class SoundPatches
                 if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") ||
                     GameInfo.LocalPlayerCount >= 2 ||
                     gameWorld.PrimaryLocalPlayer == null ||
-                    (gameWorld.PrimaryLocalPlayer != null && (gameWorld.PrimaryLocalPlayer.IsDead || gameWorld.PrimaryLocalPlayer.IsRemoved || gameWorld.PrimaryLocalPlayer.IsDisposed))
+                    gameWorld.PrimaryLocalPlayer.IsDisposed ||
+                    gameWorld.PrimaryLocalPlayer.IsRemoved || 
+                    gameWorld.PrimaryLocalPlayer.IsDead
                 )
                 {
                     listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);

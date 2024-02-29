@@ -63,7 +63,8 @@ internal static class Browser
                 if (__instance.m_game.SFDGameServer.Players > 32 ||
                     __instance.m_game.SFDGameServer.MaxPlayers > 32 ||
                     __instance.m_game.SFDGameServer.Players > __instance.m_game.SFDGameServer.MaxPlayers ||
-                    __instance.m_game.SFDGameServer.Description.Length > 200
+                    __instance.m_game.SFDGameServer.Description.Length > 200 ||
+                    __instance.m_game.SFDGameServer.GameName.Length < 3
                 )
                 {
                     color = ServerError;
