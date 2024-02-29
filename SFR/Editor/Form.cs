@@ -14,17 +14,6 @@ namespace SFDCT.Editor;
 [HarmonyPatch]
 internal static class Form
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(StateEditor), nameof(StateEditor.Load))]
-    private static void PatchEditorWindowIcon(StateEditor __instance)
-    {
-        // Fix the editor window displaying SFD icon
-        if (Program.GameIcon != null)
-        {
-            __instance.m_mapEditorForm.Icon = Program.GameIcon;
-        }
-    }
-
     /// <summary>
     ///     The game checks the version written into the ImagesList.sfdx file,
     ///     if it's different it rebuilds it again. This makes the game build it

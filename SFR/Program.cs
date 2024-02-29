@@ -12,6 +12,7 @@ using HarmonyLib;
 using SFDCT.Helper;
 using SFDCT.Misc;
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 
 namespace SFDCT;
 
@@ -23,26 +24,125 @@ internal static class Program
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
     internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT/";
     internal static readonly string GitHubVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/ModVersion.txt";
-    internal static Icon GameIcon;
     private static readonly Harmony Harmony = new("SuperfightersDeluxe_Custom");
 
     private static int Main(string[] args)
     {
-        // Set the cmd title
-        Console.Title = $"Superfighters Deluxe Custom Console - {Constants.Version.Label}";
+        string SFRDirectory = Path.Combine(GameDirectory, "SFR");
+        string SFRExecutable = Path.Combine(GameDirectory, "SFR.exe");
+        bool hasSFR = Directory.Exists(SFRDirectory) && File.Exists(SFRExecutable);
 
-        // Get SFDCT icon
-        try
+        // Help stuff for normies
+        if (args.Contains("-help", StringComparer.OrdinalIgnoreCase))
         {
-            GameIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-        }
-        catch
-        {
-            GameIcon = null;
+            Logger.LogWarn("ALL LAUNCH ARGUMENTS:");
+            Logger.LogWarn("-HELP           Show this message.");
+            Logger.LogWarn("-SFD            Start Superfighters Deluxe.");
+
+            if (hasSFR)
+            {
+            Logger.LogWarn("-SFR            Start Superfighters Redux.");
+            }
+
+            Logger.LogWarn("-SLOTS [8-32]   Use extended-slots.");
+            return 0;
         }
 
-        // Versions
+        // Launch SFR, if found
+        if (args.Contains("-SFR", StringComparer.OrdinalIgnoreCase))
+        {
+            Logger.LogWarn("Starting Superfighters Redux...");
+
+            if (hasSFR)
+            {
+                Process.Start(SFRExecutable, string.Join(" ", args));
+            }
+            else
+            {
+                Logger.LogError("SFR is not installed or could not be found");
+            }
+            return 0;
+        }
+
+        // Launch SFD
+        if (args.Contains("-SFD", StringComparer.OrdinalIgnoreCase))
+        {
+            Logger.LogWarn("Starting Superfighters Deluxe...");
+           
+            string SFDExectuable = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
+            if (File.Exists(SFDExectuable))
+            {
+                Process.Start(SFDExectuable, string.Join(" ", args));
+            }
+            else
+            {
+                Logger.LogError("Could not find Superfighters Deluxe's executable");
+            }
+            return 0;
+        }
+
+        // Check extended-slots
+        if (args.Contains("-slots", StringComparer.OrdinalIgnoreCase))
+        {
+            int slotArgCount = 8;
+            int slotArgIndex = 0;
+            args.ToList().ForEach((string str) =>
+            {
+                if (str.Equals("-slots", StringComparison.OrdinalIgnoreCase))
+                { 
+                    return;
+                }
+                slotArgIndex++;
+            });
+
+            if (args.Length > slotArgIndex + 1)
+            {
+                if (!int.TryParse(args[slotArgIndex + 1], out slotArgCount))
+                {
+                    slotArgCount = 8;
+                }
+            }
+
+            if (slotArgCount == 8)
+            {
+                Logger.LogWarn("Select slot count (8-32): ", false);
+                string line = Console.ReadLine();
+                if (!int.TryParse(line, out slotArgCount))
+                {
+                    slotArgCount = 8;
+                }
+            }
+
+            slotArgCount = Math.Max(Math.Min(slotArgCount, 32), 8);
+            if (slotArgCount != 8)
+            {
+                Logger.LogWarn($"Setting max-slots to {slotArgCount}");
+                Constants.HOST_GAME_EXTENDED_SLOTS = true;
+                Constants.HOST_GAME_SLOT_COUNT = slotArgCount;
+                Constants.HOST_GAME_SLOT_STATES = new byte[Constants.HOST_GAME_SLOT_COUNT];
+                Constants.HOST_GAME_SLOT_TEAMS = new SFD.Team[Constants.HOST_GAME_SLOT_COUNT];
+            }
+        }
+
+
+        CheckRepositoryVersion();
+
+        // Patch SFD and start SFDCT
+        Logger.LogInfo("Starting SFDCT...");
+        Harmony.PatchAll();
+        Logger.LogInfo("Patching completed...");
+        SFD.Program.Main(args);
+        
+        return 0;
+    }
+
+    /// <summary>
+    ///     Fetch "ModVersion.txt" from the repository and compare versions against ours.
+    /// </summary>
+    public static void CheckRepositoryVersion()
+    {
         Logger.LogWarn("CHECKING VERSIONS FROM GITHUB REPOSITORY...");
+
         WebClient wc = null;
         try
         {
@@ -65,58 +165,11 @@ internal static class Program
                 Logger.LogWarn($"Current version ({Constants.Version.SFDCT}) matches repository ({targetVersion})");
             }
         }
-        catch { }
-        wc?.Dispose();
-        wc = null;
-
-        // Max-slots
-        for(int i = 0; i < args.Length; i++)
+        catch (Exception ex)
         {
-            if (args[i].ToUpper() == "-SLOTS")
-            {
-                int slotArgCount = 8;
-                if (args.Length > i + 1)
-                {
-                    if (!int.TryParse(args[i + 1], out slotArgCount))
-                    {
-                        slotArgCount = 8;
-                        Logger.LogError("Failed to parse slot count, using manual selection...");
-                    }
-                }
-                            
-                if (slotArgCount == 8)
-                {
-                    Logger.LogInfo("Select slot count (8 - 32): ", false);
-                    string line = Console.ReadLine();
-
-                    if (!int.TryParse(line, out slotArgCount))
-                    {
-                        slotArgCount = 8;
-                        Logger.LogError("Failed to parse slot count, using default (8)...");
-                    }
-                }
-
-                slotArgCount = Math.Max(Math.Min(slotArgCount, 32), 8);
-                if (slotArgCount != 8)
-                {
-                    Logger.LogWarn($"SETTING MAX-SLOTS TO {slotArgCount}");
-                    Constants.HOST_GAME_EXTENDED_SLOTS = true;
-                    Constants.HOST_GAME_SLOT_COUNT = slotArgCount;
-                    Constants.HOST_GAME_SLOT_STATES = new byte[slotArgCount];
-                    Constants.HOST_GAME_SLOT_TEAMS = new SFD.Team[slotArgCount];
-                }
-
-                break;
-            }
+            Logger.LogError($"Error while getting repository's version - {ex.Message}");
         }
-
-        // Patch and start SFD
-        Logger.LogInfo("Starting SFDCT...");
-        Harmony.PatchAll();
-        Logger.LogInfo("Patching completed...");
-        SFD.Program.Main(args);
-
-        return 0;
+        wc?.Dispose();
     }
 
     /// <summary>
