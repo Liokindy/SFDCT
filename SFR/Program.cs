@@ -121,6 +121,7 @@ internal static class Program
             }
         }
 
+        Console.Title = "Superfighters Custom Console " + Constants.Version.Label;
 
         CheckRepositoryVersion();
        

@@ -39,7 +39,7 @@ public static class Constants
     {
         get
         {
-            if (HOST_GAME_EXTENDED_SLOTS && GameSFD.Handle.ImHosting)
+            if (HOST_GAME_EXTENDED_SLOTS)
             {
                 return HOST_GAME_SLOT_COUNT;
             }
