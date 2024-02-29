@@ -100,6 +100,7 @@ internal static class Program
                 if (slotArgCount != 8)
                 {
                     Logger.LogWarn($"SETTING MAX-SLOTS TO {slotArgCount}");
+                    Constants.HOST_GAME_EXTENDED_SLOTS = true;
                     Constants.HOST_GAME_SLOT_COUNT = slotArgCount;
                     Constants.HOST_GAME_SLOT_STATES = new byte[slotArgCount];
                     Constants.HOST_GAME_SLOT_TEAMS = new SFD.Team[slotArgCount];

@@ -19,7 +19,7 @@ public static class Constants
     public readonly struct Version
     {
         public static string SFD = "v.1.3.7d";
-        public static string SFDCT = "v.1.0.2";
+        public static string SFDCT = "v.1.0.3";
         public static bool InDev = false;
         public static string Label
         {
