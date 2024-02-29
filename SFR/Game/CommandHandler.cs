@@ -480,7 +480,7 @@ internal static class CommandHandler
                 {
                     if (args.Parameters[1].ToUpper() == "DEFAULT" || args.Parameters[1].ToUpper() == "NULL")
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) forced server-movement was reset.", Color.LightBlue));
+                        args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) forced server-movement was reset.", Color.LightBlue, args.SenderGameUser));
                         bool oldVal = (gameUserTag.Ping > Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING || Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0) && Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK;
                         
                         gameUserTag.ForceServerMovement = oldVal;
@@ -502,7 +502,7 @@ internal static class CommandHandler
                     }
 
                     bool val = (args.Parameters[1] == "1" || args.Parameters[1].ToUpper() == "TRUE");
-                    args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) set forced server-movement to {val}.", Color.LightBlue));
+                    args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) set forced server-movement to {val}.", Color.LightBlue, args.SenderGameUser));
                     gameUserTag.ForceServerMovement = val;
                     gameUserTag.ForcedServerMovementToggleTime = -1f;
                     if (gameUserTag.GameUsers != null)
@@ -532,7 +532,7 @@ internal static class CommandHandler
                     for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
                     {
                         string mess = "- " + GetSlotState(__instance.GetGameSlotByIndex(i).GameSlotIndex, CConst.HOST_GAME_SLOT_STATES[i], (int)CConst.HOST_GAME_SLOT_TEAMS[i], __instance.GetGameSlotByIndex(i).IsOccupiedByUser);
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.Yellow));
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.Yellow, args.SenderGameUser));
                     }
                     return true;
                 }
@@ -603,7 +603,7 @@ internal static class CommandHandler
 
                         string messSlotAfter = GetSlotState(slotIndex, slotState, slotTeam);
                         string mess = messSlotBefore + " -> " + messSlotAfter;
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.ForestGreen));
+                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
 
                         GameSFD.Handle.Server.SyncGameSlotsInfo();
                     }
@@ -623,7 +623,7 @@ internal static class CommandHandler
             ))
             {
                 string header = "- SCOREBOARD -";
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser, null));
+                args.Feedback.Add(new(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser));
 
                 int num = 0;
                 foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
@@ -659,7 +659,7 @@ internal static class CommandHandler
                         mess1 = $"{slotIndex}: {accName} - {team} | {tWins}/{tLoss} ({tGames})";
                     }
 
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess1, messCol, args.SenderGameUser, null));
+                    args.Feedback.Add(new(args.SenderGameUser, mess1, messCol, args.SenderGameUser));
                 }
                 return true;
             }
@@ -695,27 +695,27 @@ internal static class CommandHandler
 
             if (args.HostPrivileges)
             {
-                args.Feedback.Add(new(args.SenderGameUser, "- HOST COMMANDS", cSep));
+                args.Feedback.Add(new(args.SenderGameUser, "- HOST COMMANDS", cSep, args.SenderGameUser));
                 foreach (KeyValuePair<string[], string> kvp in hostCommands)
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, $"{kvp.Key.Last()} {kvp.Value}", cHost));
+                    args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cHost, args.SenderGameUser));
                 }
             }
             if (args.ModeratorPrivileges)
             {
-                args.Feedback.Add(new(args.SenderGameUser, "- MODERATOR COMMANDS", cSep));
+                args.Feedback.Add(new(args.SenderGameUser, "- MODERATOR COMMANDS", cSep, args.SenderGameUser));
                 foreach (KeyValuePair<string[], string> kvp in moderatorCommands)
                 {
                     if (args.CanUseModeratorCommand(kvp.Key))
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, $"{kvp.Key.Last()} {kvp.Value}", cMod));
+                        args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cMod, args.SenderGameUser));
                     }
                 }
             }
             args.Feedback.Add(new(args.SenderGameUser, "- PUBLIC COMMANDS", cSep));
             foreach (KeyValuePair<string[], string> kvp in publicCommands)
             {
-                args.Feedback.Add(new(args.SenderGameUser, $"{kvp.Key.Last()} {kvp.Value}", cPublic));
+                args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cPublic, args.SenderGameUser));
             }
 
             return true;
