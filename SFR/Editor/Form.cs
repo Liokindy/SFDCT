@@ -11,7 +11,11 @@ using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.Editor;
 
-[HarmonyPatch]
+// [HarmonyPatch]
+/// <summary>
+///     This fix causes the game to randomly not boot, and get stucked while
+///     patching. Will stay disabled until another solution is done.
+/// </summary>
 internal static class Form
 {
     /// <summary>
@@ -20,11 +24,12 @@ internal static class Form
     ///     with the target SFD version (v.1.3.7d) instead of v.1.3.7x. So if the
     ///     user uses vanilla-SFD, the imagelist won't be re-built.
     /// </summary>
+    /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(SFDMapEditor), nameof(SFDMapEditor.BuildTreeViewImageList), new Type[] { })]
     private static IEnumerable<CodeInstruction> SFDMapEditorBuildTreeViewImageList(IEnumerable<CodeInstruction> instructions)
     {
-        foreach (CodeInstruction code in instructions.ToList())
+        foreach (CodeInstruction code in instructions)
         {
             if (code.operand == null)
             {
@@ -37,46 +42,5 @@ internal static class Form
         }
         return instructions;
     }
-
-    /// <summary>
-    ///     Saving a map through the editor
-    /// </summary>
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(StateEditor), nameof(StateEditor.AddNewEditMap), new Type[] { })]
-    private static IEnumerable<CodeInstruction> StateEditorAddNewEditMap(IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (CodeInstruction code in instructions.ToList())
-        {
-            if (code.operand == null)
-            {
-                continue;
-            }
-            if (code.operand.Equals("v.1.3.7x"))
-            {
-                code.operand = CConst.Version.SFD;
-            }
-        }
-        return instructions;
-    }
-
-    /// <summary>
-    ///     Saving a script through the editor
-    /// </summary>
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(StateEditor), nameof(StateEditor.AddNewEditExtensionScript), new Type[] { })]
-    private static IEnumerable<CodeInstruction> StateEditorAddNewEditExtensionScript(IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (CodeInstruction code in instructions.ToList())
-        {
-            if (code.operand == null)
-            {
-                continue;
-            }
-            if (code.operand.Equals("v.1.3.7x"))
-            {
-                code.operand = CConst.Version.SFD;
-            }
-        }
-        return instructions;
-    }
+    */
 }

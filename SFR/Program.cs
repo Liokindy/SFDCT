@@ -85,21 +85,18 @@ internal static class Program
         if (args.Contains("-slots", StringComparer.OrdinalIgnoreCase))
         {
             int slotArgCount = 8;
-            int slotArgIndex = 0;
-            args.ToList().ForEach((string str) =>
+            for(int i = 0; i < args.Length; i++)
             {
-                if (str.Equals("-slots", StringComparison.OrdinalIgnoreCase))
-                { 
-                    return;
-                }
-                slotArgIndex++;
-            });
-
-            if (args.Length > slotArgIndex + 1)
-            {
-                if (!int.TryParse(args[slotArgIndex + 1], out slotArgCount))
+                if (args[i].Equals("-slots", StringComparison.OrdinalIgnoreCase))
                 {
-                    slotArgCount = 8;
+                    if (args.Length > i + 1)
+                    {
+                        if (!int.TryParse(args[i + 1], out slotArgCount))
+                        {
+                            slotArgCount = 8;
+                        }
+                    }
+                    break;
                 }
             }
 
@@ -126,7 +123,7 @@ internal static class Program
 
 
         CheckRepositoryVersion();
-
+       
         // Patch SFD and start SFDCT
         Logger.LogInfo("Starting SFDCT...");
         Harmony.PatchAll();
