@@ -17,11 +17,11 @@ namespace SFDCT.UI;
 internal static class ChatTweaks
 {
     private static int m_rowSizeNormal = 10;
-    private static int m_rowSizeShowHistory = 16;
-    private static int m_rowSizeTyping = 13;
+    private static int m_rowSizeShowHistory = 13;
+    private static int m_rowSizeTyping = 15;
     private static bool IsWordSeparator(char c)
     {
-        return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
+        return c != '_' && !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
     }
 
     private static int m_lastMessageIndex = 0;
@@ -125,18 +125,26 @@ internal static class ChatTweaks
                 if (ctrlHeld)
                 {
                     string textboxText = GameChat.m_textbox.Text;
-                    int charIndex = textboxText.Length;
-                    while(charIndex >= 0)
+                    int charCount = 0;
+
+                    for(int i = textboxText.Length; i > 0; i--)
                     {
-                        charIndex--;
-                        if (charIndex != textboxText.Length - 1 && IsWordSeparator(textboxText.ElementAtOrDefault(charIndex)))
+                        char currentChar = textboxText[i - 1];
+                        bool isWordSep = IsWordSeparator(currentChar);
+                        if (isWordSep && IsWordSeparator(textboxText.ElementAtOrDefault(i - 2)))
                         {
-                            charIndex = Math.Min(charIndex + 1, textboxText.Length - 1);
+                            continue;
+                        }
+
+                        if (isWordSep && i != textboxText.Length)
+                        {
+                            charCount = i + 1;
                             break;
                         }
                     }
+                    charCount = Math.Max(Math.Min(charCount, textboxText.Length), 0);
 
-                    GameChat.m_textbox.SetText(textboxText.Substring(0, charIndex));
+                    GameChat.m_textbox.SetText(textboxText.Substring(0, charCount));
                 }
             }
         }
