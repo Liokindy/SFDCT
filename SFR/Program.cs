@@ -123,7 +123,14 @@ internal static class Program
 
         Console.Title = "Superfighters Custom Console " + Constants.Version.Label;
 
-        CheckRepositoryVersion();
+        if (args.Contains("-skip", StringComparer.OrdinalIgnoreCase))
+        {
+            Logger.LogWarn("SKIPPED REPOSITORY-VERSION CHECK.");
+        }
+        else
+        {
+            CheckRepositoryVersion();
+        }
        
         // Patch SFD and start SFDCT
         Logger.LogInfo("Starting SFDCT...");
