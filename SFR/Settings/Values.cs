@@ -30,11 +30,11 @@ public static class Values
         Add("SOUNDPANNING_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
         Add("SOUNDPANNING_INWORLD_THRESHOLD", 80f, IniSettingType.Float);
         Add("SOUNDPANNING_INWORLD_DISTANCE", 1000f, IniSettingType.Float);
-
-        for(int i = 1; i <= 8; i++)
+        for (int i = 1; i <= 8; i++)
         {
             Add($"EXTENDEDPROFILES_{i}_PROFILE", 0, IniSettingType.Int);
         }
+        Add("MAINMENU_BG_USE_BLACK", false, IniSettingType.Bool);
 
         b_initialized = true;
     }

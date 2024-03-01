@@ -162,7 +162,7 @@
     <Compile Include="Misc\Constants.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\CornerLabelHandler.cs" />
+    <Compile Include="UI\MainMenu.cs" />
     <Compile Include="UI\Scoreboard.cs" />
     <Compile Include="UI\ScrollHandler.cs" />
     <Compile Include="Weapons\SFDWeaponTweaks.cs" />
