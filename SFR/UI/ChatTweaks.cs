@@ -9,8 +9,7 @@ using SFD;
 using SFD.GUI.Text;
 using SFD.MenuControls;
 using SFD.States;
-using Logger = SFDCT.Helper.Logger;
-using static SFD.GameChat;
+using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.UI;
 
@@ -35,6 +34,31 @@ internal static class ChatTweaks
     {
         if (GameChat.m_chatActive)
         {
+            // Staff-chat
+            if (!string.IsNullOrEmpty(GameChat.m_textbox.Text))
+            {
+                if (GameChat.m_textbox.Text.StartsWith("/staff ") || GameChat.m_textbox.Text == "/staff" ||
+                    GameChat.m_textbox.Text.StartsWith("/s ") || GameChat.m_textbox.Text == "/s")
+                {
+                    Client client = GameSFD.Handle.Client;
+                    GameInfo gameInfo;
+                    if (client != null && client.IsRunning && client.GameInfo != null)
+                    {
+                        gameInfo = GameSFD.Handle.Client.GameInfo;
+                    }
+                    else
+                    {
+                        gameInfo = GameSFD.Handle.GetRunningState().GetActiveGameInfo();
+                    }
+
+                    GameUser gameUser = gameInfo?.GetLocalGameUser(0);
+                    if (gameUser != null && (gameUser.IsModerator || gameUser.IsHost))
+                    {
+                        GameChat.m_textbox.LabelColor = CConst.Colors.Staff_Chat_Message;
+                    }
+                }
+            }
+
             if (GameChat.m_rows != m_rowSizeTyping)
             {
                 GameChat.m_rows = m_rowSizeTyping;
@@ -134,6 +158,19 @@ internal static class ChatTweaks
             }
             m_lastMessagesList.Add(message);
         }
+    }
+
+    public static string ConstructMetaTextToStaffChatMessage(string msg, string plrName, TeamIcon team)
+    {
+        string text = string.Format("[{0}]{1}:[#] [{2}]{3}",
+        [
+            CConst.Colors.Staff_Chat_Name.ToHex(),
+            TextMeta.EscapeText(plrName),
+            CConst.Colors.Staff_Chat_Message.ToHex(),
+            TextMeta.EscapeText(msg)
+        ]);
+        text = string.Format("[ICO=TEAM_{0}]{1}", (int)team, text);
+        return string.Format("[{0}]{1}[#]{2}", CConst.Colors.Staff_Chat_Tag.ToHex(), TextMeta.EscapeText("[To staff]"), text);
     }
 
     [HarmonyPostfix]

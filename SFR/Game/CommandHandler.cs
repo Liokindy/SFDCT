@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
 using SFD.States;
@@ -9,12 +9,13 @@ using SFD.ManageLists;
 using SFD.Objects;
 using SFD.Weapons;
 using SFD.Projectiles;
+using SFD.GUI.Text;
+using Microsoft.Xna.Framework;
 using Lidgren.Network;
-using HarmonyLib;
-using CConst = SFDCT.Misc.Constants;
-using System.Security.AccessControl;
-using System.Collections.Generic;
 using SFDCT.Game.Voting;
+using SFDCT.Helper;
+using CConst = SFDCT.Misc.Constants;
+using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -130,7 +131,8 @@ internal static class CommandHandler
     }
     private static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
     {
-        if (GameSFD.Handle.Server == null)
+        Server server = GameSFD.Handle.Server;
+        if (server == null)
         {
             return false;
         }
@@ -232,7 +234,7 @@ internal static class CommandHandler
                                     resupplyAmmo = true;
 
                                     NetMessage.PlayerReceiveItem.Data data = new(worldPlayer.ObjectID, worldPlayer.CurrentHandgunWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
-                                    GameSFD.Handle.Server.SendMessage(MessageType.PlayerReceiveItem, data);
+                                    server.SendMessage(MessageType.PlayerReceiveItem, data);
                                 }
                                 if (worldPlayer.CurrentRifleWeapon != null)
                                 {
@@ -240,7 +242,7 @@ internal static class CommandHandler
                                     resupplyAmmo = true;
 
                                     NetMessage.PlayerReceiveItem.Data data = new(worldPlayer.ObjectID, worldPlayer.CurrentRifleWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
-                                    GameSFD.Handle.Server.SendMessage(MessageType.PlayerReceiveItem, data);
+                                    server.SendMessage(MessageType.PlayerReceiveItem, data);
                                 }
 
                                 if (resupplyAmmo)
@@ -453,16 +455,12 @@ internal static class CommandHandler
                     else
                     {
                         args.Feedback.Add(new(args.SenderGameUser, "Creating vote...", Color.ForestGreen, args.SenderGameUser));
-                        GameVote vote = new Voting.GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, publicResults, description, alternatives.ToArray());
-                        Server sv = GameSFD.Handle.Server;
-                        if (sv != null)
-                        {
-                            vote.ValidRemoteUniqueIdentifiers.AddRange(sv.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
-                            __instance.VoteInfo.AddVote(vote);
-                            sv.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
-                            return true;
-                        }
-                        args.Feedback.Add(new(args.SenderGameUser, "Error getting server handle.", Color.Red, args.SenderGameUser));
+                        GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, publicResults, description, alternatives.ToArray());
+
+                        vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                        __instance.VoteInfo.AddVote(vote);
+                        server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                        return true;
                     }
                     return true;
                 }
@@ -520,6 +518,56 @@ internal static class CommandHandler
                     }
                     return true;
                 }
+            }
+
+            // Staff messages
+            if (args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
+            {
+                if (args.SenderGameUser == null)
+                {
+                    return false;
+                }
+                if (!server.Running)
+                {
+                    return false;
+                }
+
+                string profName = args.SenderGameUser.GetProfileName();
+                string mess = UI.ChatTweaks.ConstructMetaTextToStaffChatMessage(args.SourceParameters, profName, args.SenderGameUser.TeamIcon);
+                NetMessage.ChatMessage.Data messageData = new(mess, CConst.Colors.Staff_Chat_Message, profName, true, args.SenderGameUser.UserIdentifier);
+
+                ConsoleOutput.ShowMessage(ConsoleOutputType.PlayerAction, $"Server: Sending staff message from '{profName}' ({args.SenderGameUser.AccountName})");
+                // Loop through slots and find moderators or the host
+                for (int i = 0; i < __instance.GameSlots.Length; i++)
+                {
+                    GameSlot gameSlot = __instance.GameSlots[i];
+                    GameUser slotUser = gameSlot.GameUser;
+                    if (gameSlot.CurrentState == GameSlot.State.Occupied && slotUser != null && (slotUser.IsHost || slotUser.IsModerator))
+                    {
+                        GameConnectionTag gameConnectionTag = slotUser.GetGameConnectionTag();
+                        NetConnection netConnection = gameConnectionTag?.NetConnection;
+
+                        if (netConnection != null)
+                        {
+                            NetOutgoingMessage msg = NetMessage.ChatMessage.Write(ref messageData, server.m_server.CreateMessage());
+                            server.m_server.SendMessage(msg, netConnection, NetDeliveryMethod.ReliableOrdered, 1);
+                        }
+                    }
+                }
+
+                // Leave a notification in DS
+                if (SFD.Program.IsServer)
+                {
+                    string msg2 = messageData.Message;
+                    if (messageData.IsMetaText)
+                    {
+                        msg2 = TextMeta.ToPlain(messageData.Message);
+                    }
+
+                    DSInfoNotification.Notify(new DSInfoNotification.ChatMessage(args.SenderGameUser.UserIdentifier, msg2, messageData.Color.ToWinDrawColor()));
+                }
+
+                return true;
             }
 
             // Host/Mod commands, only available when using extended slots
@@ -677,6 +725,7 @@ internal static class CommandHandler
                 { ["GIVE"], "[USER] [ITEMS...]" },
                 { ["DOVOTE"], "[PUBLIC?] [TEXT] [A] [B] [C?] [D?]" },
                 { ["FORCESERVERMOVEMENT", "FORCESVMOV"], "[USER] [1/0/NULL]" },
+                { ["STAFF", "S"], "[MESSAGE]" },
 
                 // Extended-slots
                 { ["SLOTS"], "" },
@@ -698,7 +747,7 @@ internal static class CommandHandler
                 args.Feedback.Add(new(args.SenderGameUser, "- HOST COMMANDS", cSep, args.SenderGameUser));
                 foreach (KeyValuePair<string[], string> kvp in hostCommands)
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cHost, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cHost, args.SenderGameUser));
                 }
             }
             if (args.ModeratorPrivileges)
@@ -708,14 +757,14 @@ internal static class CommandHandler
                 {
                     if (args.CanUseModeratorCommand(kvp.Key))
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cMod, args.SenderGameUser));
+                        args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cMod, args.SenderGameUser));
                     }
                 }
             }
-            args.Feedback.Add(new(args.SenderGameUser, "- PUBLIC COMMANDS", cSep));
+            args.Feedback.Add(new(args.SenderGameUser, "- PUBLIC COMMANDS", cSep, args.SenderGameUser));
             foreach (KeyValuePair<string[], string> kvp in publicCommands)
             {
-                args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.Last()} {kvp.Value}", cPublic, args.SenderGameUser));
+                args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cPublic, args.SenderGameUser));
             }
 
             return true;
