@@ -1,61 +1,79 @@
-My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). 
-- It adds some features I personally like to have in vanilla SFD. 
-- Players without SFDCT can join you server, and you can join vanilla servers with SFDCT.
+My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). Superfighters Deluxe Custom.
 
-<img src="docs/SFD_titleLoop.gif" alt="SFD"/>
+<p align="center"><img src="docs/SFD_titleLoop.gif" width=75%/></p>
 
-# Notable Features
+- It adds some features that I personally like to SFD. 
+- Players without SFDCT can join your server, and you can join other vanilla servers while using SFDCT.
+
 > [!NOTE]
-> The mod is still a work-in-progress. Features may break, be added, removed, or changed entirely.
+> The mod is still a Work-In-Progress. Some features may be added, be removed, or sometimes changed drastically.
 
 > [!TIP]
-> Settings are currently accessed and changed by editing `SFDCT/config.ini` with a text editor. You can refresh your settings in-game using `F6`
+> Settings are currently accessed and changed by editing `SFDCT/config.ini` directly with a text editor. You can refresh your settings in-game using `F6`. In some cases you may need to restart the game.
 
-### Sound Panning
-- Sounds will pan to the left or right depending on where they come from
-- Sound will distort and sound slowed down or speed up according to the time modifier.
+# NOTABLE FEATURES
 
-### More profiles
-- You have twice the amount of profiles to use, from 9 to a whopping 18.
+#### EXTENDED PROFILES
+- You have twice the amount of profiles to use, 18 instead of just 9.
 
-<img src="docs/extendedProfiles.gif" alt="ExtendedProfiles"/>
+<img src="docs/extendedProfiles.gif" width=50%/>
 
-### More slots
+#### EXTENDED SLOTS
 > [!WARNING]
-> This is feature is still in an experimental and WIP state. It may break maps and scripts that assume there's only 8 slots available, or there may be other yet-unknown issues.
+> This feature may be *buggy*. Unprepared scripts/maps will behave weird with more than 8 players. Other players not using SFDCT will get incorrect results from `/PLAYERS` and the scoreboard will look empty.
 
-> [!TIP]
-> Other players will see the scoreboard glitched, and the `/PLAYERS` command will not work. A server-side replacement is in place for players to see others score and team, `/SCOREBOARD`
+- Set more than 8 slots for players and bots in your server using the launch parameter `-SLOTS`, you can also do a set amount like `-SLOTS 12`.
+- A bigger scoreboard that shows more than 8 players, beware that because of the UI's fixed scale it may clip out of the screen in smaller resolutions than 720p.
+- If you know a server uses SFDCT and has extended slots enabled, you can join with the same slot count to see the scoreboard properly.
 
-- Expanded scoreboard to show more than 8 players, after 16 slots it may look glitched in some resolutions like 720p.
-- Set more than 8 slots for players or bots to use in your server.
-- Activated with the `-SLOTS [8-32]` start parameter.
+<img src="docs/10SlotsScoreboard.png" width=50%/>
 
-<img src="docs/10SlotsScoreboard.png" alt="10SlotsScoreboard"/>
-<img src="docs/20slotsChaos.gif" alt="20SlotsChaos"/>
+#### MANUAL VOTES
+- When the vote ends, the results are sent to you in private.
+- You can specify up to 4 choices and specify if the results should be shown to everyone else.
+- Examples: `/DOVOTE 1 "Like the map?" "Yeah" "No"`, `/DOVOTE "Kill Dxse?" "Yes" "Yeah" "Affirmative"`
 
-### QoL and Customization
-- Cycle through your messages in chat using the `UP` and `DOWN` arrow keys (like Minecraft!)
+<img src="docs/manualVoting0.gif" width=35%/>
 
-<img src="docs/chatCycling.gif" alt="ChatCycling"/>
+<img src="docs/manualVoting1.png" width=50%/>
 
-- Choose your own custom color for the UI.
+#### CHAT IMPROVEMENTS
+- Use the `UP` and `DOWN` arrow keys to cycle through old messages or commands.
+- Use `Ctrl` + `Backspace` to erase entire words like other text editors.
+- Moderators and the host can talk with each other privately using staff-chat (`/S` or `/STAFF`)
 
-<img src="docs/customUI0.png" alt="CustomUI0"/>
-<img src="docs/customUI1.png" alt="CustomUI1"/>
+<img src="docs/chatFeatures.gif" width=50%/>
 
-# Installation
+#### CUSTOM UI COLOR
+- Use any color you want for the UI.
+
+<img src="docs/customUI.png" width=50%/>
+
+#### IMPROVED DEFAULT COMMANDS
+- The `/PLAYERS` command will provide more info about the players in the lobby.
+
+<img src="docs/defaultCommands0.png" width=40%/>
+
+- The `/GIVE` command supports multiple arguments, i.e `/GIVE ME 17 21 BOUNCING_AMMO`
+
+<img src="docs/defaultCommands1.gif" width=40%/>
+
+# INSTALLATION
 > [!WARNING]
-> SFDCT may get flagged as malicious by your browser/OS. This is a **known problem**, however, due to this we advice you to **not** trust downloads of SFDCT's releases from sites outside the [Official Repository](https://github.com/Liokindy/SFDCT/).
+> SFDCT may get flagged as malicious. This is a known problem. We advice you to **NOT** trust downloads of SFDCT from sites that are not from [**this** repository](https://github.com/Liokindy/SFDCT/).
 
-1. Get the latest release [here](https://github.com/Liokindy/SFDCT/releases). Go to SFD's root folder and extract the zip contents there.
+1. Download the [latest release](https://github.com/Liokindy/SFDCT/releases) and extract the contents to Superfighters Deluxe's folder. (Commonly located at `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe`)
 
-2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`. This will tell Steam to open SFDCT instead of SFD.
+<img src="docs/installation0.png" width=75%/>
 
-3. When you launch SFD, a cmd will appear, and SFDCT will boot instead.
+2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`.
 
-# Credits
+<img src="docs/steamLaunchParameters.png" width=75%/>
+
+3. When you launch SFD, SFDCT will boot instead.
+
+# CREDITS
 SFDCT is made using [SFR](https://github.com/Odex64/SFR) as a base, however, assets, features, etc. From SFR are not included.
 
-# Building
+# BUILDING
 You can use [SFR's](https://github.com/Odex64/SFR) building guide, as the process is similar.
