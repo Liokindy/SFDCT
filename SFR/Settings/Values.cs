@@ -34,7 +34,7 @@ public static class Values
         {
             Add($"EXTENDEDPROFILES_{i}_PROFILE", 0, IniSettingType.Int);
         }
-        Add("MAINMENU_BG_USE_BLACK", false, IniSettingType.Bool);
+        Add("MAINMENU_BG_USE_BLACK", true, IniSettingType.Bool);
 
         b_initialized = true;
     }

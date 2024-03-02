@@ -20,7 +20,7 @@ public static class Constants
     {
         public static string SFD = "v.1.3.7d";
         public static string SFDCT = "v.1.0.4";
-        public static bool InDev = true;
+        public static bool InDev = false;
         public static string Label
         {
             get
