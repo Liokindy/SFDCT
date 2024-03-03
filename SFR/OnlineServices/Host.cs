@@ -71,7 +71,7 @@ internal static class Host
     private static IEnumerable<CodeInstruction> Server_Start(IEnumerable<CodeInstruction> instructions)
     {
         instructions.ElementAt(26).opcode = OpCodes.Ldc_I4_S;
-        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 4; // 12
+        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 2; // 8 + 4 = 12
         return instructions;
     }
 
@@ -174,17 +174,49 @@ internal static class Host
     }
 
     /// <summary>
-    ///     Modified clients can enter the server and use an empty AccountName
+    ///     This allows the DS server to bypass the ReadAccountData check in
+    ///     order to join the server while having an empty AccountName.
     /// </summary>
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
-    private static void ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Server), nameof(Server.DoReadRun))]
+    private static IEnumerable<CodeInstruction> Server_DoReadRun(IEnumerable<CodeInstruction> instructions, ILGenerator il)
     {
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName.Length == 0)
+        // The "flag" variable stores if the sender is the DS preview.
+        //
+        // We add CodeInstructions that check for this variable (ldloc_S 20) and branches
+        // after "flag3" is supposed to be set to false.
+        //
+        // We do this because "flag3" is only set to false after "ReadAccountData" returns false.
+        // (Which it will, because the AccountName provided is empty.)
+
+        // In-game code
+        /*
+        bool flag = false;
+        .
+        .
+        else if (Program.IsServer)
         {
-            // Possible modified client
-            __result = false;
+            flag = senderConnection.IsLocalHost();
         }
+        .
+        .
+        if (!Constants.Account.ReadAccountData(connectData.AccountData, key, out accountName, out text))
+        {
+            flag3 = false;
+        }
+        */
+
+        // Define a label in the instructions after "flag = false;"
+        Label returnLabel = il.DefineLabel();
+        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+        code.ElementAt(552).labels.Add(returnLabel);
+
+        // Add the code instructions to branch if "flag" is true
+        code.Insert(550, new(OpCodes.Ldloc_S, 20));
+        code.Insert(551, new(OpCodes.Brtrue_S, returnLabel));
+
+        return code;
     }
 
     /// <summary>
