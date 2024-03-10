@@ -71,7 +71,7 @@ internal static class Host
     private static IEnumerable<CodeInstruction> Server_Start(IEnumerable<CodeInstruction> instructions)
     {
         instructions.ElementAt(26).opcode = OpCodes.Ldc_I4_S;
-        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 2; // 8 + 4 = 12
+        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 1; // 8 + 4 = 12
         return instructions;
     }
 

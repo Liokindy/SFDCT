@@ -126,6 +126,7 @@
     <Compile Include="Fighter\GadgetHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
+    <Compile Include="Game\Commands\ExtendedSlots.cs" />
     <Compile Include="Game\VersionPatch.cs" />
     <Compile Include="Game\Voting\GameVoteManual.cs" />
     <Compile Include="OnlineServices\NetMessages.cs" />
