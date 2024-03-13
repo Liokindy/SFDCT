@@ -377,10 +377,10 @@ internal static class CommandHandler
                         return true;
                     }
 
-                    bool publicResults = false;
-                    if (args.Parameters[0] == "1" || args.Parameters[0].ToUpper() == "TRUE")
+                    bool requiresOverHalf = true;
+                    if (args.Parameters[0] == "0" || args.Parameters[0].ToUpper() == "FALSE")
                     {
-                        publicResults = true;
+                        requiresOverHalf = false;
                     }
 
                     string description = "";
@@ -390,8 +390,8 @@ internal static class CommandHandler
                     string temp = "";
                     for (int i = 0; i < args.Parameters.Count; i++)
                     {
-                        // First argument was TRUE or 1
-                        if (i == 0 && publicResults) { continue; }
+                        // First argument was FALSE or 0
+                        if (i == 0 && !requiresOverHalf) { continue; }
 
                         string parameter = args.Parameters[i];
                         temp += parameter.Replace("\"", string.Empty) + " ";
@@ -409,6 +409,7 @@ internal static class CommandHandler
                             
                             alternatives.Add(temp);
                             temp = "";
+
                             // Will cause an out-of-index crash on vanilla clients.
                             // SFD only assigns 4 keys for voting in an array, F1-4.
                             if (alternatives.Count >= 4)
@@ -424,9 +425,10 @@ internal static class CommandHandler
                     }
                     else
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, "Creating vote...", Color.ForestGreen, args.SenderGameUser));
-                        GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, publicResults, description, alternatives.ToArray());
+                        string mess = string.Format("Creating vote ({0})...", requiresOverHalf ? "over-half" : "all");
+                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
 
+                        GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), true, requiresOverHalf);
                         vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
                         __instance.VoteInfo.AddVote(vote);
                         server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));

@@ -16,14 +16,14 @@ internal class GameVoteManual : GameVote
     public GameUser VoteOwner;
     public long VoteOwnerID;
     public bool VoteHandled = false;
-    public bool Public = false;
+    public bool Public = true;
     public bool OverHalfEndsVote = true;
 
     // <Text id="vote.nextmap.alternative.official">{0}</Text>
     private const string EmptyTextID = "vote.nextmap.alternative.official";
-    private const int TextMaxLength = 48;
+    private const int TextMaxLength = 64;
 
-    public GameVoteManual(int ID, GameUser ownerUser, bool publicResults, string descriptionText, params string[] alternativeTexts) : base(ID, GameVote.Type.KickVote)
+    public GameVoteManual(int ID, GameUser ownerUser, string descriptionText, string[] alternativeTexts, bool publicResults = true, bool requireHalf = true) : base(ID, GameVote.Type.KickVote)
     {
         this.DescriptionTextID = EmptyTextID;
 
@@ -33,13 +33,13 @@ internal class GameVoteManual : GameVote
         }
         this.DescriptionParameters = [descriptionText];
 
-        this.TotalVoteTime = 20 * 1000;
+        this.TotalVoteTime = 25 * 1000;
 
         this.VoteOwner = ownerUser;
         this.VoteOwnerID = ownerUser.UserIdentifier;
 
         this.Public = publicResults;
-        this.OverHalfEndsVote = true;
+        this.OverHalfEndsVote = requireHalf;
 
 
         sbyte aID = 0;
@@ -55,7 +55,7 @@ internal class GameVoteManual : GameVote
     public override void AnswersUpdated(GameInfo gameInfo)
     {
         // Logger.LogInfo($"VOTING: {this.VoteID} answer updated.");
-        if (this.ValidRemoteUniqueIdentifiers.Count == this.VotedRemoteUniqueIdentifiers.Count)
+        if (this.VotedRemoteUniqueIdentifiers.Count >= this.ValidRemoteUniqueIdentifiers.Count)
         {
             // Logger.LogInfo($"VOTING: {this.VoteID} all voted.");
             this.VoteTimeout(gameInfo);
@@ -107,7 +107,7 @@ internal class GameVoteManual : GameVote
             }
 
             sbyte? highestAlternativeID = this.GetHighestVoteCount(out _)?.Index;
-            NetConnection singleConn = this.Public ? this.VoteOwner.GetGameConnectionTag()?.NetConnection : null;
+            NetConnection singleConn = this.Public ? null : this.VoteOwner.GetGameConnectionTag()?.NetConnection;
 
             // Header. "Vote (X/X): X"
             string headerText = $"Vote ({votedCount}/{validCount}): \"{this.DescriptionParameters[0]}\"";
