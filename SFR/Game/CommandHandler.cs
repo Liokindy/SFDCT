@@ -278,7 +278,7 @@ internal static class CommandHandler
                                 wpnBazooka.RWeaponData.Properties.StartMags = 1;
                                 wpnBazooka.RWeaponData.Properties.CooldownAfterPostAction = 100;
                                 wpnBazooka.RWeaponData.Properties.ExtraAutomaticCooldown = 50;
-                                wpnBazooka.RWeaponData.Properties.ProjectilesEachBlast = 6;
+                                wpnBazooka.RWeaponData.Properties.ProjectilesEachBlast = 2;
                                 wpnBazooka.RWeaponData.Properties.SpecialAmmoBulletsRefill = 10;
                                 wpnBazooka.RWeaponData.LazerUpgrade = 1;
                                 wpnBazooka.RWeaponData.PowerupFireRounds = 30;
@@ -366,7 +366,7 @@ internal static class CommandHandler
                 
                 // Manually create a vote, the results are sent to the owner user,
                 // optionally, results can be shown to all players.
-                // /DOVOTE [PUBLIC?] [TEXT] [A] [B] [C?] [D?]
+                // /DOVOTE [OVER-HALF?] [TEXT] [A] [B] [C?] [D?]
                 if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant &&
                     args.Parameters.Count > 2 && args.IsCommand("DOVOTE") && args.CanUseModeratorCommand("DOVOTE")
                 )
@@ -435,6 +435,24 @@ internal static class CommandHandler
                         return true;
                     }
                     return true;
+                }
+            
+                // Manually start sudden-death.
+                // /FORCESD [TIME?]
+                if (args.IsCommand("FORCESUDDENDEATH", "FORCESD") && args.CanUseModeratorCommand("FORCESUDDENDEATH", "FORCESD"))
+                {
+                    int sdTime = 45;
+                    if (args.Parameters.Count > 0)
+                    {
+                        if (!int.TryParse(args.Parameters[0], out sdTime))
+                        {
+                            sdTime = 45;
+                        }
+                    }
+                    if (sdTime > 45) { sdTime = 45; }
+                    if (sdTime < 5) { sdTime = 5; }
+
+                    __instance.GameWorld.StartSuddenDeathForced(sdTime);
                 }
             }
 
@@ -654,9 +672,10 @@ internal static class CommandHandler
             Dictionary<string[], string> moderatorCommands = new()
             {
                 { ["GIVE"], "[USER] [ITEMS...]" },
-                { ["DOVOTE"], "[PUBLIC?] [TEXT] [A] [B] [C?] [D?]" },
+                { ["DOVOTE"], "[OVER-HALF?] [TEXT] [A] [B] [C?] [D?]" },
                 { ["FORCESERVERMOVEMENT", "FORCESVMOV"], "[USER] [1/0/NULL]" },
                 { ["STAFF", "S"], "[MESSAGE]" },
+                { ["FORCESUDDENDEATH", "FORCESD"], "[TIME?]" },
 
                 // Extended-slots
                 { ["SLOTS"], "" },
