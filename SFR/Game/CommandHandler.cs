@@ -116,17 +116,99 @@ internal static class CommandHandler
             // /MOUSE [1/0]
             if (args.IsCommand("MOUSE", "M") && args.Parameters.Count > 0)
             {
-                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
+                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpper() == "TRUE")
                 {
                     Commands.DebugMouse.IsEnabled = true;
                 }
-                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
+                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpper() == "FALSE")
                 {
                     Commands.DebugMouse.IsEnabled = false;
                 }
 
                 string mess = "Mouse dragging is now " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
+                return true;
+            }
+
+            // Add commands to Moderator Commands
+            // /MODERATOR_COMMANDS_ADD [...]
+            if (args.IsCommand("MODERATOR_COMMANDS_ADD") && args.Parameters.Count >= 1)
+            {
+                for(int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string param = args.Parameters[i].ToUpper();
+                    if (string.IsNullOrEmpty(param) || param == "ALL") { continue; }
+
+                    if (!Constants.MODDERATOR_COMMANDS.Contains(param))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Add(param);
+
+                        string mess = $"Added '/{param}' to moderator commands.";
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
+                    }
+                }
+                if (args.Parameters.Count > 1)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Added {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name));
+                }
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+            }
+
+            // Remove commands from Moderator Commands
+            // /MODERATOR_COMMANDS_REMOVE [...]
+            if (args.IsCommand("MODERATOR_COMMANDS_REMOVE") && args.Parameters.Count >= 1)
+            {
+                for (int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string param = args.Parameters[i].ToUpper();
+                    if (string.IsNullOrEmpty(param)) { continue; }
+
+                    if (param == "ALL")
+                    {
+                        Constants.MODDERATOR_COMMANDS.Clear();
+
+                        string mess = "Removed all commands from moderator commands, moderators can now use all commands.";
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Tag));
+                        break;
+                    }
+
+                    if (Constants.MODDERATOR_COMMANDS.Contains(param))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Remove(param);
+
+                        string mess = $"Removed '/{param}' from moderator commands.";
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
+                    }
+                }
+
+                if (args.Parameters.Count > 1)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Removed {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name));
+                }
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+            }
+
+            // List commands in Moderator Commands
+            // /MODERATOR_COMMANDS_GET [...]
+            if (args.IsCommand("MODERATOR_COMMANDS_GET"))
+            {
+                if (Constants.MODDERATOR_COMMANDS.Count == 0)
+                {
+                    string mess = "Moderators have access to all commands.";
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
+                    
+                    return true;
+                }
+
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Listing all moderator commands...", CConst.Colors.Staff_Chat_Name));
+                foreach (string str in Constants.MODDERATOR_COMMANDS)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"'/{str}'", CConst.Colors.Staff_Chat_Message));
+                }
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Moderators have access to {Constants.MODDERATOR_COMMANDS.Count} command(s).", CConst.Colors.Staff_Chat_Name));
+
                 return true;
             }
         }
@@ -648,6 +730,9 @@ internal static class CommandHandler
             Dictionary<string[], string> hostCommands = new()
             {
                 { ["MOUSE", "M"], "[1/0]" },
+                { ["MODERATOR_COMMANDS_ADD"], "[...]" },
+                { ["MODERATOR_COMMANDS_REMOVE"], "[...]" },
+                { ["MODERATOR_COMMANDS_GET"], "" },
             };
             Dictionary<string[], string> moderatorCommands = new()
             {
