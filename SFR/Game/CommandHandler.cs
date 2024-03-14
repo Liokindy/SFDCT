@@ -140,137 +140,119 @@ internal static class CommandHandler
                 // Better /GIVE command, allows for multiple weapons in a single command
                 // and use ALL as user (uses all users in the lobby)
                 // /GIVE [USER/PLAYER/ALL] [ITEMS...]
-                if (args.IsCommand("GIVE") && args.CanUseModeratorCommand("GIVE") && args.Parameters.Count > 1)
+                if (args.IsCommand("GIVE") && args.CanUseModeratorCommand("GIVE") && args.Parameters.Count >= 2)
                 {
-                    Color fbColor = Color.ForestGreen;
+                    Color feedbackColor = Color.ForestGreen;
+                    Color errorColor = Color.Red;
+                    List<Player> targetPlayers = [];
+                    bool isGiveAll = args.Parameters[0].Equals("All", StringComparison.OrdinalIgnoreCase);
 
-                    bool giveAll = args.Parameters[0].ToUpper() == "ALL";
-                    GameUser selectedUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-                    Player selectedPlayer = selectedUser == null ? null : __instance.GameWorld.GetPlayerByUserIdentifier(selectedUser.UserIdentifier);
-
-                    List<Player> playersToGive = [];
-                    if (giveAll)
+                    // "All" targets all players in the lobby
+                    if (isGiveAll)
                     {
-                        foreach(GameUser gu in __instance.GetGameUsers())
+                        targetPlayers = __instance.GetGameUsers().Select((GameUser user) =>
                         {
-                            if (gu == null || gu.IsDisposed)
+                            if (user != null && !user.IsDisposed)
                             {
-                                continue;
+                                Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
+                                if (userPlayer != null && !userPlayer.IsDisposed && !userPlayer.IsRemoved)
+                                {
+                                    return userPlayer;
+                                }
                             }
 
-                            Player guPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(gu.UserIdentifier);
-                            playersToGive.Add(guPlayer);    
-                        }
+                            return null;
+                        }).ToList();
                     }
                     else
                     {
-                        playersToGive.Add(selectedPlayer);
+                        // Try to get user by string input
+                        GameUser targetUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                        if (targetUser == null || targetUser.IsDisposed)
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, $"User '{args.Parameters[0]}' not found.", errorColor, args.SenderGameUser));
+                            return true;
+                        }
+                        Player targetPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(targetUser.UserIdentifier);
+                        if (targetPlayer == null || targetPlayer.IsDisposed || targetPlayer.IsRemoved)
+                        {
+                            return true;
+                        }
+
+                        targetPlayers = [targetPlayer];
                     }
 
-                    List<string> errorMessages = [];
-                    string giveAllMessage = "";
-                    foreach(Player worldPlayer in playersToGive)
+
+                    List<string> receivedTexts = [];
+
+                    // Loop through players
+                    foreach(Player player in targetPlayers)
                     {
-                        if (worldPlayer == null || worldPlayer.IsDisposed || worldPlayer.IsRemoved || worldPlayer.IsDead) { continue; }
+                        if (player == null) { continue; }
 
-                        // Start at 1 so we don't use the user parameter
-                        List<string> receivedStuff = [];
-                        for (int i = 1; i < args.Parameters.Count; i++)
+                        // Loop through parameters
+                        for(int i = 1; i < args.Parameters.Count; i++)
                         {
-                            string parameter = args.Parameters[i].ToUpper();
-                            if (string.IsNullOrEmpty(parameter))
-                            {
-                                continue;
-                            }
+                            string param = args.Parameters[i];
+                            if (string.IsNullOrEmpty(param)) { continue; }
 
-                            // Heal the player to full health
-                            if (parameter == "LIFE" || parameter == "HEAL" || parameter == "HEALTH")
+                            // Ammo for Rifle and Handgun
+                            if (param.Equals("Ammo", StringComparison.OrdinalIgnoreCase))
                             {
-                                // args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was healed.", fbColor));
-                                receivedStuff.Add("Heal");
-                                worldPlayer.HealAmount(worldPlayer.Health.MaxValue);
-
-                                // Visual and audio feedback for the player
-                                worldPlayer.GrabWeaponItem(WeaponDatabase.GetWeapon("+50"));
-                                continue;
-                            }
-
-                            // Give player ammo for his handgun and rifle
-                            if (parameter == "AMMO")
-                            {
-                                bool resupplyAmmo = false;
-                                if (worldPlayer.CurrentHandgunWeapon != null)
+                                bool filledAmmo = false;
+                                if (player.CurrentHandgunWeapon != null)
                                 {
-                                    worldPlayer.CurrentHandgunWeapon.FillAmmoMax();
-                                    resupplyAmmo = true;
-
-                                    NetMessage.PlayerReceiveItem.Data data = new(worldPlayer.ObjectID, worldPlayer.CurrentHandgunWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
-                                    server.SendMessage(MessageType.PlayerReceiveItem, data);
+                                    player.CurrentHandgunWeapon.CurrentSpareMags = player.CurrentHandgunWeapon.Properties.MaxCarriedSpareMags;
+                                    filledAmmo = true;
+                                    if (__instance.GameOwner == GameOwnerEnum.Server)
+                                    {
+                                        NetMessage.PlayerReceiveItem.Data data = new(player.ObjectID, player.CurrentHandgunWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
+                                        server.SendMessage(MessageType.PlayerReceiveItem, data);
+                                    }
                                 }
-                                if (worldPlayer.CurrentRifleWeapon != null)
+                                if (player.CurrentRifleWeapon != null)
                                 {
-                                    worldPlayer.CurrentRifleWeapon.FillAmmoMax();
-                                    resupplyAmmo = true;
-
-                                    NetMessage.PlayerReceiveItem.Data data = new(worldPlayer.ObjectID, worldPlayer.CurrentRifleWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
-                                    server.SendMessage(MessageType.PlayerReceiveItem, data);
+                                    player.CurrentRifleWeapon.CurrentSpareMags = player.CurrentRifleWeapon.Properties.MaxCarriedSpareMags;
+                                    filledAmmo = true;
+                                    if (__instance.GameOwner == GameOwnerEnum.Server)
+                                    {
+                                        NetMessage.PlayerReceiveItem.Data data2 = new(player.ObjectID, player.CurrentRifleWeapon, NetMessage.PlayerReceiveItem.ReceiveSourceType.GrabWeaponAmmo);
+                                        server.SendMessage(MessageType.PlayerReceiveItem, data2);
+                                    }
                                 }
 
-                                if (resupplyAmmo)
+                                if (filledAmmo)
                                 {
-                                    receivedStuff.Add("Ammo");
-                                    // args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was supplied with ammo.", fbColor));
+                                    receivedTexts.Add("Ammo");
                                 }
-                                continue;
                             }
 
-                            // All weapons in the game
-                            // (This is host-only, so it's his fault if he blows his computer up)
-                            if (args.HostPrivileges && parameter == "ALL")
+                            // Streetsweeper and StreetsweeperCrate
+                            if (param.Equals("SW", StringComparison.OrdinalIgnoreCase) ||
+                                param.Equals("STREETSWEEPER", StringComparison.OrdinalIgnoreCase) ||
+                                param.Equals("SWC", StringComparison.OrdinalIgnoreCase) ||
+                                param.Equals("STREETSWEEPERCRATE", StringComparison.OrdinalIgnoreCase))
                             {
-                                short[] WeaponIDs = [
-                                    // 22, 7, 68
-                                    24,01,28,02,17,06,05,19,26,03,
-                                    04,31,08,11,41,10,12,18,13,14,
-                                    15,16,20,25,27,29,09,23,42,43,
-                                    44,45,21,30,32,33,58,34,35,36,
-                                    37,38,39,40,49,47,48,46,50,51,
-                                    52,53,55,54,57,56,59,62,61,63,
-                                    64,65,66,67
-                                ];
-
-                                foreach (short id in WeaponIDs)
+                                string objectName = "STREETSWEEPERCRATE";
+                                if (param.Equals("SW", StringComparison.OrdinalIgnoreCase) || param.Equals("STREETSWEEPER", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    worldPlayer.GrabWeaponItem(WeaponDatabase.GetWeapon(id));
+                                    objectName = "STREETSWEEPER";
                                 }
 
-                                receivedStuff.Add("All");
-                                //args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} received a LOT of weapons.", fbColor));
-                                break;
-                            }
+                                Vector2 swSpawnOffset = new(-player.LastDirectionX * 2f, 8f);
 
-                            // Spawn a streetsweeper or streetsweepercrate
-                            if (parameter == "SW" || parameter == "SWC" || parameter == "STREETSWEEPER" || parameter == "STREETSWEEPERCRATE")
-                            {
-                                string objectName = (parameter == "SW" ? "STREETSWEEPER" : (parameter == "SWC" ? "STREETSWEEPERCRATE" : parameter));
-                                //args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} was delivered a {objectName}.", fbColor));
-                                receivedStuff.Add(objectName);
-
-                                SpawnObjectInformation spawnObject = new(__instance.GameWorld.CreateObjectData(objectName), worldPlayer.PreWorld2DPosition + new Vector2((float)(-(float)worldPlayer.LastDirectionX) * 2f, 8f), 0f, 1, Vector2.Zero, 0f);
+                                SpawnObjectInformation spawnObject = new SpawnObjectInformation(__instance.GameWorld.CreateObjectData(objectName), player.PreWorld2DPosition + swSpawnOffset, 0f, 1, Vector2.Zero, 0f);
                                 ObjectData objectData = ObjectData.Read(__instance.GameWorld.CreateTile(spawnObject));
-
-                                // Make the streetsweeper an ally, if spawned without a crate
-                                if (objectData is ObjectStreetsweeper objStreetsweeper)
+                                if (objectData is ObjectStreetsweeper)
                                 {
-                                    objStreetsweeper.SetOwnerPlayer(worldPlayer);
-                                    objStreetsweeper.SetOwnerTeam(worldPlayer.CurrentTeam, false);
+                                    ((ObjectStreetsweeper)objectData).SetOwnerPlayer(player);
+                                    ((ObjectStreetsweeper)objectData).SetOwnerTeam(player.CurrentTeam, false);
                                 }
-                                continue;
+
+                                receivedTexts.Add(objectName.ToLowerInvariant());
                             }
 
-
-                            // "Custom" weapons - vanilla weapons with modified base-properties
-                            if (parameter.ToUpper() == "HOSTGUN" && args.HostPrivileges)
+                            if (args.HostPrivileges && param.Equals("HostGun", StringComparison.OrdinalIgnoreCase))
                             {
                                 WeaponItem wpnBazooka = new WeaponItem(WeaponItemType.Rifle, new WpnBazooka());
                                 wpnBazooka.RWeaponData.Properties.MaxMagsInWeapon = 1;
@@ -279,90 +261,78 @@ internal static class CommandHandler
                                 wpnBazooka.RWeaponData.Properties.StartMags = 1;
                                 wpnBazooka.RWeaponData.Properties.CooldownAfterPostAction = 100;
                                 wpnBazooka.RWeaponData.Properties.ExtraAutomaticCooldown = 50;
-                                wpnBazooka.RWeaponData.Properties.ProjectilesEachBlast = 2;
+                                wpnBazooka.RWeaponData.Properties.ProjectilesEachBlast = 3;
                                 wpnBazooka.RWeaponData.Properties.SpecialAmmoBulletsRefill = 10;
                                 wpnBazooka.RWeaponData.LazerUpgrade = 1;
-                                wpnBazooka.RWeaponData.PowerupFireRounds = 30;
 
                                 wpnBazooka.RWeaponData.Properties.Projectile = new ProjectileBazooka();
-                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.InitialSpeed = 100; // 490
-                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.DodgeChance = 0.9f; // 0.9
+                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.InitialSpeed = 300; // 490
+                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.DodgeChance = 0.9f;
                                 wpnBazooka.RWeaponData.Properties.Projectile.Properties.CanBeAbsorbedOrBlocked = true;
 
+                                __instance.GameWorld.SlowmotionHandler.AddSlowmotion(new Slowmotion(100f, 250f, 1000f, 0.1f, player.ObjectID));
+                                SFD.Effects.EffectHandler.PlayEffect("CAM_S", player.Position, __instance.GameWorld, 3.25f, 100f, false);
+                                SFD.Sounds.SoundHandler.PlaySound("LogoSlam", player.Position, 1f, __instance.GameWorld);
 
-                                __instance.GameWorld.SlowmotionHandler.AddSlowmotion(new Slowmotion(1f, 1f, 1250f, 0.01f, worldPlayer.ObjectID));
-                                SFD.Effects.EffectHandler.PlayEffect("CAM_S", worldPlayer.Position, __instance.GameWorld, 3.25f, 100f, false);
-                                SFD.Sounds.SoundHandler.PlaySound("LogoSlam", worldPlayer.Position, 1f, __instance.GameWorld);
-
-                                worldPlayer.GrabWeaponItem(wpnBazooka);
-                                args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} has received the \"HOST GUN\"", Color.DarkRed));
+                                player.GrabWeaponItem(wpnBazooka);
                                 continue;
                             }
 
-
-                            // Get a weapon with it's name
-                            WeaponItem wpn = WeaponDatabase.GetWeapon(parameter);
-                            short weaponID = 0;
-                            if (wpn == null)
+                            // Weapon ID or Name
+                            try
                             {
-                                if (!short.TryParse(parameter, out weaponID))
+                                WeaponItem wpn = WeaponDatabase.GetWeapon(param);
+                                if (wpn == null)
                                 {
-                                    string mess = $"Could not find weapon with name \"{parameter}\"";
-                                    if (!errorMessages.Contains(mess)) { errorMessages.Add(mess); }
-                                    // args.Feedback.Add(new(args.SenderGameUser, $"Could not find weapon with name \"{parameter}\"", Color.Red, args.SenderGameUser));
-                                    continue;
-                                }
-                                else
-                                {
-                                    // Try using the parsed ID instead
-                                    wpn = WeaponDatabase.GetWeapon(weaponID);
-
-                                    if (wpn == null)
+                                    short weaponID = 0;
+                                    bool parsedID = short.TryParse(param, out weaponID);
+                                    wpn = parsedID ? WeaponDatabase.GetWeapon(weaponID) : null;
+                            
+                                    if (!parsedID || wpn == null)
                                     {
-                                        string mess = $"Could not find weapon with ID \"{parameter}\"";
-                                        if (!errorMessages.Contains(mess)) { errorMessages.Add(mess); }
-                                        // args.Feedback.Add(new(args.SenderGameUser, $"Could not find weapon with ID \"{parameter}\"", Color.Red, args.SenderGameUser));
+                                        args.Feedback.Add(new(args.SenderGameUser, $"Weapon '{param}' not found.", errorColor, args.SenderGameUser));
                                         continue;
                                     }
                                 }
-                            }
 
-                            if (!wpn.BaseProperties.WeaponCanBeEquipped)
+                                if (!wpn.BaseProperties.WeaponCanBeEquipped) { continue; }
+                                receivedTexts.Add($"{wpn.BaseProperties.VisualText} ({wpn.BaseProperties.WeaponID})");
+                                player.GrabWeaponItem(wpn);
+                            }
+                            catch
                             {
                                 continue;
                             }
-
-                            worldPlayer.GrabWeaponItem(wpn);
-                            receivedStuff.Add($"\"{wpn.BaseProperties.WeaponNameID}\" ({wpn.BaseProperties.WeaponID})");
-                            // args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} received \"{wpn.BaseProperties.WeaponNameID}\" ({wpn.BaseProperties.WeaponID})", fbColor));
-                        }
-
-                        if (receivedStuff.Count == 0)
-                        {
-                            continue;
-                        }
-
-                        string itemList = string.Join(", ", receivedStuff);
-                        if (!giveAll)
-                        {
-                            args.Feedback.Add(new(args.SenderGameUser, $"{worldPlayer.Name} received: {itemList}.", Color.ForestGreen, args.SenderGameUser));
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(giveAllMessage))
-                            {
-                                giveAllMessage = itemList;
-                            }
                         }
                     }
 
-                    if (giveAll && !string.IsNullOrEmpty(giveAllMessage))
+                    if (receivedTexts.Count == 0)
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, $"Everyone received: {giveAllMessage}", Color.ForestGreen, args.SenderGameUser));
+                        return true;
                     }
 
-                    return true;
+                    // Create feedback text
+                    string mess = "";
+                    if (isGiveAll)
+                    {
+                        mess = "Everyone received ";
+                    }
+                    else
+                    {
+                        mess = $"{targetPlayers[0].Name} received ";
+                    }
 
+                    if (receivedTexts.Count == 1)
+                    {
+                        mess += receivedTexts[0];
+                    }
+                    else
+                    {
+                        mess += string.Join(", ", receivedTexts);
+                    }
+
+                    args.Feedback.Add(new(args.SenderGameUser, mess, feedbackColor, null));
+                    return true;
                 }
                 
                 // Manually create a vote, the results are sent to the owner user,
