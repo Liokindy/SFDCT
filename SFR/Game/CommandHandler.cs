@@ -30,12 +30,12 @@ internal static class CommandHandler
 
         // We check to see if we handle custom commands before vanilla ones,
         // this also allows us to replace them.
-        if (__instance.GameOwner != GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local)
+        if (__instance.GameOwner == GameOwnerEnum.Client || __instance.GameOwner == GameOwnerEnum.Local)
         {
             // Client
             ranCustomCommand = ClientCommands(args, __instance);
         }
-        if (__instance.GameOwner == GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local)
+        if (!ranCustomCommand && (__instance.GameOwner == GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local))
         {
             // Server
             ranCustomCommand = ServerCommands(args, __instance);
@@ -97,12 +97,13 @@ internal static class CommandHandler
 
             return true;
         }
+
         return false;
     }
     private static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
     {
         Server server = GameSFD.Handle.Server;
-        if (server == null)
+        if (server == null && __instance.GameOwner == GameOwnerEnum.Server)
         {
             return false;
         }
@@ -368,13 +369,13 @@ internal static class CommandHandler
                 // optionally, results can be shown to all players.
                 // /DOVOTE [OVER-HALF?] [TEXT] [A] [B] [C?] [D?]
                 if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant &&
-                    args.Parameters.Count > 2 && args.IsCommand("DOVOTE") && args.CanUseModeratorCommand("DOVOTE")
+                    args.Parameters.Count >= 3 && args.IsCommand("DOVOTE") && args.CanUseModeratorCommand("DOVOTE")
                 )
                 {
                     if (__instance.VoteInfo.ActiveVotes.Count >= 1)
                     {
                         args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
-                        return true;
+                        return false;
                     }
 
                     bool requiresOverHalf = true;
@@ -429,9 +430,18 @@ internal static class CommandHandler
                         args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
 
                         GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), true, requiresOverHalf);
-                        vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
-                        __instance.VoteInfo.AddVote(vote);
-                        server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                        
+                        if (__instance.GameOwner == GameOwnerEnum.Server)
+                        {
+                            vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                            __instance.VoteInfo.AddVote(vote);
+                            server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                        }
+                        else
+                        {
+                            vote.ValidRemoteUniqueIdentifiers.Add(1L);
+                            __instance.VoteInfo.AddVote(vote);
+                        }
                         return true;
                     }
                     return true;
@@ -459,7 +469,7 @@ internal static class CommandHandler
             // Forcefully enables/disables server-movement on a user, regardless of the
             // automatic server-movement setting.
             // /FORCESVMOV [USER] [1/0/NULL]
-            if (args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
+            if (__instance.GameOwner == GameOwnerEnum.Server && args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
             {
                 GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
                 GameConnectionTag gameUserTag = gameUser?.GetGameConnectionTag();
@@ -511,7 +521,7 @@ internal static class CommandHandler
             }
 
             // Staff messages
-            if (args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
+            if (__instance.GameOwner == GameOwnerEnum.Server && args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
             {
                 if (args.SenderGameUser == null)
                 {

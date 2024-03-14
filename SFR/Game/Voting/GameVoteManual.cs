@@ -89,48 +89,60 @@ internal class GameVoteManual : GameVote
         this.VoteHandled = true;
 
         Server sv = GameSFD.Handle.Server;
+        
+        int votedCount = this.VotedRemoteUniqueIdentifiers.Count;
+        int validCount = this.ValidRemoteUniqueIdentifiers.Count;
+
+        Color resultsHeaderCol = Color.LightBlue;
+        Color resultsAlterColor = resultsHeaderCol * 0.5f;
+        Color resultsChoosenColor = resultsHeaderCol * 0.9f;
+
+        if (!this.Public)
+        {
+            float mult = 0.7f;
+            resultsHeaderCol *= mult;
+            resultsAlterColor *= mult;
+            resultsChoosenColor *= mult;
+        }
+
+        sbyte? highestAlternativeID = this.GetHighestVoteCount(out _)?.Index;
+        NetConnection singleConn = this.Public ? null : this.VoteOwner.GetGameConnectionTag()?.NetConnection;
+
+        // Header. "Vote (X/X): X"
+        string headerText = $"Vote ({votedCount}/{validCount}): \"{this.DescriptionParameters[0]}\"";
         if (sv != null)
         {
-            int votedCount = this.VotedRemoteUniqueIdentifiers.Count;
-            int validCount = this.ValidRemoteUniqueIdentifiers.Count;
-
-            Color resultsHeaderCol = Color.LightBlue;
-            Color resultsAlterColor = resultsHeaderCol * 0.5f;
-            Color resultsChoosenColor = resultsHeaderCol * 0.9f;
-
-            if (!this.Public)
-            {
-                float mult = 0.7f;
-                resultsHeaderCol *= mult;
-                resultsAlterColor *= mult;
-                resultsChoosenColor *= mult;
-            }
-
-            sbyte? highestAlternativeID = this.GetHighestVoteCount(out _)?.Index;
-            NetConnection singleConn = this.Public ? null : this.VoteOwner.GetGameConnectionTag()?.NetConnection;
-
-            // Header. "Vote (X/X): X"
-            string headerText = $"Vote ({votedCount}/{validCount}): \"{this.DescriptionParameters[0]}\"";
             sv.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(headerText, resultsHeaderCol), null, singleConn);
+        }
+        else
+        {
+            ChatMessage.Show(headerText, resultsHeaderCol);
+        }
             
-            // Results. "X - X"
-            for(int i = 0; i < this.Alternatives.Count; i++)
+        // Results. "X - X"
+        for(int i = 0; i < this.Alternatives.Count; i++)
+        {
+            GameVoteAlternative gvAlt = this.Alternatives[i];
+            if (gvAlt == null) { continue; }
+
+            bool isHighestAlternative = highestAlternativeID != null && highestAlternativeID == gvAlt.Index;
+            Color resultCol = isHighestAlternative ? resultsChoosenColor : resultsAlterColor;
+
+            int awnserVoteCount = this.Answers.Where(gvA => gvA != null && gvA.SelectedAlternativeIndex == gvAlt.Index).Count();
+            string resultText = $"{awnserVoteCount} - \"{gvAlt.DescriptionParameters[0]}\"";
+            if (sv != null)
             {
-                GameVoteAlternative gvAlt = this.Alternatives[i];
-                if (gvAlt == null) { continue; }
-
-                bool isHighestAlternative = highestAlternativeID != null && highestAlternativeID == gvAlt.Index;
-                Color resultCol = isHighestAlternative ? resultsChoosenColor : resultsAlterColor;
-
-                int awnserVoteCount = this.Answers.Where(gvA => gvA != null && gvA.SelectedAlternativeIndex == gvAlt.Index).Count();
-                string resultText = $"{awnserVoteCount} - \"{gvAlt.DescriptionParameters[0]}\"";
                 sv.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(resultText, resultCol), null, singleConn);
             }
-
-            // Vote (7/8): "Header?"
-            // 2 - "Yes"
-            // 1 - "No"
-            // 4 - "Yes (Extra)"
+            else
+            {
+                ChatMessage.Show(resultText, resultCol);
+            }
         }
+
+        // Vote (7/8): "Header?"
+        // 2 - "Yes"
+        // 1 - "No"
+        // 4 - "Yes (Extra)"
     }
 }
