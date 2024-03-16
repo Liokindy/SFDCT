@@ -29,9 +29,9 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 <img src="docs/10SlotsScoreboard.png" width=50%/>
 
 #### MANUAL VOTES
-- When the vote ends, the results are sent to you in private.
-- You can specify up to 4 choices and specify if the results should be shown to everyone else.
-- Examples: `/DOVOTE 1 "Like the map?" "Yeah" "No"`, `/DOVOTE "Kill Dxse?" "Yes" "Yeah" "Affirmative"`
+- When the vote ends, the results are sent in chat for everyone to see.
+- You can specify up to 4 choices and specify if the vote should automatically end after half the lobby votes.
+- Examples: `/DOVOTE 0 "Like the map?" "Yeah" "No"`, `/DOVOTE "Kill Dxse?" "Yes" "Yeah" "Affirmative"`
 
 <img src="docs/manualVoting0.gif" width=35%/>
 
