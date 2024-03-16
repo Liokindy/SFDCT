@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Threading;
 using HarmonyLib;
 using Lidgren.Network;
+using Microsoft.Xna.Framework;
 using SFD;
 using SFDCT.Helper;
 using CConst = SFDCT.Misc.Constants;
@@ -217,6 +218,38 @@ internal static class Host
         code.Insert(551, new(OpCodes.Brtrue_S, returnLabel));
 
         return code;
+    }
+
+    /// <summary>
+    ///     Modified clients can enter the server and use an empty AccountName.
+    ///     This can make them harder to track and kick/ban, the only use for
+    ///     this is malicious so we deny their account negotation.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
+    private static void ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
+    {
+        if (string.IsNullOrEmpty(accountName) || accountName.Length > 32)
+        {
+            __result = false;
+            return;
+        }
+
+        string accName = accountName;
+        accName = accName.Replace(Environment.NewLine, "");
+        accName = accName.Replace("\r", "");
+        accName = accName.Replace("\n", "");
+        accName = accName.Trim();
+        while (accName.Contains("  "))
+        {
+            accName = accName.Replace("  ", " ");
+        }
+
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
+        {
+            __result = false;
+            return;
+        }
     }
 
     /// <summary>
