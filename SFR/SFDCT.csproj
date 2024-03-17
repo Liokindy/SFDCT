@@ -129,6 +129,7 @@
     <Compile Include="Game\Commands\ExtendedSlots.cs" />
     <Compile Include="Game\VersionPatch.cs" />
     <Compile Include="Game\Voting\GameVoteManual.cs" />
+    <Compile Include="Helper\KeyboardHelper.cs" />
     <Compile Include="OnlineServices\NetMessages.cs" />
     <Compile Include="UI\ExtendedProfiles.cs" />
     <Compile Include="Game\CommandHandler.cs" />
@@ -139,10 +140,8 @@
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Helper\ExtendedMath.cs" />
     <Compile Include="Helper\PlayerHUD.cs" />
-    <Compile Include="Helper\Randomizer.cs" />
-    <Compile Include="Helper\Vector.cs" />
     <Compile Include="Editor\MapData.cs" />
-    <Compile Include="Misc\ConfigIni.cs" />
+    <Compile Include="Settings\Config.cs" />
     <Compile Include="Misc\Tweaks.cs" />
     <Compile Include="Objects\ObjectDataHandler.cs" />
     <Compile Include="Objects\SFDObjectTweaks.cs" />
@@ -166,6 +165,7 @@
     <Compile Include="UI\MainMenu.cs" />
     <Compile Include="UI\Scoreboard.cs" />
     <Compile Include="UI\ScrollHandler.cs" />
+    <Compile Include="UI\TextboxTweaks.cs" />
     <Compile Include="Weapons\SFDWeaponTweaks.cs" />
   </ItemGroup>
   <ItemGroup>

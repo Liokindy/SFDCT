@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using SFD.Code;
 using SFDCT.Helper;
-using SFDCT.Misc;
+using SFDCT.Settings;
 
 namespace SFDCT.Settings;
 
@@ -83,7 +83,7 @@ public static class Values
         if (List.ContainsKey(key.ToUpper()))
         {
             List[key.ToUpper()].Value = newValue;
-            ConfigIni.NeedsSaving = true;
+            Config.NeedsSaving = true;
             return true;
         }
         return false;

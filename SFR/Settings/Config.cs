@@ -5,13 +5,13 @@ using SFD.Code;
 using SFDCT.Helper;
 using System.Threading;
 using CSettings = SFDCT.Settings.Values;
+using CConst = SFDCT.Misc.Constants;
 using HarmonyLib;
-using System.Runtime.CompilerServices;
 
-namespace SFDCT.Misc;
+namespace SFDCT.Settings;
 
 [HarmonyPatch]
-internal static class RefreshIni
+internal static class Refresh
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SFD.GameSFD), nameof(SFD.GameSFD.StateKeyUpEvent))]
@@ -19,13 +19,13 @@ internal static class RefreshIni
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{Constants.Paths.ConfigurationIni}'...");
-            ConfigIni.Refresh();
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{CConst.Paths.ConfigurationIni}'...");
+            Config.Refresh();
             SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshed!");
         }
     }
 }
-internal static class ConfigIni
+internal static class Config
 {
     private static IniHandler Handler;
     public static bool NeedsSaving = false;
@@ -42,9 +42,9 @@ internal static class ConfigIni
         CSettings.Init();
 
         // Create config.ini if it doesnt exist.
-        if (!File.Exists(Constants.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.ConfigurationIni))
         {
-            using (FileStream fileStream = File.Create(Misc.Constants.Paths.ConfigurationIni))
+            using (FileStream fileStream = File.Create(CConst.Paths.ConfigurationIni))
             {
                 fileStream.Close();
             }
@@ -58,7 +58,7 @@ internal static class ConfigIni
                 kvp.Value.Save(Handler);
             }
 
-            Handler.SaveFile(Constants.Paths.ConfigurationIni);
+            Handler.SaveFile(CConst.Paths.ConfigurationIni);
             Handler.Clear();
         }
         Refresh();
@@ -66,7 +66,7 @@ internal static class ConfigIni
     public static void Refresh()
     {
         Logger.LogDebug("CONFIG.INI: Refreshing...");
-        if (!File.Exists(Constants.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.ConfigurationIni))
         {
             Logger.LogError("CONFIG.INI: File doesnt exist. Restart the game to create it again");
             return;
@@ -78,23 +78,23 @@ internal static class ConfigIni
         }
 
         Handler.Clear();
-        Handler.ReadFile(Constants.Paths.ConfigurationIni);
+        Handler.ReadFile(CConst.Paths.ConfigurationIni);
         foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
         {
             kvp.Value.Load(Handler);
         }
-        Handler.SaveFile(Constants.Paths.ConfigurationIni);
+        Handler.SaveFile(CConst.Paths.ConfigurationIni);
         CSettings.ApplyOverrides();
     }
     public static void Save()
     {
-        if (!ConfigIni.NeedsSaving)
+        if (!NeedsSaving)
         {
             return;
         }
 
         Logger.LogDebug("CONFIG.INI: Saving...");
-        if (!File.Exists(Constants.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.ConfigurationIni))
         {
             Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
             return;
@@ -109,7 +109,7 @@ internal static class ConfigIni
         {
             kvp.Value.Save(Handler);
         }
-        Handler.SaveFile(Constants.Paths.ConfigurationIni);
+        Handler.SaveFile(CConst.Paths.ConfigurationIni);
         Logger.LogDebug("CONFIG.INI: Saving finished.");
     }
 }

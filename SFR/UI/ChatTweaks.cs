@@ -114,39 +114,6 @@ internal static class ChatTweaks
                 }
                 return false;
             }
-            if (key == Keys.Back && GameChat.m_textbox.Text.Length > 0)
-            {
-                bool ctrlHeld = false;
-                if (GameSFD.Handle.GetRunningState() != null && GameSFD.Handle.GetRunningState().GetActiveGameWorld() != null && !GameSFD.Handle.GetRunningState().GetActiveGameWorld().IsDisposed)
-                {
-                    ctrlHeld = GameSFD.Handle.GetRunningState().GetActiveGameWorld().IsControlPressed();
-                }
-
-                if (ctrlHeld)
-                {
-                    string textboxText = GameChat.m_textbox.Text;
-                    int charCount = 0;
-
-                    for(int i = textboxText.Length; i > 0; i--)
-                    {
-                        char currentChar = textboxText[i - 1];
-                        bool isWordSep = IsWordSeparator(currentChar);
-                        if (isWordSep && IsWordSeparator(textboxText.ElementAtOrDefault(i - 2)))
-                        {
-                            continue;
-                        }
-
-                        if (isWordSep && i != textboxText.Length)
-                        {
-                            charCount = i + 1;
-                            break;
-                        }
-                    }
-                    charCount = Math.Max(Math.Min(charCount, textboxText.Length), 0);
-
-                    GameChat.m_textbox.SetText(textboxText.Substring(0, charCount));
-                }
-            }
         }
 
         if (m_lastMessageIndex != 0)
