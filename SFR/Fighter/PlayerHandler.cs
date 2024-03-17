@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Linq;
-using Microsoft.Xna.Framework;
+using System.IO;
 using SFD;
+using SFD.Code;
 using SFD.Projectiles;
 using SFD.Objects;
 using SFD.Effects;
 using SFD.Sounds;
 using Box2D.XNA;
+using Microsoft.Xna.Framework;
 using HarmonyLib;
+using CConst = SFDCT.Misc.Constants;
+using SFDGameScriptInterface;
 
 namespace SFDCT.Fighter;
 

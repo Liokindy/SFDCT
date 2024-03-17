@@ -35,6 +35,7 @@ public static class Values
             Add($"EXTENDEDPROFILES_{i}_PROFILE", 0, IniSettingType.Int);
         }
         Add("MAINMENU_BG_USE_BLACK", true, IniSettingType.Bool);
+        Add("MAINMENU_TRACK_RANDOM", false, IniSettingType.Bool);
 
         b_initialized = true;
     }

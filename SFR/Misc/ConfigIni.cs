@@ -19,7 +19,7 @@ internal static class RefreshIni
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshing 'SFDCT/config.ini'...");
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{Constants.Paths.ConfigurationIni}'...");
             ConfigIni.Refresh();
             SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshed!");
         }
