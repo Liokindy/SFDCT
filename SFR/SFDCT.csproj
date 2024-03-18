@@ -130,6 +130,7 @@
     <Compile Include="Game\VersionPatch.cs" />
     <Compile Include="Game\Voting\GameVoteManual.cs" />
     <Compile Include="Helper\KeyboardHelper.cs" />
+    <Compile Include="OnlineServices\DSPreview.cs" />
     <Compile Include="OnlineServices\NetMessages.cs" />
     <Compile Include="UI\ExtendedProfiles.cs" />
     <Compile Include="Game\CommandHandler.cs" />
