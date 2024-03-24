@@ -24,7 +24,6 @@ internal static class TextboxTweaks
             for (int i = textboxText.Length - 1; i >= 0; i--)
             {
                 char c = textboxText[i];
-                Logger.LogInfo($"c: '{c}'");
                 if ((char.IsSeparator(c) || char.IsSymbol(c)) && i != textboxText.Length - 1)
                 {
                     if (i - 1 >= 0)
@@ -43,9 +42,6 @@ internal static class TextboxTweaks
 
             if (charCount != 0)
             {
-                Logger.LogWarn($"charCount: '{charCount}'");
-                Logger.LogWarn($"textboxText: '{textboxText}'");
-
                 textboxText = textboxText.Substring(0, textboxText.Length - charCount);
                 __instance.SetText(textboxText);
             }

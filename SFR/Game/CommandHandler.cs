@@ -126,7 +126,7 @@ internal static class CommandHandler
                 }
 
                 string mess = "Mouse dragging is now " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, args.SenderGameUser));
                 return true;
             }
 
@@ -144,12 +144,12 @@ internal static class CommandHandler
                         Constants.MODDERATOR_COMMANDS.Add(param);
 
                         string mess = $"Added '/{param}' to moderator commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
                     }
                 }
                 if (args.Parameters.Count > 1)
                 {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Added {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Added {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
                 }
 
                 SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
@@ -169,7 +169,7 @@ internal static class CommandHandler
                         Constants.MODDERATOR_COMMANDS.Clear();
 
                         string mess = "Removed all commands from moderator commands, moderators can now use all commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Tag));
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Tag, args.SenderGameUser));
                         break;
                     }
 
@@ -178,38 +178,16 @@ internal static class CommandHandler
                         Constants.MODDERATOR_COMMANDS.Remove(param);
 
                         string mess = $"Removed '/{param}' from moderator commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
                     }
                 }
 
                 if (args.Parameters.Count > 1)
                 {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Removed {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Removed {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
                 }
 
                 SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
-            }
-
-            // List commands in Moderator Commands
-            // /MODERATOR_COMMANDS_GET [...]
-            if (args.IsCommand("MODERATOR_COMMANDS_GET"))
-            {
-                if (Constants.MODDERATOR_COMMANDS.Count == 0)
-                {
-                    string mess = "Moderators have access to all commands.";
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message));
-                    
-                    return true;
-                }
-
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Listing all moderator commands...", CConst.Colors.Staff_Chat_Name));
-                foreach (string str in Constants.MODDERATOR_COMMANDS)
-                {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"'/{str}'", CConst.Colors.Staff_Chat_Message));
-                }
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Moderators have access to {Constants.MODDERATOR_COMMANDS.Count} command(s).", CConst.Colors.Staff_Chat_Name));
-
-                return true;
             }
         }
         
@@ -518,23 +496,45 @@ internal static class CommandHandler
                 }
             }
 
-            // Forcefully enables/disables server-movement on a user, regardless of the
-            // automatic server-movement setting.
-            // /FORCESVMOV [USER] [1/0/NULL]
-            if (__instance.GameOwner == GameOwnerEnum.Server && args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
+            if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-                GameConnectionTag gameUserTag = gameUser?.GetGameConnectionTag();
-                
-                if (gameUser != null && gameUserTag != null)
+                // Forcefully enables/disables server-movement on a user, regardless of the
+                // automatic server-movement setting.
+                // /FORCESVMOV [USER] [1/0/NULL]
+                if (args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
                 {
-                    if (args.Parameters[1].ToUpper() == "DEFAULT" || args.Parameters[1].ToUpper() == "NULL")
+                    GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    GameConnectionTag gameUserTag = gameUser?.GetGameConnectionTag();
+                
+                    if (gameUser != null && gameUserTag != null)
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) forced server-movement was reset.", Color.LightBlue, args.SenderGameUser));
-                        bool oldVal = (gameUserTag.Ping > Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING || Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0) && Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK;
+                        if (args.Parameters[1].ToUpper() == "DEFAULT" || args.Parameters[1].ToUpper() == "NULL")
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) forced server-movement was reset.", Color.LightBlue, args.SenderGameUser));
+                            bool oldVal = (gameUserTag.Ping > Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING || Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0) && Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK;
                         
-                        gameUserTag.ForceServerMovement = oldVal;
-                        gameUserTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS + 100f;
+                            gameUserTag.ForceServerMovement = oldVal;
+                            gameUserTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS + 100f;
+                            if (gameUserTag.GameUsers != null)
+                            {
+                                for (int j = 0; j < gameUserTag.GameUsers.Length; j++)
+                                {
+                                    GameUser gu = gameUserTag.GameUsers[j];
+                                    if (gu != null)
+                                    {
+                                        gu.ForceServerMovement = oldVal;
+                                        Player playerByUserID = __instance.GameWorld?.GetPlayerByUserIdentifier(gu.UserIdentifier);
+                                        playerByUserID?.UpdateCanDoPlayerAction();
+                                    }
+                                }
+                            }
+                            return true;
+                        }
+
+                        bool val = (args.Parameters[1] == "1" || args.Parameters[1].ToUpper() == "TRUE");
+                        args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) set forced server-movement to {val}.", Color.LightBlue, args.SenderGameUser));
+                        gameUserTag.ForceServerMovement = val;
+                        gameUserTag.ForcedServerMovementToggleTime = -1f;
                         if (gameUserTag.GameUsers != null)
                         {
                             for (int j = 0; j < gameUserTag.GameUsers.Length; j++)
@@ -542,7 +542,7 @@ internal static class CommandHandler
                                 GameUser gu = gameUserTag.GameUsers[j];
                                 if (gu != null)
                                 {
-                                    gu.ForceServerMovement = oldVal;
+                                    gu.ForceServerMovement = val;
                                     Player playerByUserID = __instance.GameWorld?.GetPlayerByUserIdentifier(gu.UserIdentifier);
                                     playerByUserID?.UpdateCanDoPlayerAction();
                                 }
@@ -550,76 +550,79 @@ internal static class CommandHandler
                         }
                         return true;
                     }
+                }
 
-                    bool val = (args.Parameters[1] == "1" || args.Parameters[1].ToUpper() == "TRUE");
-                    args.Feedback.Add(new(args.SenderGameUser, $"\"{gameUser.GetProfileName()}\" ({gameUser.AccountName}) set forced server-movement to {val}.", Color.LightBlue, args.SenderGameUser));
-                    gameUserTag.ForceServerMovement = val;
-                    gameUserTag.ForcedServerMovementToggleTime = -1f;
-                    if (gameUserTag.GameUsers != null)
+                // Staff messages
+                if (args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
+                {
+                    if (args.SenderGameUser == null)
                     {
-                        for (int j = 0; j < gameUserTag.GameUsers.Length; j++)
+                        return false;
+                    }
+                    if (!server.Running)
+                    {
+                        return false;
+                    }
+
+                    string profName = args.SenderGameUser.GetProfileName();
+                    string mess = UI.ChatTweaks.ConstructMetaTextToStaffChatMessage(args.SourceParameters, profName, args.SenderGameUser.TeamIcon);
+                    NetMessage.ChatMessage.Data messageData = new(mess, CConst.Colors.Staff_Chat_Message, profName, true, args.SenderGameUser.UserIdentifier);
+
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.PlayerAction, $"Server: Sending staff message from '{profName}' ({args.SenderGameUser.AccountName})");
+                    // Loop through slots and find moderators or the host
+                    for (int i = 0; i < __instance.GameSlots.Length; i++)
+                    {
+                        GameSlot gameSlot = __instance.GameSlots[i];
+                        GameUser slotUser = gameSlot.GameUser;
+                        if (gameSlot.CurrentState == GameSlot.State.Occupied && slotUser != null && (slotUser.IsHost || slotUser.IsModerator))
                         {
-                            GameUser gu = gameUserTag.GameUsers[j];
-                            if (gu != null)
+                            GameConnectionTag gameConnectionTag = slotUser.GetGameConnectionTag();
+                            NetConnection netConnection = gameConnectionTag?.NetConnection;
+
+                            if (netConnection != null)
                             {
-                                gu.ForceServerMovement = val;
-                                Player playerByUserID = __instance.GameWorld?.GetPlayerByUserIdentifier(gu.UserIdentifier);
-                                playerByUserID?.UpdateCanDoPlayerAction();
+                                NetOutgoingMessage msg = NetMessage.ChatMessage.Write(ref messageData, server.m_server.CreateMessage());
+                                server.m_server.SendMessage(msg, netConnection, NetDeliveryMethod.ReliableOrdered, 1);
                             }
                         }
                     }
+
+                    // Leave a notification in DS
+                    if (SFD.Program.IsServer)
+                    {
+                        string msg2 = messageData.Message;
+                        if (messageData.IsMetaText)
+                        {
+                            msg2 = TextMeta.ToPlain(messageData.Message);
+                        }
+
+                        DSInfoNotification.Notify(new DSInfoNotification.ChatMessage(args.SenderGameUser.UserIdentifier, msg2, messageData.Color.ToWinDrawColor()));
+                    }
+
                     return true;
                 }
-            }
 
-            // Staff messages
-            if (__instance.GameOwner == GameOwnerEnum.Server && args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
-            {
-                if (args.SenderGameUser == null)
+                // List commands in Moderator Commands
+                // /MODERATOR_COMMANDS_GET [...]
+                if (args.IsCommand("MHELP", "MODHELP"))
                 {
-                    return false;
-                }
-                if (!server.Running)
-                {
-                    return false;
-                }
-
-                string profName = args.SenderGameUser.GetProfileName();
-                string mess = UI.ChatTweaks.ConstructMetaTextToStaffChatMessage(args.SourceParameters, profName, args.SenderGameUser.TeamIcon);
-                NetMessage.ChatMessage.Data messageData = new(mess, CConst.Colors.Staff_Chat_Message, profName, true, args.SenderGameUser.UserIdentifier);
-
-                ConsoleOutput.ShowMessage(ConsoleOutputType.PlayerAction, $"Server: Sending staff message from '{profName}' ({args.SenderGameUser.AccountName})");
-                // Loop through slots and find moderators or the host
-                for (int i = 0; i < __instance.GameSlots.Length; i++)
-                {
-                    GameSlot gameSlot = __instance.GameSlots[i];
-                    GameUser slotUser = gameSlot.GameUser;
-                    if (gameSlot.CurrentState == GameSlot.State.Occupied && slotUser != null && (slotUser.IsHost || slotUser.IsModerator))
+                    if (Constants.MODDERATOR_COMMANDS.Count == 0)
                     {
-                        GameConnectionTag gameConnectionTag = slotUser.GetGameConnectionTag();
-                        NetConnection netConnection = gameConnectionTag?.NetConnection;
+                        string mess = "Moderators have access to all commands.";
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
 
-                        if (netConnection != null)
-                        {
-                            NetOutgoingMessage msg = NetMessage.ChatMessage.Write(ref messageData, server.m_server.CreateMessage());
-                            server.m_server.SendMessage(msg, netConnection, NetDeliveryMethod.ReliableOrdered, 1);
-                        }
-                    }
-                }
-
-                // Leave a notification in DS
-                if (SFD.Program.IsServer)
-                {
-                    string msg2 = messageData.Message;
-                    if (messageData.IsMetaText)
-                    {
-                        msg2 = TextMeta.ToPlain(messageData.Message);
+                        return true;
                     }
 
-                    DSInfoNotification.Notify(new DSInfoNotification.ChatMessage(args.SenderGameUser.UserIdentifier, msg2, messageData.Color.ToWinDrawColor()));
-                }
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Listing all moderator commands...", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
+                    foreach (string str in Constants.MODDERATOR_COMMANDS)
+                    {
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"'/{str}'", CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
+                    }
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Moderators have access to {Constants.MODDERATOR_COMMANDS.Count} command(s).", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
 
-                return true;
+                    return true;
+                }
             }
 
             // Host/Mod commands, only available when using extended slots
@@ -732,7 +735,6 @@ internal static class CommandHandler
                 { ["MOUSE", "M"], "[1/0]" },
                 { ["MODERATOR_COMMANDS_ADD"], "[...]" },
                 { ["MODERATOR_COMMANDS_REMOVE"], "[...]" },
-                { ["MODERATOR_COMMANDS_GET"], "" },
             };
             Dictionary<string[], string> moderatorCommands = new()
             {
@@ -741,15 +743,16 @@ internal static class CommandHandler
                 { ["FORCESERVERMOVEMENT", "FORCESVMOV"], "[USER] [1/0/NULL]" },
                 { ["STAFF", "S"], "[MESSAGE]" },
                 { ["FORCESUDDENDEATH", "FORCESD"], "[TIME?]" },
+                { ["MHELP, MODHELP"], "" },
 
                 // Extended-slots
-                { ["SLOTS"], "" },
-                { ["SETSLOT", "SSLOT"], "[INDEX] [0/1/2/4/5/6] [0/1/2/3/4]" }
+                // { ["SLOTS"], "" },
+                // { ["SETSLOT", "SSLOT"], "[INDEX] [0/1/2/4/5/6] [0/1/2/3/4]" }
             };
             Dictionary<string[], string> publicCommands = new()
             {
                 // Extended-slots
-                { ["SCOREBOARD"], "" }
+                // { ["SCOREBOARD"], "" }
             };
 
             Color cSep = Color.LightBlue;

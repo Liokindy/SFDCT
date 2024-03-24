@@ -221,6 +221,25 @@ internal static class Host
     }
 
     /// <summary>
+    ///     Profiles names from users are only validated for integrity,
+    ///     meaning they can be empty. This validates the name for this,
+    ///     reserved names, etc.
+    /// </summary>
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Profile), nameof(Profile.ValidateProfileIntegrity))]
+    private static void Profile_ValidateProfileIntegrity(Profile __instance, bool validateNameIntegrity)
+    {
+        if (validateNameIntegrity)
+        {
+            if (!Profile.ValidateName(__instance.Name, out string result, out string errorMsg))
+            {
+                Logger.LogError($"Failed Profile.ValidateName: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
+                __instance.Name = result;
+            }
+        }
+    }
+
+    /// <summary>
     ///     Modified clients can enter the server and use an empty AccountName.
     ///     This can make them harder to track and kick/ban, the only use for
     ///     this is malicious so we deny their account negotation.
@@ -229,9 +248,21 @@ internal static class Host
     [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
     private static void ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
     {
-        if (string.IsNullOrEmpty(accountName) || accountName.Length > 32)
+        string mess = $"Failed ReadAccountData: key: '{key}' accountName: '{accountName}' account: '{account}'";
+
+        if (!__result)
+        {
+            Logger.LogError(mess);
+            return;
+        }
+
+        bool b666usersMustContain666 = false;
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  " || accountName.Length <= 2 || accountName.Length >= 24 ||
+            (b666usersMustContain666 && account == "S666" && !accountName.Contains("666:"))
+            )
         {
             __result = false;
+            Logger.LogError(mess);
             return;
         }
 
@@ -248,6 +279,7 @@ internal static class Host
         if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
         {
             __result = false;
+            Logger.LogError(mess);
             return;
         }
     }
