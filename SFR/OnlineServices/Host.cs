@@ -233,7 +233,7 @@ internal static class Host
         {
             if (!Profile.ValidateName(__instance.Name, out string result, out string errorMsg))
             {
-                Logger.LogError($"Failed Profile.ValidateName: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
+                Logger.LogDebug($"Failed Profile.ValidateName: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
                 __instance.Name = result;
             }
         }
@@ -252,7 +252,7 @@ internal static class Host
 
         if (!__result)
         {
-            Logger.LogError(mess);
+            Logger.LogDebug(mess);
             return;
         }
 
@@ -262,7 +262,7 @@ internal static class Host
             )
         {
             __result = false;
-            Logger.LogError(mess);
+            Logger.LogDebug(mess);
             return;
         }
 
@@ -279,7 +279,7 @@ internal static class Host
         if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
         {
             __result = false;
-            Logger.LogError(mess);
+            Logger.LogDebug(mess);
             return;
         }
     }

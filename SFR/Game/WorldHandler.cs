@@ -16,16 +16,6 @@ namespace SFDCT.Game;
 [HarmonyPatch]
 internal static class WorldHandler
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static void UpdateWorld(GameWorld __instance, float chunkMs, float totalMs, bool isLast, bool isFirst)
-    {
-        if (__instance.GameOwner != GameOwnerEnum.Server)
-        {
-            LazerDrawing.Update(totalMs);
-        }
-    }
-
     /// <summary>
     ///     For unknown reasons players tempt to crash when joining a game.
     ///     This is caused because a collection is being modified during its iteration.
@@ -60,7 +50,6 @@ internal static class WorldHandler
     private static void DisposeData()
     {
         // SyncHandler.Attempts.Clear();
-        Game.LazerDrawing.Dispose();
     }
 
     [HarmonyPrefix]

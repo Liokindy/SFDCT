@@ -135,7 +135,6 @@
     <Compile Include="UI\ExtendedProfiles.cs" />
     <Compile Include="Game\CommandHandler.cs" />
     <Compile Include="Game\Commands\DebugMouse.cs" />
-    <Compile Include="Game\LazerDrawing.cs" />
     <Compile Include="Game\SoundPatches.cs" />
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
