@@ -31,9 +31,6 @@ public static class Constants
     }
     public struct Colors
     {
-        public static Color OmenFlash = Color.White;
-        public static Color OmenBar = new(120, 152, 255);
-
         public static Color Staff_Chat_Tag = new(168, 255, 168);
         public static Color Staff_Chat_Name= new(144, 238, 144);
         public static Color Staff_Chat_Message = new(56, 179, 56);
@@ -50,7 +47,6 @@ public static class Constants
             return 8;
         }
     }
-
     public static bool HOST_GAME_EXTENDED_SLOTS = false;
     public static int HOST_GAME_SLOT_COUNT = 8;
     public static byte[] HOST_GAME_SLOT_STATES = new byte[HOST_GAME_SLOT_COUNT];
