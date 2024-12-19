@@ -130,64 +130,78 @@ internal static class CommandHandler
                 return true;
             }
 
-            // Add commands to Moderator Commands
-            // /MODERATOR_COMMANDS_ADD [...]
-            if (args.IsCommand("MODERATOR_COMMANDS_ADD") && args.Parameters.Count >= 1)
+            // Manually create a game-vote, like a map-vote
+            // /DOVOTE [TEXT] [A] [B] [C?] [D?]
+            // /DOVOTEHIDDEN [TEXT] [A] [B] [C?] [D?]
+            if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant &&
+                args.Parameters.Count >= 3 && args.IsCommand("DOVOTE", "DOVOTEHIDDEN")
+            )
             {
-                for(int i = 0; i < args.Parameters.Count; i++)
+                if (__instance.VoteInfo.ActiveVotes.Count > 0)
                 {
-                    string param = args.Parameters[i].ToUpper();
-                    if (string.IsNullOrEmpty(param) || param == "ALL") { continue; }
-
-                    if (!Constants.MODDERATOR_COMMANDS.Contains(param))
-                    {
-                        Constants.MODDERATOR_COMMANDS.Add(param);
-
-                        string mess = $"Added '/{param}' to moderator commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
-                    }
-                }
-                if (args.Parameters.Count > 1)
-                {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Added {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
+                    return false;
                 }
 
-                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
-            }
+                string description = "";
+                List<string> alternatives = [];
 
-            // Remove commands from Moderator Commands
-            // /MODERATOR_COMMANDS_REMOVE [...]
-            if (args.IsCommand("MODERATOR_COMMANDS_REMOVE") && args.Parameters.Count >= 1)
-            {
+                bool isPublic = !args.IsCommand("DOVOTEHIDDEN");
+
+                bool isDescription = true;
+                string temp = "";
                 for (int i = 0; i < args.Parameters.Count; i++)
                 {
-                    string param = args.Parameters[i].ToUpper();
-                    if (string.IsNullOrEmpty(param)) { continue; }
+                    string parameter = args.Parameters[i];
+                    temp += parameter.Replace("\"", string.Empty) + " ";
 
-                    if (param == "ALL")
+                    if (parameter.EndsWith("\""))
                     {
-                        Constants.MODDERATOR_COMMANDS.Clear();
+                        temp = temp.Substring(0, temp.Length - 1);
+                        if (isDescription)
+                        {
+                            description = temp;
+                            isDescription = false;
+                            temp = "";
+                            continue;
+                        }
 
-                        string mess = "Removed all commands from moderator commands, moderators can now use all commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Tag, args.SenderGameUser));
-                        break;
-                    }
+                        alternatives.Add(temp);
+                        temp = "";
 
-                    if (Constants.MODDERATOR_COMMANDS.Contains(param))
-                    {
-                        Constants.MODDERATOR_COMMANDS.Remove(param);
-
-                        string mess = $"Removed '/{param}' from moderator commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
+                        // Will cause an out-of-index crash on vanilla clients.
+                        // SFD only assigns 4 keys for voting in an array, F1-4.
+                        if (alternatives.Count >= 4)
+                        {
+                            break;
+                        }
                     }
                 }
 
-                if (args.Parameters.Count > 1)
+                if (isDescription || string.IsNullOrEmpty(description) || alternatives.Count <= 1)
                 {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Removed {args.Parameters.Count} moderator command(s)", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, "Error parsing Vote-Syntax.", Color.Red, args.SenderGameUser));
                 }
+                else
+                {
+                    string mess = isPublic ? "Creating public-vote..." : "Creating private-vote...";
+                    args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
 
-                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                    GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), isPublic, false);
+
+                    if (__instance.GameOwner == GameOwnerEnum.Server)
+                    {
+                        vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                        __instance.VoteInfo.AddVote(vote);
+                        server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                    }
+                    else
+                    {
+                        vote.ValidRemoteUniqueIdentifiers.Add(1L);
+                        __instance.VoteInfo.AddVote(vote);
+                    }
+                }
+                return true;
             }
         }
         
@@ -312,32 +326,6 @@ internal static class CommandHandler
                                 receivedTexts.Add(objectName.ToLowerInvariant());
                             }
 
-                            if (args.HostPrivileges && param.Equals("HostGun", StringComparison.OrdinalIgnoreCase))
-                            {
-                                WeaponItem wpnBazooka = new WeaponItem(WeaponItemType.Rifle, new WpnBazooka());
-                                wpnBazooka.RWeaponData.Properties.MaxMagsInWeapon = 1;
-                                wpnBazooka.RWeaponData.Properties.MaxRoundsInMag = 10;
-                                wpnBazooka.RWeaponData.Properties.MaxCarriedSpareMags = 0;
-                                wpnBazooka.RWeaponData.Properties.StartMags = 1;
-                                wpnBazooka.RWeaponData.Properties.CooldownAfterPostAction = 100;
-                                wpnBazooka.RWeaponData.Properties.ExtraAutomaticCooldown = 50;
-                                wpnBazooka.RWeaponData.Properties.ProjectilesEachBlast = 3;
-                                wpnBazooka.RWeaponData.Properties.SpecialAmmoBulletsRefill = 10;
-                                wpnBazooka.RWeaponData.LazerUpgrade = 1;
-
-                                wpnBazooka.RWeaponData.Properties.Projectile = new ProjectileBazooka();
-                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.InitialSpeed = 300; // 490
-                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.DodgeChance = 0.9f;
-                                wpnBazooka.RWeaponData.Properties.Projectile.Properties.CanBeAbsorbedOrBlocked = true;
-
-                                __instance.GameWorld.SlowmotionHandler.AddSlowmotion(new Slowmotion(100f, 250f, 1000f, 0.1f, player.ObjectID));
-                                SFD.Effects.EffectHandler.PlayEffect("CAM_S", player.Position, __instance.GameWorld, 3.25f, 100f, false);
-                                SFD.Sounds.SoundHandler.PlaySound("LogoSlam", player.Position, 1f, __instance.GameWorld);
-
-                                player.GrabWeaponItem(wpnBazooka);
-                                continue;
-                            }
-
                             // Weapon ID or Name
                             try
                             {
@@ -393,106 +381,6 @@ internal static class CommandHandler
 
                     args.Feedback.Add(new(args.SenderGameUser, mess, feedbackColor, null));
                     return true;
-                }
-                
-                // Manually create a vote, the results are sent to the owner user,
-                // optionally, results can be shown to all players.
-                // /DOVOTE [OVER-HALF?] [TEXT] [A] [B] [C?] [D?]
-                if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant &&
-                    args.Parameters.Count >= 3 && args.IsCommand("DOVOTE") && args.CanUseModeratorCommand("DOVOTE")
-                )
-                {
-                    if (__instance.VoteInfo.ActiveVotes.Count >= 1)
-                    {
-                        args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
-                        return false;
-                    }
-
-                    bool requiresOverHalf = true;
-                    if (args.Parameters[0] == "0" || args.Parameters[0].ToUpper() == "FALSE")
-                    {
-                        requiresOverHalf = false;
-                    }
-
-                    string description = "";
-                    List<string> alternatives = [];
-
-                    bool isDescription = true;
-                    string temp = "";
-                    for (int i = 0; i < args.Parameters.Count; i++)
-                    {
-                        // First argument was FALSE or 0
-                        if (i == 0 && !requiresOverHalf) { continue; }
-
-                        string parameter = args.Parameters[i];
-                        temp += parameter.Replace("\"", string.Empty) + " ";
-
-                        if (parameter.EndsWith("\""))
-                        {
-                            temp = temp.Substring(0, temp.Length - 1);
-                            if (isDescription)
-                            {
-                                description = temp;
-                                isDescription = false;
-                                temp = "";
-                                continue;
-                            }
-                            
-                            alternatives.Add(temp);
-                            temp = "";
-
-                            // Will cause an out-of-index crash on vanilla clients.
-                            // SFD only assigns 4 keys for voting in an array, F1-4.
-                            if (alternatives.Count >= 4)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    if (isDescription || string.IsNullOrEmpty(description) || alternatives.Count <= 1)
-                    {
-                        args.Feedback.Add(new(args.SenderGameUser, "Error parsing Vote-Syntax.", Color.Red, args.SenderGameUser));
-                    }
-                    else
-                    {
-                        string mess = string.Format("Creating vote ({0})...", requiresOverHalf ? "over-half" : "all");
-                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
-
-                        GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), true, requiresOverHalf);
-                        
-                        if (__instance.GameOwner == GameOwnerEnum.Server)
-                        {
-                            vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
-                            __instance.VoteInfo.AddVote(vote);
-                            server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
-                        }
-                        else
-                        {
-                            vote.ValidRemoteUniqueIdentifiers.Add(1L);
-                            __instance.VoteInfo.AddVote(vote);
-                        }
-                        return true;
-                    }
-                    return true;
-                }
-            
-                // Manually start sudden-death.
-                // /FORCESD [TIME?]
-                if (args.IsCommand("FORCESUDDENDEATH", "FORCESD") && args.CanUseModeratorCommand("FORCESUDDENDEATH", "FORCESD"))
-                {
-                    int sdTime = 45;
-                    if (args.Parameters.Count > 0)
-                    {
-                        if (!int.TryParse(args.Parameters[0], out sdTime))
-                        {
-                            sdTime = 45;
-                        }
-                    }
-                    if (sdTime > 45) { sdTime = 45; }
-                    if (sdTime < 5) { sdTime = 5; }
-
-                    __instance.GameWorld.StartSuddenDeathForced(sdTime);
                 }
             }
 
@@ -551,78 +439,6 @@ internal static class CommandHandler
                         return true;
                     }
                 }
-
-                // Staff messages
-                if (args.IsCommand("STAFF", "S") && args.Parameters.Count > 0)
-                {
-                    if (args.SenderGameUser == null)
-                    {
-                        return false;
-                    }
-                    if (!server.Running)
-                    {
-                        return false;
-                    }
-
-                    string profName = args.SenderGameUser.GetProfileName();
-                    string mess = UI.ChatTweaks.ConstructMetaTextToStaffChatMessage(args.SourceParameters, profName, args.SenderGameUser.TeamIcon);
-                    NetMessage.ChatMessage.Data messageData = new(mess, CConst.Colors.Staff_Chat_Message, profName, true, args.SenderGameUser.UserIdentifier);
-
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.PlayerAction, $"Server: Sending staff message from '{profName}' ({args.SenderGameUser.AccountName})");
-                    // Loop through slots and find moderators or the host
-                    for (int i = 0; i < __instance.GameSlots.Length; i++)
-                    {
-                        GameSlot gameSlot = __instance.GameSlots[i];
-                        GameUser slotUser = gameSlot.GameUser;
-                        if (gameSlot.CurrentState == GameSlot.State.Occupied && slotUser != null && (slotUser.IsHost || slotUser.IsModerator))
-                        {
-                            GameConnectionTag gameConnectionTag = slotUser.GetGameConnectionTag();
-                            NetConnection netConnection = gameConnectionTag?.NetConnection;
-
-                            if (netConnection != null)
-                            {
-                                NetOutgoingMessage msg = NetMessage.ChatMessage.Write(ref messageData, server.m_server.CreateMessage());
-                                server.m_server.SendMessage(msg, netConnection, NetDeliveryMethod.ReliableOrdered, 1);
-                            }
-                        }
-                    }
-
-                    // Leave a notification in DS
-                    if (SFD.Program.IsServer)
-                    {
-                        string msg2 = messageData.Message;
-                        if (messageData.IsMetaText)
-                        {
-                            msg2 = TextMeta.ToPlain(messageData.Message);
-                        }
-
-                        DSInfoNotification.Notify(new DSInfoNotification.ChatMessage(args.SenderGameUser.UserIdentifier, msg2, messageData.Color.ToWinDrawColor()));
-                    }
-
-                    return true;
-                }
-
-                // List commands in Moderator Commands
-                // /MODERATOR_COMMANDS_GET [...]
-                if (args.IsCommand("MHELP", "MODHELP"))
-                {
-                    if (Constants.MODDERATOR_COMMANDS.Count == 0)
-                    {
-                        string mess = "Moderators have access to all commands.";
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
-
-                        return true;
-                    }
-
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Listing all moderator commands...", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
-                    foreach (string str in Constants.MODDERATOR_COMMANDS)
-                    {
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"'/{str}'", CConst.Colors.Staff_Chat_Message, args.SenderGameUser));
-                    }
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Moderators have access to {Constants.MODDERATOR_COMMANDS.Count} command(s).", CConst.Colors.Staff_Chat_Name, args.SenderGameUser));
-
-                    return true;
-                }
             }
 
             // Host/Mod commands, only available when using extended slots
@@ -673,121 +489,7 @@ internal static class CommandHandler
                 }
             }
         }
-
-        // Public commands, only available whne using extended slots
-        if (CConst.HOST_GAME_EXTENDED_SLOTS)
-        {
-            // Players will only see "?0" when listing players,
-            // so we send them a server-sided list instead.
-            // /SCOREBOARD
-            if (args.IsCommand(
-                "SCOREBOARD"
-            ))
-            {
-                string header = "- SCOREBOARD -";
-                args.Feedback.Add(new(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser));
-
-                int num = 0;
-                foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
-                {
-                    if (gameUser.IsDedicatedPreview) { continue; }
-
-                    string slotIndex = gameUser.GameSlotIndex.ToString();
-                    string profName = gameUser.GetProfileName();
-                    string accName = gameUser.AccountName;
-                    string ping = gameUser.Ping.ToString();
-                    string tWins = gameUser.Score.TotalWins.ToString();
-                    string tLoss = gameUser.Score.TotalLosses.ToString();
-                    string tGames = gameUser.Score.TotalGames.ToString();
-
-                    string team = "Team?";
-                    if (gameUser.GameSlot != null)
-                    {
-                        team = gameUser.GameSlot.CurrentTeam.ToString();  
-                    }
-
-                    Color messCol = Color.LightBlue * (num % 2 == 0 ? 1f : 0.625f);
-                    messCol.A = 255;
-                    num++;
-                    
-                    string mess1;
-                    
-                    if (gameUser.IsBot)
-                    {
-                        mess1 = $"{slotIndex}: \"{profName}\" (BOT) - {team}";
-                    }
-                    else
-                    {
-                        mess1 = $"{slotIndex}: {accName} - {team} | {tWins}/{tLoss} ({tGames})";
-                    }
-
-                    args.Feedback.Add(new(args.SenderGameUser, mess1, messCol, args.SenderGameUser));
-                }
-                return true;
-            }
-        }
         
-        // Custom-Help command
-        if (args.IsCommand("CTHELP"))
-        {
-            Dictionary<string[], string> hostCommands = new()
-            {
-                { ["MOUSE", "M"], "[1/0]" },
-                { ["MODERATOR_COMMANDS_ADD"], "[...]" },
-                { ["MODERATOR_COMMANDS_REMOVE"], "[...]" },
-            };
-            Dictionary<string[], string> moderatorCommands = new()
-            {
-                { ["GIVE"], "[USER] [ITEMS...]" },
-                { ["DOVOTE"], "[OVER-HALF?] [TEXT] [A] [B] [C?] [D?]" },
-                { ["FORCESERVERMOVEMENT", "FORCESVMOV"], "[USER] [1/0/NULL]" },
-                { ["STAFF", "S"], "[MESSAGE]" },
-                { ["FORCESUDDENDEATH", "FORCESD"], "[TIME?]" },
-                { ["MHELP, MODHELP"], "" },
-
-                // Extended-slots
-                // { ["SLOTS"], "" },
-                // { ["SETSLOT", "SSLOT"], "[INDEX] [0/1/2/4/5/6] [0/1/2/3/4]" }
-            };
-            Dictionary<string[], string> publicCommands = new()
-            {
-                // Extended-slots
-                // { ["SCOREBOARD"], "" }
-            };
-
-            Color cSep = Color.LightBlue;
-            Color cPublic = new(255, 181, 26);
-            Color cMod = new(159, 255, 64);
-            Color cHost = Color.Yellow;
-
-            if (args.HostPrivileges)
-            {
-                args.Feedback.Add(new(args.SenderGameUser, "- HOST COMMANDS", cSep, args.SenderGameUser));
-                foreach (KeyValuePair<string[], string> kvp in hostCommands)
-                {
-                    args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cHost, args.SenderGameUser));
-                }
-            }
-            if (args.ModeratorPrivileges)
-            {
-                args.Feedback.Add(new(args.SenderGameUser, "- MODERATOR COMMANDS", cSep, args.SenderGameUser));
-                foreach (KeyValuePair<string[], string> kvp in moderatorCommands)
-                {
-                    if (args.CanUseModeratorCommand(kvp.Key))
-                    {
-                        args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cMod, args.SenderGameUser));
-                    }
-                }
-            }
-            args.Feedback.Add(new(args.SenderGameUser, "- PUBLIC COMMANDS", cSep, args.SenderGameUser));
-            foreach (KeyValuePair<string[], string> kvp in publicCommands)
-            {
-                args.Feedback.Add(new(args.SenderGameUser, $"/{kvp.Key.First()} {kvp.Value}", cPublic, args.SenderGameUser));
-            }
-
-            return true;
-        }
-
         return false;
     }
 }

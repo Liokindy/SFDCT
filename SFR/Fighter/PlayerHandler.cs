@@ -47,30 +47,4 @@ internal static class PlayerHandler
         }
     }
     */
-
-    /// <summary>
-    ///     Players look glitchy when held by the debug mouse, as they
-    ///     think they're stuck in the falling state, and try to recover.
-    /// </summary>
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Player), nameof(Player.CheckResolveStuckInFalling))]
-    private static bool DebugMouseFix(Player __instance)
-    {
-        // Fix is server-sided
-        if (__instance.GameOwner == GameOwnerEnum.Client)
-        {
-            return true;
-        }
-
-        if (__instance.GameWorld != null && __instance.GameWorld.m_debugMouseObject != null && !__instance.GameWorld.m_debugMouseObject.IsDisposed)
-        {
-            if (__instance.GameWorld.m_debugMouseObject.ObjectID == __instance.ObjectID)
-            {
-                return false;
-            }
-        }
-
-
-        return true;
-    }
 }

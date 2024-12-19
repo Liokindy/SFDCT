@@ -11,6 +11,20 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 > [!TIP]
 > Settings are currently accessed and changed by editing `SFDCT/config.ini` directly with a text editor. You can refresh your settings in-game using `F6`. In some cases you may need to restart the game.
 
+# INSTALLATION
+> [!WARNING]
+> SFDCT may get flagged as malicious. This is a known problem. We advice you to **NOT** trust downloads of SFDCT from sites that are not from [**this** repository](https://github.com/Liokindy/SFDCT/).
+
+1. Download the [latest release](https://github.com/Liokindy/SFDCT/releases) and extract the contents to Superfighters Deluxe's folder. (Commonly located at `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe`)
+
+<img src="docs/installation0.png" width=75%/>
+
+2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`.
+
+<img src="docs/steamLaunchParameters.png" width=75%/>
+
+3. When you launch SFD, SFDCT will boot instead.
+
 # NOTABLE FEATURES
 
 #### EXTENDED PROFILES
@@ -29,6 +43,7 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 <img src="docs/10SlotsScoreboard.png" width=50%/>
 
 #### MANUAL VOTES
+- Can only be used by the server-host
 - When the vote ends, the results are sent in chat for everyone to see.
 - You can specify up to 4 choices and specify if the vote should automatically end after half the lobby votes.
 - Examples: `/DOVOTE 0 "Like the map?" "Yeah" "No"`, `/DOVOTE "Kill Dxse?" "Yes" "Yeah" "Affirmative"`
@@ -57,20 +72,6 @@ My own mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/
 - The `/GIVE` command supports multiple arguments, i.e `/GIVE ME 17 21 BOUNCING_AMMO`
 
 <img src="docs/defaultCommands1.gif" width=40%/>
-
-# INSTALLATION
-> [!WARNING]
-> SFDCT may get flagged as malicious. This is a known problem. We advice you to **NOT** trust downloads of SFDCT from sites that are not from [**this** repository](https://github.com/Liokindy/SFDCT/).
-
-1. Download the [latest release](https://github.com/Liokindy/SFDCT/releases) and extract the contents to Superfighters Deluxe's folder. (Commonly located at `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe`)
-
-<img src="docs/installation0.png" width=75%/>
-
-2. Go to SFD's launch options in Steam and type `cmd /c "%command%\..\SFDCT.exe"`.
-
-<img src="docs/steamLaunchParameters.png" width=75%/>
-
-3. When you launch SFD, SFDCT will boot instead.
 
 # CREDITS
 SFDCT is made using [SFR](https://github.com/Odex64/SFR) as a base, however, assets, features, etc. From SFR are not included.

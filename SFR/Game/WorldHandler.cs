@@ -51,28 +51,4 @@ internal static class WorldHandler
     {
         // SyncHandler.Attempts.Clear();
     }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.GetStartupPlayerFlashTime))]
-    private static bool GetStartupPlayerFlashTime(GameWorld __instance, ref float __result)
-    {
-        // 1.25s without startup sequence, 2.25s by default
-        // 1.5s without startup or iris, 2.55s with both
-
-        __result = 1500f;
-
-        // The transition may cover the player for some time on startup
-        if (__instance.ObjectWorldData.StartupIrisSwipeEnabled)
-        {
-            __result += 300f;
-        }
-
-        // The GET READY... FIGHT! may cover the player and/or distract the user
-        if (__instance.ObjectWorldData.StartupSequenceEnabled)
-        {
-            __result += 750f;
-        }
-
-        return false;
-    }
 }

@@ -20,7 +20,7 @@ public static class Constants
     {
         public static string SFD = "v.1.3.7d";
         public static string SFDCT = "v.1.0.5";
-        public static bool InDev = true;
+        public static bool InDev = false;
         public static string Label
         {
             get
@@ -28,12 +28,6 @@ public static class Constants
                 return SFDCT + (InDev ? " (Dev)" : "");
             }
         }
-    }
-    public struct Colors
-    {
-        public static Color Staff_Chat_Tag = new(168, 255, 168);
-        public static Color Staff_Chat_Name= new(144, 238, 144);
-        public static Color Staff_Chat_Message = new(56, 179, 56);
     }
 
     public static int SlotCount
