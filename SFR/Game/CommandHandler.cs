@@ -130,78 +130,79 @@ internal static class CommandHandler
                 return true;
             }
 
-            // Manually create a game-vote, like a map-vote
-            // /DOVOTE [TEXT] [A] [B] [C?] [D?]
-            // /DOVOTEHIDDEN [TEXT] [A] [B] [C?] [D?]
-            if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant &&
-                args.Parameters.Count >= 3 && args.IsCommand("DOVOTE", "DOVOTEHIDDEN")
-            )
+            if (__instance.GameWorld != null)
             {
-                if (__instance.VoteInfo.ActiveVotes.Count > 0)
+                // Manually create a game-vote, like a map-vote
+                // /DOVOTE [TEXT] [A] [B] [C?] [D?]
+                // /DOVOTEHIDDEN [TEXT] [A] [B] [C?] [D?]
+                if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant && args.Parameters.Count >= 3 && args.IsCommand("DOVOTE", "DOVOTEHIDDEN"))
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
-                    return false;
-                }
-
-                string description = "";
-                List<string> alternatives = [];
-
-                bool isPublic = !args.IsCommand("DOVOTEHIDDEN");
-
-                bool isDescription = true;
-                string temp = "";
-                for (int i = 0; i < args.Parameters.Count; i++)
-                {
-                    string parameter = args.Parameters[i];
-                    temp += parameter.Replace("\"", string.Empty) + " ";
-
-                    if (parameter.EndsWith("\""))
+                    if (__instance.VoteInfo.ActiveVotes.Count > 0)
                     {
-                        temp = temp.Substring(0, temp.Length - 1);
-                        if (isDescription)
+                        args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
+                        return false;
+                    }
+
+                    string description = "";
+                    List<string> alternatives = [];
+
+                    bool isPublic = !args.IsCommand("DOVOTEHIDDEN");
+
+                    bool isDescription = true;
+                    string temp = "";
+                    for (int i = 0; i < args.Parameters.Count; i++)
+                    {
+                        string parameter = args.Parameters[i];
+                        temp += parameter.Replace("\"", string.Empty) + " ";
+
+                        if (parameter.EndsWith("\""))
                         {
-                            description = temp;
-                            isDescription = false;
+                            temp = temp.Substring(0, temp.Length - 1);
+                            if (isDescription)
+                            {
+                                description = temp;
+                                isDescription = false;
+                                temp = "";
+                                continue;
+                            }
+
+                            alternatives.Add(temp);
                             temp = "";
-                            continue;
-                        }
 
-                        alternatives.Add(temp);
-                        temp = "";
-
-                        // Will cause an out-of-index crash on vanilla clients.
-                        // SFD only assigns 4 keys for voting in an array, F1-4.
-                        if (alternatives.Count >= 4)
-                        {
-                            break;
+                            // Will cause an out-of-index crash on vanilla clients.
+                            // SFD only assigns 4 keys for voting in an array, F1-4.
+                            if (alternatives.Count >= 4)
+                            {
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (isDescription || string.IsNullOrEmpty(description) || alternatives.Count <= 1)
-                {
-                    args.Feedback.Add(new(args.SenderGameUser, "Error parsing Vote-Syntax.", Color.Red, args.SenderGameUser));
-                }
-                else
-                {
-                    string mess = isPublic ? "Creating public-vote..." : "Creating private-vote...";
-                    args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
-
-                    GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), isPublic, false);
-
-                    if (__instance.GameOwner == GameOwnerEnum.Server)
+                    if (isDescription || string.IsNullOrEmpty(description) || alternatives.Count <= 1)
                     {
-                        vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
-                        __instance.VoteInfo.AddVote(vote);
-                        server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                        args.Feedback.Add(new(args.SenderGameUser, "Error parsing Vote-Syntax.", Color.Red, args.SenderGameUser));
                     }
                     else
                     {
-                        vote.ValidRemoteUniqueIdentifiers.Add(1L);
-                        __instance.VoteInfo.AddVote(vote);
+                        string mess = isPublic ? "Creating public-vote..." : "Creating private-vote...";
+                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
+
+                        GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), isPublic, false);
+
+                        if (__instance.GameOwner == GameOwnerEnum.Server)
+                        {
+                            vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.CanVote));
+                            __instance.VoteInfo.AddVote(vote);
+                            server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                        }
+                        else
+                        {
+                            vote.ValidRemoteUniqueIdentifiers.Add(1L);
+                            __instance.VoteInfo.AddVote(vote);
+                        }
                     }
+                    return true;
                 }
-                return true;
             }
         }
         
