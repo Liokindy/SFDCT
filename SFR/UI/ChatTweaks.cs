@@ -9,6 +9,7 @@ using SFD;
 using SFD.GUI.Text;
 using SFD.MenuControls;
 using SFD.States;
+using SFDCT.Helper;
 using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.UI;
@@ -21,11 +22,11 @@ internal static class ChatTweaks
     private static int m_rowSizeTyping = 15;
     private static bool IsWordSeparator(char c)
     {
-        return c != '_' && !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
+        return !char.IsLetter(c) || char.IsSeparator(c) || char.IsSymbol(c);
     }
 
     private static int m_lastMessageIndex = 0;
-    private static int m_lastMessagesListMax = 128;
+    private static int m_lastMessagesListMax = 16;
     private static List<string> m_lastMessagesList = new(m_lastMessagesListMax);
 
     [HarmonyPostfix]
@@ -64,28 +65,24 @@ internal static class ChatTweaks
         {
             if ((key == Keys.Up || key == Keys.Down) && m_lastMessagesList != null && m_lastMessagesList.Any() )
             {
-                Client client = GameSFD.Handle.Client;
-                if (client != null && client.IsRunning)
+                __result = false;
+
+                int listIndex = (m_lastMessagesList.Count - 1) - m_lastMessageIndex;
+                string message = m_lastMessagesList.ElementAtOrDefault(listIndex);
+
+                m_lastMessageIndex += (key == Keys.Up ? 1 : -1);
+                if (m_lastMessageIndex < 0)
                 {
-                    __result = false;
+                    m_lastMessageIndex = m_lastMessagesList.Count - 1;
+                }
+                if (m_lastMessageIndex > m_lastMessagesList.Count - 1)
+                {
+                    m_lastMessageIndex = 0;
+                }
 
-                    int listIndex = (m_lastMessagesList.Count - 1) - m_lastMessageIndex;
-                    string message = m_lastMessagesList.ElementAtOrDefault(listIndex);
-
-                    m_lastMessageIndex += (key == Keys.Up ? 1 : -1);
-                    if (m_lastMessageIndex < 0)
-                    {
-                        m_lastMessageIndex = m_lastMessagesList.Count - 1;
-                    }
-                    if (m_lastMessageIndex > m_lastMessagesList.Count - 1)
-                    {
-                        m_lastMessageIndex = 0;
-                    }
-
-                    if (!string.IsNullOrEmpty(message))
-                    {
-                        GameChat.m_textbox.SetText(message);
-                    }
+                if (!string.IsNullOrEmpty(message))
+                {
+                    GameChat.m_textbox.SetText(message);
                 }
                 return false;
             }

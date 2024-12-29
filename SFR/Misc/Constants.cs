@@ -9,28 +9,29 @@ namespace SFDCT.Misc;
 
 public static class Constants
 {
+    public static Random RANDOM = new();
     public readonly struct Paths
     {
         public static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
-        public static string Content = Path.Combine(Paths.SFDCT, "Content");
-        public static string ConfigurationIni = Path.Combine(Paths.SFDCT, "config.ini");
-        public static string Profiles = Path.Combine(Content, "Profile");
+        public static string CONTENT = Path.Combine(Paths.SFDCT, "Content");
+        public static string CONFIGURATIONINI = Path.Combine(Paths.SFDCT, "config.ini");
+        public static string PROFILES = Path.Combine(CONTENT, "Profile");
     }
     public readonly struct Version
     {
         public static string SFD = "v.1.3.7d";
         public static string SFDCT = "v.1.0.6";
-        public static bool InDev = true;
-        public static string Label
+        public static bool INDEV = true;
+        public static string LABEL
         {
             get
             {
-                return SFDCT + (InDev ? " (Dev)" : "");
+                return SFDCT + (INDEV ? " (Dev)" : "");
             }
         }
     }
 
-    public static int SlotCount
+    public static int SLOTCOUNT
     {
         get
         {

@@ -64,7 +64,7 @@ internal static class Dumping
         Stopwatch dumpItemStopwatch = new();
         dumpItemStopwatch.Start();
 
-        string dumpRootFolder = Path.Combine(CConst.Paths.Content, "Dump");
+        string dumpRootFolder = Path.Combine(CConst.Paths.CONTENT, "Dump");
 
         string dumpItemFolder = Path.Combine(dumpRootFolder, "Items");
         string dumpItemNone = Path.Combine(dumpItemFolder, "None");
@@ -185,7 +185,7 @@ internal static class Dumping
         Stopwatch dumpAnimStopwatch = new();
         dumpAnimStopwatch.Start();
 
-        string dumpRootFolder = Path.Combine(CConst.Paths.Content, "Dump");
+        string dumpRootFolder = Path.Combine(CConst.Paths.CONTENT, "Dump");
         string dumpAnimationsFolder = Path.Combine(dumpRootFolder, "Animations");
 
         CheckDirectory(dumpRootFolder);
@@ -234,7 +234,7 @@ internal static class Dumping
             Items.m_slotMaleItems[i] = new List<Item>();
         }
 
-        string[] propertyFilesPaths = Directory.GetFiles(Path.Combine(Path.Combine(CConst.Paths.Content, "Dump"), "Items"), "*.txt", SearchOption.AllDirectories);
+        string[] propertyFilesPaths = Directory.GetFiles(Path.Combine(Path.Combine(CConst.Paths.CONTENT, "Dump"), "Items"), "*.txt", SearchOption.AllDirectories);
         foreach (string propertyFilePath in propertyFilesPaths)
         {
             string itemFolderPath = propertyFilePath.Substring(0, propertyFilePath.Length - ("/properties.txt").Length);

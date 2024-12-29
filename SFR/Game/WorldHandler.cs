@@ -7,6 +7,11 @@ using SFDCT.Helper;
 using SFDCT.Sync;
 using HarmonyLib;
 using Box2D.XNA;
+using System.Runtime.CompilerServices;
+using System.Reflection.Emit;
+using CSettings = SFDCT.Settings.Values;
+using SFD.Sounds;
+using SFD.MapEditor;
 
 namespace SFDCT.Game;
 
@@ -50,5 +55,51 @@ internal static class WorldHandler
     private static void DisposeData()
     {
         // SyncHandler.Attempts.Clear();
+    }
+
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
+    private static void SaturationPatch(GameWorld __instance, float chunkMs, float totalMs, bool isLast, bool isFirst)
+    {
+        if (!SFD.Program.IsGame || !(__instance.EditMode & !__instance.EditPhysicsRunning) && isLast && __instance.GameOwner != GameOwnerEnum.Server)
+        {
+            float highestPlayerHealthFullness = 0f;
+            for (int i = 0; i < __instance.LocalPlayers.Length; i++)
+            {
+                Player localPlayer = __instance.LocalPlayers[i];
+                if (localPlayer != null && !localPlayer.IsDisposed && !localPlayer.IsDead)
+                {
+                    highestPlayerHealthFullness = Math.Max(highestPlayerHealthFullness, localPlayer.Health.Fullness);
+                }
+            }
+
+            if (highestPlayerHealthFullness > 0f)
+            {
+                if (GameSFD.GUIMode == ShowGUIMode.HideAll)
+                {
+                    GameSFD.Saturation = 1f;
+                }
+                else if (highestPlayerHealthFullness < CSettings.GetFloat("LOW_HEALTH_THRESHOLD"))
+                {
+                    float lowhpFactor = 1f - highestPlayerHealthFullness /  CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
+
+                    if (__instance.m_nextHeartbeatDelay < 400f && highestPlayerHealthFullness < 0.25)
+                    {
+                        __instance.m_nextHeartbeatDelay += totalMs * Math.Max(1 - highestPlayerHealthFullness / 0.25f, 0.6f);
+                    }
+
+                    __instance.m_nextHeartbeatDelay -= totalMs * Math.Max(lowhpFactor, 0.6f);
+                    if (__instance.m_nextHeartbeatDelay <= 0f)
+                    {
+                        Logger.LogDebug(__instance.m_nextHeartbeatDelay);
+                        __instance.m_nextHeartbeatDelay = 400f;
+                        SoundHandler.PlaySound("Heartbeat", 1f, __instance);
+                    }
+
+                    GameSFD.Saturation = 1f - lowhpFactor * CSettings.GetFloat("LOW_HEALTH_SATURATION_FACTOR");
+                }
+            }
+        }
     }
 }

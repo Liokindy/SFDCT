@@ -83,7 +83,7 @@ internal static class MainMenu
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.DrawInner))]
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(76).operand = $"{CConst.Version.SFD} - {CConst.Version.Label}";
+        instructions.ElementAt(76).operand = $"{CConst.Version.SFD} - {CConst.Version.LABEL}";
         return instructions;
     }
 }

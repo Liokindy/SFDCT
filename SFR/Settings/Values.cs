@@ -35,6 +35,8 @@ public static class Values
         }
         Add("MAINMENU_BG_USE_BLACK", true, IniSettingType.Bool);
         Add("MAINMENU_TRACK_RANDOM", false, IniSettingType.Bool);
+        Add("LOW_HEALTH_SATURATION_FACTOR", 0.7f, IniSettingType.Float);
+        Add("LOW_HEALTH_THRESHOLD", 0.25f, IniSettingType.Float);
 
         b_initialized = true;
     }
@@ -153,6 +155,12 @@ public static class Values
                     string colorString = SFD.Constants.ColorToString((Color)(saveAsDefault ? this.Default : this.Value));
                     Handler.ReadLine(this.Key + "=" + colorString);
                     break;
+                case IniSettingType.Float:
+                    // Use SFD's way to store floats ('.' instead of ',')
+                    string floatString = ((float)(saveAsDefault ? this.Default : this.Value)).ToString();
+                    floatString = floatString.Replace(',', '.');
+                    Handler.ReadLine(this.Key + "=" + floatString);
+                    break;
             }
 
             Logger.LogDebug($"CONFIG.INI: Saved '{this.Key}', {this.Type}: {this.Value}");
@@ -164,7 +172,9 @@ public static class Values
                 switch (this.Type)
                 {
                     case IniSettingType.Float:
-                        this.Value = float.Parse(temp);
+                        float tempFloat;
+                        Handler.TryReadValueFloat(this.Key, (float)this.Default, out tempFloat);
+                        this.Value = tempFloat;
                         break;
                     case IniSettingType.Int:
                         this.Value = int.Parse(temp);
@@ -174,7 +184,7 @@ public static class Values
                         break;
                     case IniSettingType.Color:
                         Color tempColor;
-                        Handler.TryReadValueColor(this.Key, Color.Magenta, out tempColor);
+                        Handler.TryReadValueColor(this.Key, (Color)this.Default, out tempColor);
                         this.Value = tempColor;
                         break;
                     case IniSettingType.Bool:

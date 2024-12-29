@@ -24,7 +24,7 @@ internal static class Scoreboard
         GameInfo lobbyGameInfo = LobbyCommandHandler.GetLobbyGameInfo();
         if (lobbyGameInfo != null && !lobbyGameInfo.IsDisposed)
         {
-            for (int i = 8; i < CConst.SlotCount; i++)
+            for (int i = 8; i < CConst.SLOTCOUNT; i++)
             {
                 __instance.m_slotsRows[i].Update(elapsed, lobbyGameInfo, __instance.m_forceUpdateLabels);
             }
@@ -49,10 +49,10 @@ internal static class Scoreboard
         int LoadingProgressWidth = 50 - 4;
         int ScoreboardWidth = StatusWidth + PortraitWidth + TeamWidth + LatencyWidth + WinsWidth + LossesWidth + LoadingProgressWidth;
 
-        __instance.Height = 568 - 50 * 8 + 50 * (int)Math.Ceiling(CConst.SlotCount * 0.5f);
+        __instance.Height = 568 - 50 * 8 + 50 * (int)Math.Ceiling(CConst.SLOTCOUNT * 0.5f);
         __instance.Width = ScoreboardWidth * 2;
 
-        __instance.m_slotsRows = new LobbySlotRow[CConst.SlotCount];
+        __instance.m_slotsRows = new LobbySlotRow[CConst.SLOTCOUNT];
         int num = 0;
         int num2 = 120;
         LobbySlotHeaderColumn lobbySlotHeaderColumn = new LobbySlotHeaderColumn(LanguageHelper.GetText("menu.scoreboard.header.status"), new Vector2((float)num, (float)num2), StatusWidth, __instance);

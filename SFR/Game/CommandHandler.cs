@@ -16,6 +16,9 @@ using SFDCT.Game.Voting;
 using SFDCT.Helper;
 using CConst = SFDCT.Misc.Constants;
 using HarmonyLib;
+using SFD.Sounds;
+using SFD.Parser;
+using System.Net.Configuration;
 
 namespace SFDCT.Game;
 
@@ -47,14 +50,7 @@ internal static class CommandHandler
     }
     private static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
     {
-        if (args.IsCommand(
-            "PLAYERS",
-            "LISTPLAYERS",
-            "SHOWPLAYERS",
-            "USERS",
-            "LISTUSERS",
-            "SHOWUSERS"
-        ))
+        if (args.IsCommand("PLAYERS","LISTPLAYERS","SHOWPLAYERS","USERS","LISTUSERS","SHOWUSERS"))
         {
             int players = 0;
             int bots = 0;
@@ -64,7 +60,7 @@ internal static class CommandHandler
 
             foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
             {
-                if (gameUser.IsDedicatedPreview) { continue; } // Vanilla hides the dedicated preview from the list
+                if (gameUser.IsDedicatedPreview && !args.SenderGameUser.IsHost) { continue; } // Vanilla hides the dedicated preview from the list
 
                 string slotIndex, profileName, accountName, account, powerStatus;
                 slotIndex = gameUser.GameSlotIndex.ToString();
@@ -108,84 +104,93 @@ internal static class CommandHandler
             return false;
         }
 
-        // Host-only commands
+        // Host commands
         if (args.HostPrivileges)
         {
             // Makes the host able to use the mouse to drag around dynamic
-            // objects and players. Looks somewhat stuttery outside the editor.
+            // objects and players. Looks somewhat stuttery outside the editor
+            // because in online mode, clients use physics predictions
+            // /MOUSE
             // /MOUSE [1/0]
-            if (args.IsCommand("MOUSE", "M") && args.Parameters.Count > 0)
+            if (args.IsCommand("MOUSE", "M"))
             {
-                if (args.Parameters[0] == "1" || args.Parameters[0].ToUpper() == "TRUE")
+                bool enabled = !Commands.DebugMouse.IsEnabled;
+                if (args.Parameters.Count >= 1)
                 {
-                    Commands.DebugMouse.IsEnabled = true;
-                }
-                if (args.Parameters[0] == "0" || args.Parameters[0].ToUpper() == "FALSE")
-                {
-                    Commands.DebugMouse.IsEnabled = false;
+                    if (args.Parameters[0] == "1" || args.Parameters[0].Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        enabled = true;
+                    }
+                    if (args.Parameters[0] == "0" || args.Parameters[0].Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        enabled = false;
+                    }
                 }
 
-                string mess = "Mouse dragging is now " + (Commands.DebugMouse.IsEnabled ? "enabled" : "disabled");
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, args.SenderGameUser));
+                Commands.DebugMouse.IsEnabled = enabled;
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Mouse dragging is set to {enabled}", args.SenderGameUser));
                 return true;
             }
-
+        }
+        
+        // Host/Moderator commands
+        if (args.HostPrivileges || args.ModeratorPrivileges)
+        {
+            // Commands that interact with the gameworld
             if (__instance.GameWorld != null)
             {
-                // Manually create a game-vote, like a map-vote
+                // Manually create a vote like a map-vote
+                // Syntax is: /DOVOTE "The vote's description" "First option" "Second option" "Third option" "Fourth option"
                 // /DOVOTE [TEXT] [A] [B] [C?] [D?]
                 // /DOVOTEHIDDEN [TEXT] [A] [B] [C?] [D?]
-                if (!__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant && args.Parameters.Count >= 3 && args.IsCommand("DOVOTE", "DOVOTEHIDDEN"))
+                if (args.IsCommand("DOVOTE", "DOVOTEHIDDEN") && args.CanUseModeratorCommand("DOVOTE", "DOVOTEHIDDEN") && !__instance.GameWorld.GameOverData.IsOver && !__instance.GameWorld.m_restartInstant)
                 {
                     if (__instance.VoteInfo.ActiveVotes.Count > 0)
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress.", Color.Red, args.SenderGameUser));
+                        args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress", Color.Red, args.SenderGameUser));
                         return false;
                     }
 
-                    string description = "";
+                    // Will cause an out-of-index crash on vanilla clients.
+                    // SFD only assigns 4 keys for voting in an array, F1-4.
+                    string description = null;
                     List<string> alternatives = [];
-
                     bool isPublic = !args.IsCommand("DOVOTEHIDDEN");
 
-                    bool isDescription = true;
-                    string temp = "";
-                    for (int i = 0; i < args.Parameters.Count; i++)
+                    string[] parsedParams = args.SourceParameters.Split('\"');
+                    if (parsedParams.Length >= 4)
                     {
-                        string parameter = args.Parameters[i];
-                        temp += parameter.Replace("\"", string.Empty) + " ";
+                        description = parsedParams[1];
+                        alternatives.Add(parsedParams[3]);
 
-                        if (parameter.EndsWith("\""))
+                        if (parsedParams.Length >= 6)
                         {
-                            temp = temp.Substring(0, temp.Length - 1);
-                            if (isDescription)
-                            {
-                                description = temp;
-                                isDescription = false;
-                                temp = "";
-                                continue;
-                            }
-
-                            alternatives.Add(temp);
-                            temp = "";
-
-                            // Will cause an out-of-index crash on vanilla clients.
-                            // SFD only assigns 4 keys for voting in an array, F1-4.
-                            if (alternatives.Count >= 4)
-                            {
-                                break;
-                            }
+                            alternatives.Add(parsedParams[5]);
+                        }
+                        if (parsedParams.Length >= 8)
+                        {
+                            alternatives.Add(parsedParams[7]);
+                        }
+                        if (parsedParams.Length >= 10)
+                        {
+                            alternatives.Add(parsedParams[9]);
                         }
                     }
 
-                    if (isDescription || string.IsNullOrEmpty(description) || alternatives.Count <= 1)
+                    if (string.IsNullOrEmpty(description) || alternatives.Count <= 0)
                     {
-                        args.Feedback.Add(new(args.SenderGameUser, "Error parsing Vote-Syntax.", Color.Red, args.SenderGameUser));
+                        args.Feedback.Add(new(args.SenderGameUser, "Error parsing vote-syntax...", Color.Red, args.SenderGameUser));
+                        return true;
                     }
                     else
                     {
-                        string mess = isPublic ? "Creating public-vote..." : "Creating private-vote...";
-                        args.Feedback.Add(new(args.SenderGameUser, mess, Color.ForestGreen, args.SenderGameUser));
+                        string mess = $"Creating vote: '{description}' :";
+                        foreach(string alt in alternatives)
+                        {
+                            mess += $" '{alt}' ";
+                        }
+
+                        args.Feedback.Add(new(args.SenderGameUser, mess, isPublic ? Color.LightBlue : Color.LightBlue * 0.7f, args.SenderGameUser));
 
                         GameVote vote = new GameVoteManual(GameVote.GetNextVoteID(), args.SenderGameUser, description, alternatives.ToArray(), isPublic, false);
 
@@ -200,27 +205,18 @@ internal static class CommandHandler
                             vote.ValidRemoteUniqueIdentifiers.Add(1L);
                             __instance.VoteInfo.AddVote(vote);
                         }
+                        return true;
                     }
-                    return true;
                 }
-            }
-        }
-        
-        // Moderator commands
-        if (args.HostPrivileges || args.ModeratorPrivileges)
-        {
-            // Commands that interact with the gameworld, such as GIVE
-            if (__instance.GameWorld != null)
-            {
+
                 // Better /GIVE command, allows for multiple weapons in a single command
                 // and use ALL as user (uses all users in the lobby)
-                // /GIVE [USER/PLAYER/ALL] [ITEMS...]
+                // /GIVE [PLAYER/ALL/ANY] [ITEMS...]
                 if (args.IsCommand("GIVE") && args.CanUseModeratorCommand("GIVE") && args.Parameters.Count >= 2)
                 {
-                    Color feedbackColor = Color.ForestGreen;
-                    Color errorColor = Color.Red;
                     List<Player> targetPlayers = [];
                     bool isGiveAll = args.Parameters[0].Equals("All", StringComparison.OrdinalIgnoreCase);
+                    bool isGiveRandom = args.Parameters[0].Equals("Any", StringComparison.OrdinalIgnoreCase) || args.Parameters[0].Equals("Random", StringComparison.OrdinalIgnoreCase);
 
                     // "All" targets all players in the lobby
                     if (isGiveAll)
@@ -239,24 +235,47 @@ internal static class CommandHandler
                             return null;
                         }).ToList();
                     }
+                    else if (isGiveRandom)
+                    {
+                        IEnumerable<Player> validPlayers = __instance.GetGameUsers().Select((GameUser user) =>
+                        {
+                            if (user != null && !user.IsDisposed)
+                            {
+                                Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
+                                if (userPlayer != null && !userPlayer.IsDisposed && !userPlayer.IsRemoved && !userPlayer.IsDead)
+                                {
+                                    return userPlayer;
+                                }
+                            }
+
+                            return null;
+                        });
+
+                        if (validPlayers.Count() > 0)
+                        {
+                            targetPlayers.Add(validPlayers.ElementAt(CConst.RANDOM.Next(0, validPlayers.Count())));
+                        }
+                    }
                     else
                     {
                         // Try to get user by string input
-                        GameUser targetUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                        GameUser targetUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser); ;
+
                         if (targetUser == null || targetUser.IsDisposed)
-                        {
-                            args.Feedback.Add(new(args.SenderGameUser, $"User '{args.Parameters[0]}' not found.", errorColor, args.SenderGameUser));
+                        {    
+                            args.Feedback.Add(new(args.SenderGameUser, $"User '{args.Parameters[0]}' not found", Color.Red, args.SenderGameUser));
                             return true;
                         }
+
                         Player targetPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(targetUser.UserIdentifier);
                         if (targetPlayer == null || targetPlayer.IsDisposed || targetPlayer.IsRemoved)
                         {
+                            args.Feedback.Add(new(args.SenderGameUser, $"User '{args.Parameters[0]}' has no player", Color.Red, args.SenderGameUser));
                             return true;
                         }
 
                         targetPlayers = [targetPlayer];
                     }
-
 
                     List<string> receivedTexts = [];
 
@@ -300,6 +319,7 @@ internal static class CommandHandler
                                 {
                                     receivedTexts.Add("Ammo");
                                 }
+                                continue;
                             }
 
                             // Streetsweeper and StreetsweeperCrate
@@ -325,6 +345,25 @@ internal static class CommandHandler
                                 }
 
                                 receivedTexts.Add(objectName.ToLowerInvariant());
+                                continue;
+                            }
+
+                            if (param.Equals("LONG_ASS_WHIP", StringComparison.OrdinalIgnoreCase))
+                            {
+                                WeaponItem wpn = WeaponDatabase.GetWeapon("Whip");
+                                wpn.MWeaponData.Properties.Range = 100.0f;
+                                wpn.MWeaponData.Properties.DamageObjects = 50f;
+                                wpn.MWeaponData.Properties.DeflectionDuringBlock.DeflectType = DeflectBulletType.Deflect;
+                                wpn.MWeaponData.Properties.DeflectionDuringBlock.DurabilityLoss = 1.0f;
+                                wpn.MWeaponData.Properties.DeflectionDuringBlock.DeflectCone = SFDMath.DegToRad(3f);
+                                wpn.MWeaponData.Properties.DeflectionOnAttack.DeflectType = DeflectBulletType.Deflect;
+                                wpn.MWeaponData.Properties.DeflectionOnAttack.DurabilityLoss = 0.0f;
+                                wpn.MWeaponData.Properties.DeflectionOnAttack.DeflectCone = SFDMath.DegToRad(0f);
+                                wpn.BaseProperties.VisualText = "Long Ass Whip";
+                                player.GrabWeaponItem(wpn);
+
+                                receivedTexts.Add($"{wpn.BaseProperties.VisualText} ({wpn.BaseProperties.WeaponID})");
+                                continue;
                             }
 
                             // Weapon ID or Name
@@ -339,7 +378,7 @@ internal static class CommandHandler
                             
                                     if (!parsedID || wpn == null)
                                     {
-                                        args.Feedback.Add(new(args.SenderGameUser, $"Weapon '{param}' not found.", errorColor, args.SenderGameUser));
+                                        args.Feedback.Add(new(args.SenderGameUser, $"Weapon '{param}' not found.", Color.Red, args.SenderGameUser));
                                         continue;
                                     }
                                 }
@@ -366,6 +405,10 @@ internal static class CommandHandler
                     {
                         mess = "Everyone received ";
                     }
+                    else if (isGiveRandom)
+                    {
+                        mess = $"{targetPlayers[0].Name} randomly received ";
+                    }
                     else
                     {
                         mess = $"{targetPlayers[0].Name} received ";
@@ -380,7 +423,7 @@ internal static class CommandHandler
                         mess += string.Join(", ", receivedTexts);
                     }
 
-                    args.Feedback.Add(new(args.SenderGameUser, mess, feedbackColor, null));
+                    args.Feedback.Add(new(args.SenderGameUser, mess));
                     return true;
                 }
             }
@@ -389,7 +432,7 @@ internal static class CommandHandler
             {
                 // Forcefully enables/disables server-movement on a user, regardless of the
                 // automatic server-movement setting.
-                // /FORCESVMOV [USER] [1/0/NULL]
+                // /FORCESERVERMOVEMENT [USER] [1/0/NULL]
                 if (args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
                 {
                     GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
@@ -440,57 +483,191 @@ internal static class CommandHandler
                         return true;
                     }
                 }
-            }
-
-            // Host/Mod commands, only available when using extended slots
-            if (CConst.HOST_GAME_EXTENDED_SLOTS)
-            {
-                // Provides a readable list of the extended slots states
-                // /SLOTS
-                if (args.IsCommand("SLOTS") && args.CanUseModeratorCommand("SLOTS"))
+                // Host/Mod commands, only available when using extended slots
+                if (CConst.HOST_GAME_EXTENDED_SLOTS)
                 {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "- Listing all slots...", Color.Yellow, args.SenderGameUser));
-                    for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
+                    // Provides a readable list of the extended slots states
+                    // /SLOTS
+                    if (args.IsCommand("SLOTS") && args.CanUseModeratorCommand("SLOTS"))
                     {
-                        GameSlot slot = __instance.GetGameSlotByIndex(i);
-                        Color messCol = Color.Orange * (i % 2 == 0 ? 1f : 0.9f);
-                        if (!slot.IsOccupied)
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "- Listing all slots...", Color.Yellow, args.SenderGameUser));
+                        for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
                         {
-                            messCol *= 0.5f;
+                            GameSlot slot = __instance.GetGameSlotByIndex(i);
+                            Color messCol = Color.Orange * (i % 2 == 0 ? 1f : 0.9f);
+                            if (!slot.IsOccupied)
+                            {
+                                messCol *= 0.5f;
+                            }
+
+                            string mess = string.Format("{0}: {1}", i, Commands.ExtendedSlots.SlotToString(slot));
+
+                            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, messCol, args.SenderGameUser));
                         }
-
-                        string mess = string.Format("{0}: {1}", i, Commands.ExtendedSlots.SlotToString(slot));
-
-                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, messCol, args.SenderGameUser));
+                        return true;
                     }
-                    return true;
-                }
 
-                // Manually set a slot state and team
-                // /SSLOT [INDEX] [0/1/2/4/5/6] [0/1/2/3/4]
-                if (args.IsCommand("SETSLOT", "SSLOT") && args.CanUseModeratorCommand("SLOTS") && args.Parameters.Count >= 2)
-                {
-                    if (int.TryParse(args.Parameters[0], out int slotIndex))
+                    // Manually set a slot state and team
+                    // /SSLOT [INDEX] [0/1/2/4/5/6] [0/1/2/3/4]
+                    if (args.IsCommand("SETSLOT", "SSLOT") && args.CanUseModeratorCommand("SETSLOT", "SSLOT") && args.Parameters.Count >= 2)
                     {
-                        slotIndex = Math.Min(Math.Max(slotIndex, 0), CConst.HOST_GAME_SLOT_COUNT - 1);
-                        int slotState = Commands.ExtendedSlots.GetSlotStateByStringInput(args.Parameters[1]);
-                        int slotTeam = (int)(args.Parameters.Count >= 3 ? Commands.ExtendedSlots.GetSlotTeamByStringInput(args.Parameters[2]) : Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
+                        if (int.TryParse(args.Parameters[0], out int slotIndex))
+                        {
+                            slotIndex = Math.Min(Math.Max(slotIndex, 0), CConst.HOST_GAME_SLOT_COUNT - 1);
+                            int slotState = Commands.ExtendedSlots.GetSlotStateByStringInput(args.Parameters[1]);
+                            int slotTeam = (int)(args.Parameters.Count >= 3 ? Commands.ExtendedSlots.GetSlotTeamByStringInput(args.Parameters[2]) : Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
 
-                        string messSlotBefore = Commands.ExtendedSlots.SlotToString(__instance.GetGameSlotByIndex(slotIndex));
+                            string messSlotBefore = Commands.ExtendedSlots.SlotToString(__instance.GetGameSlotByIndex(slotIndex));
 
-                        LobbyCommandHandler.LobbyStatus_LobbySlotValueChanged(null, slotIndex, slotState);
-                        LobbyCommandHandler.LobbyTeam_LobbySlotValueChanged(null, slotIndex, slotTeam);
+                            LobbyCommandHandler.LobbyStatus_LobbySlotValueChanged(null, slotIndex, slotState);
+                            LobbyCommandHandler.LobbyTeam_LobbySlotValueChanged(null, slotIndex, slotTeam);
 
-                        string messSlotAfter = Commands.ExtendedSlots.SlotToString(__instance.GetGameSlotByIndex(slotIndex));
-                        args.Feedback.Add(new(args.SenderGameUser, messSlotBefore + "->" + messSlotAfter, Color.ForestGreen, args.SenderGameUser));
+                            string messSlotAfter = Commands.ExtendedSlots.SlotToString(__instance.GetGameSlotByIndex(slotIndex));
+                            args.Feedback.Add(new(args.SenderGameUser, messSlotBefore + "->" + messSlotAfter, Color.ForestGreen, args.SenderGameUser));
 
-                        GameSFD.Handle.Server.SyncGameSlotsInfo();
+                            GameSFD.Handle.Server.SyncGameSlotsInfo();
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
         }
-        
+
+        // Public commands
+        if (args.IsCommand("HELP"))
+        {
+            Color yellow = Color.Yellow;
+            Color c = new(255, 181, 26);
+            Color c2 = new(159, 255, 64);
+            Color c3 = new(255, 91, 51);
+            Color c4 = new(63, 255, 155);
+
+            if (__instance.GameOwner != GameOwnerEnum.Server)
+            {
+                // Client/Local
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/PLAYERS' to list all players.", yellow, args.SenderGameUser, null));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MUTE [PLAYER]' to mute a player's chat messages.", yellow, args.SenderGameUser, null));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/UNMUTE [PLAYER]' to unmute a muted player's chat messages.", yellow, args.SenderGameUser, null));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SCRIPTS' to list all current scripts.", yellow, args.SenderGameUser, null));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SHOWDIFFICULTY' to show current difficulty for campaign maps.", yellow, args.SenderGameUser, null));
+                
+                if (__instance.GameOwner == GameOwnerEnum.Client)
+                {
+                    // Client
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/PING' to show your ping to the server.", yellow, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/W [PLAYER] [TEXT]' to whisper a player.", yellow, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/T [TEXT]' to send a team message.", yellow, args.SenderGameUser, null));
+                }
+            }
+
+            if (args.SenderGameUser.IsModerator)
+            {
+                if (__instance.GameOwner == GameOwnerEnum.Client) { return false; }
+
+                if (args.CanUseModeratorCommand("SLOMO","SLOWMOTION")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SLOMO [1/0]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SETTIME")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETTIME [0.1-2.0]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("INFINITE_AMMO","IA")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_AMMO [1/0]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("INFINITE_LIFE","INFINITE_HEALTH","IL","IH")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_LIFE [1/0]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("INFINITE_ENERGY","IE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_ENERGY [1/0]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("GIVE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/GIVE [PLAYER/ANY/ALL] [ITEM] [ITEM] [...]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("REMOVE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/REMOVE [PLAYER] [ITEM/SLOT]'", c2, args.SenderGameUser, null)); }
+                
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/ITEMS' to list all available items in the game.", c2, args.SenderGameUser, null));
+                
+                if (args.CanUseModeratorCommand("SETSTARTHEALTH","SETSTARTLIFE","STARTHEALTH","STARTLIFE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/STARTLIFE [1-100]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("STARTITEMS","STARTITEM","SETSTARTITEMS","SETSTARTITEM","SETSTARTUPITEMS","SETSTARTUPITEM")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETSTARTITEMS ID ID ID ...' to set start items.", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("CLEAR","RESET")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CLEAR' to reset cheats.", c2, args.SenderGameUser, null)); }
+                
+                if (args.SenderGameUser.IsHost && __instance.GameOwner != GameOwnerEnum.Local)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CHAT [1/0]' to enable/disable global chat.", c3, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MODERATORS' to list all moderators with index.", c3, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/ADDMODERATOR [PLAYER]' to add someone to the moderator list.", c3, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/REMOVEMODERATOR [INDEX|PLAYER]' to remove from the moderator list.", c3, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETMODPASS [INDEX|PLAYER] [PASS]' to set mod password.", c3, args.SenderGameUser, null));
+                }
+
+                if (args.CanUseModeratorCommand("MSG","MESSAGE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MSG [TEXT]' to show a message to everyone.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SERVERDESCRIPTION")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SERVERDESCRIPTION' to show the server description as a reminder.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("GAMEOVER")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/GAMEOVER' to restart the game.", c, args.SenderGameUser, null)); }
+                
+                if (GameSFD.Handle.CurrentState == State.EditorTestRun)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/R' to restart instant.", c, args.SenderGameUser, null));
+                }
+
+                if (args.CanUseModeratorCommand("SCRIPTS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SCRIPTS' to list all available scripts.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("LOADSCRIPT","STARTSCRIPT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/STARTSCRIPT X' to start script X.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("UNLOADSCRIPT","STOPSCRIPT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/STOPSCRIPT X' to stop script X.", c, args.SenderGameUser, null)); }
+                if (args.SenderGameUser != null && args.SenderGameUser.IsHost)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/RELOADSCRIPTS' to reload scripts from disk.", c, args.SenderGameUser, null));
+                }
+
+                if (args.CanUseModeratorCommand("MAPS","LISTMAPS","SHOWMAPS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPS' to list all maps.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("MAPS","LISTMAPS","SHOWMAPS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPS [CATEGORY]' to list all maps in category X.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("LISTMAPCATEGORIES","LISTMAPCAT","SHOWMAPCATEGORIES","SHOWMAPCAT","LISTMC","SHOWMC","MAPCATEGORIES")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPCATEGORIES' to list all map categories.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("CHANGEMAPCATEGORY","CHANGEMAPCAT","CHANGEMC")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CHANGEMAPCATEGORY [CATEGORY]' to change the map category.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("MAP","CHANGEMAP")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CHANGEMAP [MAP]' to change the map next fight.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("NEXTMAP")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/NEXTMAP' to change map in the current map rotation to the next map.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("MAPPARTS","SHOWMAPPARTS","LISTMAPPARTS","CHAPTERS","LISTCHAPTERS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CHAPTERS' to list available chapters for the current map.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SETMAPPART","CHANGEMAPPART","SMP","CMP","SETCHAPTER")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETCHAPTER [X]' to change to chapter X.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("NEXTMAPPART","NEXTCHAPTER")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/NEXTCHAPTER' to change to the next chapter.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("MAPROTATION","MR"))
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPROTATION [X]' to enable map rotation every X fights.", c, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPROTATION [M]' to change map rotation mode where M is A, B, C or D.", c, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAPROTATION [M] [X]' to change map rotation mode and interval.", c, args.SenderGameUser, null));
+                }
+                if (args.CanUseModeratorCommand("SETDIFFICULTY")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETDIFFICULTY [1/2/3/4/EASY/NORMAL/HARD/EXPERT]' to change the difficulty for campaign maps.", c, args.SenderGameUser, null)); }
+
+                if (__instance.GameOwner != GameOwnerEnum.Local)
+                {
+                    if (args.CanUseModeratorCommand("BAN","BAN_USER","BAN_USER_BY_IP"))
+                    {
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/BAN [PLAYER]' to ban a player by name or index.", c, args.SenderGameUser, null));
+                    }
+                    if (args.CanUseModeratorCommand("KICK","KICK_USER"))
+                    {
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/KICK [PLAYER]' to kick player by name or index.", c, args.SenderGameUser, null));
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/KICK [X] [PLAYER]' to kick a player by name or index for X minutes (max 60 minutes).", c, args.SenderGameUser, null));
+                    }
+                    if (args.CanUseModeratorCommand("MAXPING","MAX_PING"))
+                    {
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MAXPING [X]' to set a maximum ping to X (range 50-500). 0 to disable.", c, args.SenderGameUser, null));
+                    }
+                    if (args.CanUseModeratorCommand("AUTO_KICK_AFK","AUTOKICKAFK","KICK_AFK","KICKAFK","AUTO_KICK_IDLE","AUTOKICKIDLE","KICK_IDLE","KICKIDLE"))
+                    {
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/KICKIDLE [X]' to set a maximum idle time to X seconds (range 30-600). 0 to disable.", c, args.SenderGameUser, null));
+                    }
+                }
+
+                if (args.CanUseModeratorCommand("TIMELIMIT","TL")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/TIMELIMIT [X]' to set time limit to X seconds (range 30-600). 0=disable.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SUDDENDEATH","SD")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SUDDENDEATH [1/0]' to set sudden death on/off.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SHUFFLETEAMS", "ST")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SHUFFLETEAMS' to shuffle the teams next fight.", c, args.SenderGameUser, null));}
+                if (args.CanUseModeratorCommand("SHUFFLETEAMS", "ST")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SHUFFLETEAMS [X]' to shuffle the teams each X fights.", c, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("SETTEAMS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETTEAMS 00000000' to set new teams next fight. 0=independent, 1=team1...", c, args.SenderGameUser, null)); }
+
+                // SFDCT
+                if (args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/FORCESERVERMOVEMENT [PLAYER] [1/0/DEFAULT]' to manually set the server-movement state of a player.", c4, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("DOVOTE", "DOVOTEHIDDEN")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/DOVOTE [DESCRIPTION] \"[OPTION F1]\" \"[OPTION F2]\" \"[OPTION F3]?\" \"[OPTION F4]?\"' to create a public vote.", c4, args.SenderGameUser, null)); }
+                
+                if (args.SenderGameUser.IsHost)
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MOUSE [1/0]' to enable or disable debug mouse dragging.", c4, args.SenderGameUser, null));
+                }
+
+                if (CConst.HOST_GAME_EXTENDED_SLOTS)
+                {
+                    if (args.CanUseModeratorCommand("SETSLOT", "SSLOT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SSLOT [INDEX] [STATE] [TEAM]?' to set a slot status.", c4, args.SenderGameUser, null)); }
+                    if (args.CanUseModeratorCommand("SLOTS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SLOTS' to see all slots status.", c4, args.SenderGameUser, null)); }
+                }
+
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "----", Microsoft.Xna.Framework.Color.LightBlue, args.SenderGameUser, null));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Scroll the chat using the scroll-wheel to see all commands.", Microsoft.Xna.Framework.Color.LightBlue, args.SenderGameUser, null));
+            }
+            return true;
+        }
         return false;
     }
 }

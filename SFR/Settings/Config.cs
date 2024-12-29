@@ -19,7 +19,7 @@ internal static class Refresh
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{CConst.Paths.ConfigurationIni}'...");
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{CConst.Paths.CONFIGURATIONINI}'...");
             Config.Refresh();
             SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshed!");
         }
@@ -42,15 +42,15 @@ internal static class Config
         CSettings.Init();
 
         // Create config.ini if it doesnt exist.
-        if (!File.Exists(CConst.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
         {
-            using (FileStream fileStream = File.Create(CConst.Paths.ConfigurationIni))
+            using (FileStream fileStream = File.Create(CConst.Paths.CONFIGURATIONINI))
             {
                 fileStream.Close();
             }
             Thread.Sleep(100);
 
-            Handler.ReadLine(";Remember that floats are written with ',' instead of '.' i.e: Value=0,75");
+            Handler.ReadLine(";Remember that floats are written with '.' instead of ',' i.e: VALUE=0.75");
             Handler.ReadLine(";If setting order seems chaotic or shuffled randomly you might want to make a copy of this 'config.ini', rename it and let the game create a new 'config.ini'. Then manually copy your custom settings to it.");
             // Write default values to it
             foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
@@ -58,7 +58,7 @@ internal static class Config
                 kvp.Value.Save(Handler);
             }
 
-            Handler.SaveFile(CConst.Paths.ConfigurationIni);
+            Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
             Handler.Clear();
         }
         Refresh();
@@ -66,7 +66,7 @@ internal static class Config
     public static void Refresh()
     {
         Logger.LogDebug("CONFIG.INI: Refreshing...");
-        if (!File.Exists(CConst.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: File doesnt exist. Restart the game to create it again");
             return;
@@ -78,12 +78,12 @@ internal static class Config
         }
 
         Handler.Clear();
-        Handler.ReadFile(CConst.Paths.ConfigurationIni);
+        Handler.ReadFile(CConst.Paths.CONFIGURATIONINI);
         foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
         {
             kvp.Value.Load(Handler);
         }
-        Handler.SaveFile(CConst.Paths.ConfigurationIni);
+        Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
         CSettings.ApplyOverrides();
     }
     public static void Save()
@@ -94,7 +94,7 @@ internal static class Config
         }
 
         Logger.LogDebug("CONFIG.INI: Saving...");
-        if (!File.Exists(CConst.Paths.ConfigurationIni))
+        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
             return;
@@ -109,7 +109,7 @@ internal static class Config
         {
             kvp.Value.Save(Handler);
         }
-        Handler.SaveFile(CConst.Paths.ConfigurationIni);
+        Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
         Logger.LogDebug("CONFIG.INI: Saving finished.");
     }
 }

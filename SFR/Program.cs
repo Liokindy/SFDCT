@@ -22,7 +22,7 @@ namespace SFDCT;
 internal static class Program
 {
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
-    internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT/";
+    internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT";
     internal static readonly string GitHubVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/ModVersion.txt";
     private static readonly Harmony Harmony = new("SuperfightersDeluxe_Custom");
 
@@ -121,7 +121,7 @@ internal static class Program
             }
         }
 
-        Console.Title = "Superfighters Custom Console " + Constants.Version.Label;
+        Console.Title = "Superfighters Custom Console " + Constants.Version.LABEL;
 
         if (args.Contains("-skip", StringComparer.OrdinalIgnoreCase))
         {
@@ -152,13 +152,26 @@ internal static class Program
         try
         {
             wc = new();
-            string versionFile = wc.DownloadString(GitHubVersionFileURL);
+            string versionFile;
+            string[] foundVersions;
+            try
+            {
+                versionFile = wc.DownloadString(GitHubVersionFileURL);
+                foundVersions = versionFile.Split('|');
+                Logger.LogWarn("Fetched version from repository!");
+            }
+            catch(Exception e)
+            {
+                Logger.LogError("Failed to get version from repository...");
+                Logger.LogError(e.ToString());
+                versionFile = "null";
+                foundVersions = ["?", "?"];
+            }
 
-            string[] foundVersions = versionFile.Split('|');
             string latestVersion = foundVersions[0];
             string previewVersion = foundVersions[1];
 
-            string targetVersion = Constants.Version.InDev ? previewVersion : latestVersion;
+            string targetVersion = Constants.Version.INDEV ? previewVersion : latestVersion;
 
             if (Constants.Version.SFDCT != targetVersion)
             {

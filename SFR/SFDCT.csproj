@@ -67,6 +67,16 @@
   <PropertyGroup>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'SFDBeta|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\SFDBeta\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>default</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Lib.Harmony.2.2.2\lib\net472\0Harmony.dll</HintPath>
@@ -141,7 +151,6 @@
     <Compile Include="Editor\MapData.cs" />
     <Compile Include="Settings\Config.cs" />
     <Compile Include="Misc\Tweaks.cs" />
-    <Compile Include="Objects\ObjectDataHandler.cs" />
     <Compile Include="Objects\SFDObjectTweaks.cs" />
     <Compile Include="OnlineServices\Browser.cs" />
     <Compile Include="Projectiles\SFDProjectileTweaks.cs" />

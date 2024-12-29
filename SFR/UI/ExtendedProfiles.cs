@@ -237,7 +237,7 @@ internal static class ExtendedProfiles
 
         // Return a default profile if we can't load the requested profile
         __result = new Profile();
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.Profiles, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
 
         if (!File.Exists(pathToProfileFile))
         {
@@ -303,13 +303,13 @@ internal static class ExtendedProfiles
         }
         Logger.LogDebug($"PROFILE: Saving {slot}...");
 
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.Profiles, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
         profileToSave.ValidateProfileIntegrity(true, Profile.ValidateProfileType.CanEquipAndUnlocked);
 
         // Create "SFDCT/Profile" folder if it doesn't exist
-        if (!Directory.Exists(Misc.Constants.Paths.Profiles))
+        if (!Directory.Exists(Misc.Constants.Paths.PROFILES))
         {
-            Directory.CreateDirectory(Misc.Constants.Paths.Profiles);
+            Directory.CreateDirectory(Misc.Constants.Paths.PROFILES);
         }
 
         using FileStream fileStream = new(pathToProfileFile, FileMode.Create);
@@ -350,7 +350,7 @@ internal static class ExtendedProfiles
         }
         Logger.LogDebug($"PROFILE: Deleting {slot}...");
 
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.Profiles, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
         if (File.Exists(pathToProfileFile))
         {
             try

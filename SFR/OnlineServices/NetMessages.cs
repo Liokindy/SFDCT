@@ -28,7 +28,7 @@ internal static class NetMessages
                 if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
 
                 NetMessage.GameInfo.GameSlotChange.Data result;
-                result.SlotIndex = netIncomingMessage.ReadRangedInteger(0, CConst.SlotCount - 1);
+                result.SlotIndex = netIncomingMessage.ReadRangedInteger(0, CConst.SLOTCOUNT - 1);
                 result.DataToChange = (NetMessage.GameInfo.GameSlotChange.DataChangeType)netIncomingMessage.ReadRangedInteger(0, 3);
                 result.NewValue = netIncomingMessage.ReadInt32();
                 __result = result;
@@ -43,7 +43,7 @@ internal static class NetMessages
                 if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
 
                 NetMessage.WriteDataType(MessageType.GameInfo_GameSlotChange, netOutgoingMessage);
-                netOutgoingMessage.WriteRangedInteger(0, CConst.SlotCount - 1, dataToWrite.SlotIndex);
+                netOutgoingMessage.WriteRangedInteger(0, CConst.SLOTCOUNT - 1, dataToWrite.SlotIndex);
                 netOutgoingMessage.WriteRangedInteger(0, 3, (int)dataToWrite.DataToChange);
                 netOutgoingMessage.Write(dataToWrite.NewValue);
                 __result = netOutgoingMessage;
@@ -61,7 +61,7 @@ internal static class NetMessages
             {
                 if (!CConst.HOST_GAME_EXTENDED_SLOTS) { return true; }
 
-                int num = netIncomingMessage.ReadRangedInteger(0, CConst.SlotCount - 1);
+                int num = netIncomingMessage.ReadRangedInteger(0, CConst.SLOTCOUNT - 1);
                 GameSlot gameSlot = connectionSlotsDestination[num];
                 gameSlot.CurrentState = (GameSlot.State)netIncomingMessage.ReadRangedInteger(0, 7);
                 gameSlot.CurrentTeam = (Team)netIncomingMessage.ReadRangedInteger(0, 7);
@@ -78,7 +78,7 @@ internal static class NetMessages
 
                 NetMessage.WriteDataType(MessageType.GameInfo_GameSlotUpdate, netOutgoingMessage);
                 GameSlot gameSlot = dataToWrite.ConnectionSlots[dataToWrite.ConnectionSlotIndex];
-                netOutgoingMessage.WriteRangedInteger(0, CConst.SlotCount - 1, dataToWrite.ConnectionSlotIndex);
+                netOutgoingMessage.WriteRangedInteger(0, CConst.SLOTCOUNT - 1, dataToWrite.ConnectionSlotIndex);
                 netOutgoingMessage.WriteRangedInteger(0, 7, (int)gameSlot.CurrentState);
                 netOutgoingMessage.WriteRangedInteger(0, 7, (int)gameSlot.CurrentTeam);
                 netOutgoingMessage.WriteRangedInteger(0, 7, (int)gameSlot.NextTeam);
@@ -142,7 +142,7 @@ internal static class NetMessages
                         gameUser.IsHost = netIncomingMessage.ReadBoolean();
                         gameUser.IsModerator = netIncomingMessage.ReadBoolean();
                         gameUser.RequestServerMovement = netIncomingMessage.ReadBoolean();
-                        gameSlotIndex = netIncomingMessage.ReadRangedInteger(-1, CConst.SlotCount);
+                        gameSlotIndex = netIncomingMessage.ReadRangedInteger(-1, CConst.SLOTCOUNT);
                         if (netIncomingMessage.ReadBoolean())
                         {
                             gameUser.Profile = NetMessage.PlayerProfileMessage.Read(netIncomingMessage, validateProfileType);
@@ -212,7 +212,7 @@ internal static class NetMessages
                         netOutgoingMessage.Write(gameUserNetData.GameUser.IsHost);
                         netOutgoingMessage.Write(gameUserNetData.GameUser.IsModerator);
                         netOutgoingMessage.Write(gameUserNetData.GameUser.RequestServerMovement);
-                        netOutgoingMessage.WriteRangedInteger(-1, CConst.SlotCount, gameUserNetData.GameSlotIndex);
+                        netOutgoingMessage.WriteRangedInteger(-1, CConst.SLOTCOUNT, gameUserNetData.GameSlotIndex);
                         Profile profile = gameUserNetData.GameUser.Profile;
                         if (profile == null)
                         {
