@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using SFD;
 using SFD.MenuControls;
 using SFD.SFDOnlineServices;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 
 namespace SFDCT.OnlineServices;
 
@@ -16,13 +16,7 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class Browser
 {
-    public static Color ServerNormal = Color.White;
-    public static Color ServerError = Constants.COLORS.RED;
-    public static Color ServerSFR = new(222, 66, 165);
-
-    public static float ServerFullMultiplier = 0.70f;
-    public static float ServerEmptyMultiplier = 0.50f;
-    public static float ServerInvalidMultiplier = 0.30f;
+    private static Color ServerSFR = new(222, 66, 165);
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
@@ -33,10 +27,10 @@ internal static class Browser
             __instance.m_game = value;
             if (__instance.labels != null && __instance.m_game != null && __instance.m_game.SFDGameServer != null)
             {
-                var color = ServerError;
+                var color = Constants.COLORS.RED;
                 if (__instance.m_game.SFDGameServer.Version == CConst.Version.SFD)
                 {
-                    color = ServerNormal;
+                    color = Color.White;
                 }
                 else if (__instance.m_game.SFDGameServer.Version.StartsWith("v.2"))
                 {
@@ -45,31 +39,18 @@ internal static class Browser
                 
                 // While using extended-slots, the client expects network data in
                 // a way the server will might not send it, causing problems.
-                if (CConst.HOST_GAME_EXTENDED_SLOTS && __instance.m_game.SFDGameServer.MaxPlayers != CConst.HOST_GAME_SLOT_COUNT)
+                if (CConst.HOST_GAME_EXTENDED_SLOTS && __instance.m_game.SFDGameServer.MaxPlayers != CConst.SLOTCOUNT)
                 {
-                    color = ServerError;
+                    color = Constants.COLORS.RED;
                 }
 
                 if (__instance.m_game.SFDGameServer.Players <= 0)
                 {
-                    color *= ServerEmptyMultiplier;
+                    color *= 0.50f;
                 }
                 else if (__instance.m_game.SFDGameServer.Players == __instance.m_game.SFDGameServer.MaxPlayers)
                 {
-                    color *= ServerFullMultiplier;
-                }
-
-                // Third party programs can send false servers with false information
-                // to the server browser, causing a lot of clutter.
-                if (__instance.m_game.SFDGameServer.Players > 32 ||
-                    __instance.m_game.SFDGameServer.MaxPlayers > 32 ||
-                    __instance.m_game.SFDGameServer.Players > __instance.m_game.SFDGameServer.MaxPlayers ||
-                    __instance.m_game.SFDGameServer.Description.Trim().Replace(" ", "").Length > 200 ||
-                    __instance.m_game.SFDGameServer.GameName.Trim().Replace(" ", "").Length <= 3
-                )
-                {
-                    color = ServerError;
-                    color *= ServerInvalidMultiplier;
+                    color *= 0.70f;
                 }
 
                 foreach (Label label in __instance.labels)
@@ -82,13 +63,54 @@ internal static class Browser
         return false;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameBrowserPanel), nameof(GameBrowserPanel.refreshTimer_Elapsed))]
+    private static void PatchBrowser(GameBrowserPanel __instance)
+    {
+        try
+        {
+            // Third party programs can send false servers with false information
+            // to the server browser, causing a lot of clutter, hide them
+
+            List<SFDGameServerInstance> gameServerInstances = new List<SFDGameServerInstance>();
+            for (int i = 0; i < __instance.m_browserGameServers.Count; i++)
+            {
+                SFDGameServerInstance serverInstance = __instance.m_browserGameServers[i];
+
+                bool exclude = false;
+                if (serverInstance != null && serverInstance.SFDGameServer != null)
+                {
+                    if (serverInstance.SFDGameServer.Players > 32 || serverInstance.SFDGameServer.MaxPlayers > 32 || serverInstance.SFDGameServer.Players > serverInstance.SFDGameServer.MaxPlayers)
+                    {
+                        exclude = true;
+                    }
+                    if (serverInstance.SFDGameServer.Description.Trim().Replace(" ", "").Length > 200 || serverInstance.SFDGameServer.GameName.Trim().Replace(" ", "").Length <= 3)
+                    {
+                        exclude = true;
+                    }
+                }
+
+                if (!exclude)
+                {
+                    gameServerInstances.Add(serverInstance);
+                }
+            }
+
+            __instance.m_browserGameServers.Clear();
+            __instance.m_browserGameServers = gameServerInstances;
+        }
+        catch
+        {
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(JoinGamePanel), nameof(JoinGamePanel.connect))]
-    private static bool ConnectToGame(JoinGamePanel __instance)
+    private static bool JoinGamePanelConnectToGame(JoinGamePanel __instance)
     {
         if (CConst.HOST_GAME_EXTENDED_SLOTS && __instance.m_server != null)
         {
-            if (__instance.m_server.MaxPlayers != CConst.HOST_GAME_SLOT_COUNT)
+            if (__instance.m_server.MaxPlayers != CConst.SLOTCOUNT)
             {
                 MessageStack.Show("Your slot count is different from the server.", MessageStackType.Error);
                 return false;

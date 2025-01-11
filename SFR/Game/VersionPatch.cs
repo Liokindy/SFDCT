@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SFD;
 using HarmonyLib;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 
 namespace SFDCT.Game;
 

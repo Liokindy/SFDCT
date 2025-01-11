@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿/*
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using SFD.Tiles;
 
@@ -9,7 +10,6 @@ namespace SFDCT.Fighter;
 /// </summary>
 // Doesn't have use, but would be unethical to
 // remove it, right?
-/*
 internal static class NameIconHandler
 {
     private static readonly Dictionary<string, string> DeveloperIcons = new()

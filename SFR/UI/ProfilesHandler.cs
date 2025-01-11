@@ -6,55 +6,17 @@ using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.MenuControls;
-using SFD.Weapons;
 using HarmonyLib;
 using SFDCT.Helper;
 
 namespace SFDCT.Fighter;
 
 [HarmonyPatch]
-internal static class ExtendedProfiles
+internal static class ProfilesHandler
 {
-    private static readonly int ExtendedProfileCount = 9;
-    private static readonly int ProfilesPerRow = 6;
-    private static readonly int ProfileSeparation = 88;
-
-    /// <summary>
-    ///     Make the player in the preview cycle through some animations,
-    ///     so it looks fancier.
-    /// </summary>
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ProfileCustomizationPanel), nameof(ProfileCustomizationPanel.Update))]
-    private static void UpdateCustomizationPreviewPlayer(ProfileCustomizationPanel __instance)
-    {
-        if (__instance.m_previewPlayer == null)
-        {
-            return;
-        }
-
-        float time = (float)(Lidgren.Network.NetTime.Now % 15f);
-        switch(time)
-        {
-            case var t when t > 7 && t < 7.35f:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack1);
-                break;
-            case var t when t > 7.35f && t < 7.65f:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.Block);
-                break;
-            case var t when t > 7.65f && t < 8:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack1);
-                break;
-            case var t when t > 8 && t < 8.35f:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack2);
-                break;
-            case var t when t > 8.35f && t < 8.9:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.MeleeAttack3);
-                break;
-            default:
-                __instance.m_previewPlayer.SetAnimation(Animation.Idle, PlayerAction.Idle);
-                break;
-        }
-    }
+    private const int ExtendedProfileCount = 9;
+    private const int ProfilesPerRow = 6;
+    private const int ProfileSeparation = 88;
 
     /// <summary>
     ///     Remove the call for RefreshGrid and only call it after we add
@@ -237,7 +199,7 @@ internal static class ExtendedProfiles
 
         // Return a default profile if we can't load the requested profile
         __result = new Profile();
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Globals.Paths.PROFILES, $"profile{slot}.sfdp"));
 
         if (!File.Exists(pathToProfileFile))
         {
@@ -303,19 +265,19 @@ internal static class ExtendedProfiles
         }
         Logger.LogDebug($"PROFILE: Saving {slot}...");
 
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Globals.Paths.PROFILES, $"profile{slot}.sfdp"));
         profileToSave.ValidateProfileIntegrity(true, Profile.ValidateProfileType.CanEquipAndUnlocked);
 
         // Create "SFDCT/Profile" folder if it doesn't exist
-        if (!Directory.Exists(Misc.Constants.Paths.PROFILES))
+        if (!Directory.Exists(Misc.Globals.Paths.PROFILES))
         {
-            Directory.CreateDirectory(Misc.Constants.Paths.PROFILES);
+            Directory.CreateDirectory(Misc.Globals.Paths.PROFILES);
         }
 
         using FileStream fileStream = new(pathToProfileFile, FileMode.Create);
         using BinaryWriter binaryWriter = new(fileStream);
 
-        binaryWriter.Write(Misc.Constants.Version.SFD);
+        binaryWriter.Write(Misc.Globals.Version.SFD);
         binaryWriter.Write(profileToSave.Name);
         binaryWriter.Write((short)profileToSave.Gender);
         for (int i = 0; i < 9; i++)
@@ -350,7 +312,7 @@ internal static class ExtendedProfiles
         }
         Logger.LogDebug($"PROFILE: Deleting {slot}...");
 
-        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Constants.Paths.PROFILES, $"profile{slot}.sfdp"));
+        string pathToProfileFile = Path.GetFullPath(Path.Combine(Misc.Globals.Paths.PROFILES, $"profile{slot}.sfdp"));
         if (File.Exists(pathToProfileFile))
         {
             try

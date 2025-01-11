@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Lidgren.Network;
 using HarmonyLib;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.UI;

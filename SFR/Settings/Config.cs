@@ -5,7 +5,7 @@ using SFD.Code;
 using SFDCT.Helper;
 using System.Threading;
 using CSettings = SFDCT.Settings.Values;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 using HarmonyLib;
 
 namespace SFDCT.Settings;

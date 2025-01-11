@@ -16,7 +16,7 @@ internal static class TextboxTweaks
     [HarmonyPatch(typeof(TextBox), nameof(TextBox.KeyPress))]
     private static bool KeyPress(TextBox __instance, Keys key)
     {
-        if (KeyboardHelper.IsLeftCtrlDown && __instance.Text.Length > 0 && key == Keys.Back)
+        if (Helper.Keyboard.IsLeftCtrlDown && __instance.Text.Length > 0 && key == Keys.Back)
         {
             string textboxText = __instance.Text;
             int charCount = 0;

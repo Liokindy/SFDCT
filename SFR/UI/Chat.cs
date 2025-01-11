@@ -1,67 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using HarmonyLib;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using SFD.GUI.Text;
-using SFD.MenuControls;
 using SFD.States;
-using SFDCT.Helper;
-using CConst = SFDCT.Misc.Constants;
 
 namespace SFDCT.UI;
 
 [HarmonyPatch]
-internal static class ChatTweaks
+internal static class Chat
 {
-    private static int m_rowSizeNormal = 10;
-    private static int m_rowSizeShowHistory = 13;
-    private static int m_rowSizeTyping = 15;
-    private static bool IsWordSeparator(char c)
-    {
-        return !char.IsLetter(c) || char.IsSeparator(c) || char.IsSymbol(c);
-    }
-
     private static int m_lastMessageIndex = 0;
-    private static int m_lastMessagesListMax = 16;
-    private static List<string> m_lastMessagesList = new(m_lastMessagesListMax);
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameChat), nameof(GameChat.Update))]
-    private static void Update()
-    {
-        if (GameChat.m_chatActive)
-        {
-            if (GameChat.m_rows != m_rowSizeTyping)
-            {
-                GameChat.m_rows = m_rowSizeTyping;
-            }
-            return;
-        }
-
-        if (GameChat.m_showChatHistory && GameSFD.Handle?.CurrentState is not State.MainMenu)
-        {
-            if (GameChat.m_rows != m_rowSizeShowHistory)
-            {
-                GameChat.m_rows = m_rowSizeShowHistory;
-            }
-            return;
-        }
-
-        if (GameChat.m_rows != m_rowSizeNormal)
-        {
-            GameChat.m_rows = m_rowSizeNormal;
-        }
-    }
+    private static List<string> m_lastMessagesList = new(16);
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameChat), nameof(GameChat.KeyPress))]
     private static bool KeyPress(ref bool __result, Keys key, bool isRepeat = false)
     {
-        if (GameChat.ChatActive)
+        if (SFD.GameChat.ChatActive)
         {
             if ((key == Keys.Up || key == Keys.Down) && m_lastMessagesList != null && m_lastMessagesList.Any() )
             {
@@ -82,7 +38,7 @@ internal static class ChatTweaks
 
                 if (!string.IsNullOrEmpty(message))
                 {
-                    GameChat.m_textbox.SetText(message);
+                    SFD.GameChat.m_textbox.SetText(message);
                 }
                 return false;
             }
@@ -95,17 +51,18 @@ internal static class ChatTweaks
         return true;
     }
 
-    public static void LogChatMessage(string message)
+    private static void LogChatMessage(string message)
     {
         if (m_lastMessagesList.LastOrDefault() != message)
         {
-            if (m_lastMessagesList.Count >= m_lastMessagesListMax)
+            if (m_lastMessagesList.Count >= 16)
             {
                 m_lastMessagesList.RemoveAt(0);
             }
             m_lastMessagesList.Add(message);
         }
     }
+
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.GameChat_EnterMessageEvent))]

@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using SFD;
-using SFDCT.Helper;
-using SFDCT.Sync;
-using HarmonyLib;
-using Box2D.XNA;
-using System.Runtime.CompilerServices;
-using System.Reflection.Emit;
-using CSettings = SFDCT.Settings.Values;
 using SFD.Sounds;
-using SFD.MapEditor;
+using SFDCT.Helper;
+using CSettings = SFDCT.Settings.Values;
+using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -62,7 +55,7 @@ internal static class WorldHandler
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
     private static void SaturationPatch(GameWorld __instance, float chunkMs, float totalMs, bool isLast, bool isFirst)
     {
-        if (!SFD.Program.IsGame || !(__instance.EditMode & !__instance.EditPhysicsRunning) && isLast && __instance.GameOwner != GameOwnerEnum.Server)
+        if (!SFD.Program.IsGame || !(__instance.EditMode & !__instance.EditPhysicsRunning) && __instance.GameOwner != GameOwnerEnum.Server)
         {
             float highestPlayerHealthFullness = 0f;
             for (int i = 0; i < __instance.LocalPlayers.Length; i++)
@@ -102,4 +95,82 @@ internal static class WorldHandler
             }
         }
     }
+    
+    /*
+    // Modify valid map commands
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.RunGameCommand))]
+    private static bool GameWorldRunGameCommand(GameWorld __instance, string command, bool startup = false, bool forceRunCommand = false)
+    {
+        if (__instance.GameOwner == GameOwnerEnum.Client) { throw new Exception("Error: GameWorld.RunGameCommand() is SERVER/LOCAL ONLY"); }
+        if (string.IsNullOrEmpty(command) || !command.StartsWith("/")) { return false; }
+
+        string[] availableMapCommands =
+        [
+            "/SETSTARTHEALTH",
+            "/SETSTARTLIFE",
+            "/STARTHEALTH",
+            "/STARTLIFE",
+            "/MSG",
+            "/MESSAGE",
+            "/STARTITEMS",
+            "/STARTITEM",
+            "/SETSTARTUPITEM",
+            "/SETSTARTUPITEMS",
+            "/SETSTARTITEM",
+            "/SETSTARTITEMS",
+            "/INFINITE_ENERGY",
+            "/IE",
+            "/INFINITE_AMMO",
+            "/IA",
+            "/INFINITE_LIFE",
+            "/IL",
+            "/INFINITE_HEALTH",
+            "/IH",
+            "/SETTIME",
+            "/REMOVE",
+            "/GIVE",
+            //
+        ];
+
+        bool runCommand = forceRunCommand;
+        if (!runCommand)
+        {
+            if (__instance.CurrentActiveScriptIsExtension)
+            {
+                runCommand = (command.ToLowerInvariant() != "/r" && !command.ToLowerInvariant().StartsWith("/r "));
+            }
+            else
+            {
+                string text = command.ToUpperInvariant();
+                foreach (string mapCommand in availableMapCommands)
+                {
+                    runCommand = text.StartsWith(mapCommand);
+                    if (runCommand) { break; }
+                }
+            }
+        }
+
+        if (runCommand)
+        {
+            HandleCommandArgs handleCommandArgs = new HandleCommandArgs()
+            {
+                Command = command,
+                UserIdentifier = 1,
+                Origin = startup ? HandleCommandOrigin.Startup : HandleCommandOrigin.Server,
+            };
+
+            if (!__instance.GameInfo.HandleCommand(handleCommandArgs, false) && SFD.Program.IsGame && __instance.m_game.CurrentState == SFD.States.State.EditorTestRun)
+            {
+                MessageStack.Show(string.Format("Command '{0}' failed or not valid.", command), MessageStackType.Warning);
+            }
+        }
+        else if (SFD.Program.IsGame && __instance.m_game.CurrentState == SFD.States.State.EditorTestRun)
+        {
+            MessageStack.Show(string.Format("Command '{0}' is not a valid game map command", command), MessageStackType.Error);
+        }
+
+        return false;
+    }
+    */
 }

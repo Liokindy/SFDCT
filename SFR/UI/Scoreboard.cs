@@ -3,7 +3,7 @@ using SFD;
 using SFD.MenuControls;
 using Microsoft.Xna.Framework;
 using HarmonyLib;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 

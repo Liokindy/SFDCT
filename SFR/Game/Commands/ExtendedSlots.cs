@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SFD;
 using HarmonyLib;
 using SFD.MenuControls;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 
 namespace SFDCT.Game.Commands;
 

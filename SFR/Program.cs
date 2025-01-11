@@ -1,18 +1,12 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.IO.Compression;
-using System.Net;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
 using SFDCT.Helper;
 using SFDCT.Misc;
-using Microsoft.Xna.Framework;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
 
 namespace SFDCT;
 
@@ -28,11 +22,8 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        string SFRDirectory = Path.Combine(GameDirectory, "SFR");
-        string SFRExecutable = Path.Combine(GameDirectory, "SFR.exe");
-        bool hasSFR = Directory.Exists(SFRDirectory) && File.Exists(SFRExecutable);
+        bool hasSFR = Directory.Exists(Path.Combine(GameDirectory, "SFR")) && File.Exists(Path.Combine(GameDirectory, "SFR.exe"));
 
-        // Help stuff for normies
         if (args.Contains("-help", StringComparer.OrdinalIgnoreCase))
         {
             Logger.LogWarn("ALL LAUNCH ARGUMENTS:");
@@ -41,10 +32,10 @@ internal static class Program
 
             if (hasSFR)
             {
-            Logger.LogWarn("-SFR            Start Superfighters Redux.");
+                Logger.LogWarn("-SFR            Start Superfighters Redux.");
             }
 
-            Logger.LogWarn("-SLOTS [8-32]   Use extended-slots.");
+            Logger.LogWarn("-SLOTS [9-32]   Use extended-slots.");
             return 0;
         }
 
@@ -55,7 +46,7 @@ internal static class Program
 
             if (hasSFR)
             {
-                Process.Start(SFRExecutable, string.Join(" ", args));
+                Process.Start(Path.Combine(GameDirectory, "SFR.exe"), string.Join(" ", args));
             }
             else
             {
@@ -68,7 +59,7 @@ internal static class Program
         if (args.Contains("-SFD", StringComparer.OrdinalIgnoreCase))
         {
             Logger.LogWarn("Starting Superfighters Deluxe...");
-           
+
             string SFDExectuable = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
             if (File.Exists(SFDExectuable))
             {
@@ -82,12 +73,12 @@ internal static class Program
         }
 
         // Check extended-slots
-        if (args.Contains("-slots", StringComparer.OrdinalIgnoreCase))
+        if (args.Contains("-SLOTS", StringComparer.OrdinalIgnoreCase))
         {
             int slotArgCount = 8;
-            for(int i = 0; i < args.Length; i++)
+            for (int i = 0; i < args.Length; i++)
             {
-                if (args[i].Equals("-slots", StringComparison.OrdinalIgnoreCase))
+                if (args[i].Equals("-SLOTS", StringComparison.OrdinalIgnoreCase))
                 {
                     if (args.Length > i + 1)
                     {
@@ -114,14 +105,14 @@ internal static class Program
             if (slotArgCount != 8)
             {
                 Logger.LogWarn($"Setting max-slots to {slotArgCount}");
-                Constants.HOST_GAME_EXTENDED_SLOTS = true;
-                Constants.HOST_GAME_SLOT_COUNT = slotArgCount;
-                Constants.HOST_GAME_SLOT_STATES = new byte[Constants.HOST_GAME_SLOT_COUNT];
-                Constants.HOST_GAME_SLOT_TEAMS = new SFD.Team[Constants.HOST_GAME_SLOT_COUNT];
+                Globals.HOST_GAME_EXTENDED_SLOTS = true;
+                Globals.HOST_GAME_SLOT_COUNT = slotArgCount;
+                Globals.HOST_GAME_SLOT_STATES = new byte[Globals.HOST_GAME_SLOT_COUNT];
+                Globals.HOST_GAME_SLOT_TEAMS = new SFD.Team[Globals.HOST_GAME_SLOT_COUNT];
             }
         }
 
-        Console.Title = "Superfighters Custom Console " + Constants.Version.LABEL;
+        Console.Title = "Superfighters Custom Console " + Globals.Version.LABEL;
 
         if (args.Contains("-skip", StringComparer.OrdinalIgnoreCase))
         {
@@ -131,13 +122,13 @@ internal static class Program
         {
             CheckRepositoryVersion();
         }
-       
+
         // Patch SFD and start SFDCT
         Logger.LogInfo("Starting SFDCT...");
         Harmony.PatchAll();
         Logger.LogInfo("Patching completed...");
         SFD.Program.Main(args);
-        
+
         return 0;
     }
 
@@ -160,7 +151,7 @@ internal static class Program
                 foundVersions = versionFile.Split('|');
                 Logger.LogWarn("Fetched version from repository!");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.LogError("Failed to get version from repository...");
                 Logger.LogError(e.ToString());
@@ -171,16 +162,16 @@ internal static class Program
             string latestVersion = foundVersions[0];
             string previewVersion = foundVersions[1];
 
-            string targetVersion = Constants.Version.INDEV ? previewVersion : latestVersion;
+            string targetVersion = Globals.Version.INDEV ? previewVersion : latestVersion;
 
-            if (Constants.Version.SFDCT != targetVersion)
+            if (Globals.Version.SFDCT != targetVersion)
             {
-                Logger.LogError($"Current version ({Constants.Version.SFDCT}) differs from repository ({targetVersion})");
-                Logger.LogError($"Get the latest release at \"{GitHubRepositoryURL}\"");
+                Logger.LogError($"Current version ({Globals.Version.SFDCT}) differs from repository ({targetVersion})");
+                Logger.LogWarn($"Get the latest release at \"{GitHubRepositoryURL}\"");
             }
             else
             {
-                Logger.LogWarn($"Current version ({Constants.Version.SFDCT}) matches repository ({targetVersion})");
+                Logger.LogWarn($"Current version ({Globals.Version.SFDCT}) matches repository ({targetVersion})");
             }
         }
         catch (Exception ex)
@@ -236,6 +227,5 @@ internal static class Program
                 sw.Close();
             }
         }
-
     }
 }

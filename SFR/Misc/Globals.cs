@@ -1,32 +1,34 @@
-using HarmonyLib;
 using SFD;
-using System;
 using System.IO;
-using Microsoft.Xna.Framework;
-using CSettings= SFDCT.Settings.Values;
 
 namespace SFDCT.Misc;
 
-public static class Constants
+public static class Globals
 {
-    public static Random RANDOM = new();
     public readonly struct Paths
     {
         public static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
-        public static string CONTENT = Path.Combine(Paths.SFDCT, "Content");
-        public static string CONFIGURATIONINI = Path.Combine(Paths.SFDCT, "config.ini");
+
+        public static string CONTENT = Path.Combine(SFDCT, "Content");
+        public static string CONFIGURATIONINI = Path.Combine(SFDCT, "config.ini");
         public static string PROFILES = Path.Combine(CONTENT, "Profile");
     }
     public readonly struct Version
     {
         public static string SFD = "v.1.3.7d";
-        public static string SFDCT = "v.1.0.6";
-        public static bool INDEV = true;
+        public static string SFDCT = "v.1.0.6_dev";
+        public static bool INDEV
+        {
+            get
+            {
+                return SFDCT.EndsWith("dev");
+            }
+        }
         public static string LABEL
         {
             get
             {
-                return SFDCT + (INDEV ? " (Dev)" : "");
+                return SFDCT;
             }
         }
     }

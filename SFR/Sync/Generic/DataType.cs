@@ -1,4 +1,5 @@
-﻿namespace SFDCT.Sync.Generic;
+﻿/*
+namespace SFDCT.Sync.Generic;
 
 internal enum DataType
 {
@@ -7,3 +8,4 @@ internal enum DataType
     Minigun,
     Head
 }
+*/

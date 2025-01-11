@@ -1,4 +1,5 @@
-﻿using Lidgren.Network;
+﻿/*
+using Lidgren.Network;
 using SFD;
 
 namespace SFDCT.Sync.Generic;
@@ -67,3 +68,4 @@ internal static class GenericServerData
         return netOutgoingMessage;
     }
 }
+*/

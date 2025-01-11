@@ -13,14 +13,12 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class DSPreview
 {
-    /// <summary>
-    ///     Request to join as a normal user instead of spectator.
-    ///     
-    ///     Non-spectators are allowed to vote and count towards alive players,
-    ///     meaning they can win after being the last standing or prevent other
-    ///     player from winning. Disabled to allow the DS to connect while the 
-    ///     server is full.
-    /// </summary>
+    //     Request to join as a normal user instead of spectator.
+    //     
+    //     Non-spectators are allowed to vote and count towards alive players,
+    //     meaning they can win after being the last standing or prevent other
+    //     player from winning. Disabled to allow the DS to connect while the 
+    //     server is full.
     //[HarmonyTranspiler]
     //[HarmonyPatch(typeof(Client), nameof(Client.CreateConnectRequestMessage))]
     //private static IEnumerable<CodeInstruction> Client_CreateConnectRequestMessage(IEnumerable<CodeInstruction> instructions)
@@ -33,9 +31,7 @@ internal static class DSPreview
     //}
 
 
-    /// <summary>
-    ///     Hook to KeyDownEvent
-    /// </summary>
+    //     Hook to KeyDownEvent
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.StateKeyDownEvent))]
     private static void GameSFD_StateKeyDownEvent(Keys key)
@@ -45,9 +41,7 @@ internal static class DSPreview
         KeyEvent(true, key);
     }
 
-    /// <summary>
-    ///     Hook to KeyUpEvent
-    /// </summary>
+    //     Hook to KeyUpEvent
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.StateKeyUpEvent))]
     private static void GameSFD_StateKeyUpEvent(Keys key)
@@ -57,9 +51,7 @@ internal static class DSPreview
         KeyEvent(false, key);
     }
     
-    /// <summary>
-    ///     Pass KeyEvents to the DSHome State's client.
-    /// </summary>
+    //     Pass KeyEvents to the DSHome State's client.
     private static void KeyEvent(bool down, Keys key)
     {
         Client client = (GameSFD.Handle.GetRunningState() as StateDSHome).m_game?.Client;

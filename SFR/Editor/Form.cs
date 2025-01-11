@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HarmonyLib;
@@ -11,7 +10,7 @@ using SFD.Core;
 using SFD.MapEditor;
 using SFD.States;
 using SFD.Tiles;
-using CConst = SFDCT.Misc.Constants;
+using CConst = SFDCT.Misc.Globals;
 
 namespace SFDCT.Editor;
 

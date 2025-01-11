@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using HarmonyLib;
 using SFD;
 using SFDGameScriptInterface;
@@ -21,7 +22,6 @@ internal static class Tweaks
     [HarmonyPatch(typeof(Enum), "InternalFormat")]
     private static bool PatchEnums(Type eT, object value, ref string __result)
     {
-        /*
         if (eT == typeof(MusicHandler.MusicTrackID) && value is int num)
         {
             switch (num)
@@ -35,7 +35,6 @@ internal static class Tweaks
                     return false;
             }
         }
-        */
 
         return true;
     }
@@ -48,13 +47,11 @@ internal static class Tweaks
     [HarmonyPatch(typeof(Enum), nameof(Enum.GetValues))]
     private static bool GetEnumValues(Type enumType, ref Array __result)
     {
-        /*
         if (enumType == typeof(WeaponItem))
         {
             __result = Enum.GetValues(typeof(Database.CustomWeaponItem));
             return false;
         }
-        */
 
         return true;
     }
@@ -75,3 +72,4 @@ internal static class Tweaks
         return true;
     }
 }
+*/

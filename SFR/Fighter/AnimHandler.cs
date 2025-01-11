@@ -69,42 +69,37 @@ internal static class AnimHandler
     /// <summary>
     ///     Patches PlayerEmptyBoltActionAnimation and SFDPlayerEmptyShotgunPumpAnimation
     /// </summary>
-    [HarmonyPatch]
-    private static class PlayerAnimation
+    private static readonly object get_PlayerPosition = AccessTools.PropertyGetter(typeof(Player), nameof(Player.Position));
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(PlayerEmptyBoltActionAnimation), nameof(PlayerEmptyBoltActionAnimation.OverrideUpperAnimationEnterFrame))]
+    private static IEnumerable<CodeInstruction> Patch_EmptyBolt(IEnumerable<CodeInstruction> instructions)
     {
-        private static readonly object get_PlayerPosition = AccessTools.PropertyGetter(typeof(Player), nameof(Player.Position));
+        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
 
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(PlayerEmptyBoltActionAnimation), nameof(PlayerEmptyBoltActionAnimation.OverrideUpperAnimationEnterFrame))]
-        private static IEnumerable<CodeInstruction> Patch_EmptyBolt(IEnumerable<CodeInstruction> instructions)
-        {
-            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+        code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+        code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+        code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
+        code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+        code.Insert(20+2, new CodeInstruction(OpCodes.Ldarg_1));
+        code.Insert(21+2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
 
-            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
-            code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
-            code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
-            code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
-            code.Insert(20+2, new CodeInstruction(OpCodes.Ldarg_1));
-            code.Insert(21+2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
-
-            return code;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(PlayerEmptyShotgunPumpAnimation), nameof(PlayerEmptyShotgunPumpAnimation.OverrideUpperAnimationEnterFrame))]
-        private static IEnumerable<CodeInstruction> Patch_ShotgunPump(IEnumerable<CodeInstruction> instructions)
-        {
-            List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-
-            code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
-            code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
-            code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
-            code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
-            code.Insert(20 + 2, new CodeInstruction(OpCodes.Ldarg_1));
-            code.Insert(21 + 2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
-
-            return code;
-        }
+        return code;
     }
 
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(PlayerEmptyShotgunPumpAnimation), nameof(PlayerEmptyShotgunPumpAnimation.OverrideUpperAnimationEnterFrame))]
+    private static IEnumerable<CodeInstruction> Patch_ShotgunPump(IEnumerable<CodeInstruction> instructions)
+    {
+        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+
+        code.ElementAt(14).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+        code.ElementAt(22).operand = AccessTools.Method(SFDCT.Game.SoundPatches.typeof_soundHandler, SFDCT.Game.SoundPatches.nameof_soundHandlerPlaySound, SFDCT.Game.SoundPatches.typeof_StringVector2Gameworld);
+        code.Insert(12, new CodeInstruction(OpCodes.Ldarg_1));
+        code.Insert(13, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+        code.Insert(20 + 2, new CodeInstruction(OpCodes.Ldarg_1));
+        code.Insert(21 + 2, new CodeInstruction(OpCodes.Callvirt, get_PlayerPosition));
+
+        return code;
+    }
 }

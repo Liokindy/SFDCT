@@ -5,20 +5,13 @@ using SFD;
 using SFD.Core;
 using SFD.States;
 using SFD.Voting;
-using SFD.ManageLists;
 using SFD.Objects;
 using SFD.Weapons;
-using SFD.Projectiles;
-using SFD.GUI.Text;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
 using SFDCT.Game.Voting;
-using SFDCT.Helper;
-using CConst = SFDCT.Misc.Constants;
+using CGlobals = SFDCT.Misc.Globals;
 using HarmonyLib;
-using SFD.Sounds;
-using SFD.Parser;
-using System.Net.Configuration;
 
 namespace SFDCT.Game;
 
@@ -253,7 +246,8 @@ internal static class CommandHandler
 
                         if (validPlayers.Count() > 0)
                         {
-                            targetPlayers.Add(validPlayers.ElementAt(CConst.RANDOM.Next(0, validPlayers.Count())));
+                            Random RND = new Random();
+                            targetPlayers.Add(validPlayers.ElementAt(RND.Next(0, validPlayers.Count())));
                         }
                     }
                     else
@@ -484,14 +478,14 @@ internal static class CommandHandler
                     }
                 }
                 // Host/Mod commands, only available when using extended slots
-                if (CConst.HOST_GAME_EXTENDED_SLOTS)
+                if (CGlobals.HOST_GAME_EXTENDED_SLOTS)
                 {
                     // Provides a readable list of the extended slots states
                     // /SLOTS
                     if (args.IsCommand("SLOTS") && args.CanUseModeratorCommand("SLOTS"))
                     {
                         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "- Listing all slots...", Color.Yellow, args.SenderGameUser));
-                        for (int i = 0; i < CConst.HOST_GAME_SLOT_COUNT; i++)
+                        for (int i = 0; i < CGlobals.SLOTCOUNT; i++)
                         {
                             GameSlot slot = __instance.GetGameSlotByIndex(i);
                             Color messCol = Color.Orange * (i % 2 == 0 ? 1f : 0.9f);
@@ -513,7 +507,7 @@ internal static class CommandHandler
                     {
                         if (int.TryParse(args.Parameters[0], out int slotIndex))
                         {
-                            slotIndex = Math.Min(Math.Max(slotIndex, 0), CConst.HOST_GAME_SLOT_COUNT - 1);
+                            slotIndex = Math.Min(Math.Max(slotIndex, 0), CGlobals.SLOTCOUNT - 1);
                             int slotState = Commands.ExtendedSlots.GetSlotStateByStringInput(args.Parameters[1]);
                             int slotTeam = (int)(args.Parameters.Count >= 3 ? Commands.ExtendedSlots.GetSlotTeamByStringInput(args.Parameters[2]) : Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
 
@@ -657,7 +651,7 @@ internal static class CommandHandler
                     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MOUSE [1/0]' to enable or disable debug mouse dragging.", c4, args.SenderGameUser, null));
                 }
 
-                if (CConst.HOST_GAME_EXTENDED_SLOTS)
+                if (CGlobals.HOST_GAME_EXTENDED_SLOTS)
                 {
                     if (args.CanUseModeratorCommand("SETSLOT", "SSLOT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SSLOT [INDEX] [STATE] [TEAM]?' to set a slot status.", c4, args.SenderGameUser, null)); }
                     if (args.CanUseModeratorCommand("SLOTS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SLOTS' to see all slots status.", c4, args.SenderGameUser, null)); }

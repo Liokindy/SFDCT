@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -28,7 +29,6 @@ internal static class PlayerHandler
     ///     Teammates cannot catch other teammates in dives, unless
     ///     the other teammate was caught in a dive/grab
     /// </summary>
-    /*
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Player), nameof(Player.PlayerWithinDiveReach))]
     private static void Teammate_DiveCheck(ref bool __result, Player __instance, Player player)
@@ -46,5 +46,5 @@ internal static class PlayerHandler
             }
         }
     }
-    */
 }
+*/

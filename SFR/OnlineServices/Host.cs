@@ -2,112 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Threading;
 using HarmonyLib;
 using Lidgren.Network;
-using Microsoft.Xna.Framework;
 using SFD;
-using SFDCT.Helper;
-using CConst = SFDCT.Misc.Constants;
-using CSettings = SFDCT.Settings.Values;
+using CConst = SFDCT.Misc.Globals;
 
-namespace SFDCT.Sync;
+namespace SFDCT.OnlineServices;
 
 [HarmonyPatch]
 internal static class Host
 {
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Constants), nameof(Constants.GET_HOST_GAME_SLOT_STATE))]
-    private static bool Slots_GetGameSlotState(ref byte __result, int index)
-    {
-        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
-
-        __result = CConst.HOST_GAME_SLOT_STATES[index];
-        return false;
-    }
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Constants), nameof(Constants.GET_HOST_GAME_SLOT_TEAM))]
-    private static bool Slots_GetGameSlotTeam(ref Team __result, int index)
-    {
-        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
-
-        __result = CConst.HOST_GAME_SLOT_TEAMS[index];
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Constants), nameof(Constants.SET_HOST_GAME_SLOT_STATE))]
-    private static bool Slots_GetGameSlotState(int index, byte value)
-    {
-        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
-
-        CConst.HOST_GAME_SLOT_STATES[index] = value;
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Constants), nameof(Constants.SET_HOST_GAME_SLOT_TEAM))]
-    private static bool Slots_GetGameSlotTeam(int index, Team value)
-    {
-        if (CConst.HOST_GAME_SLOT_COUNT == 8) { return true; }
-
-        CConst.HOST_GAME_SLOT_TEAMS[index] = value;
-        return false;
-    }
-
-
-    // Increase GameInfo.GameSlots array size
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(GameInfo), MethodType.Constructor, new Type[] { typeof(GameOwnerEnum) })]
-    private static IEnumerable<CodeInstruction> Slots_GameSlotsArray(IEnumerable<CodeInstruction> instructions)
-    {
-        instructions.ElementAt(94).opcode = OpCodes.Ldc_I4_S;
-        instructions.ElementAt(94).operand = CConst.HOST_GAME_SLOT_COUNT;
-        return instructions;
-    }
-
-    // Increase maximum connections
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(Server), nameof(Server.Start))]
-    private static IEnumerable<CodeInstruction> Server_Start(IEnumerable<CodeInstruction> instructions)
-    {
-        instructions.ElementAt(26).opcode = OpCodes.Ldc_I4_S;
-        instructions.ElementAt(26).operand = CConst.HOST_GAME_SLOT_COUNT + 1; // 8 + 4 = 12
-        return instructions;
-    }
-
-    // Init all slots
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.InitOpenGameSlots))]
-    private static IEnumerable<CodeInstruction> Slots_InitOpenSlots(IEnumerable<CodeInstruction> instructions)
-    {
-        instructions.ElementAt(54).opcode = OpCodes.Ldc_I4_S;
-        instructions.ElementAt(54).operand = CConst.HOST_GAME_SLOT_COUNT;
-        return instructions;
-    }
-
-    /// <summary>
-    ///     Allow the host to send messages quickly
-    /// </summary>
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(GameConnectionTag), nameof(GameConnectionTag.ConsumeFreeChatTicket))]
-    private static bool GameConnectionTag_ConsumeFreeChatTicket(GameConnectionTag __instance, ref bool __result)
-    {
-        if (__instance.IsHost)
-        {
-            __result = true;
-            return false;
-        }
-        return true;
-    }
-
-    /// <summary>
-    ///     Users that have ForcedServerMovementToggleTime set to -1
-    ///     will be have forced server movement regardless of latency.
-    /// </summary>
+    //     Make GameUsers that have 'ForcedServerMovementToggleTime' set to -1
+    //     have forced server movement regardless of their latency, makes it
+    //     possible to set their ForcedServerMovement elsewhere
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Server), nameof(Server.updateForcedServerMovement))]
-    private static bool Server_updateForcedServerMovement(Server __instance, float time)
+    private static bool ServerUpdateForcedServerMovement(Server __instance, float time)
     {
         __instance.m_updateForcedServerMovementTime -= time;
         if (__instance.m_updateForcedServerMovementTime > 0)
@@ -174,13 +84,11 @@ internal static class Host
         return false;
     }
 
-    /// <summary>
-    ///     This allows the DS server to bypass the ReadAccountData check in
-    ///     order to join the server while having an empty AccountName.
-    /// </summary>
+    //     Make the dedicated server preview bypass the ReadAccountData check to
+    //     join the server while having an invalid AccountName
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(Server), nameof(Server.DoReadRun))]
-    private static IEnumerable<CodeInstruction> Server_DoReadRun(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+    private static IEnumerable<CodeInstruction> ServerDoReadRunDSPreviewFix(IEnumerable<CodeInstruction> instructions, ILGenerator il)
     {
         // The "flag" variable stores if the sender is the DS preview.
         //
@@ -218,90 +126,5 @@ internal static class Host
         code.Insert(551, new(OpCodes.Brtrue_S, returnLabel));
 
         return code;
-    }
-
-    /// <summary>
-    ///     Profiles names from users are only validated for integrity,
-    ///     meaning they can be empty. This validates the name for this,
-    ///     reserved names, etc.
-    /// </summary>
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Profile), nameof(Profile.ValidateProfileIntegrity))]
-    private static void Profile_ValidateProfileIntegrity(Profile __instance, bool validateNameIntegrity)
-    {
-        if (validateNameIntegrity)
-        {
-            if (!Profile.ValidateName(__instance.Name, out string result, out string errorMsg))
-            {
-                Logger.LogDebug($"Failed Profile.ValidateName: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
-                __instance.Name = result;
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Modified clients can enter the server and use an empty AccountName.
-    ///     This can make them harder to track and kick/ban, the only use for
-    ///     this is malicious so we deny their account negotation.
-    /// </summary>
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
-    private static void ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
-    {
-        string mess = $"Failed ReadAccountData: key: '{key}' accountName: '{accountName}' account: '{account}'";
-
-        if (!__result)
-        {
-            Logger.LogDebug(mess);
-            return;
-        }
-
-        bool b666usersMustContain666 = false;
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  " || accountName.Length <= 2 || accountName.Length >= 24 ||
-            (b666usersMustContain666 && account == "S666" && !accountName.Contains("666:"))
-            )
-        {
-            __result = false;
-            Logger.LogDebug(mess);
-            return;
-        }
-
-        string accName = accountName;
-        accName = accName.Replace(Environment.NewLine, "");
-        accName = accName.Replace("\r", "");
-        accName = accName.Replace("\n", "");
-        accName = accName.Trim();
-        while (accName.Contains("  "))
-        {
-            accName = accName.Replace("  ", " ");
-        }
-
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
-        {
-            __result = false;
-            Logger.LogDebug(mess);
-            return;
-        }
-    }
-
-    /// <summary>
-    ///     Modified clients can bypass the chat box's 120 character limit.
-    ///     Large chat messages cause stuttering on other clients, so we
-    ///     reject those messages as spam.
-    /// </summary>
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Server), nameof(Server.HandleChatMessage))]
-    private static void Server_HandleChatMessage(ref bool __result, GameUser senderGameUser, string stringMsg)
-    {
-        // Message got denied by other means
-        if (!__result)
-        {
-            return;
-        }
-
-        if (stringMsg.Length > 120)
-        {
-            __result = false;
-        }
     }
 }

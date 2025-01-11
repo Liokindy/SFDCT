@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -24,10 +25,9 @@ namespace SFDCT.Sync;
 ///     </para>
 /// </summary>
 
-// [HarmonyPatch]
+[HarmonyPatch]
 internal static class SyncHandler
 {
-    /*
     private const byte MaxAttempts = 18;
     internal static readonly Dictionary<int, byte> Attempts = new();
     [HarmonyTranspiler]
@@ -208,5 +208,5 @@ internal static class SyncHandler
     }
 
     #endregion
-    */
 }
+*/

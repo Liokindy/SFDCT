@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using SFD;
 using SFD.Voting;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
-using Logger = SFDCT.Helper.Logger;
 
 namespace SFDCT.Game.Voting;
 

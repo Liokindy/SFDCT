@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿/*
+using HarmonyLib;
 
 namespace SFDCT.Editor;
 
@@ -26,3 +27,4 @@ internal static class MapData
     // }
 #endif
 }
+*/

@@ -1,4 +1,5 @@
-﻿using SFD;
+﻿/*
+using SFD;
 
 namespace SFDCT.Sync.Generic;
 
@@ -27,3 +28,4 @@ internal sealed class GenericData
         }
     }
 }
+*/
