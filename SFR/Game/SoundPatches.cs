@@ -5,6 +5,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Sounds;
+using SFDCT.Helper;
 using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Game;
@@ -64,45 +65,93 @@ internal static class SoundPatches
             // Sound pitch
             float soundPitch = (gameWorld.SlowmotionHandler.SlowmotionModifier) - 1f; // -1f to 1f
 
+            // Sound volume
+            float soundVolumeModifier = 1f;
+
             // Sound Panning
             float soundPanning = 0f;
-            if (worldPosition != Vector2.Zero && CSettings.GetBool("SOUNDPANNING_ENABLED") && CSettings.GetFloat("SOUNDPANNING_STRENGTH") != 0f)
+            if (worldPosition != Vector2.Zero)
             {
-                float listenerPosX;
-                // Use screen-space if told to, if playing locally,
-                // or the current player is dead/removed/null
-                if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") ||
-                    GameInfo.LocalPlayerCount >= 2 ||
-                    gameWorld.PrimaryLocalPlayer == null ||
-                    gameWorld.PrimaryLocalPlayer.IsDisposed ||
-                    gameWorld.PrimaryLocalPlayer.IsRemoved || 
-                    gameWorld.PrimaryLocalPlayer.IsDead
-                )
+                if (CSettings.GetBool("SOUNDATTENUATION_ENABLED"))
                 {
-                    listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
-                    soundPanning = (listenerPosX - GameSFD.GAME_WIDTHf * 0.5f) / GameSFD.GAME_WIDTHf * 0.5f;
-                }
-                else
-                {
-                    float worldThreshold = CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
-                    float worldDistance = CSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
-                    float distX = worldPosition.X - gameWorld.PrimaryLocalPlayer.Position.X;
-
-                    // The side of the panning is decided by the X position difference.
-                    // Negative is left. Positive is right.
-                    
-                    // The distance from the player to the sound is over the threshold.
-                    // If it's below, it will not have any panning.
-                    if (Math.Abs(distX) >= worldThreshold)
+                    Vector2 listenerPos;
+                    if (CSettings.GetBool("SOUNDATTENUATION_FORCE_SCREEN_SPACE") ||
+                        GameInfo.LocalPlayerCount >= 2 ||
+                        gameWorld.PrimaryLocalPlayer == null ||
+                        gameWorld.PrimaryLocalPlayer.IsDisposed ||
+                        gameWorld.PrimaryLocalPlayer.IsRemoved ||
+                        gameWorld.PrimaryLocalPlayer.IsDead
+                    )
                     {
-                        soundPanning = (distX - worldThreshold) / worldDistance;
+                        listenerPos = Camera.ConvertWorldToScreen(worldPosition);
+
+                        float distanceFromCenter = (listenerPos - new Vector2(GameSFD.GAME_WIDTHf, GameSFD.GAME_HEIGHTf) * 0.5f).CalcSafeLength();
+                        if (distanceFromCenter <= 0f)
+                        {
+                            soundVolumeModifier = 0f;
+                        }
+                        else
+                        {
+                            soundVolumeModifier = distanceFromCenter / MathHelper.Max(GameSFD.GAME_WIDTHf, GameSFD.GAME_HEIGHTf);
+                        }
                     }
+                    else
+                    {
+                        float worldThreshold = CSettings.GetFloat("SOUNDATTENUATION_INWORLD_THRESHOLD");
+                        float worldDistance = CSettings.GetFloat("SOUNDATTENUATION_INWORLD_DISTANCE");
+                        float dist = (worldPosition - gameWorld.PrimaryLocalPlayer.Position).CalcSafeLength();
+
+                        if (dist >= worldThreshold)
+                        {
+                            soundVolumeModifier = (dist - worldThreshold) / worldDistance;
+                        }
+                        else
+                        {
+                            soundVolumeModifier = 0f;
+                        }
+                    }
+
+                    soundVolumeModifier = MathHelper.Clamp(1 - soundVolumeModifier, CSettings.GetFloat("SOUNDATTENUATION_MIN"), 1f);
                 }
-                soundPanning = MathHelper.Clamp(soundPanning * CSettings.GetFloat("SOUNDPANNING_STRENGTH"), -1f, 1f);
+
+                if (CSettings.GetBool("SOUNDPANNING_ENABLED") && CSettings.GetFloat("SOUNDPANNING_STRENGTH") != 0f)
+                {
+                    float listenerPosX;
+                    // Use screen-space if told to, if playing locally,
+                    // or the current player is dead/removed/null
+                    if (CSettings.GetBool("SOUNDPANNING_FORCE_SCREEN_SPACE") ||
+                        GameInfo.LocalPlayerCount >= 2 ||
+                        gameWorld.PrimaryLocalPlayer == null ||
+                        gameWorld.PrimaryLocalPlayer.IsDisposed ||
+                        gameWorld.PrimaryLocalPlayer.IsRemoved || 
+                        gameWorld.PrimaryLocalPlayer.IsDead
+                    )
+                    {
+                        listenerPosX = Camera.ConvertWorldToScreenX(worldPosition.X);
+                        soundPanning = (listenerPosX - GameSFD.GAME_WIDTHf * 0.5f) / GameSFD.GAME_WIDTHf * 0.5f;
+                    }
+                    else
+                    {
+                        float worldThreshold = CSettings.GetFloat("SOUNDPANNING_INWORLD_THRESHOLD");
+                        float worldDistance = CSettings.GetFloat("SOUNDPANNING_INWORLD_DISTANCE");
+                        float distX = worldPosition.X - gameWorld.PrimaryLocalPlayer.Position.X;
+
+                        // The side of the panning is decided by the X position difference.
+                        // Negative is left. Positive is right.
+                    
+                        // The distance from the player to the sound is over the threshold.
+                        // If it's below, it will not have any panning.
+                        if (Math.Abs(distX) >= worldThreshold)
+                        {
+                            soundPanning = (distX - worldThreshold) / worldDistance;
+                        }
+                    }
+                    soundPanning = MathHelper.Clamp(soundPanning * CSettings.GetFloat("SOUNDPANNING_STRENGTH"), -1f, 1f);
+                }
             }
             
             // Play the sound
-            SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier, soundPitch, soundPanning);
+            SoundHandler.PlaySoundEffectGroup(soundEffectGroup, soundEffectGroup.VolumeModifier * volumeModifier * soundVolumeModifier, soundPitch, soundPanning);
             return;
         }
 

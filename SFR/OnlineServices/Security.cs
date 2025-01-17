@@ -19,8 +19,8 @@ internal static class Security
 
         if (!Profile.ValidateName(__instance.Name, out string result, out string errorMsg))
         {
-            Logger.LogDebug($"Profile.ValidateName: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
             __instance.Name = result;
+            Logger.LogDebug($"Profile.ValidateProfileIntegrity: name: '{__instance.Name}' result: '{result}' errorMsg: '{errorMsg}'");
         }
     }
 
@@ -39,8 +39,34 @@ internal static class Security
             return;
         }
 
-        bool b666usersMustContain666 = false;
-        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  " || accountName.Length <= 2 || accountName.Length >= 24 || (b666usersMustContain666 && account == "S666" && !accountName.StartsWith("666:")))
+        bool bTryEnforce666 = true;
+        bool b666usersMustContain666 = true;
+        if ((account == "S666" && !accountName.StartsWith("666:")) || (account != "S666" && accountName.StartsWith("666:")))
+        {
+            if (bTryEnforce666)
+            {
+                if (account != "S666" && accountName.StartsWith("666:"))
+                {
+                    account = "S666";
+                }
+                else
+                {
+                    accountName = "666:" + accountName;
+                }
+            }
+
+            if (b666usersMustContain666)
+            {
+                if ((account == "S666" && !accountName.StartsWith("666:")) || (account != "S666" && accountName.StartsWith("666:")))
+                {
+                    __result = false;
+                    Logger.LogDebug(mess);
+                    return;
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  " || accountName.Length <= 2 || accountName.Length >= 24)
         {
             __result = false;
             Logger.LogDebug(mess);
@@ -72,9 +98,12 @@ internal static class Security
     [HarmonyPatch(typeof(Server), nameof(Server.HandleChatMessage))]
     private static void HandleChatMessage(ref bool __result, GameUser senderGameUser, string stringMsg)
     {
-        if (__result && stringMsg.Length > 120)
+        if (__result && stringMsg.Length > 120 && !senderGameUser.IsHost)
         {
             __result = false;
+
+            string mess = $"Server.HandleChatMessage: senderGameUser: {senderGameUser.AccountName}:{senderGameUser.Account} stringMsg.Length: {stringMsg.Length}";
+            Logger.LogDebug(mess);
         }
     }
 }

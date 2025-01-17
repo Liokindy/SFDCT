@@ -12,6 +12,10 @@ using Lidgren.Network;
 using SFDCT.Game.Voting;
 using CGlobals = SFDCT.Misc.Globals;
 using HarmonyLib;
+using System.Globalization;
+using static System.Net.Mime.MediaTypeNames;
+using System.Collections;
+using SFDCT.Helper;
 
 namespace SFDCT.Game;
 
@@ -47,43 +51,114 @@ internal static class CommandHandler
         {
             int players = 0;
             int bots = 0;
+            int spectators = 0;
 
-            string header = "- Listing all users in the lobby...";
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.ForestGreen, args.SenderGameUser));
-
-            foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex))
+            // 0/none
+            // 1
+            // 2
+            int infoLevel = 0;
+            if (args.Parameters.Count > 0)
             {
-                if (gameUser.IsDedicatedPreview && !args.SenderGameUser.IsHost) { continue; } // Vanilla hides the dedicated preview from the list
-
-                string slotIndex, profileName, accountName, account, powerStatus;
-                slotIndex = gameUser.GameSlotIndex.ToString();
-
-                // Modified clients can illegaly modify these, bypassing their maximum lengths.
-                profileName = gameUser.GetProfileName().Substring(0, Math.Min(gameUser.GetProfileName().Length, 32));
-                accountName = gameUser.AccountName.Substring(0, Math.Min(gameUser.AccountName.Length, 32));
-                account = gameUser.Account.Substring(0, Math.Min(gameUser.Account.Length, 32));
-
-                // Check IsHost first, hosts are counted as moderators
-                powerStatus = gameUser.IsHost ? "- HOST" : (gameUser.IsModerator ? "- MOD" : "");
-
-                string mess = "?";
-                if (gameUser.IsBot)
+                if (int.TryParse(args.Parameters[0], out infoLevel))
                 {
-                    // Bots don't have ping, or an account. Less clutter
-                    mess = $"{slotIndex}: {profileName} - BOT";
-                    bots++;
+                    if (infoLevel >= 2)
+                    {
+                        if (args.SenderGameUser.IsHost)
+                        {
+                            // For security reasons, NetIPs arent synced to regular users
+                            infoLevel = 2;
+                        }
+                        else
+                        {
+                            infoLevel = 1;
+                        }
+                    }
                 }
                 else
                 {
-                    mess = $"{slotIndex}: {profileName} ({accountName}:{account}) {powerStatus}";
-                    players++;
+                    infoLevel = 0;
                 }
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.LightBlue, args.SenderGameUser));
             }
 
-            string info = $"- {players} player(s)" + (bots > 0 ? $" and {bots} bot(s)" : "");
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, info, Color.ForestGreen, args.SenderGameUser));
+            string header = "Listing all users in the lobby...";
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.LightBlue, args.SenderGameUser));
 
+            int i = 0;
+            foreach (GameUser gameUser in __instance.GetGameUsers().OrderBy(gu => gu.GameSlotIndex != -1 ? gu.GameSlotIndex : gu.UserIdentifier))
+            {
+                // Modified clients can illegaly modify these, bypassing their maximum lengths.
+                string profileName = gameUser.GetProfileName().Substring(0, Math.Min(gameUser.GetProfileName().Length, 32));
+                string accountName = gameUser.AccountName.Substring(0, Math.Min(gameUser.AccountName.Length, 32));
+                string account     = gameUser.Account.Substring(0, Math.Min(gameUser.Account.Length, 32));
+                string powerStatus = gameUser.IsHost ? "(HOST)" : (gameUser.IsModerator ? "(MOD)" : string.Empty);
+                string index = gameUser.GameSlotIndex.ToString();
+                if (gameUser.GameSlotIndex == -1)
+                {
+                    index = string.Format("#{0}", gameUser.UserIdentifier);
+                }
+                string userIdentifier = gameUser.UserIdentifier.ToString();
+                string netIP = (gameUser.IsBot || gameUser.IsHost) ? "localhost" : gameUser.GetNetIP();
+
+                if (gameUser.IsBot)
+                {
+                    bots++;
+                    accountName = "BOT";
+                    account = "SNPC";
+                }
+                else
+                {
+                    if (!gameUser.JoinedAsSpectator)
+                    {
+                        players++;
+                    }
+                    else
+                    {
+                        spectators++;
+                    }
+                }
+
+                // TODO:
+                // - Spectators
+                // - SFDCT Scripts
+                // - This
+                // - TeamRotation Slots scripts
+                // - Team5 Team6
+                string mess = "?";
+                switch(infoLevel)
+                {
+                    default:
+                    case 0:
+                        mess = string.Format("- {0}: '{1}' {2}", index, profileName, powerStatus);
+                        break;
+                    case 1:
+                        mess = string.Format("- {0}: '{1}' ({2}) {3}", index, profileName, accountName, powerStatus);
+                        break;
+                    case 2:
+                        mess = string.Format("- {0} {1}: '{2}' ({3}) {4}", index, netIP, profileName, accountName, powerStatus);
+                        break;
+                }
+
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, Color.LightBlue * (i % 2 == 0 ? 0.5f : 0.6f), args.SenderGameUser));
+                i++;
+            }
+
+            string info = "Found ";
+            info += $"{players} player";
+            if (players != 1) { info += "s"; }
+            if (bots > 0)
+            {
+                info += ", ";
+                info += $"{bots} bot";
+                if (bots != 1) { info += "s"; }
+            }
+            if (spectators > 0)
+            {
+                info += ", ";
+                info += $"{spectators} spectator";
+                if (spectators != 1) { info += "s"; }
+            }
+
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, info, Color.LightBlue * 0.75f, args.SenderGameUser));
             return true;
         }
 
@@ -105,7 +180,7 @@ internal static class CommandHandler
             // because in online mode, clients use physics predictions
             // /MOUSE
             // /MOUSE [1/0]
-            if (args.IsCommand("MOUSE", "M"))
+            if (args.IsCommand("MOUSE"))
             {
                 bool enabled = !Commands.DebugMouse.IsEnabled;
                 if (args.Parameters.Count >= 1)
@@ -122,6 +197,89 @@ internal static class CommandHandler
 
                 Commands.DebugMouse.IsEnabled = enabled;
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Mouse dragging is set to {enabled}", args.SenderGameUser));
+                return true;
+            }
+
+            if (args.IsCommand("REFANIM"))
+            {
+                bool result = false;
+                SFDCT.Bootstrap.Assets.AnimationsLoader.Load(null, ref result);
+                
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Refreshed animations!", args.SenderGameUser));
+            }
+
+            // Makes it possible for the host to add, remove or list MODERATOR_COMMANDS in-game
+            Color c1 = new Color(159, 255, 64);
+            if (args.IsCommand("ADDMODCOMMANDS"))
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Adding moderator commands...", c1, args.SenderGameUser));
+
+                for (int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string modCommand = args.Parameters[i].ToUpperInvariant();
+
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"- Added '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                }
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Added '{args.Parameters.Count}' moderator commands", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+            if (args.IsCommand("REMOVEMODCOMMANDS") && args.Parameters.Count > 0)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Removing moderator commands...", c1, args.SenderGameUser));
+
+                for (int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string modCommand = args.Parameters[i];
+
+                    if (Constants.MODDERATOR_COMMANDS.Contains(modCommand))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Remove(modCommand);
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"- Removed '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+                    if (Constants.MODDERATOR_COMMANDS.Contains(modCommand.ToUpperInvariant()))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Remove(modCommand.ToUpperInvariant());
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"- Removed '{modCommand.ToUpperInvariant()}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+                    
+                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                }
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Removed '{args.Parameters.Count}' moderator commands", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+            if (args.IsCommand("CLEARMODCOMMANDS"))
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Clearing all moderator commands...", c1, args.SenderGameUser));
+                int count = Constants.MODDERATOR_COMMANDS.Count;
+                Constants.MODDERATOR_COMMANDS.Clear();
+
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Cleared {count} moderator commands.", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+            if (args.IsCommand("LISTMODCOMMANDS"))
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Listing all moderator commands...", c1, args.SenderGameUser));
+
+                if (Constants.MODDERATOR_COMMANDS.Count > 0)
+                {
+                    for(int i = 0; i < Constants.MODDERATOR_COMMANDS.Count; i++)
+                    {
+                        string modCommand = Constants.MODDERATOR_COMMANDS[i];
+                        args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"- '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Moderators can use {Constants.MODDERATOR_COMMANDS.Count} command(s)'", c1 * 0.8f, args.SenderGameUser));
+                }
+                else
+                {
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "- Moderators can use all commands!", c1 * 0.75f, args.SenderGameUser));
+                }
                 return true;
             }
         }
@@ -424,10 +582,98 @@ internal static class CommandHandler
 
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
+                if (args.IsCommand("JOIN") && args.CanUseModeratorCommand("JOIN"))
+                {
+                    if (!args.SenderGameUser.JoinedAsSpectator)
+                    {
+                        return false;
+                    }
+
+                    GameConnectionTag senderGameConnectionTag = args.SenderGameUser.GetGameConnectionTag();
+                    if (senderGameConnectionTag == null || senderGameConnectionTag.NetConnection == null)
+                    {
+                        return false;
+                    }
+                    NetConnection senderConnection = senderGameConnectionTag.NetConnection;
+
+                    List<GameSlot> foundOpenGameSlots = server.FindOpenGameSlots(__instance.DropInMode, 1, __instance.EvenTeams);
+                    if (foundOpenGameSlots.Count <= 0)
+                    {
+                        return false;
+                    }
+
+                    __instance.DisposeGameUser(foundOpenGameSlots[0].GameUser, server);
+                    args.SenderGameUser.GameSlot = foundOpenGameSlots[0];
+                    foundOpenGameSlots[0].GameUser = args.SenderGameUser;
+                    foundOpenGameSlots[0].CurrentState = GameSlot.State.Occupied;
+                    args.SenderGameUser.JoinedAsSpectator = false;
+                    args.SenderGameUser.SpectatingWhileWaitingToPlay = !server.WaitingInLobby;
+
+                    Color joinColor = CGlobals.Colors.TEAM_SPECTATOR_CHAT_NAME;
+                    string joinSoundName = "PlayerJoin";
+                    string joinMessage = LanguageHelper.GetText("menu.lobby.newPlayerJoined", args.SenderGameUser.GetProfileName());
+
+                    NetMessage.Sound.Data joinSoundData = new NetMessage.Sound.Data(joinSoundName, true, Vector2.Zero, 1f);
+                    server.SendMessage(MessageType.Sound, joinSoundData);
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, joinMessage, joinColor, null, null));
+                }
+
+                if (args.IsCommand("SPECTATE") && args.CanUseModeratorCommand("SPECTATE"))
+                {
+                    if (args.SenderGameUser.JoinedAsSpectator)
+                    {
+                        return false;
+                    }
+
+                    GameConnectionTag senderGameConnectionTag = args.SenderGameUser.GetGameConnectionTag();
+                    if (senderGameConnectionTag == null || senderGameConnectionTag.NetConnection == null)
+                    {
+                        return false;
+                    }
+                    NetConnection senderConnection = senderGameConnectionTag.NetConnection;
+
+                    GameSlot senderGameSlot = args.SenderGameUser.GameSlot;
+                    args.SenderGameUser.GameSlot = CGlobals.SPECTATOR_GAMESLOT;
+                    args.SenderGameUser.SpectatingWhileWaitingToPlay = false;
+                    args.SenderGameUser.JoinedAsSpectator = true;
+                    if (__instance.GameWorld != null)
+                    {
+                        foreach(GameVote activeVote in __instance.VoteInfo.ActiveVotes)
+                        {
+                            activeVote.RemoveUser(__instance, args.SenderGameUser.GetGameConnectionTagRemoteUniqueIdentifier());
+                        }
+
+                        Player senderPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(args.SenderGameUser.UserIdentifier);
+                        if (senderPlayer != null)
+                        {
+                            if (server.CurrentState is ServerClientState.Game)
+                            {
+                                senderPlayer.Kill();
+                            }
+                            else
+                            {
+                                senderPlayer.Remove();
+                            }
+                        }
+                        senderPlayer.SetUser(0, true);
+                    }
+
+                    senderGameSlot.ClearGameUser(null);
+
+                    Color leaveColor = CGlobals.Colors.TEAM_SPECTATOR_CHAT_TAG;
+                    string leaveSoundName = "PlayerLeave";
+                    string leaveMessage = LanguageHelper.GetText("menu.lobby.newPlayerJoinedTeam", args.SenderGameUser.GetProfileName(), "Spectator");
+
+                    NetMessage.Sound.Data joinSoundData = new NetMessage.Sound.Data(leaveSoundName, true, Vector2.Zero, 1f);
+                    server.SendMessage(MessageType.Sound, joinSoundData);
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, leaveMessage, leaveColor, null, null));
+                    return true;
+                }
+
                 // Forcefully enables/disables server-movement on a user, regardless of the
                 // automatic server-movement setting.
                 // /FORCESERVERMOVEMENT [USER] [1/0/NULL]
-                if (args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT", "FORCESVMOV") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT", "FORCESVMOV"))
+                if (args.Parameters.Count > 1 && args.IsCommand("FORCESERVERMOVEMENT") && args.CanUseModeratorCommand("FORCESERVERMOVEMENT"))
                 {
                     GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
                     GameConnectionTag gameUserTag = gameUser?.GetGameConnectionTag();
@@ -477,15 +723,16 @@ internal static class CommandHandler
                         return true;
                     }
                 }
+
                 // Host/Mod commands, only available when using extended slots
-                if (CGlobals.HOST_GAME_EXTENDED_SLOTS)
+                if (true) //CGlobals.HOST_GAME_EXTENDED_SLOTS)
                 {
                     // Provides a readable list of the extended slots states
                     // /SLOTS
                     if (args.IsCommand("SLOTS") && args.CanUseModeratorCommand("SLOTS"))
                     {
                         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "- Listing all slots...", Color.Yellow, args.SenderGameUser));
-                        for (int i = 0; i < CGlobals.SLOTCOUNT; i++)
+                        for (int i = 0; i < server.GameInfo.GameSlots.Length; i++)
                         {
                             GameSlot slot = __instance.GetGameSlotByIndex(i);
                             Color messCol = Color.Orange * (i % 2 == 0 ? 1f : 0.9f);
@@ -502,12 +749,12 @@ internal static class CommandHandler
                     }
 
                     // Manually set a slot state and team
-                    // /SSLOT [INDEX] [0/1/2/4/5/6] [0/1/2/3/4]
-                    if (args.IsCommand("SETSLOT", "SSLOT") && args.CanUseModeratorCommand("SETSLOT", "SSLOT") && args.Parameters.Count >= 2)
+                    // /SETSLOT [INDEX] [0/1/2/4/5/6] [0/1/2/3/4]
+                    if (args.IsCommand("SETSLOT") && args.CanUseModeratorCommand("SETSLOT") && args.Parameters.Count >= 2)
                     {
                         if (int.TryParse(args.Parameters[0], out int slotIndex))
                         {
-                            slotIndex = Math.Min(Math.Max(slotIndex, 0), CGlobals.SLOTCOUNT - 1);
+                            slotIndex = Math.Min(Math.Max(slotIndex, 0), server.GameInfo.GameSlots.Length - 1);
                             int slotState = Commands.ExtendedSlots.GetSlotStateByStringInput(args.Parameters[1]);
                             int slotTeam = (int)(args.Parameters.Count >= 3 ? Commands.ExtendedSlots.GetSlotTeamByStringInput(args.Parameters[2]) : Constants.GET_HOST_GAME_SLOT_TEAM(slotIndex));
 
@@ -563,7 +810,7 @@ internal static class CommandHandler
                 if (args.CanUseModeratorCommand("INFINITE_AMMO","IA")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_AMMO [1/0]'", c2, args.SenderGameUser, null)); }
                 if (args.CanUseModeratorCommand("INFINITE_LIFE","INFINITE_HEALTH","IL","IH")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_LIFE [1/0]'", c2, args.SenderGameUser, null)); }
                 if (args.CanUseModeratorCommand("INFINITE_ENERGY","IE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/INFINITE_ENERGY [1/0]'", c2, args.SenderGameUser, null)); }
-                if (args.CanUseModeratorCommand("GIVE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/GIVE [PLAYER/ANY/ALL] [ITEM] [ITEM] [...]'", c2, args.SenderGameUser, null)); }
+                if (args.CanUseModeratorCommand("GIVE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/GIVE [PLAYER/ANY/ALL] [ITEM] [...] [...]'", c2, args.SenderGameUser, null)); }
                 if (args.CanUseModeratorCommand("REMOVE")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/REMOVE [PLAYER] [ITEM/SLOT]'", c2, args.SenderGameUser, null)); }
                 
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/ITEMS' to list all available items in the game.", c2, args.SenderGameUser, null));
@@ -648,12 +895,17 @@ internal static class CommandHandler
                 
                 if (args.SenderGameUser.IsHost)
                 {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MOUSE [1/0]' to enable or disable debug mouse dragging.", c4, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/MOUSE [1/0]' to enable, disable or toggle mouse dragging.", c4, args.SenderGameUser, null));
+
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/ADDMODCOMMANDS [COMMAND] [...] [...]' to add moderator commands.", c4, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/REMOVEMODCOMMANDS [COMMAND] [...] [...]' to remove moderator commands.", c4, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/CLEARMODCOMMANDS' to clear all moderator commands.", c4, args.SenderGameUser, null));
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/LISTMODCOMMANDS' to list all moderator commands.", c4, args.SenderGameUser, null));
                 }
 
-                if (CGlobals.HOST_GAME_EXTENDED_SLOTS)
+                if (true) // CGlobals.HOST_GAME_EXTENDED_SLOTS)
                 {
-                    if (args.CanUseModeratorCommand("SETSLOT", "SSLOT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SSLOT [INDEX] [STATE] [TEAM]?' to set a slot status.", c4, args.SenderGameUser, null)); }
+                    if (args.CanUseModeratorCommand("SETSLOT")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SETSLOT [INDEX] [STATE] [TEAM]?' to set a slot status.", c4, args.SenderGameUser, null)); }
                     if (args.CanUseModeratorCommand("SLOTS")) { args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "'/SLOTS' to see all slots status.", c4, args.SenderGameUser, null)); }
                 }
 

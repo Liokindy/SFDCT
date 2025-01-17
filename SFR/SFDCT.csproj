@@ -128,17 +128,25 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Bootstrap\Assets.cs" />
+    <Compile Include="Bootstrap\AssetsHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
-    <Compile Include="Bootstrap\Dumping.cs" />
+    <Compile Include="Bootstrap\Assets\AnimationsLoader.cs" />
+    <Compile Include="Bootstrap\Assets\Content.cs" />
+    <Compile Include="Bootstrap\Assets\ItemsLoader.cs" />
+    <Compile Include="Bootstrap\Assets\SoundsLoader.cs" />
+    <Compile Include="Bootstrap\Assets\TexturesLoader.cs" />
+    <Compile Include="Bootstrap\Scripts\ConstantColorsOverridesLoader.cs" />
+    <Compile Include="Bootstrap\Scripts\ScriptsLoader.cs" />
+    <Compile Include="Bootstrap\Scripts\WeaponOverridesLoader.cs" />
     <Compile Include="Editor\Form.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
+    <Compile Include="Fighter\TeamColorHandler.cs" />
     <Compile Include="Game\Commands\ExtendedSlots.cs" />
-    <Compile Include="Game\VersionPatch.cs" />
     <Compile Include="Game\Voting\GameVoteManual.cs" />
     <Compile Include="Helper\Keyboard.cs" />
+    <Compile Include="Objects\Default.cs" />
     <Compile Include="Objects\SoundPanning\BarrelExplosive.cs" />
     <Compile Include="Objects\SoundPanning\Bird.cs" />
     <Compile Include="Objects\SoundPanning\C4Thrown.cs" />

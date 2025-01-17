@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using SFD.Code;
 using SFDCT.Helper;
-using System.Threading;
 using CSettings = SFDCT.Settings.Values;
 using CConst = SFDCT.Misc.Globals;
 using HarmonyLib;
@@ -19,16 +18,18 @@ internal static class Refresh
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, $"Refreshing '{CConst.Paths.CONFIGURATIONINI}'...");
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, $"Refreshing '{CConst.Paths.CONFIGURATIONINI}'...");
             Config.Refresh();
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.GameStatus, "Refreshed!");
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, "Refreshed!");
         }
     }
 }
+
 internal static class Config
 {
     private static IniHandler Handler;
     public static bool NeedsSaving = false;
+    public static bool FirstRefresh = true;
 
     /// <summary>
     ///     Initializes the config.ini, if it doesnt exist 
@@ -50,8 +51,9 @@ internal static class Config
             }
             Thread.Sleep(100);
 
-            Handler.ReadLine(";Remember that floats are written with '.' instead of ',' i.e: VALUE=0.75");
+            Handler.ReadLine(";Floats are saved with '.' i.e: VALUE=0.65");
             Handler.ReadLine(";If setting order seems chaotic or shuffled randomly you might want to make a copy of this 'config.ini', rename it and let the game create a new 'config.ini'. Then manually copy your custom settings to it.");
+            
             // Write default values to it
             foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
             {
@@ -85,6 +87,11 @@ internal static class Config
         }
         Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
         CSettings.ApplyOverrides();
+
+        if (FirstRefresh)
+        {
+            FirstRefresh = false;
+        }
     }
     public static void Save()
     {

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using SFD;
-using SFD.Sounds;
-using SFDCT.Helper;
-using CSettings = SFDCT.Settings.Values;
 using HarmonyLib;
+using System.Collections.Generic;
+using CGlobals = SFDCT.Misc.Globals;
+using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Game;
 
@@ -40,60 +39,48 @@ internal static class WorldHandler
     }
 
     /// <summary>
+    ///     Potential bug-fix for users not being able to open maps in
+    ///     vanilla-SFD, might be caused by maps being saved as v.1.3.7x 
+    /// </summary>
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.WriteToStream))]
+    private static IEnumerable<CodeInstruction> SFDMapEditorBuildTreeViewImageList(IEnumerable<CodeInstruction> instructions)
+    {
+        foreach (CodeInstruction code in instructions)
+        {
+            if (code.operand == null)
+            {
+                continue;
+            }
+            if (code.operand.Equals("v.1.3.7x"))
+            {
+                code.operand = CGlobals.Version.SFD;
+            }
+        }
+        return instructions;
+    }
+
+    /// <summary>
     ///     This class will be called at the end of every round.
     ///     Use it to dispose your collections or reset some data.
     /// </summary>
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.DisposeAllObjects))]
-    private static void DisposeData()
-    {
-        // SyncHandler.Attempts.Clear();
-    }
+    //[HarmonyPostfix]
+    //[HarmonyPatch(typeof(GameWorld), nameof(GameWorld.DisposeAllObjects))]
+    //private static void DisposeData()
+    //{
+    //    SyncHandler.Attempts.Clear();
+    //}
 
 
-    [HarmonyPostfix]
+    [HarmonyTranspiler]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static void SaturationPatch(GameWorld __instance, float chunkMs, float totalMs, bool isLast, bool isFirst)
+    private static IEnumerable<CodeInstruction> SaturationPatch(IEnumerable<CodeInstruction> instructions)
     {
-        if (!SFD.Program.IsGame || !(__instance.EditMode & !__instance.EditPhysicsRunning) && __instance.GameOwner != GameOwnerEnum.Server)
-        {
-            float highestPlayerHealthFullness = 0f;
-            for (int i = 0; i < __instance.LocalPlayers.Length; i++)
-            {
-                Player localPlayer = __instance.LocalPlayers[i];
-                if (localPlayer != null && !localPlayer.IsDisposed && !localPlayer.IsDead)
-                {
-                    highestPlayerHealthFullness = Math.Max(highestPlayerHealthFullness, localPlayer.Health.Fullness);
-                }
-            }
+        instructions.ElementAt(760).operand = CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
+        instructions.ElementAt(764).operand = CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
+        instructions.ElementAt(770).operand = CSettings.GetFloat("LOW_HEALTH_SATURATION_FACTOR");
 
-            if (highestPlayerHealthFullness > 0f)
-            {
-                if (GameSFD.GUIMode == ShowGUIMode.HideAll)
-                {
-                    GameSFD.Saturation = 1f;
-                }
-                else if (highestPlayerHealthFullness < CSettings.GetFloat("LOW_HEALTH_THRESHOLD"))
-                {
-                    float lowhpFactor = 1f - highestPlayerHealthFullness /  CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
-
-                    if (__instance.m_nextHeartbeatDelay < 400f && highestPlayerHealthFullness < 0.25)
-                    {
-                        __instance.m_nextHeartbeatDelay += totalMs * Math.Max(1 - highestPlayerHealthFullness / 0.25f, 0.6f);
-                    }
-
-                    __instance.m_nextHeartbeatDelay -= totalMs * Math.Max(lowhpFactor, 0.6f);
-                    if (__instance.m_nextHeartbeatDelay <= 0f)
-                    {
-                        Logger.LogDebug(__instance.m_nextHeartbeatDelay);
-                        __instance.m_nextHeartbeatDelay = 400f;
-                        SoundHandler.PlaySound("Heartbeat", 1f, __instance);
-                    }
-
-                    GameSFD.Saturation = 1f - lowhpFactor * CSettings.GetFloat("LOW_HEALTH_SATURATION_FACTOR");
-                }
-            }
-        }
+        return instructions;
     }
     
     /*

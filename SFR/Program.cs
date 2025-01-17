@@ -123,6 +123,9 @@ internal static class Program
             CheckRepositoryVersion();
         }
 
+        Settings.Config.Initialize(); // SFDCT's config.ini loads before SFD is patched
+        Bootstrap.Assets.ScriptsLoader.Load();
+
         // Patch SFD and start SFDCT
         Logger.LogInfo("Starting SFDCT...");
         Harmony.PatchAll();
