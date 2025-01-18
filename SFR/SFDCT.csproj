@@ -135,9 +135,6 @@
     <Compile Include="Bootstrap\Assets\ItemsLoader.cs" />
     <Compile Include="Bootstrap\Assets\SoundsLoader.cs" />
     <Compile Include="Bootstrap\Assets\TexturesLoader.cs" />
-    <Compile Include="Bootstrap\Scripts\ConstantColorsOverridesLoader.cs" />
-    <Compile Include="Bootstrap\Scripts\ScriptsLoader.cs" />
-    <Compile Include="Bootstrap\Scripts\WeaponOverridesLoader.cs" />
     <Compile Include="Editor\Form.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />

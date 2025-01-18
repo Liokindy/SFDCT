@@ -19,12 +19,14 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Animations), nameof(SFD.Animations.Load))]
         internal static bool Load(Microsoft.Xna.Framework.Game game, ref bool __result)
         {
-            if (!CIni.GetBool("USE_1_4_0_ASSETS"))
+            string animationsPath = Path.Combine("SFDCT\\Content", "Data\\Animations\\");
+
+            if (!CIni.GetBool("USE_1_4_0_ASSETS") || (Directory.Exists(animationsPath) && Directory.EnumerateFiles(animationsPath).Count() > 0))
             {
                 return true;
             }
 
-            string[] animationTextFiles = Directory.EnumerateFiles(Constants.GetLoadPath(Path.Combine("SFDCT\\Content", "Data\\Animations\\"))).ToArray();
+            string[] animationTextFiles = Directory.EnumerateFiles(animationsPath).ToArray();
             if (animationTextFiles.Length >= 2)
             {
                 List<AnimationData> animations = [];
