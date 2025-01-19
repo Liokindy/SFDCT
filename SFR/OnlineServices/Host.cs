@@ -101,9 +101,9 @@ internal static class Host
         int readMessageCount = 1000; //num
         NetIncomingMessage netIncomingMessage = firstMessage;
 
-        int maximumSpectatorCount = CSettings.GetInt("ALLOW_SPECTATORS_COUNT"); // doesnt affect host
-        bool onlyLocalHostAsSpectator = !CSettings.GetBool("ALLOW_SPECTATORS");
-        bool onlyModeratorsAsSpectators = CSettings.GetBool("ALLOW_SPECTATORS_ONLY_MODERATORS");
+        int maximumSpectatorCount = CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.AllowSpectatorsCount)); // doesnt affect host
+        bool onlyLocalHostAsSpectator = !CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.AllowSpectators));
+        bool onlyModeratorsAsSpectators = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.AllowSpectatorsOnlyModerators));
         
         bool showDSPreviewJoinMessage = false;
         

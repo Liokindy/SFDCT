@@ -21,7 +21,7 @@ namespace SFDCT.Bootstrap.Assets
         {
             string animationsPath = Path.Combine("SFDCT\\Content", "Data\\Animations\\");
 
-            if (!CIni.GetBool("USE_1_4_0_ASSETS") || (Directory.Exists(animationsPath) && Directory.EnumerateFiles(animationsPath).Count() > 0))
+            if (!CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)) || (Directory.Exists(animationsPath) && Directory.EnumerateFiles(animationsPath).Count() > 0))
             {
                 return true;
             }
@@ -59,7 +59,7 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Animations), nameof(SFD.Animations.Load))]
         internal static void LoadPostfix(Microsoft.Xna.Framework.Game game, ref bool __result)
         {
-            if (CIni.GetBool("USE_1_4_0_ASSETS"))
+            if (CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)))
             {
                 return;
             }

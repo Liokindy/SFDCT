@@ -16,7 +16,7 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Items), nameof(SFD.Items.Load))]
         public static bool Load(GameSFD game)
         {
-            if (!CIni.GetBool("USE_1_4_0_ASSETS"))
+            if (!CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)))
             {
                 return true;
             }

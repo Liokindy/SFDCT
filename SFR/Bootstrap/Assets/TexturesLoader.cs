@@ -17,7 +17,7 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Tiles.Textures), nameof(SFD.Tiles.Textures.Load), [typeof(string)])]
         internal static bool Load(string path)
         {
-            if (!CIni.GetBool("USE_1_4_0_ASSETS"))
+            if (!CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)))
             {
                 return true;
             }
@@ -37,7 +37,7 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Tiles.Textures), nameof(SFD.Tiles.Textures.LoadTexture))]
         internal static bool LoadTexture(ref Texture2D __result, string texture)
         {
-            if (!CIni.GetBool("USE_1_4_0_ASSETS"))
+            if (!CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)))
             {
                 return true;
             }
@@ -70,7 +70,7 @@ namespace SFDCT.Bootstrap.Assets
         [HarmonyPatch(typeof(SFD.Tiles.TileTextures), nameof(SFD.Tiles.TileTextures.Load))]
         internal static bool Load(TileTextures __instance, string textureFile, bool ignoreErrors = false)
         {
-            if (!CIni.GetBool("USE_1_4_0_ASSETS"))
+            if (!CIni.Get<bool>(CIni.GetKey(CIni.SettingKey.Use140Assets)))
             {
                 return true;
             }

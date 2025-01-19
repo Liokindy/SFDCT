@@ -7,7 +7,7 @@ using CConst = SFDCT.Misc.Globals;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace SFDCT.UI;
+namespace SFDCT.UI.ExtendedSlots;
 
 [HarmonyPatch]
 internal static class Scoreboard

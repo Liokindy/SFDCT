@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using SFD;
-using SFD.MenuControls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Lidgren.Network;
-using HarmonyLib;
+using SFD;
+using SFD.MenuControls;
 using CConst = SFDCT.Misc.Globals;
 using CSettings = SFDCT.Settings.Values;
+using HarmonyLib;
+using SFDCT.Helper;
 
 namespace SFDCT.UI;
 
@@ -17,8 +17,43 @@ namespace SFDCT.UI;
 ///     Patches the visuals of the main menu
 /// </summary>
 [HarmonyPatch]
-internal static class MainMenu
+internal static class MainMenuHandler
 {
+    private static Panel mainMenuPanel = null;
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MainMenuPanel), MethodType.Constructor)]
+    private static void MainMenuPanelConstructor(MainMenuPanel __instance)
+    {
+        if (SFD.Program.IsGame)
+        {
+            mainMenuPanel = __instance;
+
+            Menu menu = ((Menu)__instance.members[0]);
+            MainMenuItem sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object obj) => { __instance.OpenSubPanel(new Panels.SFDCTSettingsPanel()); }));
+
+            sfdctSettings.Initialize(menu);
+
+            menu.Height += 32;
+            menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameMenuPanel), MethodType.Constructor)]
+    private static void GameMenuPanelConstructor(GameMenuPanel __instance)
+    {
+        mainMenuPanel = __instance;
+
+        Menu menu = ((Menu)__instance.members[0]);
+        MainMenuItem sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object obj) => { __instance.OpenSubPanel(new Panels.SFDCTSettingsPanel()); }));
+
+        sfdctSettings.Initialize(menu);
+
+        menu.Height += 32;
+        menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
+    }
+
     /// <summary>
     ///     The texture that covers the left side of the main menu is drawn using 
     ///     Black as a color. Changing to white allows the user to use a custom texture
@@ -66,7 +101,7 @@ internal static class MainMenu
     {
         if (mainMenuBG != null)
         {
-            Color drawColor = CSettings.GetBool("MAINMENU_BG_USE_BLACK") ? Color.Black : Color.White;
+            Color drawColor = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.MainMenuBgUseBlack)) ? Color.Black : Color.White;
             int scale = 2;
 
             for (int i = 0; i < GameSFD.GAME_HEIGHT + mainMenuBG.Height * scale; i += mainMenuBG.Height * scale)

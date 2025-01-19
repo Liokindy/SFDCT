@@ -8,7 +8,7 @@ using SFD.States;
 namespace SFDCT.UI;
 
 [HarmonyPatch]
-internal static class Chat
+internal static class ChatHandler
 {
     private static int m_lastMessageIndex = 0;
     private static List<string> m_lastMessagesList = new(16);

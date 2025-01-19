@@ -1,13 +1,77 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
+using SFD;
 using SFD.Code;
+using SFDCT.Bootstrap.Assets;
 using SFDCT.Helper;
 
 namespace SFDCT.Settings;
 
 public static class Values
 {
+    public enum SettingKey
+    {
+        MenuColor,
+        PlayerBlinkColor,
+        SoundPanningEnabled,
+        SoundPanningStrength,
+        SoundPanningForceScreenSpace,
+        SoundPanningInworldThreshold,
+        SoundPanningInworldDistance,
+        SoundAttenuationEnabled,
+        SoundAttenuationMin,
+        SoundAttenuationForceScreenSpace,
+        SoundAttenuationInworldThreshold,
+        SoundAttenuationInworldDistance,
+        MainMenuBgUseBlack,
+        MainMenuTrackRandom,
+        LowHealthSaturationFactor,
+        LowHealthThreshold,
+        Use140Assets,
+        UseSfrColorsForTeam5Team6,
+        AllowSpectators,
+        AllowSpectatorsOnlyModerators,
+        AllowSpectatorsCount,
+        ExtendedProfile,
+    }
+    public static string GetKey(SettingKey key)
+    {
+        switch(key)
+        {
+            default:
+                string mess = $"CONFIG.INI: Fail at GetKey, SettingKey '{key}' does not have a key!";
+                Logger.LogError(mess);
+                throw new Exception(mess);
+            case SettingKey.MenuColor:                          return "MENU_COLOR";
+            case SettingKey.PlayerBlinkColor:                   return "PLAYER_BLINK_COLOR";
+            case SettingKey.SoundPanningEnabled:                return "SOUNDPANNING_ENABLED";
+            case SettingKey.SoundPanningStrength:               return "SOUNDPANNING_STRENGTH";
+            case SettingKey.SoundPanningForceScreenSpace:       return "SOUNDPANNING_FORCE_SCREEN_SPACE";
+            case SettingKey.SoundPanningInworldThreshold:       return "SOUNDPANNING_INWORLD_THRESHOLD";
+            case SettingKey.SoundPanningInworldDistance:        return "SOUNDPANNING_INWORLD_DISTANCE";
+            case SettingKey.SoundAttenuationEnabled:            return "SOUNDATTENUATION_ENABLED";
+            case SettingKey.SoundAttenuationMin:                return "SOUNDATTENUATION_MIN";
+            case SettingKey.SoundAttenuationForceScreenSpace:   return "SOUNDATTENUATION_FORCE_SCREEN_SPACE";
+            case SettingKey.SoundAttenuationInworldThreshold:   return "SOUNDATTENUATION_INWORLD_THRESHOLD";
+            case SettingKey.SoundAttenuationInworldDistance:    return "SOUNDATTENUATION_INWORLD_DISTANCE";
+            case SettingKey.MainMenuBgUseBlack:                 return "MAINMENU_BG_USE_BLACK";
+            case SettingKey.MainMenuTrackRandom:                return "MAINMENU_TRACK_RANDOM";
+            case SettingKey.LowHealthSaturationFactor:          return "LOW_HEALTH_SATURATION_FACTOR";
+            case SettingKey.LowHealthThreshold:                 return "LOW_HEALTH_THRESHOLD";
+            case SettingKey.Use140Assets:                       return "USE_1_4_0_ASSETS";
+            case SettingKey.UseSfrColorsForTeam5Team6:          return "USE_SFR_COLORS_FOR_TEAM5_TEAM6";
+            case SettingKey.AllowSpectators:                    return "ALLOW_SPECTATORS";
+            case SettingKey.AllowSpectatorsOnlyModerators:      return "ALLOW_SPECTATORS_ONLY_MODERATORS";
+            case SettingKey.AllowSpectatorsCount:               return "ALLOW_SPECTATORS_COUNT";
+            case SettingKey.ExtendedProfile:                    return "EXTENDEDPROFILES_PROFILE_";
+        }
+    }
+
     public static Dictionary<string, IniSetting> List = [];
     private static bool b_initialized = false;
     public static void Init()
@@ -17,47 +81,47 @@ public static class Values
             return;
         }
 
-        Add("MENU_COLOR", new Color(32, 0, 192), IniSettingType.Color);
-        Add("PLAYER_BLINK_COLOR", new Color(255, 255, 255), IniSettingType.Color);
-        Add("SOUNDPANNING_ENABLED", true, IniSettingType.Bool);
-        Add("SOUNDPANNING_STRENGTH", 0.7f, 0f, 1f, IniSettingType.Float);
-        Add("SOUNDPANNING_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
-        Add("SOUNDPANNING_INWORLD_THRESHOLD", 60f, 0f, null, IniSettingType.Float);
-        Add("SOUNDPANNING_INWORLD_DISTANCE", 400f, 0f, null, IniSettingType.Float);
-        Add("SOUNDATTENUATION_ENABLED", true, IniSettingType.Bool);
-        Add("SOUNDATTENUATION_MIN", 0.6f, 0f, 1f, IniSettingType.Float);
-        Add("SOUNDATTENUATION_FORCE_SCREEN_SPACE", false, IniSettingType.Bool);
-        Add("SOUNDATTENUATION_INWORLD_THRESHOLD", 60f, 0f, null, IniSettingType.Float);
-        Add("SOUNDATTENUATION_INWORLD_DISTANCE", 500f, 0f, null, IniSettingType.Float);
+        Add(GetKey(SettingKey.MenuColor), new Color(32, 0, 192), IniSettingType.Color);
+        Add(GetKey(SettingKey.PlayerBlinkColor), new Color(255, 255, 255), IniSettingType.Color);
+        Add(GetKey(SettingKey.SoundPanningEnabled), true, IniSettingType.Bool);
+        Add(GetKey(SettingKey.SoundPanningStrength), 0.7f, 0f, 1f, IniSettingType.Float);
+        Add(GetKey(SettingKey.SoundPanningForceScreenSpace), false, IniSettingType.Bool);
+        Add(GetKey(SettingKey.SoundPanningInworldThreshold), 60, 0, 1000, IniSettingType.Int);
+        Add(GetKey(SettingKey.SoundPanningInworldDistance), 400, 0, 1000, IniSettingType.Int);
+        Add(GetKey(SettingKey.SoundAttenuationEnabled), true, IniSettingType.Bool);
+        Add(GetKey(SettingKey.SoundAttenuationMin), 0.6f, 0f, 1f, IniSettingType.Float);
+        Add(GetKey(SettingKey.SoundAttenuationForceScreenSpace), false, IniSettingType.Bool);
+        Add(GetKey(SettingKey.SoundAttenuationInworldThreshold), 60, 0, 1000, IniSettingType.Int);
+        Add(GetKey(SettingKey.SoundAttenuationInworldDistance), 500, 0, 1000, IniSettingType.Int);
         for (int i = 1; i <= 8; i++)
         {
-            Add($"EXTENDEDPROFILES_{i}_PROFILE", 0, IniSettingType.Int);
+            Add(GetKey(SettingKey.ExtendedProfile) + i, 0, IniSettingType.Int);
         }
-        Add("MAINMENU_BG_USE_BLACK", true, IniSettingType.Bool);
-        Add("MAINMENU_TRACK_RANDOM", false, IniSettingType.Bool);
-        Add("LOW_HEALTH_SATURATION_FACTOR", 0.7f, 0f, 1f, IniSettingType.Float, true);
-        Add("LOW_HEALTH_THRESHOLD", 0.25f, 0f, 1f, IniSettingType.Float, true);
-        Add("USE_1_4_0_ASSETS", false, IniSettingType.Bool, true);
-        Add("USE_SFR_COLORS_FOR_TEAM5_TEAM6", true, IniSettingType.Bool, false);
+        Add(GetKey(SettingKey.MainMenuBgUseBlack), true, IniSettingType.Bool);
+        Add(GetKey(SettingKey.MainMenuTrackRandom), false, IniSettingType.Bool);
+        Add(GetKey(SettingKey.LowHealthSaturationFactor), 0.7f, 0f, 1f, IniSettingType.Float, true);
+        Add(GetKey(SettingKey.LowHealthThreshold), 0.25f, 0f, 1f, IniSettingType.Float, true);
+        Add(GetKey(SettingKey.Use140Assets), false, IniSettingType.Bool, true);
+        Add(GetKey(SettingKey.UseSfrColorsForTeam5Team6), true, IniSettingType.Bool, false);
 
-        Add("ALLOW_SPECTATORS", false, IniSettingType.Bool);
-        Add("ALLOW_SPECTATORS_ONLY_MODERATORS", true, IniSettingType.Bool);
-        Add("ALLOW_SPECTATORS_COUNT", 4, 1, 4, IniSettingType.Int);
+        Add(GetKey(SettingKey.AllowSpectators), false, IniSettingType.Bool);
+        Add(GetKey(SettingKey.AllowSpectatorsOnlyModerators), true, IniSettingType.Bool);
+        Add(GetKey(SettingKey.AllowSpectatorsCount), 4, 1, 4, IniSettingType.Int);
 
         b_initialized = true;
     }
     public static void ApplyOverrides()
     {
-        SFD.Constants.COLORS.MENU_BLUE = Values.GetColor("MENU_COLOR");
-        SFD.Constants.COLORS.PLAYER_FLASH_LIGHT = Values.GetColor("PLAYER_BLINK_COLOR");
-        SFD.Constants.PLAYER_1_PROFILE = Values.GetInt("EXTENDEDPROFILES_1_PROFILE");
-        SFD.Constants.PLAYER_2_PROFILE = Values.GetInt("EXTENDEDPROFILES_2_PROFILE");
-        SFD.Constants.PLAYER_3_PROFILE = Values.GetInt("EXTENDEDPROFILES_3_PROFILE");
-        SFD.Constants.PLAYER_4_PROFILE = Values.GetInt("EXTENDEDPROFILES_4_PROFILE");
-        SFD.Constants.PLAYER_5_PROFILE = Values.GetInt("EXTENDEDPROFILES_5_PROFILE");
-        SFD.Constants.PLAYER_6_PROFILE = Values.GetInt("EXTENDEDPROFILES_6_PROFILE");
-        SFD.Constants.PLAYER_7_PROFILE = Values.GetInt("EXTENDEDPROFILES_7_PROFILE");
-        SFD.Constants.PLAYER_8_PROFILE = Values.GetInt("EXTENDEDPROFILES_8_PROFILE");
+        SFD.Constants.COLORS.MENU_BLUE = Values.Get<Color>(GetKey(SettingKey.MenuColor));
+        SFD.Constants.COLORS.PLAYER_FLASH_LIGHT = Values.Get<Color>(GetKey(SettingKey.PlayerBlinkColor));
+        SFD.Constants.PLAYER_1_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "1");
+        SFD.Constants.PLAYER_2_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "2");
+        SFD.Constants.PLAYER_3_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "3");
+        SFD.Constants.PLAYER_4_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "4");
+        SFD.Constants.PLAYER_5_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "5");
+        SFD.Constants.PLAYER_6_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "6");
+        SFD.Constants.PLAYER_7_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "7");
+        SFD.Constants.PLAYER_8_PROFILE = Values.Get<int>(GetKey(SettingKey.ExtendedProfile) + "8");
 
         Logger.LogDebug("CONFIG.INI: Applied values to SFD's internals");
     }
@@ -79,6 +143,13 @@ public static class Values
             }
         }
     }
+    public static void ResetToDefaults()
+    {
+        foreach(IniSetting setting in List.Values)
+        {
+            setting.Reset();
+        }
+    }
     private static void Add(string key, object value, IniSettingType type, bool requiresRestart = false)
     {
         List.Add(key.ToUpperInvariant(), new IniSetting(key.ToUpperInvariant(), value, type, null, null, requiresRestart));
@@ -87,55 +158,122 @@ public static class Values
     {
         List.Add(key.ToUpperInvariant(), new IniSetting(key.ToUpperInvariant(), value, type, minValue, maxValue, requiresRestart));
     }
-    public static bool SetSetting(string key, object newValue)
+    
+    public static T Get<T>(string key, bool getDefault = false)
     {
-        if (List.ContainsKey(key.ToUpperInvariant()))
+        key = key.ToUpperInvariant();
+
+        if (!List.ContainsKey(key))
         {
-            List[key.ToUpperInvariant()].Value = newValue;
-            Config.NeedsSaving = true;
-            return true;
+            string mess = $"CONFIG.INI: Trying to GET key '{key}', key not found!!";
+            Logger.LogError(mess);
+            throw new KeyNotFoundException(mess);
         }
-        return false;
+
+        IniSetting setting = List[key];
+        if (setting.ValueType != typeof(T))
+        {
+            string mess = $"CONFIG.INI: Trying to GET value '{key}' from type '{typeof(T)}', key is type {setting.ValueType}!!";
+            Logger.LogError(mess);
+            throw new Exception(mess);
+        }
+
+        return (T)setting.Get(getDefault);
     }
-    public static float GetFloat(string key)
+    public static T GetLimit<T>(string key, bool getMaxValue = false)
     {
-        return (float)List[key.ToUpperInvariant()].Get();
+        key = key.ToUpperInvariant();
+
+        if (!List.ContainsKey(key))
+        {
+            string mess = $"CONFIG.INI: Trying to GET LIMIT key '{key}', key not found!!";
+            Logger.LogError(mess);
+            throw new KeyNotFoundException(mess);
+        }
+
+        IniSetting setting = List[key];
+        if (setting.ValueType != typeof(T))
+        {
+            string mess = $"CONFIG.INI: Trying to GET LIMIT value '{key}' from type '{typeof(T)}', key is type {setting.ValueType}!!";
+            Logger.LogError(mess);
+            throw new Exception(mess);
+        }
+
+        return (T)setting.GetLimit(getMaxValue);
     }
-    public static int GetInt(string key)
+    public static void Set<T>(string key, T value)
     {
-        return (int)List[key.ToUpperInvariant()].Get();
-    }
-    public static string GetString(string key)
-    {
-        return (string)List[key.ToUpperInvariant()].Get();
-    }
-    public static Color GetColor(string key)
-    {
-        return (Color)List[key.ToUpperInvariant()].Get();
-    }
-    public static bool GetBool(string key)
-    {
-        return (bool)List[key.ToUpperInvariant()].Get();
+        key = key.ToUpperInvariant();
+
+        if (!List.ContainsKey(key))
+        {
+            string mess = $"CONFIG.INI: Trying to SET key '{key}', key not found!!";
+            Logger.LogError(mess);
+            throw new KeyNotFoundException(mess);
+        }
+
+        IniSetting setting = List[key];
+        if (setting.ValueType != typeof(T))
+        {
+            string mess = $"CONFIG.INI: Trying to SET value '{key}' from type '{typeof(T)}', key is type {setting.ValueType}!!";
+            Logger.LogError(mess);
+            throw new Exception(mess);
+        }
+
+        if (setting.RequiresGameRestart && !Config.FirstRefresh)
+        {
+            string mess = $"CONFIG.INI: '{key}' requires GAME-RESTART to properly change from {setting.Value} to {value}!";
+            Logger.LogWarn(mess);
+        }
+
+        if (!setting.Value.Equals(value))
+        {
+            Config.NeedsSaving = true;
+        }
+
+        setting.Value = value;
     }
 
-    // Settings base class
     public enum IniSettingType
     {
-        Float = 0,
-        Int = 1,
-        String = 2,
-        Color = 3,
-        Bool = 4,
+        Float,
+        Int,
+        String,
+        Color,
+        Bool,
     }
     public class IniSetting
     {
         public IniSettingType Type = IniSettingType.Int;
+        public Type ValueType
+        {
+            get
+            {
+                switch(Type)
+                {
+                    default:
+                        return typeof(object);
+                    case IniSettingType.Float:
+                        return typeof(float);
+                    case IniSettingType.Int:
+                        return typeof(int);
+                    case IniSettingType.String:
+                        return typeof(string);
+                    case IniSettingType.Color:
+                        return typeof(Color);
+                    case IniSettingType.Bool:
+                        return typeof(bool);
+                }
+            }
+        }
+        
         public string Key;
         public object Value;
         public object MinValue;
         public object MaxValue;
         public readonly object Default;
         public readonly bool RequiresGameRestart;
+
         public IniSetting(string saveKey, object saveValue, IniSettingType saveType, object minValue = null, object maxValue = null, bool requiresRestart = false)
         {
             this.Key = saveKey.ToUpperInvariant();
@@ -153,7 +291,7 @@ public static class Values
             {
                 case IniSettingType.Color:
                     // Use SFD's way to store color
-                    string colorString = SFD.Constants.ColorToString((Color)(saveAsDefault ? this.Default : this.Value));
+                    string colorString = Constants.ColorToString((Color)(saveAsDefault ? this.Default : this.Value));
                     line = this.Key + "=" + colorString;
                     break;
                 case IniSettingType.Float:
@@ -223,22 +361,70 @@ public static class Values
                 this.Save(Handler, true);
             }
         }
-        public object Get()
+        public object Get(bool getDefault = false)
         {
             switch (this.Type)
             {
                 case IniSettingType.Float:
-                    return (float)this.Value;
+                    return (float)(getDefault ? this.Default : this.Value);
                 case IniSettingType.Int:
-                    return (int)this.Value;
+                    return (int)(getDefault ? this.Default : this.Value);
                 case IniSettingType.String:
-                    return (string)this.Value;
+                    return (string)(getDefault ? this.Default : this.Value);
                 case IniSettingType.Color:
-                    return (Color)this.Value;
+                    return (Color)(getDefault ? this.Default : this.Value);
                 case IniSettingType.Bool:
-                    return (bool)this.Value;
+                    return (bool)(getDefault ? this.Default : this.Value);
                 default:
-                    return this.Value;
+                    return (getDefault ? this.Default : this.Value);
+            }
+        }
+        public void Reset()
+        {
+            if (!Config.FirstRefresh && RequiresGameRestart && !this.Default.Equals(this.Value))
+            {
+                Logger.LogWarn($"CONFIG.INI: Failed to RESET '{this.Key}' from {this.Value} to {this.Default}, requires a game-restart!");
+                return;
+            }
+
+            switch (this.Type)
+            {
+                case IniSettingType.Float:
+                    this.Value = (float)(this.Default);
+                    break;
+                case IniSettingType.Int:
+                    this.Value = (int)(this.Default);
+                    break;
+                case IniSettingType.String:
+                    this.Value = (string)(this.Default);
+                    break;
+                case IniSettingType.Color:
+                    this.Value = (Color)(this.Default);
+                    break;
+                case IniSettingType.Bool:
+                    this.Value = (bool)(this.Default);
+                    break;
+                default:
+                    this.Value = this.Default;
+                    break;
+            }
+        }
+        public object GetLimit(bool getMaxValue)
+        {
+            switch (this.Type)
+            {
+                case IniSettingType.Float:
+                    return (float)(getMaxValue ? this.MaxValue : this.MinValue);
+                case IniSettingType.Int:
+                    return (int)(getMaxValue ? this.MaxValue : this.MinValue);
+                case IniSettingType.String:
+                    return (string)(getMaxValue ? this.MaxValue : this.MinValue);
+                case IniSettingType.Color:
+                    return (Color)(getMaxValue ? this.MaxValue : this.MinValue);
+                case IniSettingType.Bool:
+                    return (bool)(getMaxValue ? this.MaxValue : this.MinValue);
+                default:
+                    return (getMaxValue ? this.MaxValue : this.MinValue);
             }
         }
     }

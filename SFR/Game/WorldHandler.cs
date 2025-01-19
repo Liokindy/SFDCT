@@ -76,9 +76,9 @@ internal static class WorldHandler
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
     private static IEnumerable<CodeInstruction> SaturationPatch(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(760).operand = CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
-        instructions.ElementAt(764).operand = CSettings.GetFloat("LOW_HEALTH_THRESHOLD");
-        instructions.ElementAt(770).operand = CSettings.GetFloat("LOW_HEALTH_SATURATION_FACTOR");
+        instructions.ElementAt(760).operand = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.LowHealthThreshold));
+        instructions.ElementAt(764).operand = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.LowHealthThreshold));
+        instructions.ElementAt(770).operand = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.LowHealthSaturationFactor));
 
         return instructions;
     }

@@ -10,7 +10,7 @@ using HarmonyLib;
 namespace SFDCT.UI;
 
 [HarmonyPatch]
-internal static class TextboxTweaks
+internal static class TextboxHandler
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(TextBox), nameof(TextBox.KeyPress))]

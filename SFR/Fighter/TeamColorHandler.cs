@@ -52,7 +52,7 @@ namespace SFDCT.Fighter
         [HarmonyPatch(typeof(Constants), nameof(Constants.GetTeamColor), new Type[] { typeof(int) })]
         private static bool GetTeamColor(ref Color __result, int team)
         {
-            bool useSFRTeams = CSettings.GetBool("USE_SFR_COLORS_FOR_TEAM5_TEAM6");
+            bool useSFRTeams = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.UseSfrColorsForTeam5Team6));
 
             switch (team)
             {
@@ -85,7 +85,7 @@ namespace SFDCT.Fighter
         [HarmonyPatch(typeof(Constants.COLORS), nameof(Constants.COLORS.GetTeamColor), new Type[] { typeof(TeamIcon), typeof(Constants.COLORS.TeamColorType) })]
         private static bool ConstantsColorsGetTeamColor(ref Color __result, TeamIcon team, Constants.COLORS.TeamColorType type = Constants.COLORS.TeamColorType.Default)
         {
-            bool useSFRTeams = CSettings.GetBool("USE_SFR_COLORS_FOR_TEAM5_TEAM6");
+            bool useSFRTeams = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.UseSfrColorsForTeam5Team6));
 
             switch (type)
             {
