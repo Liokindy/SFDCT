@@ -200,14 +200,6 @@ internal static class CommandHandler
                 return true;
             }
 
-            if (args.IsCommand("REFANIM"))
-            {
-                bool result = false;
-                SFDCT.Bootstrap.Assets.AnimationsLoader.Load(null, ref result);
-                
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Refreshed animations!", args.SenderGameUser));
-            }
-
             // Makes it possible for the host to add, remove or list MODERATOR_COMMANDS in-game
             Color c1 = new Color(159, 255, 64);
             if (args.IsCommand("ADDMODCOMMANDS"))

@@ -1,9 +1,11 @@
 ﻿using System.Linq;
-using SFD;
-using HarmonyLib;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using SFD;
+using SFD.Effects;
 using CGlobals = SFDCT.Misc.Globals;
 using CSettings = SFDCT.Settings.Values;
+using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -36,6 +38,17 @@ internal static class WorldHandler
         }
 
         return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(EffectHandler), nameof(EffectHandler.CreateEffect))]
+    private static bool EffectHandlerCreateEffect(string effectId, Vector2 worldPosition, GameWorld gameWorld, object[] args)
+    {
+        if (effectId.Equals("HIT"))
+        {
+            return false;
+        }
+        return true;
     }
 
     /// <summary>

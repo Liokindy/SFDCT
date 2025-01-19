@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Sounds;
-using SFDCT.Helper;
 using CSettings = SFDCT.Settings.Values;
 
 namespace SFDCT.Game;
@@ -155,7 +152,7 @@ internal static class SoundPatches
             return;
         }
 
-        if (soundID == "NONE" || string.IsNullOrEmpty(soundID))
+        if (soundID.Equals("NONE", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(soundID))
         {
             return;
         }
