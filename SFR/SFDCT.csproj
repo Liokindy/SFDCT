@@ -164,6 +164,8 @@
     <Compile Include="Projectiles\SoundPanning\ProjectileBow.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
+    <Compile Include="UI\Panels\Tweaks\Dropdown.cs" />
+    <Compile Include="UI\Panels\Tweaks\LobbySlotDropdown.cs" />
     <Compile Include="UI\ProfilesHandler.cs" />
     <Compile Include="Game\CommandHandler.cs" />
     <Compile Include="Game\Commands\DebugMouse.cs" />
