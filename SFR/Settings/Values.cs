@@ -38,6 +38,7 @@ public static class Values
         AllowSpectatorsOnlyModerators,
         AllowSpectatorsCount,
         ExtendedProfile,
+        HideFilmgrain,
     }
     public static string GetKey(SettingKey key)
     {
@@ -69,6 +70,7 @@ public static class Values
             case SettingKey.AllowSpectatorsOnlyModerators:      return "ALLOW_SPECTATORS_ONLY_MODERATORS";
             case SettingKey.AllowSpectatorsCount:               return "ALLOW_SPECTATORS_COUNT";
             case SettingKey.ExtendedProfile:                    return "EXTENDEDPROFILES_PROFILE_";
+            case SettingKey.HideFilmgrain:                      return "HIDE_FILMGRAIN";
         }
     }
 
@@ -107,6 +109,7 @@ public static class Values
         Add(GetKey(SettingKey.AllowSpectators), false, IniSettingType.Bool);
         Add(GetKey(SettingKey.AllowSpectatorsOnlyModerators), true, IniSettingType.Bool);
         Add(GetKey(SettingKey.AllowSpectatorsCount), 4, 1, 4, IniSettingType.Int);
+        Add(GetKey(SettingKey.HideFilmgrain), false, IniSettingType.Bool);
 
         b_initialized = true;
     }

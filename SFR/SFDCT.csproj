@@ -162,6 +162,7 @@
     <Compile Include="OnlineServices\Slots.cs" />
     <Compile Include="Projectiles\SoundPanning\Default.cs" />
     <Compile Include="Projectiles\SoundPanning\ProjectileBow.cs" />
+    <Compile Include="UI\FilmgrainHandler.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
     <Compile Include="UI\Panels\Tweaks\Dropdown.cs" />

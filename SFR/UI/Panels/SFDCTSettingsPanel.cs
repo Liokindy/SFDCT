@@ -13,6 +13,7 @@ namespace SFDCT.UI.Panels
     {
         private bool m_modifiedSettings;
         private bool m_OriginalSoundPanningEnabled;
+        private bool m_OriginalHideFilmgrain;
         private Color m_OriginalMenuColor;
         private float m_OriginalSoundPanningStrength;
         private bool m_OriginalSoundPanningScreenSpace;
@@ -37,6 +38,8 @@ namespace SFDCT.UI.Panels
         private MenuItemSlider m_menuItemSoundPanningThreshold = null;
         private MenuItemSlider m_menuItemSoundPanningDistance = null;
 
+        private MenuItemDropdown m_menuItemHideFilmgrain = null;
+
         private MenuItemDropdown m_menuItemMainMenuRandomTrackEnabled = null;
         private MenuItemDropdown m_menuItemMainMenuBlackEnabled = null;
 
@@ -52,6 +55,7 @@ namespace SFDCT.UI.Panels
         private MenuItemSlider m_menuItemSoundAttenuationThreshold = null;
         private MenuItemSlider m_menuItemSoundAttenuationDistance = null;
 
+        private MenuItemValueChangedEvent m_menuItemHideFilmgrainValueChanged = null;
         private MenuItemValueChangedEvent m_menuItemSoundPanningEnabledValueChanged = null;
         private MenuItemValueChangedEvent m_menuItemSoundPanningStrengthValueChanged = null;
         private MenuItemValueChangedEvent m_menuItemSoundPanningScreenSpaceValueChanged = null;
@@ -134,7 +138,13 @@ namespace SFDCT.UI.Panels
                 LanguageHelper.GetText("general.off"),
             ]);
             m_menuItemSFRTeamColorsEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.UseSfrColorsForTeam5Team6)) ? 0 : 1);
+            m_menuItemHideFilmgrain = new MenuItemDropdown("HIDE FILMGRAIN", [
+                LanguageHelper.GetText("general.yes"),
+                LanguageHelper.GetText("general.no"),
+            ]);
+            m_menuItemHideFilmgrain.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.HideFilmgrain)) ? 0 : 1);
 
+            m_menuItemHideFilmgrainValueChanged += m_menuItemHideFilmgrain_ValueChanged; HookHandler.Hook(m_menuItemHideFilmgrain, m_menuItemHideFilmgrainValueChanged);
             m_menuItemSpectatorEnabledValueChanged += m_menuItemSpectatorEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorEnabled, m_menuItemSpectatorEnabledValueChanged);
             m_menuItemSoundPanningEnabledValueChanged += m_menuItemSoundPanningEnabled_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningEnabled, m_menuItemSoundPanningEnabledValueChanged);
             m_menuItemSoundPanningStrengthValueChanged += m_menuItemSoundPanningStrength_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningStrength, m_menuItemSoundPanningStrengthValueChanged);
@@ -177,6 +187,7 @@ namespace SFDCT.UI.Panels
                 m_menuItemSpectatorCount,
                 new MenuItemSeparator("MISC"),
                 m_menuItemSFRTeamColorsEnabled,
+                m_menuItemHideFilmgrain,
                 new MenuItemSeparator(""),
                 new MenuItemButton("RESET TO DEFAULT", new ControlEvents.ChooseEvent(this.setDefault), "micon_settings"),
                 new MenuItemButton(LanguageHelper.GetText("button.done"), new ControlEvents.ChooseEvent(this.ok), "micon_ok"),
@@ -189,6 +200,7 @@ namespace SFDCT.UI.Panels
         private void SetOriginalValues()
         {
             m_modifiedSettings = false;
+            m_OriginalHideFilmgrain = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.HideFilmgrain));
             m_OriginalSoundPanningEnabled = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled));
             m_OriginalMenuColor = CSettings.Get<Color>(CSettings.GetKey(CSettings.SettingKey.MenuColor));
             m_OriginalSoundPanningStrength = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength));
@@ -209,6 +221,7 @@ namespace SFDCT.UI.Panels
         }
         public override void Dispose()
         {
+            HookHandler.DisposeHook(m_menuItemHideFilmgrain); m_menuItemHideFilmgrainValueChanged = null;
             HookHandler.DisposeHook(m_menuItemSoundPanningEnabled); m_menuItemSoundPanningEnabledValueChanged = null;
             HookHandler.DisposeHook(m_menuItemSoundPanningStrength); m_menuItemSoundPanningStrengthValueChanged = null;
             HookHandler.DisposeHook(m_menuItemSoundPanningScreenSpace); m_menuItemSoundPanningScreenSpaceValueChanged = null;
@@ -238,6 +251,7 @@ namespace SFDCT.UI.Panels
             }
             base.KeyPress(key);
         }
+        
         private void m_menuItemMenuColor_TextSetValidationItem(string textToValidate, TextValidationEventArgs e)
         {
             textToValidate = textToValidate.Replace("#", "");
@@ -279,6 +293,12 @@ namespace SFDCT.UI.Panels
                     MessageStack.Show("Failed parsing HEX color", MessageStackType.Information);
                 }
             }
+        }
+
+        private void m_menuItemHideFilmgrain_ValueChanged(MenuItem sender)
+        {
+            m_modifiedSettings = true;
+            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.HideFilmgrain), m_menuItemHideFilmgrain.ValueId == 0);
         }
         private void m_menuItemSoundPanningEnabled_ValueChanged(MenuItem sender)
         {
@@ -365,6 +385,7 @@ namespace SFDCT.UI.Panels
         {
             CSettings.ResetToDefaults();
 
+            m_menuItemHideFilmgrain.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.HideFilmgrain)) ? 0 : 1);
             m_menuItemSoundPanningEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
             m_menuItemSoundPanningScreenSpace.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace)) ? 0 : 1);
             m_menuItemSoundAttenuationEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled)) ? 0 : 1);
