@@ -55,6 +55,8 @@ namespace SFDCT.UI.Panels
         private MenuItemSlider m_menuItemSoundAttenuationThreshold = null;
         private MenuItemSlider m_menuItemSoundAttenuationDistance = null;
 
+        private MenuItemButton m_menuItemResetToDefault = null;
+
         private MenuItemValueChangedEvent m_menuItemHideFilmgrainValueChanged = null;
         private MenuItemValueChangedEvent m_menuItemSoundPanningEnabledValueChanged = null;
         private MenuItemValueChangedEvent m_menuItemSoundPanningStrengthValueChanged = null;
@@ -83,6 +85,7 @@ namespace SFDCT.UI.Panels
                 LanguageHelper.GetText("general.off"),
             ]);
             m_menuItemSoundPanningEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
+
             m_menuItemSoundPanningStrength = new MenuItemSlider("STRENGTH", (int)(CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength)) * 100f), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength)) * 100), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength), true) * 100));
             m_menuItemSoundPanningScreenSpace = new MenuItemDropdown("USE SCREEN SPACE", [
                 LanguageHelper.GetText("general.on"),
@@ -144,25 +147,28 @@ namespace SFDCT.UI.Panels
             ]);
             m_menuItemHideFilmgrain.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.HideFilmgrain)) ? 0 : 1);
 
-            m_menuItemHideFilmgrainValueChanged += m_menuItemHideFilmgrain_ValueChanged; HookHandler.Hook(m_menuItemHideFilmgrain, m_menuItemHideFilmgrainValueChanged);
-            m_menuItemSpectatorEnabledValueChanged += m_menuItemSpectatorEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorEnabled, m_menuItemSpectatorEnabledValueChanged);
+            m_menuItemResetToDefault = new MenuItemButton("RESET TO DEFAULT", new ControlEvents.ChooseEvent(this.setDefault), "micon_settings");
+
             m_menuItemSoundPanningEnabledValueChanged += m_menuItemSoundPanningEnabled_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningEnabled, m_menuItemSoundPanningEnabledValueChanged);
             m_menuItemSoundPanningStrengthValueChanged += m_menuItemSoundPanningStrength_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningStrength, m_menuItemSoundPanningStrengthValueChanged);
             m_menuItemSoundPanningScreenSpaceValueChanged += m_menuItemSoundPanningScreenSpace_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningScreenSpace, m_menuItemSoundPanningScreenSpaceValueChanged);
             m_menuItemSoundPanningThresholdValueChanged += m_menuItemSoundPanningThreshold_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningThreshold, m_menuItemSoundPanningThresholdValueChanged);
             m_menuItemSoundPanningDistanceValueChanged += m_menuItemSoundPanningDistance_ValueChanged; HookHandler.Hook(m_menuItemSoundPanningDistance, m_menuItemSoundPanningDistanceValueChanged);
-            m_menuItemMainMenuRandomTrackEnabledValueChanged += m_menuItemMainMenuRandomTrackEnabled_ValueChanged; HookHandler.Hook(m_menuItemMainMenuRandomTrackEnabled, m_menuItemMainMenuRandomTrackEnabledValueChanged);
-            m_menuItemMainMenuBlackEnabledValueChanged += m_menuItemMainMenuBlackEnabled_ValueChanged; HookHandler.Hook(m_menuItemMainMenuBlackEnabled, m_menuItemMainMenuBlackEnabledValueChanged);
-            m_menuItemSFRTeamColorsEnabledValueChanged += m_menuItemSFRTeamColorsEnabled_ValueChanged; HookHandler.Hook(m_menuItemSFRTeamColorsEnabled, m_menuItemSFRTeamColorsEnabledValueChanged);
-            m_menuItemSpectatorEnabledValueChanged += m_menuItemSpectatorEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorEnabled, m_menuItemSpectatorEnabledValueChanged);
-            m_menuItemSpectatorOnlyModEnabledValueChanged += m_menuItemSpectatorOnlyModEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorOnlyModEnabled, m_menuItemSpectatorOnlyModEnabledValueChanged);
-            m_menuItemSpectatorCountValueChanged += m_menuItemSpectatorCount_ValueChanged; HookHandler.Hook(m_menuItemSpectatorCount, m_menuItemSpectatorCountValueChanged);
             m_menuItemSoundAttenuationEnabledValueChanged += m_menuItemSoundAttenuationEnabled_ValueChanged; HookHandler.Hook(m_menuItemSoundAttenuationEnabled, m_menuItemSoundAttenuationEnabledValueChanged);
             m_menuItemSoundAttenuationMinValueChanged += m_menuItemSoundAttenuationMin_ValueChanged; HookHandler.Hook(m_menuItemSoundAttenuationMin, m_menuItemSoundAttenuationMinValueChanged);
             m_menuItemSoundAttenuationScreenSpaceValueChanged += m_menuItemSoundAttenuationScreenSpace_ValueChanged; HookHandler.Hook(m_menuItemSoundAttenuationScreenSpace, m_menuItemSoundAttenuationScreenSpaceValueChanged);
             m_menuItemSoundAttenuationThresholdValueChanged += m_menuItemSoundAttenuationThreshold_ValueChanged; HookHandler.Hook(m_menuItemSoundAttenuationThreshold, m_menuItemSoundAttenuationThresholdValueChanged);
             m_menuItemSoundAttenuationDistanceValueChanged += m_menuItemSoundAttenuationDistance_ValueChanged; HookHandler.Hook(m_menuItemSoundAttenuationDistance, m_menuItemSoundAttenuationDistanceValueChanged);
             m_menuItemMenuColorTextSetValidationItem += m_menuItemMenuColor_TextSetValidationItem; HookHandler.Hook(m_menuItemMenuColor.TextSetValidationItem, m_menuItemMenuColorTextSetValidationItem);
+            m_menuItemMainMenuRandomTrackEnabledValueChanged += m_menuItemMainMenuRandomTrackEnabled_ValueChanged; HookHandler.Hook(m_menuItemMainMenuRandomTrackEnabled, m_menuItemMainMenuRandomTrackEnabledValueChanged);
+            m_menuItemMainMenuBlackEnabledValueChanged += m_menuItemMainMenuBlackEnabled_ValueChanged; HookHandler.Hook(m_menuItemMainMenuBlackEnabled, m_menuItemMainMenuBlackEnabledValueChanged);
+            m_menuItemSpectatorEnabledValueChanged += m_menuItemSpectatorEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorEnabled, m_menuItemSpectatorEnabledValueChanged);
+            m_menuItemSpectatorOnlyModEnabledValueChanged += m_menuItemSpectatorOnlyModEnabled_ValueChanged; HookHandler.Hook(m_menuItemSpectatorOnlyModEnabled, m_menuItemSpectatorOnlyModEnabledValueChanged);
+            m_menuItemSpectatorCountValueChanged += m_menuItemSpectatorCount_ValueChanged; HookHandler.Hook(m_menuItemSpectatorCount, m_menuItemSpectatorCountValueChanged);
+            m_menuItemSFRTeamColorsEnabledValueChanged += m_menuItemSFRTeamColorsEnabled_ValueChanged; HookHandler.Hook(m_menuItemSFRTeamColorsEnabled, m_menuItemSFRTeamColorsEnabledValueChanged);
+            m_menuItemHideFilmgrainValueChanged += m_menuItemHideFilmgrain_ValueChanged; HookHandler.Hook(m_menuItemHideFilmgrain, m_menuItemHideFilmgrainValueChanged);
+
+            SetTooltips();
 
             List <MenuItem> items = [
                 new MenuItemSeparator("SOUND PANNING"),
@@ -189,13 +195,38 @@ namespace SFDCT.UI.Panels
                 m_menuItemSFRTeamColorsEnabled,
                 m_menuItemHideFilmgrain,
                 new MenuItemSeparator(""),
-                new MenuItemButton("RESET TO DEFAULT", new ControlEvents.ChooseEvent(this.setDefault), "micon_settings"),
+                m_menuItemResetToDefault,
                 new MenuItemButton(LanguageHelper.GetText("button.done"), new ControlEvents.ChooseEvent(this.ok), "micon_ok"),
                 new MenuItemButton(LanguageHelper.GetText("button.back"), new ControlEvents.ChooseEvent(this.back), "micon_cancel"),
             ];
 
             Menu menu = new Menu(Vector2.UnitY * 50, this.Width, this.Height - 50, this, items.ToArray());
             this.members.Add(menu);
+        }
+        private void SetTooltips()
+        {
+            m_menuItemSoundPanningEnabled.Tooltip = "Enables or disables sound-panning, sound-panning pans sound to the left or right audio channels";
+            m_menuItemSoundPanningStrength.Tooltip = "Sets the strength of sound-panning, higher strength means more noticeable sound-panning";
+            m_menuItemSoundPanningScreenSpace.Tooltip = "Sets if sound-panning is calculated using the position on-screen rather than the in-world position of the sound";
+            m_menuItemSoundPanningThreshold.Tooltip = "Sets the in-world threshold of sound-panning in pixels, sounds within this distance of your character will not be panned";
+            m_menuItemSoundPanningDistance.Tooltip = "Sets the in-world distance of sound-panning in pixels, sounds further than this distance will be fully panned";
+
+            m_menuItemSoundAttenuationEnabled.Tooltip = "Enables or disables sound-attenuation, sound-attenuation lowers the volume of far away sounds";
+            m_menuItemSoundAttenuationMin.Tooltip = "Sets the minimum value of sound-attenuation, a lower minimum value means stronger sound-attenuation";
+            m_menuItemSoundAttenuationScreenSpace.Tooltip = "Sets if sound-attenuation is calculated using the position on-screen rather than the in-world position of the sound";
+            m_menuItemSoundAttenuationThreshold.Tooltip = "Sets the in-world threshold of sound-attenuation in pixels, sounds within this distance of your character will not be attenuated";
+            m_menuItemSoundAttenuationDistance.Tooltip = "Sets the in-world distance of sound-attenuation in pixels, sounds further than this distance will be fully attenuated";
+
+            m_menuItemMenuColor.Tooltip = "Sets the color of the UI using a HEX color, i.e: #FF00FF";
+            m_menuItemMainMenuRandomTrackEnabled.Tooltip = "Enables or disables if a random track is choosen to play in the main menu";
+            m_menuItemMainMenuBlackEnabled.Tooltip = "Enables or disables if the main menu background texture is drawn using black (turn off if you want to use a custom texture)";
+            m_menuItemSpectatorEnabled.Tooltip = "Enables or disables if spectators are allowed when hosting a server (the host will ignore this setting)";
+            m_menuItemSpectatorOnlyModEnabled.Tooltip = "Sets if only Moderators assigned by IP can join as Spectators when the server is full";
+            m_menuItemSpectatorCount.Tooltip = "Sets the maximum amount of spectators";
+            m_menuItemSFRTeamColorsEnabled.Tooltip = "Enables or disables if Team5 and Team6 use Purple and Cyan instead of Magenta and White. Note that these teams are only available through scripts or maps";
+            m_menuItemHideFilmgrain.Tooltip = "Hides or shows the FilmGrain effect (FilmGrain is forcefully hidden if effects level is set to low)";
+
+            m_menuItemResetToDefault.Tooltip = "Reset all values to their default values";
         }
         private void SetOriginalValues()
         {

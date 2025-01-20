@@ -29,13 +29,15 @@ internal static class MainMenuHandler
         {
             mainMenuPanel = __instance;
 
-            Menu menu = ((Menu)__instance.members[0]);
+            Menu menu = __instance.menu;
             MainMenuItem sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object obj) => { __instance.OpenSubPanel(new Panels.SFDCTSettingsPanel()); }));
 
             sfdctSettings.Initialize(menu);
 
-            menu.Height += 32;
-            menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
+            __instance.Height += 1;
+            menu.Height += 1;
+            menu.Items.Insert(menu.Items.Count - 2, sfdctSettings);
+            __instance.UpdatePosition();
         }
     }
 
@@ -50,7 +52,7 @@ internal static class MainMenuHandler
 
         sfdctSettings.Initialize(menu);
 
-        menu.Height += 32;
+        menu.Height += 1;
         menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
     }
 
