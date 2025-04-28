@@ -199,6 +199,14 @@ internal static class CommandHandler
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, $"Mouse dragging is set to {enabled}", args.SenderGameUser));
                 return true;
             }
+            
+            if (args.IsCommand("SENDCT") && args.Parameters.Count > 0)
+            {
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Sending SFDCT data...", args.SenderGameUser));
+
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Sent SFDCT data!", args.SenderGameUser));
+                return true;
+            }
 
             // Makes it possible for the host to add, remove or list MODERATOR_COMMANDS in-game
             Color c1 = new Color(159, 255, 64);

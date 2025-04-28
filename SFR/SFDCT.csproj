@@ -135,6 +135,7 @@
     <Compile Include="Bootstrap\Assets\ItemsLoader.cs" />
     <Compile Include="Bootstrap\Assets\SoundsLoader.cs" />
     <Compile Include="Bootstrap\Assets\TexturesLoader.cs" />
+    <Compile Include="Bootstrap\Scripts\CTWeaponsLoader.cs" />
     <Compile Include="Editor\Form.cs" />
     <Compile Include="Fighter\AnimHandler.cs" />
     <Compile Include="Fighter\DevHandler.cs" />
@@ -162,6 +163,10 @@
     <Compile Include="OnlineServices\Slots.cs" />
     <Compile Include="Projectiles\SoundPanning\Default.cs" />
     <Compile Include="Projectiles\SoundPanning\ProjectileBow.cs" />
+    <Compile Include="Sync\Custom\NetCTData.cs" />
+    <Compile Include="Sync\Custom\NetCTDataType.cs" />
+    <Compile Include="Sync\Custom\NetCTWeapon.cs" />
+    <Compile Include="Sync\NetMessagesHandler.cs" />
     <Compile Include="UI\FilmgrainHandler.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
@@ -196,6 +201,7 @@
     <Compile Include="UI\ExtendedSlots\Scoreboard.cs" />
     <Compile Include="UI\ScrollHandler.cs" />
     <Compile Include="UI\TextboxHandler.cs" />
+    <Compile Include="Weapons\Database.cs" />
     <Compile Include="Weapons\SoundPanning\Melee\CueStick.cs" />
     <Compile Include="Weapons\SoundPanning\Melee\CueStickShaft.cs" />
     <Compile Include="Weapons\SoundPanning\Melee\Flagpole.cs" />
@@ -242,6 +248,8 @@
     <Compile Include="Weapons\SoundPanning\Ranged\SniperRifle.cs" />
     <Compile Include="Weapons\SoundPanning\Ranged\TommyGun.cs" />
     <Compile Include="Weapons\SoundPanning\Ranged\Uzi.cs" />
+    <Compile Include="Weapons\WpnBaseMWeapon.cs" />
+    <Compile Include="Weapons\WpnBaseRWeapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

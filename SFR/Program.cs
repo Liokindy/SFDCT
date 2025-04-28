@@ -124,7 +124,7 @@ internal static class Program
         }
 
         Settings.Config.Initialize(); // SFDCT's config.ini loads before SFD is patched
-        
+
         // Patch SFD and start SFDCT
         Logger.LogInfo("Starting SFDCT...");
         Harmony.PatchAll();
