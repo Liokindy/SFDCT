@@ -1,3 +1,16 @@
+# IMPORTANT
+> [!WARNING]
+> SFDCT will **NOT** work in any other version that is not `1.3.7d`
+
+As of SFD 1.4.1, SFDCT is no longer working. SFDCT was based on SFR, I did not do the work for the internal patching. I have tried researching about it and did some experiments to try and get it to work on 1.4.1 but they all failed.
+
+Most of the useful features were added to SFD, so... There's no point in using SFDCT anymore.
+
+Because of all that, and several reasons regarding the community (toxicity, an entire discord server being griefed, hypocrisy, and more).
+
+I won't be doing more work on SFDCT anymore.
+
+# SFDCT
 SFDCT is my mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds some stuff me and my friends want in vanilla SFD.
 
 - Players with vanilla-SFD can join an SFDCT server, and if you use SFDCT you can join vanilla-SFD servers!
