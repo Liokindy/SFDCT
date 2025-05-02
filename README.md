@@ -2,13 +2,9 @@
 > [!WARNING]
 > SFDCT will **NOT** work in any other version that is not `1.3.7d`
 
-As of SFD 1.4.1, SFDCT is no longer working. SFDCT was based on SFR, I did not do the work for the internal patching. I have tried researching about it and did some experiments to try and get it to work on 1.4.1 but they all failed.
+I'm working to get SFDCT to work on SFD 1.4.1. Most of the features will have to get removed as they are officially implemented, and I don't know if I will get it to work.
 
-Most of the useful features were added to SFD, so... There's no point in using SFDCT anymore.
-
-Because of all that, and several reasons regarding the community (toxicity, an entire discord server being griefed, hypocrisy, and more).
-
-I won't be doing more work on SFDCT anymore.
+But there's still hope.
 
 # SFDCT
 SFDCT is my mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds some stuff me and my friends want in vanilla SFD.
