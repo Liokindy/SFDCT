@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("Superfighters Deluxe Custom")]
-[assembly: AssemblyCopyright("Copyright © Superfighters Deluxe Custom 2024")]
+[assembly: AssemblyCopyright("Copyright © Superfighters Deluxe Custom 2025")]
 [assembly: AssemblyTrademark("Superfighters Deluxe Custom")]
 [assembly: AssemblyProduct("Superfighters Deluxe Custom")]
 [assembly: AssemblyCulture("")]
