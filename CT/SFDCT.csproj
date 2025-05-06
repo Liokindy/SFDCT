@@ -109,11 +109,9 @@
     </Reference>
     <Reference Include="SFD.GameScriptInterface">
       <HintPath>..\SFD\SFD.GameScriptInterface.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="SFD.ScriptEngine">
       <HintPath>..\SFD\SFD.ScriptEngine.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -129,34 +127,18 @@
     </Compile>
     <Compile Include="Bootstrap\AssetsHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
-    <Compile Include="Editor\Form.cs" />
-    <Compile Include="Fighter\AnimHandler.cs" />
-    <Compile Include="Fighter\DevHandler.cs" />
-    <Compile Include="Fighter\PlayerHandler.cs" />
-    <Compile Include="Game\Commands\ExtendedSlots.cs" />
-    <Compile Include="Game\Voting\GameVoteManual.cs" />
+    <Compile Include="Fighter\CreditHandler.cs" />
     <Compile Include="Helper\Keyboard.cs" />
-    <Compile Include="Objects\Default.cs" />
     <Compile Include="OnlineServices\DSPreview.cs" />
     <Compile Include="OnlineServices\Security.cs" />
-    <Compile Include="Sync\Custom\NetCTData.cs" />
-    <Compile Include="Sync\Custom\NetCTDataType.cs" />
-    <Compile Include="Sync\Custom\NetCTWeapon.cs" />
-    <Compile Include="Sync\NetMessagesHandler.cs" />
-    <Compile Include="UI\FilmgrainHandler.cs" />
+    <Compile Include="Settings\IniSetting.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
-    <Compile Include="UI\Panels\Tweaks\Dropdown.cs" />
-    <Compile Include="UI\Panels\Tweaks\LobbySlotDropdown.cs" />
-    <Compile Include="UI\ProfilesHandler.cs" />
     <Compile Include="Game\CommandHandler.cs" />
-    <Compile Include="Game\Commands\DebugMouse.cs" />
-    <Compile Include="Game\SoundPatches.cs" />
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Editor\MapData.cs" />
     <Compile Include="Settings\Config.cs" />
-    <Compile Include="Misc\Tweaks.cs" />
     <Compile Include="OnlineServices\Browser.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -164,18 +146,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Settings\Values.cs" />
-    <Compile Include="Sync\Generic\DataType.cs" />
-    <Compile Include="Sync\Generic\GenericData.cs" />
-    <Compile Include="Sync\Generic\GenericServerData.cs" />
-    <Compile Include="OnlineServices\Host.cs" />
-    <Compile Include="Sync\SyncHandler.cs" />
-    <Compile Include="UI\ChatHandler.cs" />
     <Compile Include="Misc\Globals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\MainMenuHandler.cs" />
-    <Compile Include="UI\ScrollHandler.cs" />
-    <Compile Include="UI\TextboxHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -194,7 +168,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Objects\" />
     <Folder Include="Projectiles\" />
+    <Folder Include="Sync\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />

@@ -9,6 +9,16 @@
 
 ## SFDCT
 
+<details>
+
+<summary>Artist's Rendition</summary>
+
+<p align="center"><img src="./docs/sfdct_title_loop.gif" alt="sfdct_title_loop"/></p>
+
+</details>
+
+<p align="center"><img src="./docs/sfd_title_loop.gif" alt="sfd_title_loop"/></p>
+
 > [!NOTE]
 > This mod is in development. Features may be added, removed, or changed. Or the mod may break with SFD's updates.
 

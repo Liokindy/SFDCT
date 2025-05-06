@@ -1,31 +1,49 @@
-﻿using HarmonyLib;
-using SFDCT.Helper;
-//using SFDCT.Misc;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using SFDCT.Helper;
+using SFDCT.Misc;
+using HarmonyLib;
 
 namespace SFDCT;
 
 /// <summary>
-///     Entry point of SFDCT. This class will decide what game to start, SFDCT, vanilla-SFD, or SFR (if available).
+///     Entry point of SFDCT.
 /// </summary>
 internal static class Program
 {
     internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
+    
     internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT";
-    internal static readonly string GitHubVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/ModVersion.txt";
+    
+    internal static bool DebugMode = false;
     private static readonly Harmony Harmony = new("SuperfightersDeluxe_Custom");
 
     private static int Main(string[] args)
     {
-        // Patch SFD and start SFDCT
-        Logger.LogInfo("Starting SFDCT...");
+        DebugMode = true;
+
+        //
+        //
+
+        if (DebugMode)
+        {
+            Logger.LogWarn("--------------------------------");
+            Logger.LogWarn("RUNNING IN DEBUG MODE");
+            Logger.LogWarn("DEBUG MESSAGES WILL APPEAR");
+            Logger.LogWarn("--------------------------------");
+        }
+
+        Logger.LogInfo("Initializing SFDCT...");
+        Settings.Config.Initialize();
+
+        Logger.LogInfo("Patching SFD...");
         Harmony.PatchAll();
-        Logger.LogInfo("Patching completed...");
+
+        Logger.LogInfo("Starting SFD...");
         SFD.Program.Main(args);
 
         return 0;
