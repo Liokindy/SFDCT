@@ -20,7 +20,7 @@ internal static class MainMenuHandler
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.DrawInner))]
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(74).operand = $"{Globals.Version.SFD} - {Globals.Version.SFDCT}";
+        instructions.ElementAt(74).operand = $"{Constants.VERSION} - {Globals.Version.SFDCT}";
         return instructions;
     }
 
