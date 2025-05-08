@@ -1,57 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Graphics;
 using SFDCT.Helper;
 
-namespace SFDCT.Settings;
+namespace SFDCT.Configuration;
 
-public static partial class Values
+public static partial class Settings
 {
-    public enum SettingKey
-    {
-        SoundPanningEnabled,
-        SoundPanningStrength,
-        SoundPanningForceScreenSpace,
-        SoundPanningInworldThreshold,
-        SoundPanningInworldDistance,
-        SoundAttenuationEnabled,
-        SoundAttenuationMin,
-        SoundAttenuationForceScreenSpace,
-        SoundAttenuationInworldThreshold,
-        SoundAttenuationInworldDistance,
-        LowHealthSaturationFactor,
-        LowHealthThreshold,
-        HideFilmgrain,
-    }
-    public static string GetKey(SettingKey key)
-    {
-        switch (key)
-        {
-            default:
-                string mess = $"CONFIG.INI: Fail at GetKey, SettingKey '{key}' does not have a key!";
-                Logger.LogError(mess);
-                throw new Exception(mess);
-            case SettingKey.SoundPanningEnabled: return "SOUNDPANNING_ENABLED";
-            case SettingKey.SoundPanningStrength: return "SOUNDPANNING_STRENGTH";
-            case SettingKey.SoundPanningForceScreenSpace: return "SOUNDPANNING_FORCE_SCREEN_SPACE";
-            case SettingKey.SoundPanningInworldThreshold: return "SOUNDPANNING_INWORLD_THRESHOLD";
-            case SettingKey.SoundPanningInworldDistance: return "SOUNDPANNING_INWORLD_DISTANCE";
-            case SettingKey.SoundAttenuationEnabled: return "SOUNDATTENUATION_ENABLED";
-            case SettingKey.SoundAttenuationMin: return "SOUNDATTENUATION_MIN";
-            case SettingKey.SoundAttenuationForceScreenSpace: return "SOUNDATTENUATION_FORCE_SCREEN_SPACE";
-            case SettingKey.SoundAttenuationInworldThreshold: return "SOUNDATTENUATION_INWORLD_THRESHOLD";
-            case SettingKey.SoundAttenuationInworldDistance: return "SOUNDATTENUATION_INWORLD_DISTANCE";;
-            case SettingKey.LowHealthSaturationFactor: return "LOW_HEALTH_SATURATION_FACTOR";
-            case SettingKey.LowHealthThreshold: return "LOW_HEALTH_THRESHOLD";
-            case SettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
-        }
-    }
-
     public static Dictionary<string, IniSetting> List = [];
     private static bool b_initialized = false;
+
     public static void Init()
     {
         if (b_initialized)
@@ -60,7 +17,7 @@ public static partial class Values
         }
 
         Add(GetKey(SettingKey.SoundPanningEnabled), true, IniSettingType.Bool);
-        Add(GetKey(SettingKey.SoundPanningStrength), 0.7f, 0f, 1f, IniSettingType.Float);
+        Add(GetKey(SettingKey.SoundPanningStrength), 0.71f, 0f, 1f, IniSettingType.Float);
         Add(GetKey(SettingKey.SoundPanningForceScreenSpace), false, IniSettingType.Bool);
         Add(GetKey(SettingKey.SoundPanningInworldThreshold), 60, 0, 1000, IniSettingType.Int);
         Add(GetKey(SettingKey.SoundPanningInworldDistance), 400, 0, 1000, IniSettingType.Int);
@@ -69,7 +26,7 @@ public static partial class Values
         Add(GetKey(SettingKey.SoundAttenuationForceScreenSpace), false, IniSettingType.Bool);
         Add(GetKey(SettingKey.SoundAttenuationInworldThreshold), 60, 0, 1000, IniSettingType.Int);
         Add(GetKey(SettingKey.SoundAttenuationInworldDistance), 500, 0, 1000, IniSettingType.Int);
-        Add(GetKey(SettingKey.LowHealthSaturationFactor), 0.7f, 0f, 1f, IniSettingType.Float, true);
+        Add(GetKey(SettingKey.LowHealthSaturationFactor), 0.71f, 0f, 1f, IniSettingType.Float, true);
         Add(GetKey(SettingKey.LowHealthThreshold), 0.25f, 0f, 1f, IniSettingType.Float, true);
         Add(GetKey(SettingKey.HideFilmgrain), false, IniSettingType.Bool);
 
@@ -161,7 +118,7 @@ public static partial class Values
             throw new Exception(mess);
         }
 
-        if (setting.RequiresGameRestart && !Config.FirstRefresh)
+        if (setting.RequiresGameRestart && !IniFile.FirstRefresh)
         {
             string mess = $"CONFIG.INI: '{key}' requires GAME-RESTART to properly change from {setting.Value} to {value}!";
             Logger.LogWarn(mess);
@@ -169,7 +126,7 @@ public static partial class Values
 
         if (!setting.Value.Equals(value))
         {
-            Config.NeedsSaving = true;
+            IniFile.NeedsSaving = true;
         }
 
         setting.Value = value;

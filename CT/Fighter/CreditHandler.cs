@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using SFD;
 
 namespace SFDCT.Fighter;
 
@@ -10,21 +7,26 @@ internal static class CreditHandler
 {
     private static readonly Dictionary<string, Color> CreditColors = new()
     {
-        {"204624521", new Color(255, 255, 255)}, // Liokindy, main dev
-        {"000000000", new Color(255, 255, 255)}, // ElDou's1, friend
-        {"000000000", new Color(255, 255, 255)}, // Nult, friend
-        {"000000000", new Color(255, 255, 255)}, // Odex, SFR's main dev
+        {"204624521",  new Color(201, 255, 234)}, // Liokindy, main dev
+        {"1144477755", new Color(203, 255, 201)}, // ElDou's¹, many ideas
+        {"000000000",  new Color(255, 231, 201)}, // Nult, ideas
+
+        // - SFDCT wouldn't exist without SFR
+        {"913199347", new Color(242, 201, 255)}, // Odex, SFR's main dev
     };
 
-    internal static Color? GetCreditColor(string accountID)
+    internal static bool IsCredit(string accountID)
     {
-        string accountIDWithoutS = accountID.Substring(1);
-        
-        if (!CreditColors.ContainsKey(accountIDWithoutS))
+        return !string.IsNullOrEmpty(accountID) && CreditColors.ContainsKey(accountID.Substring(1));
+    }
+
+    internal static Color GetCreditColor(string accountID)
+    {
+        if (!IsCredit(accountID))
         {
-            return null;
+            return Color.White;
         }
 
-        return CreditColors[accountIDWithoutS];
+        return CreditColors[accountID.Substring(1)];
     }
 }

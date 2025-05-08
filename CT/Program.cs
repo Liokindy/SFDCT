@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using SFDCT.Helper;
 using SFDCT.Misc;
+using SFDCT.Configuration;
 using HarmonyLib;
 
 namespace SFDCT;
@@ -38,7 +39,7 @@ internal static class Program
         }
 
         Logger.LogInfo("Initializing SFDCT...");
-        Settings.Config.Initialize();
+        IniFile.Initialize();
 
         Logger.LogInfo("Patching SFD...");
         Harmony.PatchAll();

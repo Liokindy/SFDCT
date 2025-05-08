@@ -127,25 +127,30 @@
     </Compile>
     <Compile Include="Bootstrap\AssetsHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
+    <Compile Include="Configuration\SettingKey.cs" />
     <Compile Include="Fighter\CreditHandler.cs" />
+    <Compile Include="Fighter\PlayerHandler.cs" />
     <Compile Include="Helper\Keyboard.cs" />
     <Compile Include="OnlineServices\DSPreview.cs" />
     <Compile Include="OnlineServices\Security.cs" />
-    <Compile Include="Settings\IniSetting.cs" />
+    <Compile Include="Configuration\IniSetting.cs" />
+    <Compile Include="Sound\Panning.cs" />
+    <Compile Include="Sound\PanningPatches\Objects\Default.cs" />
+    <Compile Include="Sound\PanningPatches\Projectiles\Default.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
     <Compile Include="Game\CommandHandler.cs" />
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Editor\MapData.cs" />
-    <Compile Include="Settings\Config.cs" />
+    <Compile Include="Configuration\IniFile.cs" />
     <Compile Include="OnlineServices\Browser.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Settings\Values.cs" />
+    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Misc\Globals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

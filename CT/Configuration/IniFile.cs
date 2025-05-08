@@ -2,12 +2,11 @@
 using System.IO;
 using System.Threading;
 using SFD.Code;
+using SFDCT.Misc;
 using SFDCT.Helper;
-using CSettings = SFDCT.Settings.Values;
-using CConst = SFDCT.Misc.Globals;
 using HarmonyLib;
 
-namespace SFDCT.Settings;
+namespace SFDCT.Configuration;
 
 [HarmonyPatch]
 internal static class Refresh
@@ -18,14 +17,14 @@ internal static class Refresh
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, $"Refreshing '{CConst.Paths.CONFIGURATIONINI}'...");
-            Config.Refresh();
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, $"Refreshing '{Globals.Paths.CONFIGURATIONINI}'...");
+            IniFile.Refresh();
             SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, "Refreshed!");
         }
     }
 }
 
-internal static class Config
+internal static class IniFile
 {
     public static IniHandler Handler;
     public static bool NeedsSaving = false;
@@ -40,12 +39,12 @@ internal static class Config
         Handler = new IniHandler();
 
         // Initialize settings list
-        CSettings.Init();
+        Settings.Init();
 
         // Create config.ini if it doesnt exist.
-        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
+        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
-            using (FileStream fileStream = File.Create(CConst.Paths.CONFIGURATIONINI))
+            using (FileStream fileStream = System.IO.File.Create(Globals.Paths.CONFIGURATIONINI))
             {
                 fileStream.Close();
             }
@@ -55,12 +54,12 @@ internal static class Config
             Handler.ReadLine(";If setting order seems chaotic or shuffled randomly you might want to make a copy of this 'config.ini', rename it and let the game create a new 'config.ini'. Then manually copy your custom settings to it.");
 
             // Write default values to it
-            foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
+            foreach (KeyValuePair<string, IniSetting> kvp in Settings.List)
             {
                 kvp.Value.Save(Handler);
             }
 
-            Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
+            Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
             Handler.Clear();
         }
         Refresh();
@@ -68,7 +67,7 @@ internal static class Config
     public static void Refresh()
     {
         Logger.LogDebug("CONFIG.INI: Refreshing...");
-        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
+        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: File doesnt exist. Restart the game to create it again");
             return;
@@ -80,13 +79,13 @@ internal static class Config
         }
 
         Handler.Clear();
-        Handler.ReadFile(CConst.Paths.CONFIGURATIONINI);
-        foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
+        Handler.ReadFile(Globals.Paths.CONFIGURATIONINI);
+        foreach (KeyValuePair<string, IniSetting> kvp in Settings.List)
         {
             kvp.Value.Load(Handler);
         }
-        Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
-        CSettings.ApplyOverrides();
+        Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
+        Settings.ApplyOverrides();
 
         if (FirstRefresh)
         {
@@ -101,7 +100,7 @@ internal static class Config
         }
 
         Logger.LogDebug("CONFIG.INI: Saving...");
-        if (!File.Exists(CConst.Paths.CONFIGURATIONINI))
+        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
             return;
@@ -112,11 +111,11 @@ internal static class Config
             return;
         }
 
-        foreach (KeyValuePair<string, CSettings.IniSetting> kvp in CSettings.List)
+        foreach (KeyValuePair<string, IniSetting> kvp in Settings.List)
         {
             kvp.Value.Save(Handler);
         }
-        Handler.SaveFile(CConst.Paths.CONFIGURATIONINI);
+        Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
         Logger.LogDebug("CONFIG.INI: Saving finished.");
     }
 }

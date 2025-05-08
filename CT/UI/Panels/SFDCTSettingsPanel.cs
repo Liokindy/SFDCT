@@ -1,11 +1,10 @@
-﻿using System.Globalization;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.MenuControls;
-using CIni = SFDCT.Settings.Config;
-using CSettings = SFDCT.Settings.Values;
+using SFDCT.Configuration;
+using SFDCT.Misc;
 
 namespace SFDCT.UI.Panels
 {
@@ -54,30 +53,30 @@ namespace SFDCT.UI.Panels
                 LanguageHelper.GetText("general.on"),
                 LanguageHelper.GetText("general.off"),
             ]);
-            m_menuItemSoundPanningEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
+            m_menuItemSoundPanningEnabled.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
 
-            m_menuItemSoundPanningStrength = new MenuItemSlider("STRENGTH", (int)(CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength)) * 100f), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength)) * 100), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength), true) * 100));
+            m_menuItemSoundPanningStrength = new MenuItemSlider("STRENGTH", (int)(Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength)) * 100f), (int)(Settings.GetLimit<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength)) * 100), (int)(Settings.GetLimit<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength), true) * 100));
             m_menuItemSoundPanningScreenSpace = new MenuItemDropdown("USE SCREEN SPACE", [
                 LanguageHelper.GetText("general.on"),
                 LanguageHelper.GetText("general.off"),
             ]);
-            m_menuItemSoundPanningScreenSpace.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace)) ? 0 : 1);
-            m_menuItemSoundPanningThreshold = new MenuItemSlider("THRESHOLD", CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold)), (CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold), true)), 5);
-            m_menuItemSoundPanningDistance = new MenuItemSlider("DISTANCE", CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance)), (CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance), true)), 5);
+            m_menuItemSoundPanningScreenSpace.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningForceScreenSpace)) ? 0 : 1);
+            m_menuItemSoundPanningThreshold = new MenuItemSlider("THRESHOLD", Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold)), (Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold), true)), 5);
+            m_menuItemSoundPanningDistance = new MenuItemSlider("DISTANCE", Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance)), (Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance), true)), 5);
 
             m_menuItemSoundAttenuationEnabled = new MenuItemDropdown("ENABLE ATTENUATION", [
                 LanguageHelper.GetText("general.on"),
                 LanguageHelper.GetText("general.off"),
             ]);
-            m_menuItemSoundAttenuationEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled)) ? 0 : 1);
-            m_menuItemSoundAttenuationMin = new MenuItemSlider("STRENGTH", (int)(CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin)) * 100f), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin)) * 100), (int)(CSettings.GetLimit<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin), true) * 100));
+            m_menuItemSoundAttenuationEnabled.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationEnabled)) ? 0 : 1);
+            m_menuItemSoundAttenuationMin = new MenuItemSlider("STRENGTH", (int)(Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin)) * 100f), (int)(Settings.GetLimit<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin)) * 100), (int)(Settings.GetLimit<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin), true) * 100));
             m_menuItemSoundAttenuationScreenSpace = new MenuItemDropdown("USE SCREEN SPACE", [
                 LanguageHelper.GetText("general.on"),
                 LanguageHelper.GetText("general.off"),
             ]);
-            m_menuItemSoundAttenuationScreenSpace.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationForceScreenSpace)) ? 0 : 1);
-            m_menuItemSoundAttenuationThreshold = new MenuItemSlider("THRESHOLD", CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold), true), 5);
-            m_menuItemSoundAttenuationDistance = new MenuItemSlider("DISTANCE", CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance)), CSettings.GetLimit<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance), true), 5);
+            m_menuItemSoundAttenuationScreenSpace.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationForceScreenSpace)) ? 0 : 1);
+            m_menuItemSoundAttenuationThreshold = new MenuItemSlider("THRESHOLD", Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold), true), 5);
+            m_menuItemSoundAttenuationDistance = new MenuItemSlider("DISTANCE", Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance)), Settings.GetLimit<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance), true), 5);
 
             m_menuItemResetToDefault = new MenuItemButton("RESET TO DEFAULT", new ControlEvents.ChooseEvent(this.setDefault), "micon_settings");
 
@@ -138,16 +137,16 @@ namespace SFDCT.UI.Panels
         private void SetOriginalValues()
         {
             m_modifiedSettings = false;
-            m_OriginalSoundPanningEnabled = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled));
-            m_OriginalSoundPanningStrength = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength));
-            m_OriginalSoundPanningScreenSpace = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace));
-            m_OriginalSoundPanningThreshold = CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold));
-            m_OriginalSoundPanningDistance = CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance));
-            m_OriginalSoundAttenuationEnabled = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled));
-            m_OriginalSoundAttenuationMin = CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin));
-            m_OriginalSoundAttenuationScreenSpace = CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationForceScreenSpace));
-            m_OriginalSoundAttenuationThreshold = CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold));
-            m_OriginalSoundAttenuationDistance = CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance));
+            m_OriginalSoundPanningEnabled = Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled));
+            m_OriginalSoundPanningStrength = Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength));
+            m_OriginalSoundPanningScreenSpace = Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningForceScreenSpace));
+            m_OriginalSoundPanningThreshold = Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold));
+            m_OriginalSoundPanningDistance = Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance));
+            m_OriginalSoundAttenuationEnabled = Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationEnabled));
+            m_OriginalSoundAttenuationMin = Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin));
+            m_OriginalSoundAttenuationScreenSpace = Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationForceScreenSpace));
+            m_OriginalSoundAttenuationThreshold = Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold));
+            m_OriginalSoundAttenuationDistance = Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance));
         }
         public override void Dispose()
         {
@@ -177,91 +176,91 @@ namespace SFDCT.UI.Panels
         private void m_menuItemSoundPanningEnabled_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled), m_menuItemSoundPanningEnabled.ValueId == 0);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled), m_menuItemSoundPanningEnabled.ValueId == 0);
         }
         private void m_menuItemSoundPanningStrength_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength), (float)m_menuItemSoundPanningStrength.Value * 0.01f);
+            Settings.Set<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength), (float)m_menuItemSoundPanningStrength.Value * 0.01f);
         }
         private void m_menuItemSoundPanningScreenSpace_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace), m_menuItemSoundPanningScreenSpace.ValueId == 0);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningForceScreenSpace), m_menuItemSoundPanningScreenSpace.ValueId == 0);
         }
         private void m_menuItemSoundPanningThreshold_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold), m_menuItemSoundPanningThreshold.Value);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold), m_menuItemSoundPanningThreshold.Value);
         }
         private void m_menuItemSoundPanningDistance_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance), m_menuItemSoundPanningDistance.Value);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance), m_menuItemSoundPanningDistance.Value);
         }
         private void m_menuItemSoundAttenuationEnabled_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled), m_menuItemSoundAttenuationEnabled.ValueId == 0);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationEnabled), m_menuItemSoundAttenuationEnabled.ValueId == 0);
         }
         private void m_menuItemSoundAttenuationMin_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin), (float)m_menuItemSoundAttenuationMin.Value * 0.01f);
+            Settings.Set<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin), (float)m_menuItemSoundAttenuationMin.Value * 0.01f);
         }
         private void m_menuItemSoundAttenuationScreenSpace_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationForceScreenSpace), m_menuItemSoundAttenuationScreenSpace.ValueId == 0);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationForceScreenSpace), m_menuItemSoundAttenuationScreenSpace.ValueId == 0);
         }
         private void m_menuItemSoundAttenuationThreshold_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold), m_menuItemSoundAttenuationThreshold.Value);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold), m_menuItemSoundAttenuationThreshold.Value);
         }
         private void m_menuItemSoundAttenuationDistance_ValueChanged(MenuItem sender)
         {
             m_modifiedSettings = true;
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance), m_menuItemSoundAttenuationDistance.Value);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance), m_menuItemSoundAttenuationDistance.Value);
         }
 
         private void setDefault(object sender)
         {
-            CSettings.ResetToDefaults();
+            Settings.ResetToDefaults();
 
-            m_menuItemSoundPanningEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
-            m_menuItemSoundPanningScreenSpace.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace)) ? 0 : 1);
-            m_menuItemSoundAttenuationEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled)) ? 0 : 1);
-            m_menuItemSoundAttenuationScreenSpace.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationForceScreenSpace)) ? 0 : 1);
-            m_menuItemSoundPanningEnabled.SetStartValue(CSettings.Get<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
-            m_menuItemSoundPanningStrength.SetStartValue((int)(CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength)) * 100f));
-            m_menuItemSoundPanningThreshold.SetStartValue(CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold)));
-            m_menuItemSoundPanningDistance.SetStartValue(CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance)));
-            m_menuItemSoundAttenuationMin.SetStartValue((int)(CSettings.Get<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin)) * 100f));
-            m_menuItemSoundAttenuationThreshold.SetStartValue(CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold)));
-            m_menuItemSoundAttenuationDistance.SetStartValue(CSettings.Get<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance)));
+            m_menuItemSoundPanningEnabled.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
+            m_menuItemSoundPanningScreenSpace.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningForceScreenSpace)) ? 0 : 1);
+            m_menuItemSoundAttenuationEnabled.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationEnabled)) ? 0 : 1);
+            m_menuItemSoundAttenuationScreenSpace.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationForceScreenSpace)) ? 0 : 1);
+            m_menuItemSoundPanningEnabled.SetStartValue(Settings.Get<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled)) ? 0 : 1);
+            m_menuItemSoundPanningStrength.SetStartValue((int)(Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength)) * 100f));
+            m_menuItemSoundPanningThreshold.SetStartValue(Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold)));
+            m_menuItemSoundPanningDistance.SetStartValue(Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance)));
+            m_menuItemSoundAttenuationMin.SetStartValue((int)(Settings.Get<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin)) * 100f));
+            m_menuItemSoundAttenuationThreshold.SetStartValue(Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold)));
+            m_menuItemSoundAttenuationDistance.SetStartValue(Settings.Get<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance)));
         }
 
         private void revert(object sender)
         {
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningEnabled), m_OriginalSoundPanningEnabled);
-            CSettings.Set<float>(CSettings.GetKey(CSettings.SettingKey.SoundPanningStrength), m_OriginalSoundPanningStrength);
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundPanningForceScreenSpace), m_OriginalSoundPanningScreenSpace);
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldThreshold), m_OriginalSoundPanningThreshold);
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundPanningInworldDistance), m_OriginalSoundPanningDistance);
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationEnabled), m_OriginalSoundAttenuationEnabled);
-            CSettings.Set<float>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationMin), m_OriginalSoundAttenuationMin);
-            CSettings.Set<bool>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationForceScreenSpace), m_OriginalSoundAttenuationScreenSpace);
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldThreshold), m_OriginalSoundAttenuationThreshold);
-            CSettings.Set<int>(CSettings.GetKey(CSettings.SettingKey.SoundAttenuationInworldDistance), m_OriginalSoundAttenuationDistance);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningEnabled), m_OriginalSoundPanningEnabled);
+            Settings.Set<float>(Settings.GetKey(Settings.SettingKey.SoundPanningStrength), m_OriginalSoundPanningStrength);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundPanningForceScreenSpace), m_OriginalSoundPanningScreenSpace);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldThreshold), m_OriginalSoundPanningThreshold);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundPanningInworldDistance), m_OriginalSoundPanningDistance);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationEnabled), m_OriginalSoundAttenuationEnabled);
+            Settings.Set<float>(Settings.GetKey(Settings.SettingKey.SoundAttenuationMin), m_OriginalSoundAttenuationMin);
+            Settings.Set<bool>(Settings.GetKey(Settings.SettingKey.SoundAttenuationForceScreenSpace), m_OriginalSoundAttenuationScreenSpace);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldThreshold), m_OriginalSoundAttenuationThreshold);
+            Settings.Set<int>(Settings.GetKey(Settings.SettingKey.SoundAttenuationInworldDistance), m_OriginalSoundAttenuationDistance);
 
             this.ParentPanel.CloseSubPanel();
         }
         private void ok(object sender)
         {
-            CIni.NeedsSaving = true;
-            CIni.Save();
-            CIni.Refresh();
+            IniFile.NeedsSaving = true;
+            IniFile.Save();
+            IniFile.Refresh();
 
             this.ParentPanel.CloseSubPanel();
         }
