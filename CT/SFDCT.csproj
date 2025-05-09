@@ -83,7 +83,6 @@
     </Reference>
     <Reference Include="Box2D.XNA">
       <HintPath>..\SFD\Box2D.XNA.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Core">
       <HintPath>..\SFD\Core.dll</HintPath>

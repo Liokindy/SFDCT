@@ -1,9 +1,8 @@
 ﻿using System.Linq;
+using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.States;
 using HarmonyLib;
-using SFDCT.Helper;
-using Microsoft.Xna.Framework.Input;
 
 namespace SFDCT.Game;
 
@@ -42,7 +41,7 @@ internal static class WorldHandler
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
     private static void Update(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
     {
-        if (isLast && SFD.Program.IsGame && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu && __instance.GameOwner != GameOwnerEnum.Client)
+        if (isLast && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu && __instance.GameOwner != GameOwnerEnum.Client)
         {
             if (EditorDebug)
             {
