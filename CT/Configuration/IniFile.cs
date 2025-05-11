@@ -85,7 +85,6 @@ internal static class IniFile
             kvp.Value.Load(Handler);
         }
         Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
-        Settings.ApplyOverrides();
 
         if (FirstRefresh)
         {

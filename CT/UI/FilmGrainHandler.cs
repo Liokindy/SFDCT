@@ -11,7 +11,7 @@ internal static class FilmgrainHandler
     [HarmonyPatch(typeof(FilmGrain), nameof(FilmGrain.Draw))]
     private static bool FilmGrainDraw()
     {
-        if (Settings.Get<bool>(Settings.SettingKey.HideFilmgrain))
+        if (Settings.Get<bool>(SettingKey.HideFilmgrain))
         {
             return false;
         }
