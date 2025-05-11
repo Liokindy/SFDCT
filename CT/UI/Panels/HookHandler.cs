@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SFD.MenuControls;
 using HarmonyLib;
 
@@ -27,27 +28,34 @@ namespace SFDCT.UI.Panels
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(MenuItemDropdown), nameof(MenuItemDropdown.TriggerValueChangedEvent))]
-        private static void MenuItemDropdownTriggerValueChangedEvent(MenuItemDropdown __instance)
+        [HarmonyPatch(typeof(MenuItemSlider), nameof(MenuItemSlider.SetValue))]
+        private static void MenuItemSliderSetValue(MenuItemSlider __instance, int value)
         {
-            if (__instance != null && HookedEvents.ContainsKey(__instance))
+            if (value != __instance.Value)
             {
-                if (HookedEvents[__instance] != null && HookedEvents[__instance] is MenuItemValueChangedEvent)
+                if (__instance != null && HookedEvents.ContainsKey(__instance))
                 {
-                    ((MenuItemValueChangedEvent)HookedEvents[__instance]).Invoke(null);
+                    if (HookedEvents[__instance] != null && HookedEvents[__instance] is Action)
+                    {
+                        int oldValue = __instance.Value;
+                        __instance.Value = value;
+                        ((Action)HookedEvents[__instance]).Invoke();
+
+                        __instance.Value = oldValue;
+                    }
                 }
             }
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(TextValidationItem), nameof(TextValidationItem.InvokeTextValidation))]
-        private static void TextValidationItemInvokeTextValidation(TextValidationItem __instance, string textToValidate, TextValidationEventArgs e)
+        [HarmonyPatch(typeof(MenuItemDropdown), nameof(MenuItemDropdown.TriggerValueChangedEvent))]
+        private static void MenuItemDropdownTriggerValueChangedEvent(MenuItemDropdown __instance)
         {
             if (__instance != null && HookedEvents.ContainsKey(__instance))
             {
-                if (HookedEvents[__instance] is TextValidationEvent)
+                if (HookedEvents[__instance] != null && HookedEvents[__instance] is Action)
                 {
-                    ((TextValidationEvent)HookedEvents[__instance]).Invoke(textToValidate, e);
+                    ((Action)HookedEvents[__instance]).Invoke();
                 }
             }
         }

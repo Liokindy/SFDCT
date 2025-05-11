@@ -129,6 +129,7 @@
     <Compile Include="Configuration\SettingKey.cs" />
     <Compile Include="Fighter\CreditHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
+    <Compile Include="Game\GameHandler.cs" />
     <Compile Include="Helper\Keyboard.cs" />
     <Compile Include="OnlineServices\DSPreview.cs" />
     <Compile Include="OnlineServices\Security.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Sound\Panning.cs" />
     <Compile Include="Sound\PanningPatches\Objects\Default.cs" />
     <Compile Include="Sound\PanningPatches\Projectiles\Default.cs" />
+    <Compile Include="UI\FilmGrainHandler.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
     <Compile Include="Game\CommandHandler.cs" />

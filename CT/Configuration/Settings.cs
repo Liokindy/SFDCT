@@ -55,6 +55,11 @@ public static partial class Settings
         List.Add(key.ToUpperInvariant(), new IniSetting(key.ToUpperInvariant(), value, type, minValue, maxValue, requiresRestart));
     }
 
+    public static T Get<T>(SettingKey key, bool getDefault = false)
+    {
+        return Get<T>(GetKey(key), getDefault);
+    }
+
     public static T Get<T>(string key, bool getDefault = false)
     {
         key = key.ToUpperInvariant();
@@ -120,8 +125,11 @@ public static partial class Settings
 
         if (setting.RequiresGameRestart && !IniFile.FirstRefresh)
         {
-            string mess = $"CONFIG.INI: '{key}' requires GAME-RESTART to properly change from {setting.Value} to {value}!";
-            Logger.LogWarn(mess);
+            string messHeader = "CONFIG.INI:";
+            string mess = $"'{key}' requires GAME-RESTART to change from {setting.Value} to {value}!";
+            Logger.LogWarn(messHeader + mess);
+
+            SFD.MessageStack.Show(mess, SFD.MessageStackType.Warning);
         }
 
         if (!setting.Value.Equals(value))
