@@ -101,6 +101,11 @@ namespace SFDCT.UI.Panels
 
         public override void Dispose()
         {
+            foreach (var menuItem in m_menuItems)
+            {
+                HookHandler.DisposeHook(menuItem);
+            }
+
             m_menuItems.Clear();
             m_menuItemArray = null;
             m_menuItemsActions.Clear();
