@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using HarmonyLib;
 using SFD;
 using SFDCT.Helper;
@@ -8,12 +10,42 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class Security
 {
-    internal static bool doLimitAccountNameLength = true;
-    internal static bool doTryEnforce666On666Users = true;
-    internal static bool doCheck666On666Users = true;
-    internal static bool doCheckEmptyAccountName = true;
-    internal static bool doExtraProfileNameValidation = true;
-    internal static bool doLimitChatMessageLength = true;
+    // Turn these into settings later
+    internal readonly static bool doLimitAccountNameLength = true;
+    internal readonly static bool doTryEnforce666On666Users = true;
+    internal readonly static bool doCheck666On666Users = true;
+    internal readonly static bool doCheckEmptyAccountName = true;
+    internal readonly static bool doExtraProfileNameValidation = true;
+    internal readonly static bool doLimitChatMessageLength = true;
+    internal readonly static bool doLocalHostBypassesAccountValidation = true;
+
+    //     This allows the DS server to bypass the ReadAccountData check in
+    //     order to join the server while having an empty AccountName.
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Server), nameof(Server.DoReadRun))]
+    private static IEnumerable<CodeInstruction> Server_DoReadRun(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+    {
+        if (!doLocalHostBypassesAccountValidation)
+        {
+            return instructions;
+        }
+
+        // We add a Brtrue_S (brach if true) before the Account Validation check
+        // so the DSPreview Client can join the server even though it does not
+        // send a valid account to the server
+
+        // We do this by using "flag2" that stores if the sender connection
+        // is localhost. It is stored as local var 22
+
+        Label returnLabel = il.DefineLabel();
+
+        List<CodeInstruction> code = new List<CodeInstruction>(instructions);
+        code[620].labels.Add(returnLabel);
+
+        code.Insert(611, new(OpCodes.Ldloc_S, 22));
+        code.Insert(612, new(OpCodes.Brtrue_S, returnLabel));
+        return code;
+    }
 
     //     Profiles names from users are only validated for integrity,
     //     meaning they can be empty. This validates the name for this,
