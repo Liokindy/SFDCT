@@ -7,23 +7,47 @@ using SFDCT.Helper;
 
 namespace SFDCT.Configuration;
 
-public enum IniSettingType
-{
-    Float,
-    Int,
-    String,
-    Color,
-    Bool,
-}
-
 public class IniSetting
 {
-    public IniSettingType Type = IniSettingType.Int;
+    public object Value 
+    {
+        get { return this.m_currentValue; }
+        set {
+            if (value.GetType() == this.ValueType)
+            {
+                this.m_currentValue = value;
+            }
+        }
+    }
+    public object MinValue { get { return this.m_minValue; } }
+    public object MaxValue { get { return this.m_maxValue; } }
+    public object Default { get { return this.m_defaultValue; } }
+    public bool RequiresGameRestart { get { return this.m_requiresGameRestart; } }
+    public string Name {
+        get {
+            if (string.IsNullOrEmpty(this.m_name))
+            {
+                return this.m_key;
+            }
+            return this.m_name;
+        }
+    }
+    public string Help {
+        get {
+            if (string.IsNullOrEmpty(this.m_help))
+            {
+                return this.m_type.ToString();
+            }
+            return this.m_help;
+        }
+    }
+    public IniSettingType Type { get { return this.m_type; } }
+
     public Type ValueType
     {
         get
         {
-            switch (Type)
+            switch (m_type)
             {
                 default:
                     return typeof(object);
@@ -41,69 +65,93 @@ public class IniSetting
         }
     }
 
-    public string Key;
-    public object Value;
-    public object MinValue;
-    public object MaxValue;
-    public readonly object Default;
-    public readonly bool RequiresGameRestart;
+    private string m_key;
+    private SettingKey m_settingKey;
+    private IniSettingType m_type;
+    private object m_currentValue;
+    private readonly bool m_requiresGameRestart;
+    private readonly object m_defaultValue;
+    private object m_minValue;
+    private object m_maxValue;
+    private string m_name;
+    private string m_help;
 
-    public IniSetting(string saveKey, object saveValue, IniSettingType saveType, object minValue = null, object maxValue = null, bool requiresRestart = false)
+    public IniSetting(string saveKey, SettingKey settingKey, IniSettingType saveType, object saveValue, bool requiresRestart = false, object minValue = null, object maxValue = null, string nameString = "", string helpString = "")
     {
-        this.Key = saveKey.ToUpperInvariant();
-        this.Value = saveValue;
-        this.MaxValue = maxValue;
-        this.MinValue = minValue;
-        this.Default = this.Value;
-        this.Type = saveType;
-        this.RequiresGameRestart = requiresRestart;
+        m_key = saveKey.ToUpperInvariant();
+        m_settingKey = settingKey;
+        m_type = saveType;
+        m_currentValue = saveValue;
+        m_defaultValue = saveValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
+        m_requiresGameRestart = requiresRestart;
+        m_name = nameString;
+        m_help = helpString;
     }
+
+    public IniSetting(string saveKey, IniSettingType saveType, object saveValue, bool requiresRestart = false, object minValue = null, object maxValue = null, string nameString = "", string helpString = "")
+    {
+        m_key = saveKey.ToUpperInvariant();
+        m_settingKey = SettingKey.None;
+        m_type = saveType;
+        m_currentValue = saveValue;
+        m_defaultValue = saveValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
+        m_requiresGameRestart = requiresRestart;
+        m_name = nameString;
+        m_help = helpString;
+    }
+
     public void Save(IniHandler Handler, bool saveAsDefault = false)
     {
-        string line = this.Key + "=" + (saveAsDefault ? this.Default.ToString() : this.Value.ToString());
-        switch (this.Type)
+        string line = m_key + "=" + (saveAsDefault ? m_defaultValue.ToString() : m_currentValue.ToString());
+
+        switch (m_type)
         {
             case IniSettingType.Color:
                 // Use SFD's way to store color
-                string colorString = Constants.ColorToString((Color)(saveAsDefault ? this.Default : this.Value));
-                line = this.Key + "=" + colorString;
+                string colorString = Constants.ColorToString((Color)(saveAsDefault ? m_defaultValue : m_currentValue));
+                line = m_key + "=" + colorString;
                 break;
             case IniSettingType.Float:
-                string floatString = ((float)(saveAsDefault ? this.Default : this.Value)).ToString(CultureInfo.InvariantCulture);
-                line = this.Key + "=" + floatString.Replace(',', '.');
+                string floatString = ((float)(saveAsDefault ? m_defaultValue : m_currentValue)).ToString(CultureInfo.InvariantCulture);
+                line = m_key + "=" + floatString.Replace(',', '.');
                 break;
         }
-        Handler.ReadLine(line);
 
-        Logger.LogDebug($"CONFIG.INI: Saved '{this.Key}' {this.Type}: {this.Value}, to '{line}'");
+        Handler.ReadLine(line);
+        Logger.LogDebug($"CONFIG.INI: Saved '{m_key}' {m_type}: {m_currentValue}, to '{line}'");
     }
+
     public void Load(IniHandler Handler)
     {
-        if (Handler.TryReadValue(this.Key, out string temp))
+        if (Handler.TryReadValue(m_key, out string temp))
         {
-            object NewValue = this.Value;
-            switch (this.Type)
+            object NewValue = m_currentValue;
+            switch (m_type)
             {
                 case IniSettingType.Float:
                     NewValue = float.Parse(temp.Replace(',', '.'), CultureInfo.InvariantCulture);
-                    if (this.MaxValue != null && (float)NewValue > (float)this.MaxValue)
+                    if (m_maxValue != null && (float)NewValue > (float)m_maxValue)
                     {
-                        NewValue = (float)this.MaxValue;
+                        NewValue = (float)m_maxValue;
                     }
-                    if (this.MinValue != null && (float)NewValue < (float)this.MinValue)
+                    if (m_minValue != null && (float)NewValue < (float)m_minValue)
                     {
-                        NewValue = (float)this.MinValue;
+                        NewValue = (float)m_minValue;
                     }
                     break;
                 case IniSettingType.Int:
                     NewValue = int.Parse(temp);
-                    if (this.MaxValue != null && (int)NewValue > (int)this.MaxValue)
+                    if (m_maxValue != null && (int)NewValue > (int)m_maxValue)
                     {
-                        NewValue = (int)this.MaxValue;
+                        NewValue = (int)m_maxValue;
                     }
-                    if (this.MinValue != null && (int)NewValue < (int)this.MinValue)
+                    if (m_minValue != null && (int)NewValue < (int)m_minValue)
                     {
-                        NewValue = (int)this.MinValue;
+                        NewValue = (int)m_minValue;
                     }
                     break;
                 case IniSettingType.String:
@@ -111,7 +159,7 @@ public class IniSetting
                     break;
                 case IniSettingType.Color:
                     Color tempColor;
-                    Handler.TryReadValueColor(this.Key, (Color)this.Default, out tempColor);
+                    Handler.TryReadValueColor(m_key, (Color)m_defaultValue, out tempColor);
                     NewValue = tempColor;
                     break;
                 case IniSettingType.Bool:
@@ -119,86 +167,86 @@ public class IniSetting
                     break;
             }
 
-            if (!IniFile.FirstRefresh && RequiresGameRestart && !NewValue.Equals(this.Value))
+            if (!IniFile.FirstRefresh && m_requiresGameRestart && !NewValue.Equals(m_currentValue))
             {
-                Logger.LogWarn($"CONFIG.INI: Failed to load '{this.Key}' from {this.Value} to {NewValue}, requires a game-restart!");
+                Logger.LogWarn($"CONFIG.INI: Failed to load '{m_key}' from {m_currentValue} to {NewValue}, requires a game-restart!");
             }
             else
             {
-                this.Value = NewValue;
-                Logger.LogDebug($"CONFIG.INI: Loaded '{this.Key}' {this.Type}: {this.Value}, from '{temp}'");
+                m_currentValue = NewValue;
+                Logger.LogDebug($"CONFIG.INI: Loaded '{m_key}' {m_type}: {m_currentValue}, from '{temp}'");
             }
         }
         else
         {
-            Logger.LogWarn($"CONFIG.INI: '{this.Key}', {this.Type} was not found in the current ini, adding...");
+            Logger.LogWarn($"CONFIG.INI: '{m_key}', {m_type} was not found in the current ini, adding...");
             this.Save(Handler, true);
         }
     }
     public object Get(bool getDefault = false)
     {
-        switch (this.Type)
+        switch (m_type)
         {
             case IniSettingType.Float:
-                return (float)(getDefault ? this.Default : this.Value);
+                return (float)(getDefault ? m_defaultValue : m_currentValue);
             case IniSettingType.Int:
-                return (int)(getDefault ? this.Default : this.Value);
+                return (int)(getDefault ? m_defaultValue : m_currentValue);
             case IniSettingType.String:
-                return (string)(getDefault ? this.Default : this.Value);
+                return (string)(getDefault ? m_defaultValue : m_currentValue);
             case IniSettingType.Color:
-                return (Color)(getDefault ? this.Default : this.Value);
+                return (Color)(getDefault ? m_defaultValue : m_currentValue);
             case IniSettingType.Bool:
-                return (bool)(getDefault ? this.Default : this.Value);
+                return (bool)(getDefault ? m_defaultValue : m_currentValue);
             default:
-                return (getDefault ? this.Default : this.Value);
+                return (getDefault ? m_defaultValue : m_currentValue);
         }
     }
     public void Reset()
     {
-        if (!IniFile.FirstRefresh && RequiresGameRestart && !this.Default.Equals(this.Value))
+        if (!IniFile.FirstRefresh && m_requiresGameRestart && !m_defaultValue.Equals(m_currentValue))
         {
-            Logger.LogWarn($"CONFIG.INI: Failed to RESET '{this.Key}' from {this.Value} to {this.Default}, requires a game-restart!");
+            Logger.LogWarn($"CONFIG.INI: Failed to RESET '{m_key}' from {m_currentValue} to {m_defaultValue}, requires a game-restart!");
             return;
         }
 
-        switch (this.Type)
+        switch (m_type)
         {
             case IniSettingType.Float:
-                this.Value = (float)(this.Default);
+                m_currentValue = (float)(m_defaultValue);
                 break;
             case IniSettingType.Int:
-                this.Value = (int)(this.Default);
+                m_currentValue = (int)(m_defaultValue);
                 break;
             case IniSettingType.String:
-                this.Value = (string)(this.Default);
+                m_currentValue = (string)(m_defaultValue);
                 break;
             case IniSettingType.Color:
-                this.Value = (Color)(this.Default);
+                m_currentValue = (Color)(m_defaultValue);
                 break;
             case IniSettingType.Bool:
-                this.Value = (bool)(this.Default);
+                m_currentValue = (bool)(m_defaultValue);
                 break;
             default:
-                this.Value = this.Default;
+                m_currentValue = m_defaultValue;
                 break;
         }
     }
     public object GetLimit(bool getMaxValue)
     {
-        switch (this.Type)
+        switch (m_type)
         {
             case IniSettingType.Float:
-                return (float)(getMaxValue ? this.MaxValue : this.MinValue);
+                return (float)(getMaxValue ? m_maxValue : m_minValue);
             case IniSettingType.Int:
-                return (int)(getMaxValue ? this.MaxValue : this.MinValue);
+                return (int)(getMaxValue ? m_maxValue : m_minValue);
             case IniSettingType.String:
-                return (string)(getMaxValue ? this.MaxValue : this.MinValue);
+                return (string)(getMaxValue ? m_maxValue : m_minValue);
             case IniSettingType.Color:
-                return (Color)(getMaxValue ? this.MaxValue : this.MinValue);
+                return (Color)(getMaxValue ? m_maxValue : m_minValue);
             case IniSettingType.Bool:
-                return (bool)(getMaxValue ? this.MaxValue : this.MinValue);
+                return (bool)(getMaxValue ? m_maxValue : m_minValue);
             default:
-                return (getMaxValue ? this.MaxValue : this.MinValue);
+                return (getMaxValue ? m_maxValue : m_minValue);
         }
     }
 }

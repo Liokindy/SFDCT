@@ -16,7 +16,7 @@ namespace SFDCT.UI.Panels
         private Dictionary<string, Action> m_menuItemsActions;
         private MenuItem[] m_menuItemArray;
 
-        public SFDCTSettingsPanel() : base("CUSTOM SETTINGS", 600, 500)
+        public SFDCTSettingsPanel() : base("CUSTOM SETTINGS", 500, 500)
         {
             m_menuItems = new(Settings.List.Count);
             m_originalValues = new(Settings.List.Count);
@@ -29,15 +29,17 @@ namespace SFDCT.UI.Panels
                 switch (settingPair.Value.Type)
                 {
                     default:
-                        m_menuItems.Add(settingPair.Key, new MenuItemSeparator(settingPair.Key));
+                        m_menuItems.Add(settingPair.Key, new MenuItemSeparator(settingPair.Value.Name));
                         ((MenuItemSeparator)m_menuItems[settingPair.Key]).lblName.Color = Color.Red * 0.5f;
+                        ((MenuItemSeparator)m_menuItems[settingPair.Key]).Tooltip = settingPair.Value.Help;
 
                         m_menuItemArray[i] = m_menuItems[settingPair.Key];
                         break;
                     case IniSettingType.Bool:
-                        m_menuItems.Add(settingPair.Key, new MenuItemDropdown(settingPair.Key, [LanguageHelper.GetText("general.on"),LanguageHelper.GetText("general.off")]));
+                        m_menuItems.Add(settingPair.Key, new MenuItemDropdown(settingPair.Value.Name, [LanguageHelper.GetText("general.on"),LanguageHelper.GetText("general.off")]));
                         ((MenuItemDropdown)m_menuItems[settingPair.Key]).DropdownItemVisibleCount = 2;
                         ((MenuItemDropdown)m_menuItems[settingPair.Key]).SetStartValue((bool)settingPair.Value.Get() ? 0 : 1);
+                        ((MenuItemDropdown)m_menuItems[settingPair.Key]).Tooltip = settingPair.Value.Help;
                         m_originalValues.Add(settingPair.Key, settingPair.Value.Get());
                         m_menuItemsActions.Add(settingPair.Key, () =>
                         {
@@ -67,9 +69,10 @@ namespace SFDCT.UI.Panels
                             maxValue = (int)((float)settingPair.Value.MaxValue * (float)floatScale);
                         }
 
-                        m_menuItems.Add(settingPair.Key, new MenuItemSlider(settingPair.Key, value, minValue, maxValue, 1));
+                        m_menuItems.Add(settingPair.Key, new MenuItemSlider(settingPair.Value.Name, value, minValue, maxValue, 1));
                         ((MenuItemSlider)m_menuItems[settingPair.Key]).SetStartValue(value);
-                        
+                        ((MenuItemSlider)m_menuItems[settingPair.Key]).Tooltip = settingPair.Value.Help;
+
                         m_originalValues.Add(settingPair.Key, settingPair.Value.Get());
                         m_menuItemsActions.Add(settingPair.Key, () =>
                         {

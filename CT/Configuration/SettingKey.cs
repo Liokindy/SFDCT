@@ -2,6 +2,7 @@
 
 public enum SettingKey
 {
+    None,
     SoundPanningEnabled,
     SoundPanningStrength,
     SoundPanningForceScreenSpace,

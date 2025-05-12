@@ -126,6 +126,7 @@
     </Compile>
     <Compile Include="Bootstrap\AssetsHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
+    <Compile Include="Configuration\IniSettingType.cs" />
     <Compile Include="Configuration\SettingKey.cs" />
     <Compile Include="Fighter\CreditHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
