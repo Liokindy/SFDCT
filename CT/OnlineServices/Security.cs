@@ -40,10 +40,10 @@ internal static class Security
         Label returnLabel = il.DefineLabel();
 
         List<CodeInstruction> code = new List<CodeInstruction>(instructions);
-        code[620].labels.Add(returnLabel);
+        code[614].labels.Add(returnLabel);
 
-        code.Insert(611, new(OpCodes.Ldloc_S, 22));
-        code.Insert(612, new(OpCodes.Brtrue_S, returnLabel));
+        code.Insert(612, new(OpCodes.Ldloc_S, 22));
+        code.Insert(613, new(OpCodes.Brtrue_S, returnLabel));
         return code;
     }
 

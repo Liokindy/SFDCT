@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.States;
 using HarmonyLib;
+using System.Collections.Generic;
+using SFDCT.Configuration;
 
 namespace SFDCT.Game;
 
@@ -37,9 +39,20 @@ internal static class WorldHandler
         return false;
     }
 
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
+    private static IEnumerable<CodeInstruction> UpdateSaturation(IEnumerable<CodeInstruction> instructions)
+    {
+        instructions.ElementAt(783).operand = Settings.Get<float>(SettingKey.LowHealthThreshold);
+        instructions.ElementAt(787).operand = Settings.Get<float>(SettingKey.LowHealthThreshold);
+        instructions.ElementAt(793).operand = Settings.Get<float>(SettingKey.LowHealthSaturationFactor);
+
+        return instructions;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static void Update(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
+    private static void UpdateDebug(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
     {
         if (isLast && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu && __instance.GameOwner != GameOwnerEnum.Client)
         {
