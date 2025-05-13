@@ -13,7 +13,7 @@ public static class Globals
     }
     public struct Version
     {
-        public static string SFDCT = "v.1.0.6_dev";
+        public static string SFDCT = "v.1.0.6";
         public static bool INDEV
         {
             get
