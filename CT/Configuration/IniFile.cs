@@ -91,9 +91,9 @@ internal static class IniFile
             FirstRefresh = false;
         }
     }
-    public static void Save()
+    public static void Save(bool forceSave = false)
     {
-        if (!NeedsSaving)
+        if (!NeedsSaving && !forceSave)
         {
             return;
         }

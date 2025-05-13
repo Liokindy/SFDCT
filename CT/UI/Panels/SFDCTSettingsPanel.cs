@@ -128,8 +128,7 @@ namespace SFDCT.UI.Panels
 
         private void ok(object sender)
         {
-            IniFile.NeedsSaving = true;
-            IniFile.Save();
+            IniFile.Save(true);
             IniFile.Refresh();
 
             this.ParentPanel.CloseSubPanel();

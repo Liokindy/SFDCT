@@ -25,10 +25,22 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        DebugMode = true;
+        if (args.Contains("-SFD", StringComparer.OrdinalIgnoreCase))
+        {
+            Logger.LogInfo("Initializing SFD...");
+            SFD.Program.Main(args);
 
-        //
-        //
+            return 0;
+        }
+
+        if (args.Contains("-DEBUG", StringComparer.OrdinalIgnoreCase))
+        {
+            DebugMode = true;
+        }
+
+#if DEBUG
+        DebugMode = true;
+#endif
 
         if (DebugMode)
         {
@@ -38,11 +50,18 @@ internal static class Program
             Logger.LogWarn("--------------------------------");
         }
 
+        Stopwatch sw = new();
+        sw.Start();
+
         Logger.LogInfo("Initializing SFDCT...");
         IniFile.Initialize();
 
         Logger.LogInfo("Patching SFD...");
         Harmony.PatchAll();
+
+        sw.Stop();
+        Logger.LogInfo($"Initialized and Patched in {sw.ElapsedMilliseconds}ms");
+        sw = null;
 
         Logger.LogInfo("Starting SFD...");
         SFD.Program.Main(args);
