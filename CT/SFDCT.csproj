@@ -108,6 +108,9 @@
     <Reference Include="SFD.GameScriptInterface">
       <HintPath>..\SFD\SFD.GameScriptInterface.dll</HintPath>
     </Reference>
+    <Reference Include="SFD.MP">
+      <HintPath>..\SFD\SFD.MP.dll</HintPath>
+    </Reference>
     <Reference Include="SFD.ScriptEngine">
       <HintPath>..\SFD\SFD.ScriptEngine.dll</HintPath>
     </Reference>

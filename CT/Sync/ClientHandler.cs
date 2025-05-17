@@ -45,7 +45,7 @@ internal static class ClientHandler
         code.Insert(29, new CodeInstruction(OpCodes.Ldarg_2, null));
         code.Insert(30, new CodeInstruction(OpCodes.Ldloc_1, null));
         code.Insert(31, new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(ClientHandler), nameof(ClientHandleCustomSignal), [typeof(Client), typeof(NetIncomingMessage), typeof(NetMessage.Signal.Data)])));
-
+        
         return code;
     }
 

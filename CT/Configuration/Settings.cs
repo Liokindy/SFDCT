@@ -30,6 +30,7 @@ public static class Settings
         Add(SettingKey.LowHealthSaturationFactor, IniSettingType.Float, 0.71f, false, 0f, 1f);
         Add(SettingKey.LowHealthThreshold, IniSettingType.Float, 0.25f, false, 0f, 1f);
         Add(SettingKey.HideFilmgrain, IniSettingType.Bool, false);
+        Add(SettingKey.DisableClockTicking, IniSettingType.Bool, true);
 
         b_initialized = true;
     }
@@ -119,6 +120,7 @@ public static class Settings
             case SettingKey.LowHealthSaturationFactor: return "LOW_HEALTH_SATURATION_FACTOR";
             case SettingKey.LowHealthThreshold: return "LOW_HEALTH_THRESHOLD";
             case SettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
+            case SettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
         }
     }
 
@@ -141,6 +143,7 @@ public static class Settings
             case SettingKey.LowHealthSaturationFactor: return "Strength";
             case SettingKey.LowHealthThreshold: return "Threshold";
             case SettingKey.HideFilmgrain: return "Hide FilmGrain";
+            case SettingKey.DisableClockTicking: return "Disable ClockTicking";
         }
     }
 
@@ -162,6 +165,7 @@ public static class Settings
             case SettingKey.LowHealthSaturationFactor: return "Controls the desaturation strength";
             case SettingKey.LowHealthThreshold: return "Controls the desaturation threshold";
             case SettingKey.HideFilmgrain: return "Forcefully hides the FilmGrain even if Effect Level is set to Normal";
+            case SettingKey.DisableClockTicking: return "Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup";
         }
     }
 
@@ -186,6 +190,7 @@ public static class Settings
             case SettingKey.LowHealthThreshold:
                 return "LOW HEALTH DESATURATION";
             case SettingKey.HideFilmgrain:
+            case SettingKey.DisableClockTicking:
                 return "MISC";
         }
     }

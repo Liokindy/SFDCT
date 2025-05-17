@@ -16,4 +16,5 @@ public enum SettingKey
     LowHealthSaturationFactor,
     LowHealthThreshold,
     HideFilmgrain,
+    DisableClockTicking,
 }

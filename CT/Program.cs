@@ -15,7 +15,7 @@ namespace SFDCT;
 /// </summary>
 internal static class Program
 {
-    internal static readonly string GameDirectory = Directory.GetCurrentDirectory();
+    internal static readonly string GameDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
     internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT";
     internal static readonly string GitHubRepositoryVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/version";
 

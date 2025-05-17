@@ -7,9 +7,10 @@ public static class Globals
     public readonly struct Paths
     {
         public readonly static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
-        public readonly static string CONFIGURATIONINI = Path.Combine(SFDCT, "config.ini");
-        public readonly static string CONTENT = Path.Combine(SFDCT, "Content");
-        public readonly static string DATA = Path.Combine(CONTENT, "Data");
+
+        public static string CONFIGURATIONINI { get { return Path.Combine(SFDCT, "config.ini"); } }
+        public static string CONTENT { get { return Path.Combine(SFDCT, "Content"); } }
+        public static string DATA { get { return Path.Combine(CONTENT, "Data"); } }
     }
 
     public struct Version
