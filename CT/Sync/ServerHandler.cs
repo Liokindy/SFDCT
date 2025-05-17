@@ -2,6 +2,7 @@
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
+using SFD.MLGameAuthorization;
 using SFDCT.Game;
 using SFDCT.Helper;
 using System;
@@ -16,6 +17,64 @@ namespace SFDCT.Sync;
 [HarmonyPatch]
 internal static class ServerHandler
 {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Server), nameof(Server.updateForcedServerMovement))]
+    private static bool ServerUpdateForcedServerMovement(Server __instance, float time)
+    {
+        __instance.m_updateForcedServerMovementTime -= time;
+        if (__instance.m_updateForcedServerMovementTime <= 0f)
+        {
+            __instance.m_updateForcedServerMovementTime = 100f;
+
+            int serverMovementCount = 0;
+            float serverMovementThreshold = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING * 0.001f;
+
+            object serverUpdateLockObject = Server.ServerUpdateLockObject;
+            lock (serverUpdateLockObject)
+            {
+                List<NetConnection> connections = __instance.m_server.Connections;
+                foreach (var connection in connections)
+                {
+                    GameConnectionTag connectionTag = connection.GameConnectionTag();
+                    if (connectionTag == null) continue;
+
+                    bool useServerMovement = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK && (connectionTag.Ping > serverMovementThreshold - (connectionTag.ForceServerMovement ? 0.01f : 0f) | Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0);
+
+                    if (connectionTag.ForcedServerMovementToggleTime == -1f) useServerMovement = true;
+                    if (connectionTag.ForcedServerMovementToggleTime == -2f) useServerMovement = false;
+
+                    if (connectionTag.ForceServerMovement == useServerMovement)
+                    {
+                        connectionTag.ForcedServerMovementToggleTime = 0f;
+                    }
+                    else
+                    {
+                        if (connectionTag.ForcedServerMovementToggleTime > 0) connectionTag.ForcedServerMovementToggleTime += 100f;
+
+                        if (connectionTag.ForcedServerMovementToggleTime < 0f && connectionTag.ForcedServerMovementToggleTime > Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS || Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0)
+                        {
+                            connectionTag.ForceServerMovement = useServerMovement;
+                            if (connectionTag.GameUsers != null)
+                            {
+                                foreach (var connectionUser in connectionTag.GameUsers)
+                                {
+                                    connectionUser.ForceServerMovement = useServerMovement;
+                                    
+                                    Player playerByUserIdentifier = __instance.GameInfo.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
+                                    playerByUserIdentifier?.UpdateCanDoPlayerAction();
+                                }
+                            }
+                        }
+
+                        if (connectionTag.ForceServerMovement) serverMovementCount++;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(Server), nameof(Server.SendMessage), [typeof(MessageType), typeof(object), typeof(NetConnection), typeof(NetConnection)])]
     private static IEnumerable<CodeInstruction> ServerSendMessage(IEnumerable<CodeInstruction> instructions)

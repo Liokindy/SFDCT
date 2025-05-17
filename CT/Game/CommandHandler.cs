@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using SFDCT.Helper;
+using SFDCT.Sync;
 using SFD;
 using SFD.Core;
 using SFD.States;
@@ -10,8 +12,6 @@ using SFD.Objects;
 using SFD.Weapons;
 using Lidgren.Network;
 using HarmonyLib;
-using SFDCT.Helper;
-using SFDCT.Sync;
 
 namespace SFDCT.Game;
 
@@ -79,11 +79,15 @@ internal static class CommandHandler
             return true;
         }
 
-        if (args.IsCommand("CLIENTMOUSE"))
+        // Client-only commands (no offline)
+        if (__instance.GameOwner == GameOwnerEnum.Client)
         {
-            WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
+            if (args.IsCommand("CLIENTMOUSE"))
+            {
+                WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
 
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format("Client Mouse set to {0}", WorldHandler.ClientMouse), Color.LightBlue, args.SenderGameUser));
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format("Client Mouse set to {0}", WorldHandler.ClientMouse), Color.LightBlue, args.SenderGameUser));
+            }
         }
 
         return false;
@@ -100,22 +104,29 @@ internal static class CommandHandler
         // Host commands
         if (args.HostPrivileges)
         {
-            // Enables debug functions of the editor, i.e
-            // Mouse-dragging, mouse-deletion, etc.
-            if (args.IsCommand("MOUSE", "SERVERMOUSE"))
+            // Server-only commands (no offline)
+            if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                string mess = "Server-Mouse set to {0}";
+                // Enables debug functions of the editor, i.e
+                // Mouse-dragging, mouse-deletion, etc.
+                if (args.IsCommand("MOUSE", "SERVERMOUSE"))
+                {
+                    string mess = "Server-Mouse set to {0}";
                 
-                WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
+                    WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
 
-                EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
-                server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
-                return true;
+                    EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
+                    server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
+                    return true;
+                }
             }
         }
 
         // Moderator commands
+        // -    This can only be true if Constants.MODDERATOR_COMMANDS is empty,
+        //      contains the command or the user is the host checking
+        //      CanUseModeratorCommand is useless
         if (args.ModeratorPrivileges)
         {
             // Commands that interact with the gameworld
@@ -128,6 +139,54 @@ internal static class CommandHandler
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
                 // None
+                if (args.IsCommand("SERVERMOVEMENT", "SVMOV"))
+                {
+                    if (args.Parameters.Count <= 0) return true;
+
+                    GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
+                    if (gameUser != null && !gameUser.IsDisposed && gameConnectionTag != null && !gameConnectionTag.IsDisposed)
+                    {
+                        bool useServerMovement = !gameConnectionTag.ForceServerMovement;
+                        bool resetServerMovement = false;
+                        if (args.Parameters.Count >= 2)
+                        {
+                            if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
+                            {
+                                resetServerMovement = true;
+                            }
+                            else
+                            {
+                                bool.TryParse(args.Parameters[1], out useServerMovement);
+                            }
+                        }
+
+                        if (resetServerMovement)
+                        {
+                            gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
+                            gameConnectionTag.ForceServerMovement = false;
+                        }
+                        else
+                        {
+                            gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
+                            gameConnectionTag.ForceServerMovement = useServerMovement;
+                        }
+
+                        string msg = "Server-movement of {0} set to {1}";
+                        args.Feedback.Add(new(args.SenderGameUser, string.Format(msg, gameUser.AccountName, resetServerMovement ? "default" : useServerMovement), args.SenderGameUser));
+
+                        if (gameConnectionTag.GameUsers != null)
+                        {
+                            foreach (var connectionUser in gameConnectionTag.GameUsers)
+                            {
+                                connectionUser.ForceServerMovement = useServerMovement;
+
+                                Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
+                                playerByUserIdentifier?.UpdateCanDoPlayerAction();
+                            }
+                        }
+                    }
+                }
             }
         }
 
