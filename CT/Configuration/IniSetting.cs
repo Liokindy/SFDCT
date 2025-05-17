@@ -41,6 +41,15 @@ public class IniSetting
             return this.m_help;
         }
     }
+    public string Category {
+        get {
+            if (string.IsNullOrEmpty(this.m_category))
+            {
+                return "Unknown";
+            }
+            return this.m_category;
+        }
+    }
     public IniSettingType Type { get { return this.m_type; } }
 
     public Type ValueType
@@ -75,6 +84,7 @@ public class IniSetting
     private object m_maxValue;
     private string m_name;
     private string m_help;
+    private string m_category;
 
     public IniSetting(string saveKey, SettingKey settingKey, IniSettingType saveType, object saveValue, bool requiresRestart = false, object minValue = null, object maxValue = null, string nameString = "", string helpString = "")
     {
@@ -90,7 +100,7 @@ public class IniSetting
         m_help = helpString;
     }
 
-    public IniSetting(string saveKey, IniSettingType saveType, object saveValue, bool requiresRestart = false, object minValue = null, object maxValue = null, string nameString = "", string helpString = "")
+    public IniSetting(string saveKey, IniSettingType saveType, object saveValue, bool requiresRestart = false, object minValue = null, object maxValue = null, string nameString = "", string helpString = "", string categoryString = "")
     {
         m_key = saveKey.ToUpperInvariant();
         m_settingKey = SettingKey.None;
@@ -102,6 +112,7 @@ public class IniSetting
         m_requiresGameRestart = requiresRestart;
         m_name = nameString;
         m_help = helpString;
+        m_category = categoryString;
     }
 
     public void Save(IniHandler Handler, bool saveAsDefault = false)

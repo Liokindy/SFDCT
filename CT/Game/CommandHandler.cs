@@ -10,6 +10,8 @@ using SFD.Objects;
 using SFD.Weapons;
 using Lidgren.Network;
 using HarmonyLib;
+using SFDCT.Helper;
+using SFDCT.Sync;
 
 namespace SFDCT.Game;
 
@@ -42,6 +44,12 @@ internal static class CommandHandler
 
     private static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
     {
+        Client client = GameSFD.Handle.Client;
+        if (client == null && __instance.GameOwner == GameOwnerEnum.Client)
+        {
+            return false;
+        }
+
         if (args.IsCommand("PLAYERS", "LISTPLAYERS", "SHOWPLAYERS", "USERS", "LISTUSERS", "SHOWUSERS"))
         {
             string header = "Listing all users in the lobby...";
@@ -60,7 +68,7 @@ internal static class CommandHandler
                 if (gameUser.IsModerator) { status = "MODERATOR"; }
                 if (gameUser.IsHost) { status = "HOST"; }
 
-                Color messColor = Color.LightBlue * (gameUser.UserIdentifier % 2 == 0 ? 0.5f : 0.6f);
+                Color messColor = Color.LightBlue * (gameUser.UserIdentifier % 2 == 0 ? 0.8f : 0.9f);
                 string mess = string.Format(user, gameUser.GameSlotIndex, gameUser.GetProfileName(), gameUser.AccountName, status);
 
                 args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, messColor, args.SenderGameUser));
@@ -69,6 +77,13 @@ internal static class CommandHandler
             args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(footer, gameUsers.Count()), Color.LightBlue, args.SenderGameUser));
 
             return true;
+        }
+
+        if (args.IsCommand("CLIENTMOUSE"))
+        {
+            WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
+
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format("Client Mouse set to {0}", WorldHandler.ClientMouse), Color.LightBlue, args.SenderGameUser));
         }
 
         return false;
@@ -87,31 +102,15 @@ internal static class CommandHandler
         {
             // Enables debug functions of the editor, i.e
             // Mouse-dragging, mouse-deletion, etc.
-            if (args.IsCommand("EDITORDEBUG"))
+            if (args.IsCommand("MOUSE", "SERVERMOUSE"))
             {
-                string mess = "Editor-Debug: {0}";
-                string mess2 = "(o . o)";
-
-                bool enabled = !WorldHandler.EditorDebug;
-                if (args.Parameters.Count >= 1)
-                {
-                    if (args.Parameters[0] == "1" || args.Parameters[0].Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-                    {
-                        enabled = true;
-                    }
-                    if (args.Parameters[0] == "0" || args.Parameters[0].Equals("FALSE", StringComparison.OrdinalIgnoreCase))
-                    {
-                        enabled = false;
-                    }
-                }
-                WorldHandler.EditorDebug = enabled;
-
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, enabled), args.SenderGameUser, null));
-                if (enabled)
-                {
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess2, Color.IndianRed, null, args.SenderGameUser));
-                }
+                string mess = "Server-Mouse set to {0}";
                 
+                WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
+                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
+
+                EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
+                server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
                 return true;
             }
         }

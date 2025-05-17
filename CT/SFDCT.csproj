@@ -89,7 +89,6 @@
     </Reference>
     <Reference Include="Lidgren.Network">
       <HintPath>..\SFD\Lidgren.Network.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -130,14 +129,20 @@
     <Compile Include="Configuration\SettingKey.cs" />
     <Compile Include="Fighter\CreditHandler.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
+    <Compile Include="Game\DebugMouse.cs" />
     <Compile Include="Game\GameHandler.cs" />
-    <Compile Include="Helper\Keyboard.cs" />
+    <Compile Include="Helper\Input.cs" />
     <Compile Include="OnlineServices\DSPreview.cs" />
     <Compile Include="OnlineServices\Security.cs" />
     <Compile Include="Configuration\IniSetting.cs" />
     <Compile Include="Sound\Panning.cs" />
     <Compile Include="Sound\PanningPatches\Objects\Default.cs" />
     <Compile Include="Sound\PanningPatches\Projectiles\Default.cs" />
+    <Compile Include="Sync\ClientHandler.cs" />
+    <Compile Include="Sync\CustomSignalData.cs" />
+    <Compile Include="Sync\CustomSignalType.cs" />
+    <Compile Include="Sync\ServerHandler.cs" />
+    <Compile Include="Sync\SignalHandler.cs" />
     <Compile Include="UI\FilmGrainHandler.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
@@ -177,7 +182,6 @@
   <ItemGroup>
     <Folder Include="Objects\" />
     <Folder Include="Projectiles\" />
-    <Folder Include="Sync\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />

@@ -38,11 +38,11 @@ public static class Settings
 
     private static void Add(SettingKey settingKey, IniSettingType type, object value, bool requiresRestart = false, object minValue = null, object maxValue = null)
     {
-        Add(GetKey(settingKey), type, value, requiresRestart, minValue, maxValue, GetName(settingKey), GetHelp(settingKey));
+        Add(GetKey(settingKey), type, value, requiresRestart, minValue, maxValue, GetName(settingKey), GetHelp(settingKey), GetCategoryName(settingKey));
     }
-    private static void Add(string stringKey, IniSettingType type, object value, bool requiresRestart = false, object minValue = null, object maxValue = null, string settingName = "", string settingHelp = "")
+    private static void Add(string stringKey, IniSettingType type, object value, bool requiresRestart = false, object minValue = null, object maxValue = null, string settingName = "", string settingHelp = "", string settingCategory = "")
     {
-        m_list.Add(stringKey.ToUpperInvariant(), new IniSetting(stringKey, type, value, requiresRestart, minValue, maxValue, settingName, settingHelp));
+        m_list.Add(stringKey.ToUpperInvariant(), new IniSetting(stringKey, type, value, requiresRestart, minValue, maxValue, settingName, settingHelp, settingCategory));
     }
 
     public static T Get<T>(SettingKey key, bool getDefault = false)
@@ -62,12 +62,6 @@ public static class Settings
         }
 
         IniSetting setting = m_list[key];
-        if (setting.ValueType != typeof(T))
-        {
-            string mess = $"CONFIG.INI: Trying to GET value '{key}' from type '{typeof(T)}', key is type {setting.ValueType}!!";
-            Logger.LogError(mess);
-            throw new Exception(mess);
-        }
 
         return (T)setting.Get(getDefault);
     }
@@ -89,14 +83,8 @@ public static class Settings
         }
 
         IniSetting setting = m_list[key];
-        if (setting.ValueType != typeof(T))
-        {
-            string mess = $"CONFIG.INI: Trying to SET value '{key}' from type '{typeof(T)}', key is type {setting.ValueType}!!";
-            Logger.LogError(mess);
-            throw new Exception(mess);
-        }
 
-        if (setting.RequiresGameRestart && !IniFile.FirstRefresh)
+        if (setting.RequiresGameRestart && !IniFile.FirstRefresh && !setting.Value.Equals(value))
         {
             string messHeader = "CONFIG.INI:";
             string mess = $"'{key}' requires GAME-RESTART to change from {setting.Value} to {value}!";
@@ -136,30 +124,28 @@ public static class Settings
         }
     }
 
-    // TODO:
     public static string GetName(SettingKey key)
     {
 
         switch (key)
         {
             default: return "Unknown-Setting";
-            case SettingKey.SoundPanningEnabled: return "Sound-panning Enabled";
-            case SettingKey.SoundPanningStrength: return "Sound-panning Strength";
-            case SettingKey.SoundPanningForceScreenSpace: return "Sound-panning force Screen-Space";
-            case SettingKey.SoundPanningInworldThreshold: return "Sound-panning Threshold";
-            case SettingKey.SoundPanningInworldDistance: return "Sound-panning Distance";
-            case SettingKey.SoundAttenuationEnabled: return "Sound-attenuation Enabled";
-            case SettingKey.SoundAttenuationMin: return "Sound-attenuation Minimum";
-            case SettingKey.SoundAttenuationForceScreenSpace: return "Sound-attenuation force Screen-Space";
-            case SettingKey.SoundAttenuationInworldThreshold: return "Sound-attenuation Threshold";
-            case SettingKey.SoundAttenuationInworldDistance: return "Sound-attenuation Distance";
-            case SettingKey.LowHealthSaturationFactor: return "Low HP Desaturation Factor";
-            case SettingKey.LowHealthThreshold: return "Low HP Desaturation Threshold";
+            case SettingKey.SoundPanningEnabled: return "Enabled";
+            case SettingKey.SoundPanningStrength: return "Strength";
+            case SettingKey.SoundPanningForceScreenSpace: return "Force Screen-Space";
+            case SettingKey.SoundPanningInworldThreshold: return "Threshold";
+            case SettingKey.SoundPanningInworldDistance: return "Distance";
+            case SettingKey.SoundAttenuationEnabled: return "Enabled";
+            case SettingKey.SoundAttenuationMin: return "Minimum";
+            case SettingKey.SoundAttenuationForceScreenSpace: return "Force Screen-Space";
+            case SettingKey.SoundAttenuationInworldThreshold: return "Threshold";
+            case SettingKey.SoundAttenuationInworldDistance: return "Distance";
+            case SettingKey.LowHealthSaturationFactor: return "Strength";
+            case SettingKey.LowHealthThreshold: return "Threshold";
             case SettingKey.HideFilmgrain: return "Hide FilmGrain";
         }
     }
 
-    // TODO:
     public static string GetHelp(SettingKey key)
     {
         switch (key)
@@ -178,6 +164,31 @@ public static class Settings
             case SettingKey.LowHealthSaturationFactor: return "Controls the desaturation strength";
             case SettingKey.LowHealthThreshold: return "Controls the desaturation threshold";
             case SettingKey.HideFilmgrain: return "Forcefully hides the FilmGrain even if Effect Level is set to Normal";
+        }
+    }
+
+    public static string GetCategoryName(SettingKey key)
+    {
+        switch (key)
+        {
+            default: return "UNKNOWN";
+            case SettingKey.SoundPanningEnabled:
+            case SettingKey.SoundPanningStrength:
+            case SettingKey.SoundPanningForceScreenSpace:
+            case SettingKey.SoundPanningInworldThreshold:
+            case SettingKey.SoundPanningInworldDistance:
+                return "SOUND-PANNING";
+            case SettingKey.SoundAttenuationEnabled:
+            case SettingKey.SoundAttenuationMin:
+            case SettingKey.SoundAttenuationForceScreenSpace:
+            case SettingKey.SoundAttenuationInworldThreshold:
+            case SettingKey.SoundAttenuationInworldDistance:
+                return "SOUND-ATTENUATION";
+            case SettingKey.LowHealthSaturationFactor:
+            case SettingKey.LowHealthThreshold:
+                return "LOW HEALTH DESATURATION";
+            case SettingKey.HideFilmgrain:
+                return "MISC";
         }
     }
 }

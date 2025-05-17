@@ -42,9 +42,9 @@ internal static class IniFile
         Settings.Init();
 
         // Create config.ini if it doesnt exist.
-        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
-            using (FileStream fileStream = System.IO.File.Create(Globals.Paths.CONFIGURATIONINI))
+            using (FileStream fileStream = File.Create(Globals.Paths.CONFIGURATIONINI))
             {
                 fileStream.Close();
             }
@@ -67,7 +67,7 @@ internal static class IniFile
     public static void Refresh()
     {
         Logger.LogDebug("CONFIG.INI: Refreshing...");
-        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: File doesnt exist. Restart the game to create it again");
             return;
@@ -99,7 +99,7 @@ internal static class IniFile
         }
 
         Logger.LogDebug("CONFIG.INI: Saving...");
-        if (!System.IO.File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
         {
             Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
             return;

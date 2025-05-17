@@ -1,18 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
+using Lidgren.Network;
+using SFDCT.Configuration;
+using SFDCT.Helper;
 using SFD;
 using SFD.States;
 using HarmonyLib;
-using System.Collections.Generic;
-using SFDCT.Configuration;
+using SFD.Effects;
+using SFDCT.Sync;
 
 namespace SFDCT.Game;
 
 [HarmonyPatch]
 internal static class WorldHandler
 {
-    public static bool EditorDebug = false;
-    private static bool m_deletePressed = false;
+    public static bool ServerMouse = false;
+    public static bool ClientMouse = false;
 
     /// <summary>
     ///     For unknown reasons players tempt to crash when joining a game.
@@ -52,25 +58,121 @@ internal static class WorldHandler
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static void UpdateDebug(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
+    private static void Update(float chunkMs, float totalMs, bool isLast, bool isFirst, GameWorld __instance)
     {
-        if (isLast && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu && __instance.GameOwner != GameOwnerEnum.Client)
+        if (isLast && __instance.m_game.CurrentState is not State.EditorTestRun or State.MainMenu)
         {
-            if (EditorDebug)
+            if (__instance.GameOwner != GameOwnerEnum.Client)
             {
-                __instance.UpdateDebugMouse();
+                UpdateDebugMouseList(__instance);
+            }
 
-                if (m_deletePressed && !Helper.Keyboard.KeyDown(Keys.Delete))
+            if (__instance.GameOwner != GameOwnerEnum.Server)
+            {
+                if (ServerMouse && ClientMouse)
                 {
-                    m_deletePressed = false;
-                }
+                    m_debugMouseUpdateTime -= totalMs;
+                    if (m_debugMouseUpdateTime <= 0f)
+                    {
+                        m_debugMouseUpdateTime = 1000f / 20f;
 
-                if (Helper.Keyboard.KeyDown(Keys.Delete) && !m_deletePressed)
-                {
-                    m_deletePressed = true;
-                    __instance.DeleteObjectAtCursor();
+                        GameSFD gameSFD = GameSFD.Handle;
+                        Client client = gameSFD?.Client;
+                        if (client != null && client.IsRunning)
+                        {
+                            Vector2 mouseBox2DPosition = __instance.GetMouseBox2DPosition();
+                            if (Input.IsMouseLeftButtonDown || m_debugMouseClientDeleteRequest || (!Input.IsMouseLeftButtonDown && m_debugMouseClientLastMouseLeftButton))
+                            {
+                                DebugMouseUpdateSignalData mouseData = new()
+                                {
+                                    Pressed = Input.IsMouseLeftButtonDown,
+                                    Delete = m_debugMouseClientDeleteRequest,
+                                    X = mouseBox2DPosition.X,
+                                    Y = mouseBox2DPosition.Y,
+                                    ID = __instance.GameInfo.GetLocalGameUser(0).GetGameConnectionTagRemoteUniqueIdentifier(),
+                                };
+
+                                client.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, mouseData.Store()));
+                                m_debugMouseClientDeleteRequest = false;
+                            }
+
+                            m_debugMouseClientLastMousePosition = mouseBox2DPosition;
+                            m_debugMouseClientLastMouseLeftButton = Input.IsMouseLeftButtonDown;
+                        }
+                    }
+
+                    if (Input.KeyDown(Keys.Delete))
+                    {
+                        if (!m_debugMouseClientDeletePressed)
+                        {
+                            m_debugMouseClientDeleteRequest = true;
+                        }
+
+                        m_debugMouseClientDeletePressed = true;
+                    }
+                    else
+                    {
+                        m_debugMouseClientDeletePressed = false;
+                    }
                 }
             }
+        }
+    }
+
+    private static Vector2 m_debugMouseClientLastMousePosition = Vector2.Zero;
+    private static bool m_debugMouseClientDeletePressed = false;
+    private static bool m_debugMouseClientDeleteRequest = false;
+    private static bool m_debugMouseClientLastMouseLeftButton = false;
+
+    private static float m_debugMouseUpdateTime = 0f;
+    private static Dictionary<long, DebugMouse> m_debugMouseList = [];
+
+    public static void UpdateUserDebugMouse(long remoteUniqueIdentifier, Vector2 box2DPosition, bool pressed, bool delete)
+    {
+        if (!m_debugMouseList.ContainsKey(remoteUniqueIdentifier))
+        {
+            Logger.LogDebug($"DEBUG MOUSE: Adding {remoteUniqueIdentifier}");
+
+            m_debugMouseList.Add(remoteUniqueIdentifier, new DebugMouse());
+        }
+
+        DebugMouse debugMouse = m_debugMouseList[remoteUniqueIdentifier];
+
+        debugMouse.RemoteUniqueIdentifier = remoteUniqueIdentifier;
+        debugMouse.MouseBox2DPosition = box2DPosition;
+        if (NetTime.Now - debugMouse.LastUpdateNetTime >= 0.25f)
+        {
+            debugMouse.MouseLastBox2DPosition = box2DPosition;
+        }
+        debugMouse.MouseIsPressed = pressed;
+        debugMouse.MouseDeleteRequest = delete;
+        debugMouse.LastUpdateNetTime = NetTime.Now;
+
+        m_debugMouseList[remoteUniqueIdentifier] = debugMouse;
+    }
+
+    private static void UpdateDebugMouseList(GameWorld world)
+    {
+        if (world == null)
+        {
+            return;
+        }
+
+        foreach (long key in m_debugMouseList.Keys.ToList())
+        {
+            DebugMouse debugMouse = m_debugMouseList[key];
+
+            if (NetTime.Now - debugMouse.LastUpdateNetTime >= 3)
+            {
+                Logger.LogDebug($"DEBUG MOUSE: Disposing {debugMouse.RemoteUniqueIdentifier}");
+
+                debugMouse.Dispose();
+                m_debugMouseList.Remove(key);
+                continue;
+            }
+
+            debugMouse.Update(world);
+            m_debugMouseList[key] = debugMouse;
         }
     }
 }

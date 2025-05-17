@@ -5,10 +5,11 @@ using HarmonyLib;
 namespace SFDCT.Helper;
 
 [HarmonyPatch]
-internal static class Keyboard
+internal static class Input
 {
     public static bool IsLeftCtrlDown { get { return KeyDown(Keys.LeftControl); } }
     public static bool IsRightCtrlDown { get { return KeyDown(Keys.RightControl); } }
+    public static bool IsMouseLeftButtonDown { get { return m_mouseLeftButtonState; } }
 
     public static bool KeyDown(Keys key)
     {
@@ -20,6 +21,7 @@ internal static class Keyboard
     }
 
     private static readonly bool[] m_keyStates = new bool[256];
+    private static bool m_mouseLeftButtonState = false;
     private static void CheckKey(bool state, Keys key)
     {
         if (((ushort)key) < m_keyStates.Length)
@@ -30,6 +32,10 @@ internal static class Keyboard
         {
             Logger.LogError("KEY OUTSIDE KEY STATES LENGTH: " + key.ToString());
         }
+    }
+    private static void CheckMouse(bool state)
+    {
+        m_mouseLeftButtonState = state;
     }
 
     [HarmonyPostfix]
@@ -44,5 +50,19 @@ internal static class Keyboard
     private static void GameSFD_StateKeyUpEvent(Keys key)
     {
         CheckKey(false, key);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.StateMouseLeftDownEvent))]
+    private static void GameSFD_StateMouseLeftDownEvent()
+    {
+        CheckMouse(true);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.StateMouseLeftUpEvent))]
+    private static void GameSFD_StateMouseLeftUpEvent()
+    {
+        CheckMouse(false);
     }
 }
