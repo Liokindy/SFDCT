@@ -1,9 +1,9 @@
-﻿using System;
+﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
-using SFD.Sounds;
 using SFD;
+using SFD.Sounds;
 using SFDCT.Configuration;
-using HarmonyLib;
+using System;
 
 namespace SFDCT.Sound;
 

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using HarmonyLib;
 using SFD;
-using SFDCT.Misc;
-using HarmonyLib;
 using SFD.MenuControls;
+using SFDCT.Misc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFDCT.UI;
 

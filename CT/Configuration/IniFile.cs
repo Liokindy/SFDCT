@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using SFD.Code;
+using SFDCT.Helper;
+using SFDCT.Misc;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using SFD.Code;
-using SFDCT.Misc;
-using SFDCT.Helper;
-using HarmonyLib;
 
 namespace SFDCT.Configuration;
 

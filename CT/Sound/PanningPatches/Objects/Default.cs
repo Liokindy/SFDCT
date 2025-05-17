@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Linq;
+﻿using HarmonyLib;
 using SFD;
 using SFD.Sounds;
-using SFDCT.Sound;
-using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 
 namespace SFDCT.Sound.PanningPatches.Objects;
 

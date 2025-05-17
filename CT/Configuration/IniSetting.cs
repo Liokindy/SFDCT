@@ -1,18 +1,19 @@
-﻿using System;
-using System.Globalization;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Code;
 using SFDCT.Helper;
+using System;
+using System.Globalization;
 
 namespace SFDCT.Configuration;
 
 public class IniSetting
 {
-    public object Value 
+    public object Value
     {
         get { return this.m_currentValue; }
-        set {
+        set
+        {
             if (value.GetType() == this.ValueType)
             {
                 this.m_currentValue = value;
@@ -23,8 +24,10 @@ public class IniSetting
     public object MaxValue { get { return this.m_maxValue; } }
     public object Default { get { return this.m_defaultValue; } }
     public bool RequiresGameRestart { get { return this.m_requiresGameRestart; } }
-    public string Name {
-        get {
+    public string Name
+    {
+        get
+        {
             if (string.IsNullOrEmpty(this.m_name))
             {
                 return this.m_key;
@@ -32,8 +35,10 @@ public class IniSetting
             return this.m_name;
         }
     }
-    public string Help {
-        get {
+    public string Help
+    {
+        get
+        {
             if (string.IsNullOrEmpty(this.m_help))
             {
                 return this.m_type.ToString();
@@ -41,8 +46,10 @@ public class IniSetting
             return this.m_help;
         }
     }
-    public string Category {
-        get {
+    public string Category
+    {
+        get
+        {
             if (string.IsNullOrEmpty(this.m_category))
             {
                 return "Unknown";

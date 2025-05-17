@@ -1,8 +1,8 @@
-﻿using System;
+﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using HarmonyLib;
+using System;
 
 namespace SFDCT.Fighter;
 

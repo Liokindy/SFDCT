@@ -1,7 +1,5 @@
-﻿using System;
+﻿using SFDCT.Helper;
 using System.Collections.Generic;
-using SFDCT.Helper;
-using SFDGameScriptInterface;
 
 namespace SFDCT.Configuration;
 
@@ -19,19 +17,19 @@ public static class Settings
             return;
         }
 
-        Add(SettingKey.SoundPanningEnabled,                 IniSettingType.Bool,    true);
-        Add(SettingKey.SoundPanningStrength,                IniSettingType.Float,   0.71f,  false, 0f, 1f);
-        Add(SettingKey.SoundPanningForceScreenSpace,        IniSettingType.Bool,    false);
-        Add(SettingKey.SoundPanningInworldThreshold,        IniSettingType.Int,     60,     false, 0, 1000);
-        Add(SettingKey.SoundPanningInworldDistance,         IniSettingType.Int,     400,    false, 0, 1000);
-        Add(SettingKey.SoundAttenuationEnabled,             IniSettingType.Bool,    true);
-        Add(SettingKey.SoundAttenuationMin,                 IniSettingType.Float,   0.6f,   false, 0f, 1f);
-        Add(SettingKey.SoundAttenuationForceScreenSpace,    IniSettingType.Bool,    false);
-        Add(SettingKey.SoundAttenuationInworldThreshold,    IniSettingType.Int,     60,     false, 0, 1000);
-        Add(SettingKey.SoundAttenuationInworldDistance,     IniSettingType.Int,     500,    false, 0, 1000);
-        Add(SettingKey.LowHealthSaturationFactor,           IniSettingType.Float,   0.71f,  false, 0f, 1f);
-        Add(SettingKey.LowHealthThreshold,                  IniSettingType.Float,   0.25f,  false, 0f, 1f);
-        Add(SettingKey.HideFilmgrain,                       IniSettingType.Bool,    false);
+        Add(SettingKey.SoundPanningEnabled, IniSettingType.Bool, true);
+        Add(SettingKey.SoundPanningStrength, IniSettingType.Float, 0.71f, false, 0f, 1f);
+        Add(SettingKey.SoundPanningForceScreenSpace, IniSettingType.Bool, false);
+        Add(SettingKey.SoundPanningInworldThreshold, IniSettingType.Int, 60, false, 0, 1000);
+        Add(SettingKey.SoundPanningInworldDistance, IniSettingType.Int, 400, false, 0, 1000);
+        Add(SettingKey.SoundAttenuationEnabled, IniSettingType.Bool, true);
+        Add(SettingKey.SoundAttenuationMin, IniSettingType.Float, 0.6f, false, 0f, 1f);
+        Add(SettingKey.SoundAttenuationForceScreenSpace, IniSettingType.Bool, false);
+        Add(SettingKey.SoundAttenuationInworldThreshold, IniSettingType.Int, 60, false, 0, 1000);
+        Add(SettingKey.SoundAttenuationInworldDistance, IniSettingType.Int, 500, false, 0, 1000);
+        Add(SettingKey.LowHealthSaturationFactor, IniSettingType.Float, 0.71f, false, 0f, 1f);
+        Add(SettingKey.LowHealthThreshold, IniSettingType.Float, 0.25f, false, 0f, 1f);
+        Add(SettingKey.HideFilmgrain, IniSettingType.Bool, false);
 
         b_initialized = true;
     }

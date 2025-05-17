@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using HarmonyLib;
+using Microsoft.Xna.Framework.Input;
 using SFD;
-using HarmonyLib;
 
 namespace SFDCT.Helper;
 

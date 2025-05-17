@@ -1,7 +1,6 @@
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using SFD.MenuControls;
-using SFDCT.Misc;
-using HarmonyLib;
 
 namespace SFDCT.OnlineServices;
 

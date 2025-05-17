@@ -1,17 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
+using SFD;
+using SFDCT.Sync;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using SFDCT.Helper;
-using SFDCT.Sync;
-using SFD;
-using SFD.Core;
-using SFD.States;
-using SFD.Voting;
-using SFD.Objects;
-using SFD.Weapons;
-using Lidgren.Network;
-using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -112,7 +105,7 @@ internal static class CommandHandler
                 if (args.IsCommand("MOUSE", "SERVERMOUSE"))
                 {
                     string mess = "Server-Mouse set to {0}";
-                
+
                     WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
                     args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
 

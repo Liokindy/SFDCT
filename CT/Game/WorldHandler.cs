@@ -1,16 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
+﻿using HarmonyLib;
 using Lidgren.Network;
-using SFDCT.Configuration;
-using SFDCT.Helper;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.States;
-using HarmonyLib;
-using SFD.Effects;
+using SFDCT.Configuration;
+using SFDCT.Helper;
 using SFDCT.Sync;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFDCT.Game;
 

@@ -1,8 +1,7 @@
-﻿using System;
+﻿using HarmonyLib;
+using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.States;
-using Microsoft.Xna.Framework.Input;
-using HarmonyLib;
 
 namespace SFDCT.OnlineServices;
 

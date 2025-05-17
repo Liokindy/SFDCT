@@ -1,6 +1,6 @@
-﻿using SFD.Effects;
+﻿using HarmonyLib;
+using SFD.Effects;
 using SFDCT.Configuration;
-using HarmonyLib;
 
 namespace SFDCT.UI;
 

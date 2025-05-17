@@ -2,15 +2,10 @@
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
-using SFD.MLGameAuthorization;
 using SFDCT.Game;
-using SFDCT.Helper;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SFDCT.Sync;
 
@@ -59,7 +54,7 @@ internal static class ServerHandler
                                 foreach (var connectionUser in connectionTag.GameUsers)
                                 {
                                     connectionUser.ForceServerMovement = useServerMovement;
-                                    
+
                                     Player playerByUserIdentifier = __instance.GameInfo.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
                                     playerByUserIdentifier?.UpdateCanDoPlayerAction();
                                 }

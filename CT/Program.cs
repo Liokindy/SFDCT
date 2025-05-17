@@ -1,12 +1,11 @@
-﻿using System;
+﻿using HarmonyLib;
+using SFDCT.Configuration;
+using SFDCT.Helper;
+using SFDCT.Misc;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using SFDCT.Helper;
-using SFDCT.Misc;
-using SFDCT.Configuration;
-using HarmonyLib;
-using System.Reflection;
 using System.Net;
 
 namespace SFDCT;

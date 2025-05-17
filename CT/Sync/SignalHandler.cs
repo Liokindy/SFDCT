@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
+﻿using HarmonyLib;
 using Lidgren.Network;
-using Microsoft.Xna.Framework;
-using SFDCT.Game;
-using SFDCT.Helper;
 using SFD;
 using SFD.Core;
-using HarmonyLib;
-using Microsoft.Xna.Framework.Input;
-using System.Threading;
+using System;
 
 namespace SFDCT.Sync;
 
@@ -24,7 +16,7 @@ internal static class SignalHandler
         NetMessage.WriteDataType(MessageType.Signal, netOutgoingMessage);
         netOutgoingMessage.WriteRangedInteger(0, 31, (int)messageToWrite.Signal);
 
-        switch(messageToWrite.Signal)
+        switch (messageToWrite.Signal)
         {
             case (NetMessage.Signal.Type)30:
                 object[] customSignalData = (object[])messageToWrite.Object;
@@ -152,7 +144,7 @@ internal static class SignalHandler
                 data.Object = new Pair<int, int>(key, value);
                 break;
         }
-        
+
         __result = data;
         return false;
     }

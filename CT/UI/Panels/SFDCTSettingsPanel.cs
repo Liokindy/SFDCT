@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Configuration;
-using SFDCT.Misc;
+using System;
+using System.Collections.Generic;
 
 namespace SFDCT.UI.Panels;
 
@@ -42,11 +41,11 @@ internal class SFDCTSettingsPanel : Panel
                     m_menuItemList.Add(m_menuItems[settingPair.Key]);
                     break;
                 case IniSettingType.Bool:
-                    m_menuItems.Add(settingPair.Key, new MenuItemDropdown(settingPair.Value.Name, [LanguageHelper.GetText("general.on"),LanguageHelper.GetText("general.off")]));
+                    m_menuItems.Add(settingPair.Key, new MenuItemDropdown(settingPair.Value.Name, [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]));
                     ((MenuItemDropdown)m_menuItems[settingPair.Key]).DropdownItemVisibleCount = 2;
                     ((MenuItemDropdown)m_menuItems[settingPair.Key]).SetStartValue((bool)settingPair.Value.Get() ? 0 : 1);
                     ((MenuItemDropdown)m_menuItems[settingPair.Key]).Tooltip = settingPair.Value.Help;
-                    
+
                     m_originalValues.Add(settingPair.Key, settingPair.Value.Get());
 
                     m_menuItemsActions.Add(settingPair.Key, () =>
@@ -155,7 +154,7 @@ internal class SFDCTSettingsPanel : Panel
 
             this.CloseSubPanel();
             this.ok(sender);
-        }, (object sender) => 
+        }, (object sender) =>
         {
             this.CloseSubPanel();
         }));

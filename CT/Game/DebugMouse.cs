@@ -1,11 +1,11 @@
 ﻿using Box2D.XNA;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Effects;
-using System.Collections.Generic;
-using System;
-using Lidgren.Network;
 using SFD.Objects;
+using System;
+using System.Collections.Generic;
 
 namespace SFDCT.Game;
 
@@ -90,7 +90,7 @@ internal class DebugMouse
                 if (!this.MouseLastIsPressed)
                 {
                     List<ObjectData> triggers = [];
-                    
+
                     AABB aabb;
                     AABB.Create(out aabb, this.MouseBox2DPosition, 0.16f);
 
@@ -185,7 +185,7 @@ internal class DebugMouse
                 if (this.MouseObject != null && !this.MouseObject.IsDisposed)
                 {
                     this.MouseJoint.SetTarget(this.MouseBox2DPosition);
-                    
+
                     if (this.MouseObject.IsPlayer)
                     {
                         Player player = (Player)this.MouseObject.InternalData;

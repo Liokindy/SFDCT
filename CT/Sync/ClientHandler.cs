@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HarmonyLib;
+using Lidgren.Network;
 using SFD;
 using SFDCT.Game;
-using HarmonyLib;
-using Lidgren.Network;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
-using SFDCT.Helper;
 
 namespace SFDCT.Sync;
 

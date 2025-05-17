@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using HarmonyLib;
 using SFD.MenuControls;
-using HarmonyLib;
+using System;
+using System.Collections.Generic;
 
 namespace SFDCT.UI.Panels;
 
