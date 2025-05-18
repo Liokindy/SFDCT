@@ -29,6 +29,13 @@ internal static class DSPreview
     //    return code;
     //}
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameUser), nameof(GameUser.IsDedicatedPreview), MethodType.Getter)]
+    private static bool GameUserGetIsDedicatedPreview(GameUser __instance, ref bool __result)
+    {
+        __result = __instance.IsHost && __instance.JoinedAsSpectator && string.IsNullOrEmpty(__instance.AccountName);
+        return false;
+    }
 
     //     Hook to KeyDownEvent
     [HarmonyPostfix]

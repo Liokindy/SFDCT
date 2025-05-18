@@ -1,10 +1,10 @@
-﻿using HarmonyLib;
-using Microsoft.Xna.Framework;
-using SFD;
-using SFDCT.Sync;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using SFDCT.Sync;
+using SFD;
+using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -45,29 +45,35 @@ internal static class CommandHandler
 
         if (args.IsCommand("PLAYERS", "LISTPLAYERS", "SHOWPLAYERS", "USERS", "LISTUSERS", "SHOWUSERS"))
         {
-            string header = "Listing all users in the lobby...";
             string user = "- {0}: '{1}' ({2}) {3}";
-            string footer = "Found {0} players";
+            string bot = "- {0}: '{1}' {3}";
+            string footer = "Found {0} users";
 
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, header, Color.LightBlue, args.SenderGameUser));
-
-            IEnumerable<GameUser> gameUsers = __instance.GetGameUsers();
-            foreach (GameUser gameUser in gameUsers)
+            int gameUserCount = 0;
+            using (IEnumerator<GameUser> enumerator = __instance.GetGameUsers().GetEnumerator())
             {
-                string status = "";
+                while (enumerator.MoveNext())
+                {
+                    GameUser gameUser = enumerator.Current;
+                    string mess = user;
+                    string status = "";
+                    Color messColor = Color.LightBlue;
 
-                if (gameUser.JoinedAsSpectator) { status = "SPECTATOR"; }
-                if (gameUser.SpectatingWhileWaitingToPlay) { status = "WAITING"; }
-                if (gameUser.IsModerator) { status = "MODERATOR"; }
-                if (gameUser.IsHost) { status = "HOST"; }
+                    if (gameUser.IsModerator) { status = "MODERATOR"; messColor = Color.LightGreen; }
+                    if (gameUser.IsHost) { status = "HOST"; messColor = Color.LightPink; }
+                    if (gameUser.SpectatingWhileWaitingToPlay) { status = "WAITING"; }
+                    if (gameUser.JoinedAsSpectator) { status = "SPECTATOR"; }
+                    if (gameUser.IsBot) { status = "BOT"; mess = bot; }
 
-                Color messColor = Color.LightBlue * (gameUser.UserIdentifier % 2 == 0 ? 0.8f : 0.9f);
-                string mess = string.Format(user, gameUser.GameSlotIndex, gameUser.GetProfileName(), gameUser.AccountName, status);
+                    messColor = new Color((Color.LightBlue.R + messColor.R) / 2, (Color.LightBlue.G + messColor.G) / 2, (Color.LightBlue.B + messColor.B) / 2);
+                    messColor *= gameUserCount % 2 == 0 ? 0.8f : 0.9f;
+                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, gameUser.GameSlotIndex, gameUser.GetProfileName(), gameUser.AccountName, status), messColor, args.SenderGameUser));
 
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, mess, messColor, args.SenderGameUser));
+                    gameUserCount++;
+                }
             }
 
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(footer, gameUsers.Count()), Color.LightBlue, args.SenderGameUser));
+            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(footer, gameUserCount), Color.LightBlue, args.SenderGameUser));
 
             return true;
         }
@@ -131,7 +137,6 @@ internal static class CommandHandler
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                // None
                 if (args.IsCommand("SERVERMOVEMENT", "SVMOV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
@@ -180,6 +185,105 @@ internal static class CommandHandler
                         }
                     }
                 }
+            }
+        }
+
+        // Public commands
+        if (args.IsCommand("JOIN"))
+        {
+            GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
+
+            if (connectionTag != null)
+            {
+                if (connectionTag.GameUsers.Count() > 1)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You can't join back with more than 1 local player", Color.Red, args.SenderGameUser, null));
+                    return true;
+                }
+                if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed || !connectionTag.FirstGameUser.JoinedAsSpectator)
+                {
+                    return true;
+                }
+
+                GameSlot oldGameSlot = connectionTag.FirstGameUser.GameSlot;
+                List<GameSlot> gameSlots = server.FindOpenGameSlots(server.GameInfo.DropInMode, connectionTag.GameUsers.Count(), server.GameInfo.EvenTeams, null);
+
+                if (gameSlots != null && gameSlots.Count > 0)
+                {
+                    GameSlot gameSlot = gameSlots.First();
+                    gameSlot.ClearGameUser(__instance);
+                    gameSlot.GameUser = connectionTag.FirstGameUser;
+                    gameSlot.CurrentState = GameSlot.State.Occupied;
+                    connectionTag.FirstGameUser.GameSlot = gameSlot;
+                    connectionTag.FirstGameUser.JoinedAsSpectator = false;
+
+                    List<string> messArgs = [];
+                    string mess = "menu.lobby.newPlayerJoined";
+                    Color messColor = Constants.COLORS.PLAYER_CONNECTED;
+
+                    messArgs.Add(connectionTag.FirstGameUser.GetProfileName());
+                    if (gameSlot.CurrentTeam != Team.Independent)
+                    {
+                        mess = "menu.lobby.newPlayerJoinedTeam";
+                    }
+
+                    server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs.ToArray()), null, null);
+                    server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f), null);
+                    server.SyncGameSlotInfo(gameSlot);
+                    server.SyncGameUserInfo(connectionTag.FirstGameUser, null);
+
+                    args.Feedback.Add(new(args.SenderGameUser, "You stopped spectating and joined back", Color.Gray, args.SenderGameUser, null));
+                }
+                else
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You can't join back, unavailable game-slot", Color.Red, args.SenderGameUser, null));
+                }
+
+                return true;
+            }
+        }
+
+        if (args.IsCommand("SPECTATE"))
+        {
+            GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
+
+            if (connectionTag != null)
+            {
+                if (connectionTag.GameUsers.Count() > 1)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You can't spectate with more than 1 local player", Color.Red, args.SenderGameUser, null));
+                    return true;
+                }
+                if (connectionTag.FirstGameUser != null && !connectionTag.FirstGameUser.IsDisposed && connectionTag.FirstGameUser.JoinedAsSpectator)
+                {
+                    return true;
+                }
+
+                GameSlot gameSlot = connectionTag.FirstGameUser.GameSlot;
+                gameSlot.GameUser = null;
+                gameSlot.ClearGameUser(null);
+                gameSlot.CurrentState = GameSlot.State.Open;
+                connectionTag.FirstGameUser.GameSlot = null;
+                connectionTag.FirstGameUser.JoinedAsSpectator = true;
+
+                if (__instance.GameWorld != null)
+                {
+                    Player senderGamePlayer = __instance.GameWorld.GetPlayerByUserIdentifier(connectionTag.FirstGameUser.UserIdentifier);
+                    senderGamePlayer?.SetUser(0);
+                    senderGamePlayer?.Kill();
+                }
+
+                string mess = "menu.lobby.newPlayerJoinedTeam";
+                string[] messArgs = [args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator")];
+                Color messColor = Color.LightGray;
+
+                server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs), null, null);
+                server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f), null);
+                server.SyncGameSlotInfo(gameSlot, null);
+                server.SyncGameUserInfo(connectionTag.FirstGameUser, null);
+
+                args.Feedback.Add(new(args.SenderGameUser, "Use /JOIN to stop spectating and join an available game-slot", Color.Gray, args.SenderGameUser, null));
+                return true;
             }
         }
 
