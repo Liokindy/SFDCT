@@ -17,4 +17,6 @@ public enum SettingKey
     LowHealthThreshold,
     HideFilmgrain,
     DisableClockTicking,
+    SpectatorsMaximum,
+    SpectatorsOnlyModerators,
 }

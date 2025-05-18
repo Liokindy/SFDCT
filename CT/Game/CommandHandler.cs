@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using SFDCT.Sync;
+using SFDCT.Configuration;
 using SFD;
 using HarmonyLib;
 
@@ -191,6 +192,15 @@ internal static class CommandHandler
         // Public commands
         if (args.IsCommand("JOIN"))
         {
+            if (!args.SenderGameUser.IsModerator && Settings.Get<bool>(SettingKey.SpectatorsOnlyModerators))
+            {
+                return true;
+            }
+            if (__instance.GetSpectatingUsers().Count >= Settings.Get<int>(SettingKey.SpectatorsMaximum))
+            {
+                return true;
+            }
+
             GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
             if (connectionTag != null)

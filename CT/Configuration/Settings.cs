@@ -31,6 +31,8 @@ public static class Settings
         Add(SettingKey.LowHealthThreshold, IniSettingType.Float, 0.25f, false, 0f, 1f);
         Add(SettingKey.HideFilmgrain, IniSettingType.Bool, false);
         Add(SettingKey.DisableClockTicking, IniSettingType.Bool, true);
+        Add(SettingKey.SpectatorsMaximum, IniSettingType.Int, 4, false, 0, 4);
+        Add(SettingKey.SpectatorsOnlyModerators, IniSettingType.Bool, true);
 
         b_initialized = true;
     }
@@ -121,6 +123,8 @@ public static class Settings
             case SettingKey.LowHealthThreshold: return "LOW_HEALTH_THRESHOLD";
             case SettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
             case SettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
+            case SettingKey.SpectatorsMaximum: return "SPECTATORS_MAXIMUM";
+            case SettingKey.SpectatorsOnlyModerators: return "SPECTATORS_ONLY_MODERATORS";
         }
     }
 
@@ -144,6 +148,8 @@ public static class Settings
             case SettingKey.LowHealthThreshold: return "Threshold";
             case SettingKey.HideFilmgrain: return "Hide FilmGrain";
             case SettingKey.DisableClockTicking: return "Disable ClockTicking";
+            case SettingKey.SpectatorsMaximum: return "Maximum";
+            case SettingKey.SpectatorsOnlyModerators: return "Only Moderators";
         }
     }
 
@@ -166,6 +172,8 @@ public static class Settings
             case SettingKey.LowHealthThreshold: return "Controls the desaturation threshold";
             case SettingKey.HideFilmgrain: return "Forcefully hides the FilmGrain even if Effect Level is set to Normal";
             case SettingKey.DisableClockTicking: return "Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup";
+            case SettingKey.SpectatorsMaximum: return "Controls the maximum amount of spectators";
+            case SettingKey.SpectatorsOnlyModerators: return "Controls if only moderators and the host can turn into spectators";
         }
     }
 
@@ -189,6 +197,9 @@ public static class Settings
             case SettingKey.LowHealthSaturationFactor:
             case SettingKey.LowHealthThreshold:
                 return "LOW HEALTH DESATURATION";
+            case SettingKey.SpectatorsMaximum:
+            case SettingKey.SpectatorsOnlyModerators:
+                return "SPECTATORS";
             case SettingKey.HideFilmgrain:
             case SettingKey.DisableClockTicking:
                 return "MISC";
