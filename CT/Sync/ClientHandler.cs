@@ -2,6 +2,7 @@
 using Lidgren.Network;
 using SFD;
 using SFDCT.Game;
+using SFDCT.Helper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -22,10 +23,10 @@ internal static class ClientHandler
     [HarmonyPatch(typeof(Client), nameof(Client.SendMessage), [typeof(MessageType), typeof(object), typeof(NetClient)])]
     private static IEnumerable<CodeInstruction> ClientSendMessage(IEnumerable<CodeInstruction> instructions)
     {
-        for (int i = 0; i < 8; i++)
-        {
-            instructions.ElementAt(61 + i).opcode = OpCodes.Nop;
-        }
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    instructions.ElementAt(61 + i).opcode = OpCodes.Nop;
+        //}
 
         return instructions;
     }
@@ -36,10 +37,10 @@ internal static class ClientHandler
     {
         List<CodeInstruction> code = new(instructions);
 
-        for (int i = 0; i < 8; i++)
-        {
-            code[13 + i].opcode = OpCodes.Nop;
-        }
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    code[13 + i].opcode = OpCodes.Nop;
+        //}
 
         code.Insert(28, new CodeInstruction(OpCodes.Ldarg_0, null));
         code.Insert(29, new CodeInstruction(OpCodes.Ldarg_2, null));

@@ -50,6 +50,7 @@ internal static class SignalHandler
                 netOutgoingMessage.Write(pair.ItemA);
                 netOutgoingMessage.Write(pair.ItemB);
                 break;
+            case NetMessage.Signal.Type.GameOverUpdateSignal:
             case NetMessage.Signal.Type.GameOverSignal:
                 GameWorld.GameOverResultUpdate gameOverResultUpdate = (GameWorld.GameOverResultUpdate)messageToWrite.Object;
                 netOutgoingMessage.WriteRangedInteger(0, 20, gameOverResultUpdate.GameOverResult.GameOverMaxVotes);
@@ -113,6 +114,7 @@ internal static class SignalHandler
                 data.Object = new Guid(netIncomingMessage.ReadBytes(16));
                 break;
             case NetMessage.Signal.Type.GameOverSignal:
+            case NetMessage.Signal.Type.GameOverUpdateSignal:
                 GameWorld.GameOverResultUpdate gameOverResultUpdate = new GameWorld.GameOverResultUpdate(new GameWorld.GameOverResultData(GameOwnerEnum.Server));
                 gameOverResultUpdate.GameOverResult.GameOverMaxVotes = netIncomingMessage.ReadRangedInteger(0, 20);
                 gameOverResultUpdate.GameOverResult.GameOverVotes = netIncomingMessage.ReadRangedInteger(0, 20);
@@ -132,8 +134,6 @@ internal static class SignalHandler
                 }
                 gameOverResultUpdate.GameOverResult.Text = netIncomingMessage.ReadString();
                 data.Object = gameOverResultUpdate;
-                break;
-            case NetMessage.Signal.Type.GameOverUpdateSignal:
                 break;
             case NetMessage.Signal.Type.LoadBeginFetchingDataSignal:
                 data.Object = netIncomingMessage.ReadInt32();
