@@ -19,4 +19,7 @@ public enum SettingKey
     DisableClockTicking,
     SpectatorsMaximum,
     SpectatorsOnlyModerators,
+    VoteKickEnabled,
+    VoteKickSuccessCooldown,
+    VoteKickFailCooldown,
 }

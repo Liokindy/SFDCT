@@ -6,6 +6,9 @@ using SFDCT.Sync;
 using SFDCT.Configuration;
 using SFD;
 using HarmonyLib;
+using SFD.Voting;
+using Lidgren.Network;
+using SFD.Core;
 
 namespace SFDCT.Game;
 
@@ -190,13 +193,57 @@ internal static class CommandHandler
         }
 
         // Public commands
+        if (__instance.GameOwner == GameOwnerEnum.Server)
+        {
+            if (args.IsCommand("VOTEKICK"))
+            {
+                if (args.Parameters.Count <= 0)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You need to specify a user to kick", Color.Red, args.SenderGameUser));
+                    return true;
+                }
+
+                if (__instance.VoteInfo == null || __instance.VoteInfo.ActiveVotes.Count > 0)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "There is already a vote in progress", Color.Red, args.SenderGameUser));
+                    return true;
+                }
+
+                if (!Voting.GameVoteKick.CanVoteKick)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You can't start another vote-kick right now", Color.Red, args.SenderGameUser));
+                    return true;
+                }
+
+                GameUser voteKickUserToKick = __instance.GetGameUserByStringInput(args.SourceParameters);
+                if (voteKickUserToKick == null || voteKickUserToKick.IsDisposed || voteKickUserToKick.IsModerator || voteKickUserToKick.IsBot)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "You can't start a vote-kick against this user", Color.Red, args.SenderGameUser));
+                    return true;
+                }
+
+                string consoleMess = "Creating vote-kick from '{0}' ({1}) against '{2}' ({3})";
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(consoleMess, args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName, voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName));
+
+                Voting.GameVoteKick vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), voteKickUserToKick);
+                vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.UserIdentifier != voteKickUserToKick.UserIdentifier && x.GameConnectionTag().FirstGameUser.CanVote));
+                __instance.VoteInfo.AddVote(vote);
+                server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
+
+                string mess = "'{0}' ({1}) HAS STARTED A VOTE-KICK AGAINST '{2}' ({3})";
+                string mess2 = "- '{0}' ({1}) has started a vote-kick against you";
+                string mess3 = "- You started a vote-kick against '{0}' ({1})";
+
+                args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName, voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName), Voting.GameVoteKick.PRIMARY_MESSAGE_COLOR));
+                args.Feedback.Add(new(args.SenderGameUser, string.Format(mess2, args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName), Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, voteKickUserToKick));
+                args.Feedback.Add(new(args.SenderGameUser, string.Format(mess3, voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName), Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, args.SenderGameUser));
+            }
+        }
+
         if (args.IsCommand("JOIN"))
         {
             if (!args.SenderGameUser.IsModerator && Settings.Get<bool>(SettingKey.SpectatorsOnlyModerators))
-            {
-                return true;
-            }
-            if (__instance.GetSpectatingUsers().Count >= Settings.Get<int>(SettingKey.SpectatorsMaximum))
             {
                 return true;
             }
@@ -255,6 +302,15 @@ internal static class CommandHandler
 
         if (args.IsCommand("SPECTATE"))
         {
+            if (!args.SenderGameUser.IsModerator && Settings.Get<bool>(SettingKey.SpectatorsOnlyModerators))
+            {
+                return true;
+            }
+            if (__instance.GetSpectatingUsers().Count >= Settings.Get<int>(SettingKey.SpectatorsMaximum))
+            {
+                return true;
+            }
+
             GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
             if (connectionTag != null)

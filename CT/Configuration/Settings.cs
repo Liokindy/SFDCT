@@ -33,6 +33,9 @@ public static class Settings
         Add(SettingKey.DisableClockTicking, IniSettingType.Bool, true);
         Add(SettingKey.SpectatorsMaximum, IniSettingType.Int, 4, false, 0, 4);
         Add(SettingKey.SpectatorsOnlyModerators, IniSettingType.Bool, true);
+        Add(SettingKey.VoteKickEnabled, IniSettingType.Bool, true);
+        Add(SettingKey.VoteKickFailCooldown, IniSettingType.Int, 150, false, 30, 300);
+        Add(SettingKey.VoteKickSuccessCooldown, IniSettingType.Int, 60, false, 30, 300);
 
         b_initialized = true;
     }
@@ -125,6 +128,9 @@ public static class Settings
             case SettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
             case SettingKey.SpectatorsMaximum: return "SPECTATORS_MAXIMUM";
             case SettingKey.SpectatorsOnlyModerators: return "SPECTATORS_ONLY_MODERATORS";
+            case SettingKey.VoteKickEnabled: return "VOTEKICK_ENABLED";
+            case SettingKey.VoteKickSuccessCooldown: return "VOTEKICK_SUCCESS_COOLDOWN";
+            case SettingKey.VoteKickFailCooldown: return "VOTEKICK_FAIL_COOLDOWN";
         }
     }
 
@@ -150,6 +156,9 @@ public static class Settings
             case SettingKey.DisableClockTicking: return "Disable ClockTicking";
             case SettingKey.SpectatorsMaximum: return "Maximum";
             case SettingKey.SpectatorsOnlyModerators: return "Only Moderators";
+            case SettingKey.VoteKickEnabled: return "Enabled";
+            case SettingKey.VoteKickSuccessCooldown: return "Success cooldown";
+            case SettingKey.VoteKickFailCooldown: return "Fail cooldown";
         }
     }
 
@@ -174,6 +183,9 @@ public static class Settings
             case SettingKey.DisableClockTicking: return "Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup";
             case SettingKey.SpectatorsMaximum: return "Controls the maximum amount of spectators";
             case SettingKey.SpectatorsOnlyModerators: return "Controls if only moderators and the host can turn into spectators";
+            case SettingKey.VoteKickEnabled: return "Enables or disables vote-kicking";
+            case SettingKey.VoteKickSuccessCooldown: return "Controls the cooldown in seconds of vote-kicking on success";
+            case SettingKey.VoteKickFailCooldown: return "Controls the cooldown in seconds of vote-kicking on failure";
         }
     }
 
@@ -200,6 +212,10 @@ public static class Settings
             case SettingKey.SpectatorsMaximum:
             case SettingKey.SpectatorsOnlyModerators:
                 return "SPECTATORS";
+            case SettingKey.VoteKickEnabled:
+            case SettingKey.VoteKickFailCooldown:
+            case SettingKey.VoteKickSuccessCooldown:
+                return "VOTE-KICK";
             case SettingKey.HideFilmgrain:
             case SettingKey.DisableClockTicking:
                 return "MISC";
