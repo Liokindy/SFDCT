@@ -71,13 +71,13 @@ internal static class CommandHandler
 
                     messColor = new Color((Color.LightBlue.R + messColor.R) / 2, (Color.LightBlue.G + messColor.G) / 2, (Color.LightBlue.B + messColor.B) / 2);
                     messColor *= gameUserCount % 2 == 0 ? 0.8f : 0.9f;
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, gameUser.GameSlotIndex, gameUser.GetProfileName(), gameUser.AccountName, status), messColor, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, gameUser.GameSlotIndex, gameUser.GetProfileName(), gameUser.AccountName, status), messColor, args.SenderGameUser));
 
                     gameUserCount++;
                 }
             }
 
-            args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(footer, gameUserCount), Color.LightBlue, args.SenderGameUser));
+            args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, gameUserCount), Color.LightBlue, args.SenderGameUser));
 
             return true;
         }
@@ -89,7 +89,7 @@ internal static class CommandHandler
             {
                 WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
 
-                args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format("Client Mouse set to {0}", WorldHandler.ClientMouse), Color.LightBlue, args.SenderGameUser));
+                args.Feedback.Add(new(args.SenderGameUser, string.Format("Client Mouse set to {0}", WorldHandler.ClientMouse), Color.LightBlue, args.SenderGameUser));
             }
         }
 
@@ -107,6 +107,83 @@ internal static class CommandHandler
         // Host commands
         if (args.HostPrivileges)
         {
+            Color c1 = new Color(159, 255, 64);
+            if (args.IsCommand("ADDMODCOMMANDS"))
+            {
+                args.Feedback.Add(new(args.SenderGameUser, "Adding moderator commands...", c1, args.SenderGameUser));
+
+                for (int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string modCommand = args.Parameters[i].ToUpperInvariant();
+
+                    args.Feedback.Add(new(args.SenderGameUser, $"- Added '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                }
+                args.Feedback.Add(new(args.SenderGameUser, $"Added '{args.Parameters.Count}' moderator commands", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+
+            if (args.IsCommand("REMOVEMODCOMMANDS") && args.Parameters.Count > 0)
+            {
+                args.Feedback.Add(new(args.SenderGameUser, "Removing moderator commands...", c1, args.SenderGameUser));
+
+                for (int i = 0; i < args.Parameters.Count; i++)
+                {
+                    string modCommand = args.Parameters[i];
+
+                    if (Constants.MODDERATOR_COMMANDS.Contains(modCommand))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Remove(modCommand);
+                        args.Feedback.Add(new(args.SenderGameUser, $"- Removed '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+                    if (Constants.MODDERATOR_COMMANDS.Contains(modCommand.ToUpperInvariant()))
+                    {
+                        Constants.MODDERATOR_COMMANDS.Remove(modCommand.ToUpperInvariant());
+                        args.Feedback.Add(new(args.SenderGameUser, $"- Removed '{modCommand.ToUpperInvariant()}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+
+                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                }
+                args.Feedback.Add(new(args.SenderGameUser, $"Removed '{args.Parameters.Count}' moderator commands", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+
+            if (args.IsCommand("CLEARMODCOMMANDS"))
+            {
+                args.Feedback.Add(new(args.SenderGameUser, "Clearing all moderator commands...", c1, args.SenderGameUser));
+                int count = Constants.MODDERATOR_COMMANDS.Count;
+                Constants.MODDERATOR_COMMANDS.Clear();
+
+                args.Feedback.Add(new(args.SenderGameUser, $"Cleared {count} moderator commands.", c1 * 0.75f, args.SenderGameUser));
+
+                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
+                return true;
+            }
+
+            if (args.IsCommand("LISTMODCOMMANDS"))
+            {
+                args.Feedback.Add(new(args.SenderGameUser, "Listing all moderator commands...", c1, args.SenderGameUser));
+
+                if (Constants.MODDERATOR_COMMANDS.Count > 0)
+                {
+                    for (int i = 0; i < Constants.MODDERATOR_COMMANDS.Count; i++)
+                    {
+                        string modCommand = Constants.MODDERATOR_COMMANDS[i];
+                        args.Feedback.Add(new(args.SenderGameUser, $"- '{modCommand}'", c1 * 0.5f, args.SenderGameUser));
+                    }
+                    args.Feedback.Add(new(args.SenderGameUser, string.Format("Moderators can use {0} command(s)", Constants.MODDERATOR_COMMANDS.Count), c1 * 0.8f, args.SenderGameUser));
+                }
+                else
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, "- Moderators can use ALL commands!", c1 * 0.75f, args.SenderGameUser));
+                }
+                return true;
+            }
+
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
@@ -117,7 +194,7 @@ internal static class CommandHandler
                     string mess = "Server-Mouse set to {0}";
 
                     WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
-                    args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
+                    args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouse), null, null));
 
                     EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
                     server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
