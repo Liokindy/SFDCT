@@ -301,45 +301,48 @@ internal static class CommandHandler
                     if (args.Parameters.Count <= 0) return true;
 
                     GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-                    GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
-                    if (gameUser != null && !gameUser.IsDisposed && gameConnectionTag != null && !gameConnectionTag.IsDisposed)
+                    if (gameUser != null && !gameUser.IsDisposed)
                     {
-                        bool useServerMovement = !gameConnectionTag.ForceServerMovement;
-                        bool resetServerMovement = false;
-                        if (args.Parameters.Count >= 2)
+                        GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
+                        if (gameConnectionTag != null && !gameConnectionTag.IsDisposed)
                         {
-                            if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
+                            bool useServerMovement = !gameConnectionTag.ForceServerMovement;
+                            bool resetServerMovement = false;
+                            if (args.Parameters.Count >= 2)
                             {
-                                resetServerMovement = true;
+                                if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    resetServerMovement = true;
+                                }
+                                else
+                                {
+                                    bool.TryParse(args.Parameters[1], out useServerMovement);
+                                }
+                            }
+
+                            if (resetServerMovement)
+                            {
+                                gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
+                                gameConnectionTag.ForceServerMovement = false;
                             }
                             else
                             {
-                                bool.TryParse(args.Parameters[1], out useServerMovement);
+                                gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
+                                gameConnectionTag.ForceServerMovement = useServerMovement;
                             }
-                        }
 
-                        if (resetServerMovement)
-                        {
-                            gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
-                            gameConnectionTag.ForceServerMovement = false;
-                        }
-                        else
-                        {
-                            gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
-                            gameConnectionTag.ForceServerMovement = useServerMovement;
-                        }
+                            string msg = "Server-movement of {0} set to {1}";
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(msg, gameUser.AccountName, resetServerMovement ? "default" : useServerMovement), args.SenderGameUser));
 
-                        string msg = "Server-movement of {0} set to {1}";
-                        args.Feedback.Add(new(args.SenderGameUser, string.Format(msg, gameUser.AccountName, resetServerMovement ? "default" : useServerMovement), args.SenderGameUser));
-
-                        if (gameConnectionTag.GameUsers != null)
-                        {
-                            foreach (var connectionUser in gameConnectionTag.GameUsers)
+                            if (gameConnectionTag.GameUsers != null)
                             {
-                                connectionUser.ForceServerMovement = useServerMovement;
+                                foreach (var connectionUser in gameConnectionTag.GameUsers)
+                                {
+                                    connectionUser.ForceServerMovement = useServerMovement;
 
-                                Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
-                                playerByUserIdentifier?.UpdateCanDoPlayerAction();
+                                    Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
+                                    playerByUserIdentifier?.UpdateCanDoPlayerAction();
+                                }
                             }
                         }
                     }
