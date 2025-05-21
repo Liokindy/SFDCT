@@ -231,7 +231,7 @@ internal static class CommandHandler
 
                     if (args.Parameters.Count == 1)
                     {
-                        if (!float.TryParse(args.Parameters[0], NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
+                        if (!float.TryParse(args.Parameters[0].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity Y", args.SenderGameUser));
                             return true;
@@ -240,13 +240,13 @@ internal static class CommandHandler
 
                     if (args.Parameters.Count == 2)
                     {
-                        if (!float.TryParse(args.Parameters[0], NumberStyles.Float, CultureInfo.InvariantCulture, out gx))
+                        if (!float.TryParse(args.Parameters[0].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gx))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity X", args.SenderGameUser));
                             return true;
                         }
 
-                        if (!float.TryParse(args.Parameters[1], NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
+                        if (!float.TryParse(args.Parameters[1].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity Y", args.SenderGameUser));
                             return true;
