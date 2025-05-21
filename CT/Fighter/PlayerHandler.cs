@@ -1,8 +1,11 @@
-﻿using HarmonyLib;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using System;
+using HarmonyLib;
+using System.Linq;
+using SFDCT.Configuration;
 
 namespace SFDCT.Fighter;
 
@@ -32,6 +35,16 @@ internal static class PlayerHandler
         __instance.m_nameLabel.DrawStatic(spriteBatch, new Vector2(x, y - 4));
 
         return false;
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
+    private static IEnumerable<CodeInstruction> Player_Draw(IEnumerable<CodeInstruction> instructions)
+    {
+        instructions.ElementAt(44).operand = Settings.Get<float>(SettingKey.LowHealthHurtLevel1Threshold);
+        instructions.ElementAt(41).operand = Settings.Get<float>(SettingKey.LowHealthHurtLevel2Threshold);
+
+        return instructions;
     }
 
     [HarmonyPrefix]

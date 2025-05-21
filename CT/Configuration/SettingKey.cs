@@ -15,6 +15,8 @@ public enum SettingKey
     SoundAttenuationInworldDistance,
     LowHealthSaturationFactor,
     LowHealthThreshold,
+    LowHealthHurtLevel1Threshold,
+    LowHealthHurtLevel2Threshold,
     HideFilmgrain,
     DisableClockTicking,
     SpectatorsMaximum,

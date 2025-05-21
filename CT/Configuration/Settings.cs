@@ -29,6 +29,8 @@ public static class Settings
         Add(SettingKey.SoundAttenuationInworldDistance, IniSettingType.Int, 500, false, 0, 1000);
         Add(SettingKey.LowHealthSaturationFactor, IniSettingType.Float, 0.71f, false, 0f, 1f);
         Add(SettingKey.LowHealthThreshold, IniSettingType.Float, 0.25f, false, 0f, 1f);
+        Add(SettingKey.LowHealthHurtLevel1Threshold, IniSettingType.Float, 0.25f, true, 0f, 1f);
+        Add(SettingKey.LowHealthHurtLevel2Threshold, IniSettingType.Float, 0.12f, true, 0f, 1f);
         Add(SettingKey.HideFilmgrain, IniSettingType.Bool, false);
         Add(SettingKey.DisableClockTicking, IniSettingType.Bool, true);
         Add(SettingKey.SpectatorsMaximum, IniSettingType.Int, 4, false, 0, 4);
@@ -124,6 +126,8 @@ public static class Settings
             case SettingKey.SoundAttenuationInworldDistance: return "SOUNDATTENUATION_INWORLD_DISTANCE";
             case SettingKey.LowHealthSaturationFactor: return "LOW_HEALTH_SATURATION_FACTOR";
             case SettingKey.LowHealthThreshold: return "LOW_HEALTH_THRESHOLD";
+            case SettingKey.LowHealthHurtLevel1Threshold: return "LOW_HEALTH_HURTLEVEL1_THRESHOLD";
+            case SettingKey.LowHealthHurtLevel2Threshold: return "LOW_HEALTH_HURTLEVEL2_THRESHOLD";
             case SettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
             case SettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
             case SettingKey.SpectatorsMaximum: return "SPECTATORS_MAXIMUM";
@@ -150,8 +154,10 @@ public static class Settings
             case SettingKey.SoundAttenuationForceScreenSpace: return "Force Screen-Space";
             case SettingKey.SoundAttenuationInworldThreshold: return "Threshold";
             case SettingKey.SoundAttenuationInworldDistance: return "Distance";
-            case SettingKey.LowHealthSaturationFactor: return "Strength";
-            case SettingKey.LowHealthThreshold: return "Threshold";
+            case SettingKey.LowHealthSaturationFactor: return "Desaturation Strength";
+            case SettingKey.LowHealthThreshold: return "Desaturation Threshold";
+            case SettingKey.LowHealthHurtLevel1Threshold: return "HurtLevel1 Threshold";
+            case SettingKey.LowHealthHurtLevel2Threshold: return "HurtLevel2 Threshold";
             case SettingKey.HideFilmgrain: return "Hide FilmGrain";
             case SettingKey.DisableClockTicking: return "Disable ClockTicking";
             case SettingKey.SpectatorsMaximum: return "Maximum";
@@ -179,6 +185,8 @@ public static class Settings
             case SettingKey.SoundAttenuationInworldDistance: return "Controls the distance of sound-attenuation, sounds further than this will be fully attenuated";
             case SettingKey.LowHealthSaturationFactor: return "Controls the desaturation strength";
             case SettingKey.LowHealthThreshold: return "Controls the desaturation threshold";
+            case SettingKey.LowHealthHurtLevel1Threshold: return "Controls the threshold for HurtLevel1 on fighters";
+            case SettingKey.LowHealthHurtLevel2Threshold: return "Controls the threshold for HurtLevel2 on fighters";
             case SettingKey.HideFilmgrain: return "Forcefully hides the FilmGrain even if Effect Level is set to Normal";
             case SettingKey.DisableClockTicking: return "Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup";
             case SettingKey.SpectatorsMaximum: return "Controls the maximum amount of spectators";
@@ -208,7 +216,9 @@ public static class Settings
                 return "SOUND-ATTENUATION";
             case SettingKey.LowHealthSaturationFactor:
             case SettingKey.LowHealthThreshold:
-                return "LOW HEALTH DESATURATION";
+            case SettingKey.LowHealthHurtLevel1Threshold:
+            case SettingKey.LowHealthHurtLevel2Threshold:
+                return "LOW HEALTH";
             case SettingKey.SpectatorsMaximum:
             case SettingKey.SpectatorsOnlyModerators:
                 return "SPECTATORS";
