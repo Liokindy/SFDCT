@@ -1,33 +1,14 @@
-> [!IMPORTANT]
-> SFDCT releases will ***only*** work in the SFD version specified for that release, any other version of SFD will ***not*** work
+<p align="center"><img src="./docs/gif/sfdct_title_loop.gif" alt="SFDCT Logo"/></p>
 
 > [!NOTE]
-> SFDCT is currently being tested and ported to SFD `1.4.1b` (I'm not experienced with Harmony, most of the technical side was previously done by SFR)
+> This mod is in development. Features may be added, removed, or changed.
 
-> [!WARNING]
-> This README is currently incomplete. Current [releases](https://github.com/Liokindy/SFDCT/releases) target SFD `1.3.7d`, so they will ***only*** work with that SFD version. It can be downloaded by choosing the `sfd_v_1_3_7d - SFD v1.3.7d` beta on Steam.
-
-## SFDCT
+Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds and tweaks some features while mantaining compatibility with vanilla-SFD. Meaning that a player can join a normal SFD server with SFDCT, and players using normal SFD can join a server being hosted with SFDCT.
 
 <details>
 
-<summary>Artist's Rendition</summary>
-
-<p align="center"><img src="./docs/sfdct_title_loop.gif" alt="sfdct_title_loop"/></p>
-
-</details>
-
-<p align="center"><img src="./docs/sfd_title_loop.gif" alt="sfd_title_loop"/></p>
-
-> [!NOTE]
-> This mod is in development. Features may be added, removed, or changed. Or the mod may break with SFD's updates.
-
-SFDCT is a mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe), it adds or tweaks small features while mantaining compatibility with vanilla-SFD.
-
-Meaning that a player can join a normal SFD server with SFDCT, and players using normal SFD can join a server being hosted with SFDCT.
-
-
-## INSTALLATION
+<summary>Installation</summary>
+<br>
 
 > [!CAUTION]
 > SFDCT may get detected as a *malicious program*. This is a known problem.
@@ -38,40 +19,48 @@ Meaning that a player can join a normal SFD server with SFDCT, and players using
 
 1. **DOWNLOAD A RELEASE**
 
-Extract the contents to Superfighters Deluxe's root folder.
+> [!IMPORTANT]
+> SFDCT releases will ***only*** work in the SFD version specified for that release, any other version of SFD will ***not*** work
 
-> [!TIP]
-> SFD is usually located at `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe`.
->
-> You can also go to Steam -> `Manage` -> `Browse local files`
+Extract the contents to Superfighters Deluxe's root folder.
 
 2. **LAUNCH OPTIONS**
 
 Inside Steam, go to Superfighters Deluxe's `Properties...` -> `LAUNCH OPTIONS` and copy these launch options:
+
+<p><img src="./docs/png/installation_0.png" alt="Steam Launch Options"/></p>
     
     cmd /c "%command%\..\SFDCT.exe"
 
 3. **OPEN SFD**
 
-When you open Superfighters Deluxe, a console will open, inside you should see colored text. *(The text may vary on your release)*
+When you open Superfighters Deluxe, a console will open, inside you should see colored text.
 
-    [12:00:00] Starting SFDCT...
-    [12:00:00] Patching completed...
-    Setting breakpad minidump AppID = 855860
-    Steam_SetMinidumpSteamID:  Caching Steam ID:  1234567890 [API loaded no]
+<p><img src="./docs/png/installation_1.png" alt="SFDCT Console"/></p>
 
-## CREDITS
+</details>
 
-Superfighters Deluxe was created and is owned by [Mythologic Interactive](https://mythologicinteractive.com/SuperfightersDeluxe)
+<details>
 
-SFDCT started by using an old version of [Superfighters Redux](https://github.com/Odex64/SFR) with its custom assets and features removed.
+<summary>Credits</summary>
 
-Many ideas were suggested to me by my friends (xoxo `ElDou's1`).
+#### SFDCT
 
+- Azure (Ideas)
+- ElDou's1 (Ideas, Tester)
+- Liokindy (Developer)
+- Nult (Ideas)
 
-## BUILDING
+#### SPECIAL THANKS
+- Developers of [Superfighters Redux](https://github.com/Odex64/SFR)
+- Original developers of [Superfighters Deluxe](https://mythologicinteractive.com/SuperfightersDeluxe)
 
-### PREREQUISITES
+</details>
+
+<details>
+<summary>Building</summary>
+
+#### PREREQUISITES
 - [Visual Studio](https://visualstudio.microsoft.com/) with ".NET Desktop development" and .NET Framework 4.7.2 SDK installed
 - [dnSpy](https://github.com/dnSpyEx/dnSpy)
 
@@ -88,9 +77,10 @@ If you have installed SFD in a another directory or drive, you must modify `buil
 
 One last step is to create a `SFDCT` folder inside your Superfighters Deluxe installation, and manually copy `Core.dll` and `Content` folder from SFDCT solution to the newly created folder.
 
- Now in Visual Studio try to build the solution, if you don't see any errors you're good to go!
+Now in Visual Studio try to build the solution, if you don't see any errors you're good to go!
 
-> [!IMPORTANT]
-> You can open `Core.dll` with dnSpy in order to inspect SFD code. It is a slightly modified `Superfighters Deluxe.exe` assembly.
-> 
-> You can write patches using [this Harmony guide](https://harmony.pardeike.net/articles/patching.html).
+You can open `Core.dll` with dnSpy in order to inspect SFD code. It is a slightly modified `Superfighters Deluxe.exe` assembly.
+
+> [!TIP]
+> You can learn how to write patches using this [Harmony guide](https://harmony.pardeike.net/articles/patching.html)
+</details>

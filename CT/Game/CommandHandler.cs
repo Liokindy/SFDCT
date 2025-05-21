@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Lidgren.Network;
 using SFDCT.Sync;
 using SFDCT.Configuration;
 using SFD;
-using HarmonyLib;
 using SFD.Voting;
-using Lidgren.Network;
 using SFD.Core;
+using HarmonyLib;
 
 namespace SFDCT.Game;
 
@@ -220,7 +220,47 @@ internal static class CommandHandler
             // Commands that interact with the gameworld
             if (__instance.GameWorld != null)
             {
-                // None
+                if (args.IsCommand("GRAVITY", "GRAV"))
+                {
+                    if (args.Parameters.Count <= 0) return true;
+
+                    // Default
+                    float gx = 0f;
+                    float gy = -26f;
+
+                    if (args.Parameters.Count == 1)
+                    {
+                        if (!float.TryParse(args.Parameters[0], out gy))
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity Y", args.SenderGameUser));
+                            return true;
+                        }
+                    }
+
+                    if (args.Parameters.Count == 2)
+                    {
+                        if (!float.TryParse(args.Parameters[0], out gx))
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity X", args.SenderGameUser));
+                            return true;
+                        }
+
+                        if (!float.TryParse(args.Parameters[1], out gy))
+                        {
+                            args.Feedback.Add(new(args.SenderGameUser, "Failed to parse gravity Y", args.SenderGameUser));
+                            return true;
+                        }
+                    }
+
+                    string mess = "World Gravity set to {0}";
+                    Vector2 gravityVector = new Vector2(gx, gy);
+
+                    __instance.GameWorld.GetActiveWorld.Gravity = gravityVector;
+                    __instance.GameWorld.GetBackgroundWorld.Gravity = gravityVector;
+
+                    args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, gravityVector.ToString())));
+                    return true;
+                }
             }
 
             // Server-only commands (no offline)
