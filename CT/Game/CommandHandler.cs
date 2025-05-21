@@ -107,6 +107,14 @@ internal static class CommandHandler
         // Host commands
         if (args.HostPrivileges)
         {
+            if (args.IsCommand("SERVERMOUSEMODERATORS", "SERVERMOUSEMOD"))
+            {
+                string mess = "Server-Mouse moderators set to {0}";
+                WorldHandler.ServerMouseNoModerators = !WorldHandler.ServerMouseNoModerators;
+
+                args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, WorldHandler.ServerMouseNoModerators)));
+            }
+
             Color c1 = new Color(159, 255, 64);
             if (args.IsCommand("ADDMODCOMMANDS"))
             {

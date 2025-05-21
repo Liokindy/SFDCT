@@ -118,10 +118,10 @@ internal static class ServerHandler
                 switch (customSignalType)
                 {
                     case CustomSignalType.DebugMouseUpdateSignal:
-                        if (msg.GameConnectionTag() == null || !(msg.GameConnectionTag().IsModerator || msg.GameConnectionTag().IsHost)) break;
+                        if (msg.GameConnectionTag() == null) break;
 
                         DebugMouseUpdateSignalData customSignalData = DebugMouseUpdateSignalData.Get(data);
-                        WorldHandler.UpdateUserDebugMouse(customSignalData.ID, new Vector2(customSignalData.X, customSignalData.Y), customSignalData.Pressed, customSignalData.Delete);
+                        WorldHandler.UpdateUserDebugMouse(msg.GameConnectionTag(), new Vector2(customSignalData.X, customSignalData.Y), customSignalData.Pressed, customSignalData.Delete);
                         break;
                 }
                 break;

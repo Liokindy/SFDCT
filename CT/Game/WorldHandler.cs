@@ -16,6 +16,7 @@ namespace SFDCT.Game;
 internal static class WorldHandler
 {
     public static bool ServerMouse = false;
+    public static bool ServerMouseNoModerators = false;
     public static bool ClientMouse = false;
 
     /// <summary>
@@ -125,8 +126,24 @@ internal static class WorldHandler
     private static float m_debugMouseUpdateTime = 0f;
     private static Dictionary<long, DebugMouse> m_debugMouseList = [];
 
-    public static void UpdateUserDebugMouse(long remoteUniqueIdentifier, Vector2 box2DPosition, bool pressed, bool delete)
+    public static void UpdateUserDebugMouse(GameConnectionTag connectionTag, Vector2 box2DPosition, bool pressed, bool delete)
     {
+        if (!connectionTag.IsModerator && !connectionTag.IsHost)
+        {
+            return;
+        }
+
+        if (ServerMouseNoModerators && !connectionTag.IsHost)
+        {
+            return;
+        }
+
+        long remoteUniqueIdentifier = connectionTag.RemoteUniqueIdentifier;
+        if (remoteUniqueIdentifier == 0)
+        {
+            return;
+        }
+
         if (!m_debugMouseList.ContainsKey(remoteUniqueIdentifier))
         {
             Logger.LogDebug($"DEBUG MOUSE: Adding {remoteUniqueIdentifier}");
