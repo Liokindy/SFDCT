@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
@@ -259,6 +260,35 @@ internal static class CommandHandler
                     __instance.GameWorld.GetBackgroundWorld.Gravity = gravityVector;
 
                     args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, gravityVector.ToString())));
+                    return true;
+                }
+
+                if (args.IsCommand("DAMAGE", "HURT"))
+                {
+                    if (args.Parameters.Count <= 1)
+                    {
+                        return true;
+                    }
+
+                    float damage = 0f;
+                    if (!float.TryParse(args.Parameters[1].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out damage))
+                    {
+                        return true;
+                    }
+
+                    string mess = "Dealt {0} damage to '{1}'";
+                    GameUser user = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    if (user != null && !user.IsDisposed)
+                    {
+                        Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
+                        if (userPlayer != null && !userPlayer.IsDisposed)
+                        {
+                            userPlayer.TakeMiscDamage(damage, false);
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(mess, damage, user.GetProfileName())));
+                            return true;
+                        }
+                    }
+
                     return true;
                 }
             }
