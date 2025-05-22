@@ -83,6 +83,12 @@ internal static class CommandHandler
             return true;
         }
 
+        if (args.IsCommand("CLEARCHAT"))
+        {
+            GameChat.ClearChat();
+            return true;
+        }
+
         // Client-only commands (no offline)
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
