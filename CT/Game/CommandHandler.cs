@@ -90,7 +90,7 @@ internal static class CommandHandler
             {
                 WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
 
-                string message = LanguageHelper.GetText("sfdct.command.clientmouse.message", WorldHandler.ClientMouse.ToString());
+                string message = LanguageHelper.GetText("sfdct.command.clientmouse.message", LanguageHelper.GetBooleanText(WorldHandler.ClientMouse));
                 args.Feedback.Add(new(args.SenderGameUser, message, Color.LightBlue, args.SenderGameUser));
             }
         }
@@ -113,7 +113,7 @@ internal static class CommandHandler
             {
                 WorldHandler.ServerMouseNoModerators = !WorldHandler.ServerMouseNoModerators;
 
-                string message = LanguageHelper.GetText("sfdct.command.servermousemoderators.message", WorldHandler.ServerMouseNoModerators.ToString());
+                string message = LanguageHelper.GetText("sfdct.command.servermousemoderators.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouseNoModerators));
                 args.Feedback.Add(new(args.SenderGameUser, message));
             }
 
@@ -213,7 +213,7 @@ internal static class CommandHandler
                 {
                     WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
 
-                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", WorldHandler.ServerMouse.ToString());
+                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouse));
                     args.Feedback.Add(new(args.SenderGameUser, message, null, null));
 
                     EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
