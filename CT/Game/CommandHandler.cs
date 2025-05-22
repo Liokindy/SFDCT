@@ -118,52 +118,57 @@ internal static class CommandHandler
             }
 
             Color c1 = new Color(159, 255, 64);
-            if (args.IsCommand("ADDMODCOMMANDS"))
+            if (args.IsCommand("ADDMODCOMMAND", "ADDMODCOMMANDS", "ADDMODERATORCOMMAND", "ADDMODERATORCOMMANDS"))
             {
                 string header = LanguageHelper.GetText("sfdct.command.addmodcommands.header");
                 string message = LanguageHelper.GetText("sfdct.command.addmodcommands.message");
                 string footer = LanguageHelper.GetText("sfdct.command.addmodcommands.footer");
 
                 args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
+                int addedCommandCount = 0;
                 for (int i = 0; i < args.Parameters.Count; i++)
                 {
                     string modCommand = args.Parameters[i].ToUpperInvariant();
+                    if (!Constants.MODDERATOR_COMMANDS.Contains(modCommand, StringComparer.OrdinalIgnoreCase))
+                    {
+                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand), c1 * 0.5f, args.SenderGameUser));
+                        Constants.MODDERATOR_COMMANDS.Add(modCommand);
 
-                    args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand), c1 * 0.5f, args.SenderGameUser));
-                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                        addedCommandCount++;
+                    }
                 }
-                args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, args.Parameters.Count), c1 * 0.75f, args.SenderGameUser));
+
+                args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, addedCommandCount), c1 * 0.75f, args.SenderGameUser));
 
                 SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
                 return true;
             }
 
-            if (args.IsCommand("REMOVEMODCOMMANDS") && args.Parameters.Count > 0)
+            if (args.IsCommand("REMOVEMODCOMMAND", "REMOVEMODCOMMANDS", "REMOVEMODERATORCOMMAND", "REMOVEMODERATORCOMMANDS") && args.Parameters.Count > 0)
             {
                 string header = LanguageHelper.GetText("sfdct.command.removemodcommands.header");
                 string message = LanguageHelper.GetText("sfdct.command.removemodcommands.message");
                 string footer = LanguageHelper.GetText("sfdct.command.removemodcommands.footer");
 
                 args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
-                for (int i = 0; i < args.Parameters.Count; i++)
+
+                foreach (string modCommand in Constants.MODDERATOR_COMMANDS.ToList())
                 {
-                    string modCommand = args.Parameters[i];
-
-                    if (Constants.MODDERATOR_COMMANDS.Contains(modCommand.ToUpperInvariant()))
+                    if (args.Parameters.Contains(modCommand, StringComparer.OrdinalIgnoreCase))
                     {
-                        Constants.MODDERATOR_COMMANDS.Remove(modCommand.ToUpperInvariant());
-                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand.ToUpperInvariant()), c1 * 0.5f, args.SenderGameUser));
-                    }
+                        Constants.MODDERATOR_COMMANDS.Remove(modCommand);
 
-                    Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand), c1 * 0.5f, args.SenderGameUser));
+                    }
                 }
+
                 args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, args.Parameters.Count), c1 * 0.75f, args.SenderGameUser));
 
                 SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
                 return true;
             }
 
-            if (args.IsCommand("CLEARMODCOMMANDS"))
+            if (args.IsCommand("CLEARMODCOMMANDS", "CLEARMODERATORCOMMANDS"))
             {
                 string header = LanguageHelper.GetText("sfdct.command.clearmodcommands.header");
                 string footer = LanguageHelper.GetText("sfdct.command.clearmodcommands.footer");
@@ -178,7 +183,7 @@ internal static class CommandHandler
                 return true;
             }
 
-            if (args.IsCommand("LISTMODCOMMANDS"))
+            if (args.IsCommand("LISTMODCOMMANDS", "LISTMODERATORCOMMANDS"))
             {
                 string header = LanguageHelper.GetText("sfdct.command.listmodcommands.header");
                 string message = LanguageHelper.GetText("sfdct.command.listmodcommands.message");
