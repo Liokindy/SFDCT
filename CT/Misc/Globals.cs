@@ -16,7 +16,7 @@ public static class Globals
 
     public struct Version
     {
-        public static string SFDCT = "v.1.0.7";
+        public static string SFDCT = "v.1.0.8";
         public static string SFD = "v.1.4.1b";
     }
 }
