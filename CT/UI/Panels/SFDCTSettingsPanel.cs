@@ -40,6 +40,20 @@ internal class SFDCTSettingsPanel : Panel
 
                     m_menuItemList.Add(m_menuItems[settingPair.Key]);
                     break;
+                case IniSettingType.String:
+                    m_menuItems.Add(settingPair.Key, new MenuItemText(settingPair.Value.Name, (string)settingPair.Value.Value));
+                    ((MenuItemText)m_menuItems[settingPair.Key]).Tooltip = settingPair.Value.Help;
+
+                    m_originalValues.Add(settingPair.Key, settingPair.Value.Get());
+
+                    m_menuItemsActions.Add(settingPair.Key, () =>
+                    {
+                        Settings.Set<string>(settingPair.Key, ((MenuItemText)m_menuItems[settingPair.Key]).Value);
+                    });
+                    HookHandler.Hook(m_menuItems[settingPair.Key], m_menuItemsActions[settingPair.Key]);
+
+                    m_menuItemList.Add(m_menuItems[settingPair.Key]);
+                    break;
                 case IniSettingType.Bool:
                     m_menuItems.Add(settingPair.Key, new MenuItemDropdown(settingPair.Value.Name, [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]));
                     ((MenuItemDropdown)m_menuItems[settingPair.Key]).DropdownItemVisibleCount = 2;

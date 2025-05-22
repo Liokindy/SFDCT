@@ -47,6 +47,19 @@ internal static class HookHandler
         }
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MenuItemText), nameof(MenuItemText.SetValue))]
+    private static void MenuItemTextSetValue(MenuItemText __instance)
+    {
+        if (__instance != null && HookedEvents.ContainsKey(__instance))
+        {
+            if (HookedEvents[__instance] != null && HookedEvents[__instance] is Action)
+            {
+                ((Action)HookedEvents[__instance]).Invoke();
+            }
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(MenuItemDropdown), nameof(MenuItemDropdown.TriggerValueChangedEvent))]
     private static void MenuItemDropdownTriggerValueChangedEvent(MenuItemDropdown __instance)

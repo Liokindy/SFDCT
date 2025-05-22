@@ -19,6 +19,7 @@ public enum SettingKey
     LowHealthHurtLevel2Threshold,
     HideFilmgrain,
     DisableClockTicking,
+    Language,
     SpectatorsMaximum,
     SpectatorsOnlyModerators,
     VoteKickEnabled,

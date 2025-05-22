@@ -17,7 +17,7 @@ internal static class Refresh
     {
         if (key == Microsoft.Xna.Framework.Input.Keys.F6)
         {
-            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, $"Refreshing '{Globals.Paths.CONFIGURATIONINI}'...");
+            SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, $"Refreshing '{Globals.Paths.ConfigurationIni}'...");
             IniFile.Refresh();
             SFD.ConsoleOutput.ShowMessage(SFD.ConsoleOutputType.ScriptFiles, "Refreshed!");
         }
@@ -42,9 +42,9 @@ internal static class IniFile
         Settings.Init();
 
         // Create config.ini if it doesnt exist.
-        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.ConfigurationIni))
         {
-            using (FileStream fileStream = File.Create(Globals.Paths.CONFIGURATIONINI))
+            using (FileStream fileStream = File.Create(Globals.Paths.ConfigurationIni))
             {
                 fileStream.Close();
             }
@@ -59,7 +59,7 @@ internal static class IniFile
                 kvp.Value.Save(Handler);
             }
 
-            Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
+            Handler.SaveFile(Globals.Paths.ConfigurationIni);
             Handler.Clear();
         }
         Refresh();
@@ -67,7 +67,7 @@ internal static class IniFile
     public static void Refresh()
     {
         Logger.LogDebug("CONFIG.INI: Refreshing...");
-        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.ConfigurationIni))
         {
             Logger.LogError("CONFIG.INI: File doesnt exist. Restart the game to create it again");
             return;
@@ -79,12 +79,12 @@ internal static class IniFile
         }
 
         Handler.Clear();
-        Handler.ReadFile(Globals.Paths.CONFIGURATIONINI);
+        Handler.ReadFile(Globals.Paths.ConfigurationIni);
         foreach (KeyValuePair<string, IniSetting> kvp in Settings.List)
         {
             kvp.Value.Load(Handler);
         }
-        Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
+        Handler.SaveFile(Globals.Paths.ConfigurationIni);
 
         if (FirstRefresh)
         {
@@ -99,7 +99,7 @@ internal static class IniFile
         }
 
         Logger.LogDebug("CONFIG.INI: Saving...");
-        if (!File.Exists(Globals.Paths.CONFIGURATIONINI))
+        if (!File.Exists(Globals.Paths.ConfigurationIni))
         {
             Logger.LogError("CONFIG.INI: Cannot save, file doesnt exist.");
             return;
@@ -114,7 +114,7 @@ internal static class IniFile
         {
             kvp.Value.Save(Handler);
         }
-        Handler.SaveFile(Globals.Paths.CONFIGURATIONINI);
+        Handler.SaveFile(Globals.Paths.ConfigurationIni);
         Logger.LogDebug("CONFIG.INI: Saving finished.");
     }
 }

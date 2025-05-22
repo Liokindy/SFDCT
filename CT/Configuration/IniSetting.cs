@@ -32,7 +32,7 @@ public class IniSetting
             {
                 return this.m_key;
             }
-            return this.m_name;
+            return LanguageHelper.GetText("sfdct.setting.name." + this.m_name);
         }
     }
     public string Help
@@ -43,7 +43,7 @@ public class IniSetting
             {
                 return this.m_type.ToString();
             }
-            return this.m_help;
+            return LanguageHelper.GetText("sfdct.setting.help." + this.m_help);
         }
     }
     public string Category
@@ -54,7 +54,7 @@ public class IniSetting
             {
                 return "Unknown";
             }
-            return this.m_category;
+            return LanguageHelper.GetText("sfdct.setting.category." + this.m_category);
         }
     }
     public IniSettingType Type { get { return this.m_type; } }

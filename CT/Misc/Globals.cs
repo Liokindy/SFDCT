@@ -8,9 +8,10 @@ public static class Globals
     {
         public readonly static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
 
-        public static string CONFIGURATIONINI { get { return Path.Combine(SFDCT, "config.ini"); } }
-        public static string CONTENT { get { return Path.Combine(SFDCT, "Content"); } }
-        public static string DATA { get { return Path.Combine(CONTENT, "Data"); } }
+        public static string ConfigurationIni { get { return Path.Combine(SFDCT, "config.ini"); } }
+        public static string Content { get { return Path.Combine(SFDCT, "Content"); } }
+        public static string Data { get { return Path.Combine(Content, "Data"); } }
+        public static string Language { get { return Path.Combine(Data, "Misc", "Language"); } }
     }
 
     public struct Version

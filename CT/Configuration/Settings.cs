@@ -33,6 +33,7 @@ public static class Settings
         Add(SettingKey.LowHealthHurtLevel2Threshold, IniSettingType.Float, 0.12f, true, 0f, 1f);
         Add(SettingKey.HideFilmgrain, IniSettingType.Bool, false);
         Add(SettingKey.DisableClockTicking, IniSettingType.Bool, true);
+        Add(SettingKey.Language, IniSettingType.String, "SFDCT_default", false);
         Add(SettingKey.SpectatorsMaximum, IniSettingType.Int, 4, false, 0, 4);
         Add(SettingKey.SpectatorsOnlyModerators, IniSettingType.Bool, true);
         Add(SettingKey.VoteKickEnabled, IniSettingType.Bool, true);
@@ -129,6 +130,7 @@ public static class Settings
             case SettingKey.LowHealthHurtLevel1Threshold: return "LOW_HEALTH_HURTLEVEL1_THRESHOLD";
             case SettingKey.LowHealthHurtLevel2Threshold: return "LOW_HEALTH_HURTLEVEL2_THRESHOLD";
             case SettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
+            case SettingKey.Language: return "LANGUAGE_FILE_NAME";
             case SettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
             case SettingKey.SpectatorsMaximum: return "SPECTATORS_MAXIMUM";
             case SettingKey.SpectatorsOnlyModerators: return "SPECTATORS_ONLY_MODERATORS";
@@ -140,95 +142,16 @@ public static class Settings
 
     public static string GetName(SettingKey key)
     {
-
-        switch (key)
-        {
-            default: return "Unknown-Setting";
-            case SettingKey.SoundPanningEnabled: return "Enabled";
-            case SettingKey.SoundPanningStrength: return "Strength";
-            case SettingKey.SoundPanningForceScreenSpace: return "Force Screen-Space";
-            case SettingKey.SoundPanningInworldThreshold: return "Threshold";
-            case SettingKey.SoundPanningInworldDistance: return "Distance";
-            case SettingKey.SoundAttenuationEnabled: return "Enabled";
-            case SettingKey.SoundAttenuationMin: return "Minimum";
-            case SettingKey.SoundAttenuationForceScreenSpace: return "Force Screen-Space";
-            case SettingKey.SoundAttenuationInworldThreshold: return "Threshold";
-            case SettingKey.SoundAttenuationInworldDistance: return "Distance";
-            case SettingKey.LowHealthSaturationFactor: return "Desaturation Strength";
-            case SettingKey.LowHealthThreshold: return "Desaturation Threshold";
-            case SettingKey.LowHealthHurtLevel1Threshold: return "HurtLevel1 Threshold";
-            case SettingKey.LowHealthHurtLevel2Threshold: return "HurtLevel2 Threshold";
-            case SettingKey.HideFilmgrain: return "Hide FilmGrain";
-            case SettingKey.DisableClockTicking: return "Disable ClockTicking";
-            case SettingKey.SpectatorsMaximum: return "Maximum";
-            case SettingKey.SpectatorsOnlyModerators: return "Only Moderators";
-            case SettingKey.VoteKickEnabled: return "Enabled";
-            case SettingKey.VoteKickSuccessCooldown: return "Success cooldown";
-            case SettingKey.VoteKickFailCooldown: return "Fail cooldown";
-        }
+        return key.ToString().ToLowerInvariant();
     }
 
     public static string GetHelp(SettingKey key)
     {
-        switch (key)
-        {
-            default: return "Unknown";
-            case SettingKey.SoundPanningEnabled: return "Enables or disables sound-panning";
-            case SettingKey.SoundPanningStrength: return "Controls the maximum panning of sounds";
-            case SettingKey.SoundPanningForceScreenSpace: return "Controls if sound-panning is calculated using screen-space positions instead of world distances";
-            case SettingKey.SoundPanningInworldThreshold: return "Controls the threshold of sound-panning, sounds closer than this will not be panned";
-            case SettingKey.SoundPanningInworldDistance: return "Controls the distance of sound-panning, sounds further than this will be fully panned";
-            case SettingKey.SoundAttenuationEnabled: return "Enables or disables sound-attenuation";
-            case SettingKey.SoundAttenuationMin: return "Controls the minimum volume of sound-attenuation, sounds volume will be lowered to this amount at max attenuation";
-            case SettingKey.SoundAttenuationForceScreenSpace: return "Controls if sound-attenuation is calculated using screen-space positions instead of world distances";
-            case SettingKey.SoundAttenuationInworldThreshold: return "Controls the threshold of sound-attenuation, sounds closer than this will not be attenuated";
-            case SettingKey.SoundAttenuationInworldDistance: return "Controls the distance of sound-attenuation, sounds further than this will be fully attenuated";
-            case SettingKey.LowHealthSaturationFactor: return "Controls the desaturation strength";
-            case SettingKey.LowHealthThreshold: return "Controls the desaturation threshold";
-            case SettingKey.LowHealthHurtLevel1Threshold: return "Controls the threshold for HurtLevel1 on fighters";
-            case SettingKey.LowHealthHurtLevel2Threshold: return "Controls the threshold for HurtLevel2 on fighters";
-            case SettingKey.HideFilmgrain: return "Forcefully hides the FilmGrain even if Effect Level is set to Normal";
-            case SettingKey.DisableClockTicking: return "Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup";
-            case SettingKey.SpectatorsMaximum: return "Controls the maximum amount of spectators";
-            case SettingKey.SpectatorsOnlyModerators: return "Controls if only moderators and the host can turn into spectators";
-            case SettingKey.VoteKickEnabled: return "Enables or disables vote-kicking";
-            case SettingKey.VoteKickSuccessCooldown: return "Controls the cooldown in seconds of vote-kicking on success";
-            case SettingKey.VoteKickFailCooldown: return "Controls the cooldown in seconds of vote-kicking on failure";
-        }
+        return key.ToString().ToLowerInvariant();
     }
 
     public static string GetCategoryName(SettingKey key)
     {
-        switch (key)
-        {
-            default: return "UNKNOWN";
-            case SettingKey.SoundPanningEnabled:
-            case SettingKey.SoundPanningStrength:
-            case SettingKey.SoundPanningForceScreenSpace:
-            case SettingKey.SoundPanningInworldThreshold:
-            case SettingKey.SoundPanningInworldDistance:
-                return "SOUND-PANNING";
-            case SettingKey.SoundAttenuationEnabled:
-            case SettingKey.SoundAttenuationMin:
-            case SettingKey.SoundAttenuationForceScreenSpace:
-            case SettingKey.SoundAttenuationInworldThreshold:
-            case SettingKey.SoundAttenuationInworldDistance:
-                return "SOUND-ATTENUATION";
-            case SettingKey.LowHealthSaturationFactor:
-            case SettingKey.LowHealthThreshold:
-            case SettingKey.LowHealthHurtLevel1Threshold:
-            case SettingKey.LowHealthHurtLevel2Threshold:
-                return "LOW HEALTH";
-            case SettingKey.SpectatorsMaximum:
-            case SettingKey.SpectatorsOnlyModerators:
-                return "SPECTATORS";
-            case SettingKey.VoteKickEnabled:
-            case SettingKey.VoteKickFailCooldown:
-            case SettingKey.VoteKickSuccessCooldown:
-                return "VOTE-KICK";
-            case SettingKey.HideFilmgrain:
-            case SettingKey.DisableClockTicking:
-                return "MISC";
-        }
+        return key.ToString().ToLowerInvariant();
     }
 }
