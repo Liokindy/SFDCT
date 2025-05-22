@@ -9,6 +9,7 @@ using SFDCT.Configuration;
 using SFD;
 using SFD.Voting;
 using SFD.Core;
+using SFD.Parser;
 using HarmonyLib;
 
 namespace SFDCT.Game;
@@ -253,7 +254,7 @@ internal static class CommandHandler
 
                     if (args.Parameters.Count == 1)
                     {
-                        if (!float.TryParse(args.Parameters[0].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
+                        if (!SFDXParser.TryParseFloat(args.Parameters[0], out gy))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.gravity.fail.parsey"), args.SenderGameUser));
                             return true;
@@ -262,13 +263,13 @@ internal static class CommandHandler
 
                     if (args.Parameters.Count == 2)
                     {
-                        if (!float.TryParse(args.Parameters[0].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gx))
+                        if (!SFDXParser.TryParseFloat(args.Parameters[0], out gx))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.gravity.fail.parsex"), args.SenderGameUser));
                             return true;
                         }
 
-                        if (!float.TryParse(args.Parameters[1].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out gy))
+                        if (!SFDXParser.TryParseFloat(args.Parameters[1], out gy))
                         {
                             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.gravity.fail.parsey"), args.SenderGameUser));
                             return true;
@@ -293,7 +294,7 @@ internal static class CommandHandler
                     }
 
                     float damage = 0f;
-                    if (!float.TryParse(args.Parameters[1].Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out damage))
+                    if (!SFDXParser.TryParseFloat(args.Parameters[1], out damage))
                     {
                         return true;
                     }
@@ -304,7 +305,14 @@ internal static class CommandHandler
                         Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
                         if (userPlayer != null && !userPlayer.IsDisposed)
                         {
-                            userPlayer.TakeMiscDamage(damage, false);
+                            if (damage >= 0f)
+                            {
+                                userPlayer.TakeMiscDamage(damage, false);
+                            }
+                            else
+                            {
+                                userPlayer.HealAmount(-damage);
+                            }
 
                             string message = LanguageHelper.GetText("sfdct.command.damage.message", damage.ToString(), user.GetProfileName());
                             args.Feedback.Add(new(args.SenderGameUser, message));
