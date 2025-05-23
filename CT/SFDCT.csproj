@@ -147,6 +147,7 @@
     <Compile Include="Sync\ServerHandler.cs" />
     <Compile Include="Sync\SignalHandler.cs" />
     <Compile Include="UI\FilmGrainHandler.cs" />
+    <Compile Include="UI\GameChatHandler.cs" />
     <Compile Include="UI\Panels\HookHandler.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
     <Compile Include="Game\CommandHandler.cs" />
