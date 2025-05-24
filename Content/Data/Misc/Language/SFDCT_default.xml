@@ -1,24 +1,20 @@
 ﻿<Texts name="Default">
 	<!-- Language: en -->
+	<Text id="sfdct.generic.list">- {0}</Text>
+	
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
 	<Text id="sfdct.command.players.message.bot">- {0}: '{1}' {3}</Text>
 	<Text id="sfdct.command.players.footer">Found {0} users</Text>
 	<Text id="sfdct.command.clientmouse.message">Client Mouse set to {0}</Text>
 	<Text id="sfdct.command.servermouse.message">Server-Mouse set to {0}</Text>
 	<Text id="sfdct.command.servermousemoderators.message">Server-Mouse moderators set to {0}</Text>
-	<Text id="sfdct.command.addmodcommands.header">Adding moderator commands...</Text>
-	<Text id="sfdct.command.addmodcommands.message">- Added '{0}'</Text>
-	<Text id="sfdct.command.addmodcommands.footer">Added {0} moderator commands</Text>
-	<Text id="sfdct.command.removemodcommands.header">Removing moderator commands...</Text>
-	<Text id="sfdct.command.removemodcommands.message">- Removed '{0}'</Text>
-	<Text id="sfdct.command.removemodcommands.footer">Removed {0} moderator commands</Text>
-	<Text id="sfdct.command.clearmodcommands.header">Clearing all moderator commands...</Text>
-	<Text id="sfdct.command.clearmodcommands.message">- Clearing '{0}'</Text>
-	<Text id="sfdct.command.clearmodcommands.footer">Cleared {0} moderator commands.</Text>
-	<Text id="sfdct.command.listmodcommands.header">Listing all moderator commands...</Text>
-	<Text id="sfdct.command.listmodcommands.message">- '{0}'</Text>
-	<Text id="sfdct.command.listmodcommands.footer">Moderators can use {0} command(s)</Text>
-	<Text id="sfdct.command.listmodcommands.footer.all">- Moderators can use ALL commands</Text>
+	<Text id="sfdct.command.modcommands.header.help">Use this command to manage the moderator commands list, syntax is '/MODCMD [L/LIST][C/CLEAR][R/REMOVE][A/ADD][T/TRY] [...]'</Text>
+	<Text id="sfdct.command.modcommands.header.list">Listing moderator commands</Text>
+	<Text id="sfdct.command.modcommands.header.clear">Cleared {0} moderator commands, moderators can now use all default commands</Text>
+	<Text id="sfdct.command.modcommands.header.remove">Removed {0} commands from moderator commands list</Text>
+	<Text id="sfdct.command.modcommands.header.add">Added {0} commands to moderator commands list</Text>
+	<Text id="sfdct.command.modcommands.header.try.true">Moderators can use following commands:</Text>
+	<Text id="sfdct.command.modcommands.header.try.false">Moderators can NOT use following commands:</Text>
 	<Text id="sfdct.command.gravity.fail.parsex">Failed to parse gravity X</Text>
 	<Text id="sfdct.command.gravity.fail.parsey">Failed to parse gravity Y</Text>
 	<Text id="sfdct.command.gravity.message">World Gravity set to {0}</Text>
@@ -82,7 +78,6 @@
 	<Text id="sfdct.setting.help.votekickenabled">Enables or disables vote-kicking</Text>
 	<Text id="sfdct.setting.help.votekicksuccesscooldown">Controls the cooldown in seconds of vote-kicking on success</Text>
 	<Text id="sfdct.setting.help.votekickfailcooldown">Controls the cooldown in seconds of vote-kicking on failure</Text>
-
 
 	<Text id="sfdct.setting.category.soundpanningenabled">SOUND-PANNING</Text>
 	<Text id="sfdct.setting.category.soundpanningstrength">SOUND-PANNING</Text>

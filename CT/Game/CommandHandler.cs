@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
@@ -124,94 +123,142 @@ internal static class CommandHandler
                 args.Feedback.Add(new(args.SenderGameUser, message));
             }
 
-            Color c1 = new Color(159, 255, 64);
-            if (args.IsCommand("ADDMODCOMMAND", "ADDMODCOMMANDS", "ADDMODERATORCOMMAND", "ADDMODERATORCOMMANDS"))
+            if (args.IsCommand("MODCMD", "MODCMDS", "MODCOMMANDS", "MODCOMMAND"))
             {
-                string header = LanguageHelper.GetText("sfdct.command.addmodcommands.header");
-                string message = LanguageHelper.GetText("sfdct.command.addmodcommands.message");
-                string footer = LanguageHelper.GetText("sfdct.command.addmodcommands.footer");
+                string action = "HELP";
+                List<string> commands = [];
 
-                args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
-                int addedCommandCount = 0;
-                for (int i = 0; i < args.Parameters.Count; i++)
+                if (args.Parameters.Count >= 1) action = args.Parameters[0].ToUpperInvariant();
+                if (args.Parameters.Count >= 2) commands = args.Parameters.GetRange(1, args.Parameters.Count - 1);
+                if (args.Parameters.Count == 2 && args.Parameters[1] == "*") commands = GameInfo.ALL_MODERATOR_COMMANDS.ToList();
+
+                string header1, header2, message1;
+                Color moderatorAccentColor = new Color(159, 255, 64);
+                bool shouldSave = false;
+
+                switch (action)
                 {
-                    string modCommand = args.Parameters[i].ToUpperInvariant();
-                    if (!Constants.MODDERATOR_COMMANDS.Contains(modCommand, StringComparer.OrdinalIgnoreCase))
-                    {
-                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand), c1 * 0.5f, args.SenderGameUser));
-                        Constants.MODDERATOR_COMMANDS.Add(modCommand);
+                    default:
+                    case "HELP":
+                        header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.help");
 
-                        addedCommandCount++;
-                    }
+                        args.Feedback.Add(new(args.SenderGameUser, header1, moderatorAccentColor, args.SenderGameUser));
+                        break;
+                    case "L":
+                    case "LIST":
+                        header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.list");
+                        message1 = LanguageHelper.GetText("sfdct.generic.list");
+
+                        args.Feedback.Add(new(args.SenderGameUser, header1, moderatorAccentColor, args.SenderGameUser));
+                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", Constants.MODDERATOR_COMMANDS)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                        break;
+                    case "C":
+                    case "CLEAR":
+                        header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.clear");
+
+                        int clearedCount = 0;
+                        shouldSave = true;
+
+                        clearedCount += Constants.MODDERATOR_COMMANDS.Count;
+                        Constants.MODDERATOR_COMMANDS.Clear();
+
+                        args.Feedback.Add(new(args.SenderGameUser, string.Format(header1, clearedCount), moderatorAccentColor, args.SenderGameUser));
+                        break;
+                    case "R":
+                    case "REMOVE":
+                        if (commands.Count > 0)
+                        {
+                            header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.remove");
+                            message1 = LanguageHelper.GetText("sfdct.generic.list");
+
+                            int removedCount = 0;
+                            shouldSave = true;
+
+                            foreach (string modderatorCommand in Constants.MODDERATOR_COMMANDS.ToList())
+                            {
+                                if (commands.Contains(modderatorCommand, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    if (Constants.MODDERATOR_COMMANDS.Remove(modderatorCommand))
+                                    {
+                                        removedCount++;
+                                    }
+                                }
+                            }
+
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(header1, removedCount), moderatorAccentColor, args.SenderGameUser));
+                            if (removedCount > 0)
+                            {
+                                args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", commands)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                            }
+                        }
+                        break;
+                    case "A":
+                    case "ADD":
+                        if (commands.Count > 0)
+                        {
+                            header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.add");
+                            message1 = LanguageHelper.GetText("sfdct.generic.list");
+
+                            int addedCount = 0;
+                            shouldSave = true;
+
+                            foreach (string command in commands)
+                            {
+                                if (!Constants.MODDERATOR_COMMANDS.Contains(command, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    Constants.MODDERATOR_COMMANDS.Add(command.ToUpperInvariant());
+                                    addedCount++;
+                                }
+                            }
+
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(header1, addedCount), moderatorAccentColor, args.SenderGameUser));
+                            if (addedCount > 0)
+                            {
+                                args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", commands)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                            }
+                        }
+                        break;
+                    case "T":
+                    case "TRY":
+                        if (commands.Count > 0)
+                        {
+                            header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.try.true");
+                            header2 = LanguageHelper.GetText("sfdct.command.modcommands.header.try.false");
+                            message1 = LanguageHelper.GetText("sfdct.generic.list");
+
+                            List<string> canUseList = [];
+                            List<string> canNotUseList = [];
+
+                            foreach (string command in commands)
+                            {
+                                if (Constants.MODDERATOR_COMMANDS.Count > 0 && !Constants.MODDERATOR_COMMANDS.Contains(command))
+                                {
+                                    canNotUseList.Add(command);
+                                }
+                                else
+                                {
+                                    canUseList.Add(command);
+                                }
+                            }
+
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(header2), moderatorAccentColor, args.SenderGameUser));
+                            if (canNotUseList.Count > 0)
+                            {
+                                args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", canNotUseList)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                            }
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(header1), moderatorAccentColor, args.SenderGameUser));
+
+                            if (canUseList.Count > 0)
+                            {
+                            args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", canUseList)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                            }
+                        }
+                        break;
                 }
 
-                args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, addedCommandCount), c1 * 0.75f, args.SenderGameUser));
-
-                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
-                return true;
-            }
-
-            if (args.IsCommand("REMOVEMODCOMMAND", "REMOVEMODCOMMANDS", "REMOVEMODERATORCOMMAND", "REMOVEMODERATORCOMMANDS") && args.Parameters.Count > 0)
-            {
-                string header = LanguageHelper.GetText("sfdct.command.removemodcommands.header");
-                string message = LanguageHelper.GetText("sfdct.command.removemodcommands.message");
-                string footer = LanguageHelper.GetText("sfdct.command.removemodcommands.footer");
-
-                args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
-
-                foreach (string modCommand in Constants.MODDERATOR_COMMANDS.ToList())
+                if (shouldSave)
                 {
-                    if (args.Parameters.Contains(modCommand, StringComparer.OrdinalIgnoreCase))
-                    {
-                        Constants.MODDERATOR_COMMANDS.Remove(modCommand);
-
-                        args.Feedback.Add(new(args.SenderGameUser, string.Format(message, modCommand), c1 * 0.5f, args.SenderGameUser));
-                    }
-                }
-
-                args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, args.Parameters.Count), c1 * 0.75f, args.SenderGameUser));
-
-                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
-                return true;
-            }
-
-            if (args.IsCommand("CLEARMODCOMMANDS", "CLEARMODERATORCOMMANDS"))
-            {
-                string header = LanguageHelper.GetText("sfdct.command.clearmodcommands.header");
-                string footer = LanguageHelper.GetText("sfdct.command.clearmodcommands.footer");
-
-                args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
-                int count = Constants.MODDERATOR_COMMANDS.Count;
-                Constants.MODDERATOR_COMMANDS.Clear();
-
-                args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, count), c1 * 0.75f, args.SenderGameUser));
-
-                SFDConfig.SaveConfig(SFDConfigSaveMode.HostGameOptions);
-                return true;
-            }
-
-            if (args.IsCommand("LISTMODCOMMANDS", "LISTMODERATORCOMMANDS"))
-            {
-                string header = LanguageHelper.GetText("sfdct.command.listmodcommands.header");
-                string message = LanguageHelper.GetText("sfdct.command.listmodcommands.message");
-
-                args.Feedback.Add(new(args.SenderGameUser, header, c1, args.SenderGameUser));
-
-                if (Constants.MODDERATOR_COMMANDS.Count > 0)
-                {
-                    for (int i = 0; i < Constants.MODDERATOR_COMMANDS.Count; i++)
-                    {
-                        string modCommand = Constants.MODDERATOR_COMMANDS[i];
-                        args.Feedback.Add(new(args.SenderGameUser, string.Format(modCommand, modCommand), c1 * 0.5f, args.SenderGameUser));
-                    }
-                    
-                    string footer = LanguageHelper.GetText("sfdct.command.listmodcommands.footer");
-                    args.Feedback.Add(new(args.SenderGameUser, string.Format(footer, Constants.MODDERATOR_COMMANDS.Count), c1 * 0.8f, args.SenderGameUser));
-                }
-                else
-                {
-                    string footer = LanguageHelper.GetText("sfdct.command.listmodcommands.footer.all");
-                    args.Feedback.Add(new(args.SenderGameUser, footer, c1 * 0.75f, args.SenderGameUser));
+                    SFDConfig.SaveConfig((SFDConfigSaveMode)10);
                 }
                 return true;
             }
