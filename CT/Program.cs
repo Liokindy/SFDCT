@@ -5,8 +5,10 @@ using SFDCT.Misc;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 
 namespace SFDCT;
 
@@ -22,8 +24,21 @@ internal static class Program
     internal static readonly Harmony Harmony = new("github.com/Liokindy/SFDCT");
     internal static bool DebugMode = false;
 
+    private static WebClient updateWebClient = null;
+    private static string updateUrl = "https://github.com/Liokindy/SFDCT/releases/download/VERSION/SFDCT.zip";
+
     private static int Main(string[] args)
     {
+        foreach (string file in Directory.GetFiles(GameDirectory, "*.old", SearchOption.TopDirectoryOnly))
+        {
+            File.Delete(file);
+        }
+
+        foreach (string file in Directory.GetFiles(Globals.Paths.SFDCT, "*.old", SearchOption.TopDirectoryOnly))
+        {
+            File.Delete(file);
+        }
+
         if (args.Contains("-HELP", StringComparer.OrdinalIgnoreCase))
         {
             Logger.LogInfo("Launch parameters");
@@ -60,10 +75,10 @@ internal static class Program
 
         if (DebugMode)
         {
-            Logger.LogWarn("--------------------------------");
-            Logger.LogWarn("RUNNING IN DEBUG MODE");
-            Logger.LogWarn("DEBUG MESSAGES WILL APPEAR");
-            Logger.LogWarn("--------------------------------");
+            Logger.LogDebug("--------------------------------");
+            Logger.LogDebug("RUNNING IN DEBUG MODE");
+            Logger.LogDebug("DEBUG MESSAGES WILL APPEAR");
+            Logger.LogDebug("--------------------------------");
         }
 
         Stopwatch sw = new();
@@ -71,30 +86,18 @@ internal static class Program
 
         if (!args.Contains("SKIP", StringComparer.OrdinalIgnoreCase))
         {
-            Logger.LogWarn("--------------------------------");
-            Logger.LogWarn("Fetching repository version...");
+            Logger.LogWarn("Checking for updates from repository...");
+            Logger.LogWarn("To skip version fetching, use -skip");
 
-            WebClient webClient;
-            try
+            if (CheckForUpdates())
             {
-                webClient = new();
+                Logger.LogWarn("Disposing web client");
+                Logger.LogWarn("Restart SFDCT to use newest repository version");
 
-                string repositoryVersion = webClient.DownloadString(GitHubRepositoryVersionFileURL).Trim();
-                if (!Globals.Version.SFDCT.Equals(repositoryVersion, StringComparison.OrdinalIgnoreCase))
-                {
-                    Logger.LogWarn("Current version differs from repository!");
-                    Logger.LogWarn($"Current {Globals.Version.SFDCT} - Repository {repositoryVersion}");
-                    Logger.LogWarn("Get a new release at:");
-                    Logger.LogWarn($"- {GitHubRepositoryURL}");
-                }
+                updateWebClient?.Dispose();
+                updateWebClient = null;
+                return 0;
             }
-            catch (Exception)
-            {
-                Logger.LogError("Failed to fetch repository version");
-                Logger.LogError("To skip version fetching, use -skip");
-                webClient = null;
-            }
-            Logger.LogWarn("--------------------------------");
         }
 
         Logger.LogInfo("Current SFDCT version is: " + Globals.Version.SFDCT);
@@ -114,5 +117,84 @@ internal static class Program
         SFD.Program.Main(args);
 
         return 0;
+    }
+
+    private static bool CheckForUpdates()
+    {
+        updateWebClient = new();
+
+        string repositoryVersion;
+        Logger.LogWarn("- Fetching version from repository...");
+
+        try
+        {
+            repositoryVersion = updateWebClient.DownloadString(GitHubRepositoryVersionFileURL).Trim();
+        }
+        catch (WebException)
+        {
+            return false;
+        }
+
+        updateUrl = updateUrl.Replace("VERSION", repositoryVersion);
+
+        Logger.LogWarn($"- Current: {Globals.Version.SFDCT}");
+        Logger.LogWarn($"- Repository: {repositoryVersion}");
+
+        switch (string.CompareOrdinal(Globals.Version.SFDCT, repositoryVersion))
+        {
+            case >= 0:
+                Logger.LogWarn("Current version is the same or newer than repository");
+                return false;
+            case < 0:
+                return DownloadUpdate();
+        }
+    }
+
+    private static bool DownloadUpdate()
+    {
+        string archivePath = Path.Combine(GameDirectory, "SFDCT.zip");
+        Logger.LogWarn("Downloading repository version...");
+
+        try
+        {
+            updateWebClient.DownloadFile(updateUrl, archivePath);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        Logger.LogWarn("- Replacing current files...");
+
+        ReplaceOldFile(Assembly.GetExecutingAssembly().Location);
+        ReplaceOldFile(Path.Combine(GameDirectory, "SFDCT.exe.config"));
+
+        foreach (string file in Directory.GetFiles(Globals.Paths.SFDCT, "*.dll", SearchOption.TopDirectoryOnly))
+        {
+            ReplaceOldFile(file);
+        }
+
+        foreach (string file in Directory.GetFiles(Path.Combine(Globals.Paths.SFDCT, "Content"), "*.*", SearchOption.AllDirectories))
+        {
+            File.Delete(file);
+        }
+
+        Logger.LogWarn("- Extracting repository version...");
+
+        using (ZipArchive archive = ZipFile.OpenRead(archivePath))
+        {
+            archive.ExtractToDirectory(GameDirectory);
+        }
+
+        File.Delete(archivePath);
+        return true;
+    }
+
+    private static void ReplaceOldFile(string file)
+    {
+        string newExtension = Path.ChangeExtension(file, "old");
+        if (File.Exists(newExtension)) File.Delete(newExtension);
+
+        File.Move(file, newExtension);
     }
 }
