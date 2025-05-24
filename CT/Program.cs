@@ -186,6 +186,8 @@ internal static class Program
 
         foreach (string file in Directory.GetFiles(Path.Combine(Globals.Paths.SFDCT, "Content"), "*.*", SearchOption.AllDirectories))
         {
+            if (file.EndsWith("config.ini")) continue;
+            
             File.Delete(file);
         }
 
