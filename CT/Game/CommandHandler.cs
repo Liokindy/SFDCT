@@ -215,24 +215,6 @@ internal static class CommandHandler
                 }
                 return true;
             }
-
-            // Server-only commands (no offline)
-            if (__instance.GameOwner == GameOwnerEnum.Server)
-            {
-                // Enables debug functions of the editor, i.e
-                // Mouse-dragging, mouse-deletion, etc.
-                if (args.IsCommand("MOUSE", "SERVERMOUSE"))
-                {
-                    WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
-
-                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouse));
-                    args.Feedback.Add(new(args.SenderGameUser, message, null, null));
-
-                    EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
-                    server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
-                    return true;
-                }
-            }
         }
 
         // Moderator commands
@@ -327,6 +309,20 @@ internal static class CommandHandler
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
+                // Enables debug functions of the editor, i.e
+                // Mouse-dragging, mouse-deletion, etc.
+                if (args.IsCommand("MOUSE", "SERVERMOUSE"))
+                {
+                    WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
+
+                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouse));
+                    args.Feedback.Add(new(args.SenderGameUser, message, null, null));
+
+                    EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
+                    server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
+                    return true;
+                }
+
                 if (args.IsCommand("SERVERMOVEMENT", "SVMOV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
