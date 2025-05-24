@@ -98,6 +98,10 @@ internal static class Program
                 updateWebClient = null;
                 return 0;
             }
+
+            Logger.LogWarn("Disposing web client");
+            updateWebClient?.Dispose();
+            updateWebClient = null;
         }
 
         Logger.LogInfo("Current SFDCT version is: " + Globals.Version.SFDCT);
@@ -152,6 +156,12 @@ internal static class Program
 
     private static bool DownloadUpdate()
     {
+        Logger.LogWarn($"All files at '{Globals.Paths.SFDCT}' will be deleted permanently");
+        Logger.LogWarn("Proceed? (Y/N): ", false);
+        bool choice = (Console.ReadLine() ?? string.Empty).Equals("Y", StringComparison.OrdinalIgnoreCase);
+
+        if (!choice) return false;
+
         string archivePath = Path.Combine(GameDirectory, "SFDCT.zip");
         Logger.LogWarn("Downloading repository version...");
 
