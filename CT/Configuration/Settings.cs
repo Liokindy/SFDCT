@@ -36,7 +36,7 @@ public static class Settings
         Add(SettingKey.Language, IniSettingType.String, "SFDCT_default", false);
         Add(SettingKey.SpectatorsMaximum, IniSettingType.Int, 4, false, 0, 4);
         Add(SettingKey.SpectatorsOnlyModerators, IniSettingType.Bool, true);
-        Add(SettingKey.VoteKickEnabled, IniSettingType.Bool, true);
+        Add(SettingKey.VoteKickEnabled, IniSettingType.Bool, false);
         Add(SettingKey.VoteKickFailCooldown, IniSettingType.Int, 150, false, 30, 300);
         Add(SettingKey.VoteKickSuccessCooldown, IniSettingType.Int, 60, false, 30, 300);
 
