@@ -5,10 +5,11 @@
 
 Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds and tweaks some features while mantaining compatibility with vanilla-SFD. Meaning that a player can join a normal SFD server with SFDCT, and players using normal SFD can join a server being hosted with SFDCT.
 
-<details>
+## Features
 
-<summary>Installation</summary>
-<br>
+You can find a detailed list of new features in this repository's Wiki: https://github.com/Liokindy/SFDCT/wiki
+
+## Installation
 
 > [!CAUTION]
 > SFDCT may get detected as a *malicious program*. This is a known problem.
@@ -38,11 +39,9 @@ When you open Superfighters Deluxe, a console will open, inside you should see c
 
 <p><img src="./docs/png/installation_1.png" alt="SFDCT Console"/></p>
 
-</details>
 
-<details>
 
-<summary>Credits</summary>
+## Credits
 
 #### SFDCT
 
@@ -55,10 +54,8 @@ When you open Superfighters Deluxe, a console will open, inside you should see c
 - Developers of [Superfighters Redux](https://github.com/Odex64/SFR)
 - Original developers of [Superfighters Deluxe](https://mythologicinteractive.com/SuperfightersDeluxe)
 
-</details>
 
-<details>
-<summary>Building</summary>
+## Building
 
 #### PREREQUISITES
 - [Visual Studio](https://visualstudio.microsoft.com/) with ".NET Desktop development" and .NET Framework 4.7.2 SDK installed
@@ -83,4 +80,3 @@ You can open `Core.dll` with dnSpy in order to inspect SFD code. It is a slightl
 
 > [!TIP]
 > You can learn how to write patches using this [Harmony guide](https://harmony.pardeike.net/articles/patching.html)
-</details>
