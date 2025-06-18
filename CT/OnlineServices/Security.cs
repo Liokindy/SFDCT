@@ -18,6 +18,20 @@ internal static class Security
     internal readonly static bool doExtraProfileNameValidation = true;
     internal readonly static bool doLimitChatMessageLength = true;
     internal readonly static bool doLocalHostBypassesAccountValidation = true;
+    internal readonly static bool doServerBrowserFiltering = true;
+
+    internal static bool FilterSFDGameServer(SFD.SFDOnlineServices.SFDGameServer gameServer)
+    {
+        if (!doServerBrowserFiltering) return false;
+        if (gameServer == null) return true;
+
+        return gameServer.MaxPlayers == 0 ||
+                gameServer.MaxPlayers > 16 ||
+                gameServer.Players > gameServer.MaxPlayers ||
+                gameServer.Bots > gameServer.MaxPlayers ||
+                gameServer.GameName?.Length > 24 ||
+                gameServer.GameName?.Length < 3;
+    }
 
     //     This allows the DS server to bypass the ReadAccountData check in
     //     order to join the server while having an empty AccountName.
