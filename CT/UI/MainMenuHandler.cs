@@ -1,9 +1,9 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Linq;
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Misc;
-using System.Collections.Generic;
-using System.Linq;
+using HarmonyLib;
 
 namespace SFDCT.UI;
 
@@ -20,7 +20,14 @@ internal static class MainMenuHandler
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.DrawInner))]
     private static IEnumerable<CodeInstruction> VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(74).operand = $"{Constants.VERSION} - {Globals.Version.SFDCT}";
+        foreach (var instruction in instructions)
+        {
+            if (instruction != null && instruction.operand != null && instruction.operand.Equals(Constants.VERSION))
+            {
+                instruction.operand = $"{Constants.VERSION} - {Globals.Version.SFDCT}";
+            }
+        }
+
         return instructions;
     }
 
