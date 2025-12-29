@@ -9,13 +9,8 @@ internal static class FilmgrainHandler
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(FilmGrain), nameof(FilmGrain.Draw))]
-    private static bool FilmGrainDraw()
+    private static bool FilmGrain_Draw_Prefix_CheckHide()
     {
-        if (Settings.Get<bool>(SettingKey.HideFilmgrain))
-        {
-            return false;
-        }
-
-        return true;
+        return !SFDCTConfig.Get<bool>(CTSettingKey.HideFilmgrain);
     }
 }

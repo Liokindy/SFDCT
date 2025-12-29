@@ -3,18 +3,36 @@ using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFDCT.Game;
+using SFDCT.Sync.Data;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 
 namespace SFDCT.Sync;
 
 [HarmonyPatch]
 internal static class ServerHandler
 {
+    internal static List<DebugMouse> DebugMouseList = [];
+    internal static bool DebugMouse
+    {
+        get;
+        set
+        {
+            if (field != value && GameSFD.Handle.Server != null)
+            {
+                var data = new SFDCTMessageData();
+                data.Type = MessageHandler.SFDCTMessageDataType.DebugMouseToggle;
+                data.Data = [value];
+
+                MessageHandler.Send(GameSFD.Handle.Server, data);
+            }
+
+            field = value;
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Server), nameof(Server.updateForcedServerMovement))]
-    private static bool ServerUpdateForcedServerMovement(Server __instance, float time)
+    private static bool Server_updateForcedServerMovement_Prefix_CustomServerMovement(Server __instance, float time)
     {
         __instance.m_updateForcedServerMovementTime -= time;
         if (__instance.m_updateForcedServerMovementTime <= 0f)
@@ -70,61 +88,63 @@ internal static class ServerHandler
         return false;
     }
 
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(Server), nameof(Server.SendMessage), [typeof(MessageType), typeof(object), typeof(NetConnection), typeof(NetConnection)])]
-    private static IEnumerable<CodeInstruction> ServerSendMessage(IEnumerable<CodeInstruction> instructions)
+    internal static void HandleCustomMessage(Server server, SFDCTMessageData messageData, NetIncomingMessage incomingMessage)
     {
-        for (int i = 0; i < 8; i++)
+        switch (messageData.Type)
         {
-            instructions.ElementAt(100 + i).opcode = OpCodes.Nop;
-        }
-
-        return instructions;
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(Server), nameof(Server.HandleDataMessage))]
-    private static IEnumerable<CodeInstruction> ServerHandleDataMessage(IEnumerable<CodeInstruction> instructions)
-    {
-        List<CodeInstruction> code = new(instructions);
-
-        for (int i = 0; i < 8; i++)
-        {
-            code[66 + i].opcode = OpCodes.Nop;
-        }
-
-        for (int i = 0; i < 9; i++)
-        {
-            code[425 + i].opcode = OpCodes.Nop;
-        }
-
-        code.Insert(105, new CodeInstruction(OpCodes.Ldarg_0, null));
-        code.Insert(106, new CodeInstruction(OpCodes.Ldarg_2, null));
-        code.Insert(107, new CodeInstruction(OpCodes.Ldloc_2, null));
-        code.Insert(108, new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(ServerHandler), nameof(ServerHandleCustomSignal), [typeof(Server), typeof(NetIncomingMessage), typeof(NetMessage.Signal.Data)])));
-
-        return code;
-    }
-
-    private static void ServerHandleCustomSignal(Server server, NetIncomingMessage msg, NetMessage.Signal.Data msgSignalData)
-    {
-        switch (msgSignalData.Signal)
-        {
-            case (NetMessage.Signal.Type)30:
-                object[] data = (object[])msgSignalData.Object;
-                CustomSignalType customSignalType = (CustomSignalType)((int)data[0]);
-
-                // ConsoleOutput.ShowMessage(ConsoleOutputType.Information, "Server: Receiving custom signal " + customSignalType);
-                switch (customSignalType)
+            default:
+                break;
+            case MessageHandler.SFDCTMessageDataType.DebugMouseUpdate:
+                if (incomingMessage.GameConnectionTag() != null && incomingMessage.GameConnectionTag().IsModerator)
                 {
-                    case CustomSignalType.DebugMouseUpdateSignal:
-                        if (msg.GameConnectionTag() == null) break;
+                    Vector2 box2DPosition = new((float)messageData.Data[0], (float)messageData.Data[1]);
+                    bool pressed = (bool)messageData.Data[2];
 
-                        DebugMouseUpdateSignalData customSignalData = DebugMouseUpdateSignalData.Get(data);
-                        WorldHandler.UpdateUserDebugMouse(msg.GameConnectionTag(), new Vector2(customSignalData.X, customSignalData.Y), customSignalData.Pressed, customSignalData.Delete);
-                        break;
+                    DebugMouse tagDebugMouse = null;
+                    foreach (var debugMouse in DebugMouseList)
+                    {
+                        if (debugMouse.Tag == incomingMessage.GameConnectionTag())
+                        {
+                            tagDebugMouse = debugMouse;
+                            break;
+                        }
+                    }
+
+                    if (tagDebugMouse == null)
+                    {
+                        tagDebugMouse = new();
+                        tagDebugMouse.Tag = incomingMessage.GameConnectionTag();
+
+                        DebugMouseList.Add(tagDebugMouse);
+                    }
+
+                    tagDebugMouse.LastNetUpdateTime = (float)NetTime.Now;
+                    tagDebugMouse.Box2DPosition = box2DPosition;
+                    tagDebugMouse.Pressed = pressed;
                 }
                 break;
         }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Server), nameof(Server.HandleDataMessage))]
+    private static bool Server_HandleDataMessage_Prefix_CustomSignals(Server __instance, NetMessage.MessageData messageData, NetIncomingMessage msg)
+    {
+        if (messageData.MessageType == MessageHandler.SFDCTMessageType)
+        {
+            var data = MessageHandler.Read(msg, messageData);
+            HandleCustomMessage(__instance, data, msg);
+            return false;
+        }
+
+        return true;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Server), nameof(Server.Shutdown), [typeof(bool)])]
+    private static void Server_Shutdown_Prefix(Server __instance)
+    {
+        DebugMouse = false;
+        DebugMouseList.Clear();
     }
 }

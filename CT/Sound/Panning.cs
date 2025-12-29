@@ -10,20 +10,16 @@ namespace SFDCT.Sound;
 [HarmonyPatch]
 internal static class Panning
 {
-    // These properties are used for patching IL code
-    // in projectiles and objects that play sounds,
-    // until SFD fixes those lines and gives them proper
-    // position arguments.
-    internal static readonly Type typeof_SoundHandler = typeof(SoundHandler);
-    internal static readonly string nameof_SoundHandlerPlaySound = nameof(SoundHandler.PlaySound);
-    internal static readonly Type[] typeof_String_Vector2_GameWorld = [typeof(string), typeof(Vector2), typeof(GameWorld)];
+    // These properties are used for patching instructions in projectiles and objects that play sounds,
+    // until SFD fixes those lines and gives them proper position arguments.
 
-    /// <summary>
-    ///     Tweaks SoundHandler.PlaySound to use position
-    /// </summary>
+    // internal static readonly Type typeof_SoundHandler = typeof(SoundHandler);
+    // internal static readonly string nameof_SoundHandlerPlaySound = nameof(SoundHandler.PlaySound);
+    // internal static readonly Type[] typeof_String_Vector2_GameWorld = [typeof(string), typeof(Vector2), typeof(GameWorld)];
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SoundHandler), nameof(SoundHandler.PlaySound), [typeof(string), typeof(Vector2), typeof(float), typeof(GameWorld)])]
-    private static bool PlaySound(string soundID, Vector2 worldPosition, float volumeModifier, GameWorld gameWorld)
+    private static bool SoundHandler_PlaySound_Prefix_SoundPanning(string soundID, Vector2 worldPosition, float volumeModifier, GameWorld gameWorld)
     {
         if (gameWorld == null || gameWorld.InLoading || gameWorld.MuteSounds)
         {
@@ -45,10 +41,6 @@ internal static class Panning
         return false;
     }
 
-    /// <summary>
-    ///     Plays a screen-space panned sound. if Position
-    ///     equals WorldOrigin panning is disabled.
-    /// </summary>
     public static void PlayGlobalPannedSound(string soundID, GameWorld gameWorld, Vector2 worldPosition, float volumeModifier = 1f)
     {
         if (SoundHandler.m_soundsDisabled)
@@ -69,10 +61,10 @@ internal static class Panning
             float soundPanning = 0f;
             if (worldPosition != Vector2.Zero)
             {
-                if (Settings.Get<bool>(Settings.GetKey(SettingKey.SoundAttenuationEnabled)))
+                if (SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationEnabled))
                 {
                     Vector2 listenerPos;
-                    if (Settings.Get<bool>(Settings.GetKey(SettingKey.SoundAttenuationForceScreenSpace)) ||
+                    if (SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace) ||
                         GameInfo.LocalPlayerCount >= 2 ||
                         gameWorld.PrimaryLocalPlayer == null ||
                         gameWorld.PrimaryLocalPlayer.IsDisposed ||
@@ -94,8 +86,8 @@ internal static class Panning
                     }
                     else
                     {
-                        float worldThreshold = Settings.Get<int>(Settings.GetKey(SettingKey.SoundAttenuationInworldThreshold));
-                        float worldDistance = Settings.Get<int>(Settings.GetKey(SettingKey.SoundAttenuationInworldDistance));
+                        float worldThreshold = SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldThreshold);
+                        float worldDistance = SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldDistance);
                         float dist = (worldPosition - gameWorld.PrimaryLocalPlayer.Position).CalcSafeLength();
 
                         if (dist >= worldThreshold)
@@ -108,15 +100,15 @@ internal static class Panning
                         }
                     }
 
-                    soundVolumeModifier = MathHelper.Clamp(1 - soundVolumeModifier, Settings.Get<float>(Settings.GetKey(SettingKey.SoundAttenuationMin)), 1f);
+                    soundVolumeModifier = MathHelper.Clamp(1 - soundVolumeModifier, SFDCTConfig.Get<float>(CTSettingKey.SoundAttenuationMin), 1f);
                 }
 
-                if (Settings.Get<bool>(Settings.GetKey(SettingKey.SoundPanningEnabled)) && Settings.Get<float>(Settings.GetKey(SettingKey.SoundPanningStrength)) != 0f)
+                if (SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningEnabled) && SFDCTConfig.Get<float>(CTSettingKey.SoundPanningStrength) != 0f)
                 {
                     float listenerPosX;
                     // Use screen-space if told to, if playing locally,
                     // or the current player is dead/removed/null
-                    if (Settings.Get<bool>(Settings.GetKey(SettingKey.SoundPanningForceScreenSpace)) ||
+                    if (SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningForceScreenSpace) ||
                         GameInfo.LocalPlayerCount >= 2 ||
                         gameWorld.PrimaryLocalPlayer == null ||
                         gameWorld.PrimaryLocalPlayer.IsDisposed ||
@@ -129,8 +121,8 @@ internal static class Panning
                     }
                     else
                     {
-                        float worldThreshold = Settings.Get<int>(Settings.GetKey(SettingKey.SoundPanningInworldThreshold));
-                        float worldDistance = Settings.Get<int>(Settings.GetKey(SettingKey.SoundPanningInworldDistance));
+                        float worldThreshold = SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldThreshold);
+                        float worldDistance = SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldDistance);
                         float distX = worldPosition.X - gameWorld.PrimaryLocalPlayer.Position.X;
 
                         // The side of the panning is decided by the X position difference.
@@ -143,7 +135,7 @@ internal static class Panning
                             soundPanning = (distX - worldThreshold) / worldDistance;
                         }
                     }
-                    soundPanning = MathHelper.Clamp(soundPanning * Settings.Get<float>(Settings.GetKey(SettingKey.SoundPanningStrength)), -1f, 1f);
+                    soundPanning = MathHelper.Clamp(soundPanning * SFDCTConfig.Get<float>(CTSettingKey.SoundPanningStrength), -1f, 1f);
                 }
             }
 

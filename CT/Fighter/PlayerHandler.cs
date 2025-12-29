@@ -1,145 +1,275 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Box2D.XNA;
+using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using HarmonyLib;
-using System.Linq;
 using SFDCT.Configuration;
+using System;
 
 namespace SFDCT.Fighter;
 
 [HarmonyPatch]
 internal static class PlayerHandler
 {
+    //[HarmonyPrefix]
+    //[HarmonyPatch(typeof(Player), nameof(Player.DrawAim))]
+    //private static bool Player_DrawAim_Prefix_CustomDraw(Player __instance, float ms, Player.DrawAimMode aimMode)
+    //{
+    //    if (__instance.IsRemoved) return false;
+
+    //    switch (aimMode)
+    //    {
+    //        case Player.DrawAimMode.Lazer:
+    //            if (__instance.InThrowingMode) break;
+    //            if (__instance.CurrentAction != PlayerAction.ManualAim && __instance.CurrentAction != PlayerAction.HipFire) break;
+
+    //            RWeapon rangedWeapon = __instance.GetCurrentRangedWeaponInUse();
+    //            if (rangedWeapon == null) break;
+    //            if (rangedWeapon.LazerUpgrade == 0) break;
+
+    //            Vector2 lazerPosition;
+    //            Vector2 lazerDirection;
+    //            var lazerTunnel = rangedWeapon.Properties.LazerPosition.X + 4f;
+
+    //            if (!__instance.GetWeaponInformation(Player.WeaponInformationType.LazerPosition, out lazerPosition, out lazerDirection)) break;
+    //            if (__instance.CurrentAction == PlayerAction.HipFire && Math.Abs(Vector2.Dot(lazerDirection, Vector2.UnitX)) < 0.7f) break;
+
+    //            SFDMath.RotatePosition(ref lazerDirection, Constants.RANDOM.NextFloat(-0.002f, 0.002f), out lazerDirection);
+
+    //            float distanceToCameraEdge = Camera.GetDistanceToEdge(lazerPosition, lazerDirection);
+
+    //            if (distanceToCameraEdge == -1f) break;
+    //            distanceToCameraEdge += 16f;
+
+    //            GameWorld.RayCastResult lazerRayCastResult = __instance.GameWorld.RayCast(lazerPosition, lazerDirection, lazerTunnel, distanceToCameraEdge, new GameWorld.RayCastFixtureCheck(__instance.LazerRayCastCollision), new GameWorld.RayCastPlayerCheck(__instance.LazerRayCastPlayerCollision));
+    //            if (lazerRayCastResult.TunnelCollision) break;
+
+    //            __instance.GameWorld.DrawLazer(__instance.m_spriteBatch, __instance.IsLocal, lazerRayCastResult.StartPosition, lazerRayCastResult.EndPosition, lazerRayCastResult.Direction);
+    //            break;
+    //        case Player.DrawAimMode.ManualAimBox:
+    //            if (__instance.CurrentAction != PlayerAction.ManualAim || !__instance.IsLocal) break;
+
+    //            var aimCursorOffset = new Vector2(36, 0);
+    //            aimCursorOffset += __instance.GetCurrentRangedWeaponInUse()?.Properties.CursorAimOffset ?? Vector2.Zero;
+
+    //            SFDMath.RotatePosition(ref aimCursorOffset, -__instance.AimAngle, out aimCursorOffset);
+    //            aimCursorOffset.X *= __instance.LastDirectionX;
+
+    //            var aimCursorPosition = __instance.Position + aimCursorOffset + __instance.AIM_ARM_OFFSET;
+    //            Vector2 muzzlePosition;
+    //            Vector2 muzzleDirection;
+    //            if (!__instance.GetWeaponInformation(Player.WeaponInformationType.MuzzlePosition, out muzzlePosition, out muzzleDirection)) break;
+
+    //            var directionToAimCursor = aimCursorPosition - muzzlePosition;
+    //            var distanceToAimCursor = directionToAimCursor.CalcSafeLength();
+    //            directionToAimCursor.Normalize();
+
+    //            GameWorld.RayCastResult aimCursorRayCastResult = __instance.GameWorld.RayCast(muzzlePosition, directionToAimCursor, 0f, distanceToAimCursor, new GameWorld.RayCastFixtureCheck(__instance.LazerRayCastCollision), new GameWorld.RayCastPlayerCheck(__instance.LazerRayCastPlayerCollision));
+    //            if (!aimCursorRayCastResult.TunnelCollision)
+    //            {
+    //                aimCursorPosition = aimCursorRayCastResult.EndPosition;
+
+    //                Camera.ConvertWorldToScreen(aimCursorPosition.X, aimCursorPosition.Y, out aimCursorPosition.X, out aimCursorPosition.Y);
+    //                var crosshairOffset = new Vector2(Player.m_textureCrosshair.Width, Player.m_textureCrosshair.Height) * 0.5f;
+    //                var crosshairScale = Math.Max(Camera.Zoom / 2f, 1f);
+
+    //                __instance.m_spriteBatch.Draw(Player.m_textureCrosshair, aimCursorPosition, null, Color.Gray, 0f, crosshairOffset, crosshairScale, SpriteEffects.None, 0f);
+    //            }
+    //            break;
+    //    }
+    //    return false;
+    //}
+
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(PlayerHUD), nameof(PlayerHUD.DrawName))]
-    private static bool PlayerHUD_DrawName(PlayerHUD __instance, Player player, GameUser user, int x, int y, SpriteBatch spriteBatch, float elapsed)
-    {
-        if (__instance.m_nameLabelTeam != user.GameSlotTeam)
-        {
-            __instance.m_nameLabelTeam = user.GameSlotTeam;
-        }
-
-        // This is probably not the best way of doing this
-        Color teamColor = Constants.GetTeamColor(__instance.m_nameLabelTeam);
-        if (__instance.m_nameLabelTeam == Team.Independent && user != null)
-        {
-            if (CreditHandler.IsCredit(user.Account))
-            {
-                teamColor = CreditHandler.GetCreditColor(user.Account);
-            }
-        }
-        __instance.m_nameLabel.Color = teamColor;
-
-        __instance.m_nameLabel.DrawStatic(spriteBatch, new Vector2(x, y - 4));
-
-        return false;
-    }
-
-    [HarmonyTranspiler]
     [HarmonyPatch(typeof(Player), nameof(Player.Draw))]
-    private static IEnumerable<CodeInstruction> Player_Draw(IEnumerable<CodeInstruction> instructions)
+    private static bool Player_Draw_Prefix_CustomDraw(Player __instance, SpriteBatch spriteBatch, float ms)
     {
-        instructions.ElementAt(44).operand = Settings.Get<float>(SettingKey.LowHealthHurtLevel1Threshold);
-        instructions.ElementAt(41).operand = Settings.Get<float>(SettingKey.LowHealthHurtLevel2Threshold);
+        if (__instance.IsNullProfile) return false;
+        if (__instance.WorldBody != null) __instance.UpdatePlayerPositionToBox2DPosition(ms);
 
-        return instructions;
-    }
+        var position = __instance.Position;
+        var slowMotionModifier = __instance.GameWorld.SlowmotionHandler.SlowmotionModifier;
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Player), nameof(Player.DrawPlates))]
-    private static bool Player_DrawPlates(float ms, Player __instance)
-    {
-        Vector2 vector = Camera.ConvertWorldToScreen(__instance.Position + new Vector2(0f, 24f));
-        float num = MathHelper.Max(Camera.Zoom * 0.5f, 1f);
+        __instance.Shake.UpdateShake(ms / slowMotionModifier);
+        __instance.Shake.ApplyShake(position);
 
-        if (!__instance.IsDead)
+        int hurtLevel = 0;
+
+        if (!__instance.Burned)
         {
-            if ((__instance.DrawStatusInfo & Player.DrawStatusInfoFlags.Name) == Player.DrawStatusInfoFlags.Name)
+            var healthFullness = __instance.Health.Fullness;
+
+            if (healthFullness <= SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold))
             {
-                Color teamTextColor = __instance.GetTeamTextColor();
-
-                if (__instance.CurrentTeam == Team.Independent)
-                {
-                    GameUser gameUser = __instance.GetGameUser();
-                    if (gameUser != null && CreditHandler.IsCredit(gameUser.Account))
-                    {
-                        teamTextColor = CreditHandler.GetCreditColor(gameUser.Account);
-                        teamTextColor = ColorCorrection.FromXNAToCustom(teamTextColor);
-                    }
-                }
-
-                Constants.DrawString(__instance.m_spriteBatch, Constants.Font1Outline, __instance.Name, new Vector2(vector.X, vector.Y - 0.75f * __instance.m_nameTextSize.Y * num), teamTextColor, 0f, __instance.m_nameTextSize * 0.5f, num * 0.5f, SpriteEffects.None, 0);
-                Texture2D teamIcon = Constants.GetTeamIcon(__instance.m_currentTeam);
-
-                if (teamIcon != null)
-                {
-                    __instance.m_spriteBatch.Draw(teamIcon, new Vector2(vector.X - __instance.m_nameTextSize.X * 0.25f * num - (float)teamIcon.Width * num, vector.Y - __instance.m_nameTextSize.Y * num), null, Color.Gray, 0f, Vector2.Zero, num, SpriteEffects.None, 1f);
-                }
+                hurtLevel = 2;
             }
-            if (__instance.ChatActive)
+            else if (healthFullness <= SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold))
             {
-                if (__instance.m_chatIconTimer > 250f)
+                hurtLevel = 1;
+            }
+        }
+
+        __instance.Equipment.EnsureHurtLevelEquipped(hurtLevel);
+
+        var desiredScale = __instance.DrawScale;
+        var currentScale = __instance.m_currentDrawScale;
+
+        if (currentScale != desiredScale)
+        {
+            var lifeTime = __instance.GameWorld.ElapsedTotalRealTime - __instance.CreateTime;
+
+            if (lifeTime < 100f)
+            {
+                currentScale = __instance.DrawScale;
+            }
+            else
+            {
+                var scaleSpeed = 0.0003f;
+
+                if (currentScale < desiredScale)
                 {
-                    __instance.m_chatIconFrame = (__instance.m_chatIconFrame + 1) % 4;
-                    __instance.m_chatIconTimer -= 250f;
+                    currentScale += scaleSpeed * ms;
+
+                    if (currentScale > desiredScale) currentScale = desiredScale;
                 }
                 else
                 {
-                    __instance.m_chatIconTimer += ms;
-                }
+                    currentScale -= scaleSpeed * ms;
 
-                __instance.m_spriteBatch.Draw(Constants.ChatIcon, new Vector2(vector.X + __instance.m_nameTextSize.X * 0.25f * num, vector.Y - __instance.m_nameTextSize.Y * num), new Rectangle?(new Rectangle(1 + __instance.m_chatIconFrame * 13, 1, 12, 12)), ColorCorrection.FromXNAToCustom(Constants.COLORS.CHAT_ICON), 0f, Vector2.Zero, num, SpriteEffects.None, 1f);
+                    if (currentScale < desiredScale) currentScale = desiredScale;
+                }
             }
+
+            __instance.m_currentDrawScale = currentScale;
         }
 
-        vector.Y -= 11f * num;
-        if ((__instance.DrawStatusInfo & Player.DrawStatusInfoFlags.StatusBars) == Player.DrawStatusInfoFlags.StatusBars)
+        if (__instance.SpeedBoostActive)
         {
-            Player.HealthMode currentHealthMode = __instance.GetCurrentHealthMode();
-            if (!__instance.IsDead)
+            var positionDifference = position - __instance.m_speedBoostDelayedPos;
+            var direction = positionDifference;
+            direction.Normalize();
+
+            if (direction.IsValid())
             {
-                BarMeter barMeter = __instance.Health;
-                bool flag = barMeter.CheckRecentlyModified(2000f);
-                Color xnaColor = Constants.COLORS.LIFE_BAR;
-                if (currentHealthMode == Player.HealthMode.StrengthBoostOverHealth || currentHealthMode == Player.HealthMode.RocketRideOverHealth)
+                var length = positionDifference.CalcSafeLength();
+
+                if (length > 6f)
                 {
-                    barMeter = __instance.OverHealth;
-                    xnaColor = (((int)(GameSFD.LastUpdateNetTimeMS / 200f) % 2 == 0) ? Constants.COLORS.LIFE_BAR_OVERHEALTH_A : Constants.COLORS.LIFE_BAR_OVERHEALTH_B);
-                    flag = true;
+                    __instance.m_speedBoostDelayedPos = position - direction * 5.99f;
                 }
-                if (flag | __instance.Energy.CheckRecentlyModified(2000f))
+                else
                 {
-                    float num2 = 32f * num;
-                    float num3 = 2f * num;
-                    Rectangle rectangle = new Rectangle((int)(vector.X - num2 / 2f), (int)vector.Y, (int)num2, (int)num3);
-                    float num4 = Math.Max(1f, Camera.Zoom * 0.5f);
-                    for (float num5 = -num4; num5 <= num4; num5 += num4 * 2f)
-                    {
-                        for (float num6 = -num4; num6 <= num4; num6 += num4 * 2f)
-                        {
-                            Rectangle destinationRectangle = new Rectangle(rectangle.X + (int)num5, rectangle.Y + (int)num6, rectangle.Width, (int)((float)rectangle.Height * 2f));
-                            __instance.m_spriteBatch.Draw(Constants.WhitePixel, destinationRectangle, Color.Black);
-                        }
-                    }
-                    __instance.m_spriteBatch.Draw(Constants.WhitePixel, rectangle, new Color(64, 64, 64));
-                    if (barMeter.CheckRecentlyModified(50f))
-                    {
-                        xnaColor = Color.White;
-                    }
-                    int width = rectangle.Width;
-                    rectangle.Width = (int)((float)width * barMeter.Fullness);
-                    __instance.m_spriteBatch.Draw(Constants.WhitePixel, rectangle, ColorCorrection.FromXNAToCustom(xnaColor));
-                    rectangle.Y += rectangle.Height;
-                    rectangle.Width = width;
-                    __instance.m_spriteBatch.Draw(Constants.WhitePixel, rectangle, new Color(64, 64, 64));
-                    rectangle.Width = (int)((float)width * __instance.Energy.Fullness);
-                    __instance.m_spriteBatch.Draw(Constants.WhitePixel, rectangle, ColorCorrection.FromXNAToCustom(Constants.COLORS.ENERGY_BAR));
+                    __instance.m_speedBoostDelayedPos += direction * Math.Min(ms / 13f, length);
                 }
             }
+
+            var ghostColor = __instance.DrawColor;
+            ghostColor.A = 40;
+
+            __instance.m_subAnimations[0].Draw(spriteBatch, __instance.m_speedBoostDelayedPos, __instance.m_currentDrawScale, __instance.GetAnimationDirection(), __instance.Rotation + __instance.m_subAnimations[0].Rotation, __instance.Equipment, ghostColor, ms);
         }
 
+        __instance.m_subAnimations[0].Draw(spriteBatch, position, __instance.m_currentDrawScale, __instance.GetAnimationDirection(), __instance.Rotation + __instance.m_subAnimations[0].Rotation, __instance.Equipment, __instance.DrawColor, ms);
         return false;
     }
+
+    //[HarmonyPrefix]
+    //[HarmonyPatch(typeof(Player), nameof(Player.DrawPlates))]
+    //private static bool Player_DrawPlates_Prefix_CustomDraw(Player __instance, float ms)
+    //{
+    //    if (__instance.IsDead) return false;
+
+    //    var zoom = Math.Max(Camera.Zoom * 0.5f, 1f);
+    //    var nameTagPosition = Camera.ConvertWorldToScreen(__instance.Position + Vector2.UnitY * 24f);
+    //    var statusBarsPosition = nameTagPosition - Vector2.UnitY * 11f * zoom;
+
+    //    // Name-Tag, Team Icon
+    //    if ((__instance.DrawStatusInfo & Player.DrawStatusInfoFlags.Name) == Player.DrawStatusInfoFlags.Name)
+    //    {
+    //        var namePosition = new Vector2(nameTagPosition.X, nameTagPosition.Y - 0.75f * __instance.m_nameTextSize.Y * zoom);
+    //        var nameColor = __instance.GetTeamTextColor();
+
+    //        Constants.DrawString(__instance.m_spriteBatch, Constants.Font1Outline, __instance.Name, namePosition, nameColor, 0f, __instance.m_nameTextSize * 0.5f, zoom * 0.5f, SpriteEffects.None, 0);
+
+    //        Texture2D teamIcon = Constants.GetTeamIcon(__instance.m_currentTeam);
+    //        if (teamIcon != null)
+    //        {
+    //            var teamIconPosition = new Vector2(nameTagPosition.X - __instance.m_nameTextSize.X * 0.25f * zoom - (float)teamIcon.Width * zoom, nameTagPosition.Y - __instance.m_nameTextSize.Y * zoom);
+
+    //            __instance.m_spriteBatch.Draw(teamIcon, teamIconPosition, null, Color.Gray, 0f, Vector2.Zero, zoom, SpriteEffects.None, 1f);
+    //        }
+    //    }
+
+    //    // Chat Icon
+    //    if (__instance.ChatActive)
+    //    {
+    //        var chatIconTime = 250f;
+    //        var chatIconFrames = 4;
+
+    //        __instance.m_chatIconTimer += ms;
+    //        if (__instance.m_chatIconTimer > chatIconTime)
+    //        {
+    //            __instance.m_chatIconFrame = (__instance.m_chatIconFrame + 1) % chatIconFrames;
+    //            __instance.m_chatIconTimer -= chatIconTime;
+    //        }
+
+    //        var chatIcon = Constants.ChatIcon;
+    //        var chatIconColor = ColorCorrection.FromXNAToCustom(Constants.COLORS.CHAT_ICON);
+    //        var chatIconPosition = new Vector2(nameTagPosition.X + __instance.m_nameTextSize.X * 0.25f * zoom, nameTagPosition.Y - __instance.m_nameTextSize.Y * zoom);
+    //        var chatIconUV = new Rectangle(1 + __instance.m_chatIconFrame * (chatIcon.Width / 4), 1, (chatIcon.Width - 2) / 4, chatIcon.Height - 2);
+
+    //        __instance.m_spriteBatch.Draw(Constants.ChatIcon, chatIconPosition, chatIconUV, chatIconColor, 0f, Vector2.Zero, zoom, SpriteEffects.None, 1f);
+    //    }
+
+    //    // Status Bars
+    //    if ((__instance.DrawStatusInfo & Player.DrawStatusInfoFlags.StatusBars) == Player.DrawStatusInfoFlags.StatusBars)
+    //    {
+    //        var healthMode = __instance.GetCurrentHealthMode();
+    //        var healthMeter = __instance.Health;
+    //        var healthColor = Constants.COLORS.LIFE_BAR;
+    //        var showStatusBars = __instance.Health.CheckRecentlyModified(2000f) || __instance.Energy.CheckRecentlyModified(2000f);
+
+    //        switch (healthMode)
+    //        {
+    //            case Player.HealthMode.StrengthBoostOverHealth:
+    //            case Player.HealthMode.RocketRideOverHealth:
+    //                // Blink over time
+    //                healthMeter = __instance.OverHealth;
+    //                healthColor = ((int)(GameSFD.LastUpdateNetTimeMS / 200f) % 2 == 0) ? Constants.COLORS.LIFE_BAR_OVERHEALTH_A : Constants.COLORS.LIFE_BAR_OVERHEALTH_B;
+
+    //                showStatusBars = true;
+    //                break;
+    //        }
+
+    //        if (showStatusBars)
+    //        {
+    //            var barsWidth = 32f * zoom;
+    //            var barsHeight = 2f * zoom;
+    //            var barsRectangle = new Rectangle((int)(statusBarsPosition.X - barsWidth / 2f), (int)statusBarsPosition.Y, (int)barsWidth, (int)barsHeight);
+
+    //            var barsOutlineThickness = 1f * zoom;
+    //            var barsOutlineRectangle = new Rectangle(barsRectangle.X, barsRectangle.Y, barsRectangle.Width, barsRectangle.Height * 2);
+    //            barsOutlineRectangle.Inflate((int)barsOutlineThickness, (int)barsOutlineThickness);
+
+    //            __instance.m_spriteBatch.Draw(Constants.WhitePixel, barsOutlineRectangle, Color.Black);
+
+    //            if (healthMeter.CheckRecentlyModified(50f)) healthColor = Color.White;
+
+    //            var originalWidth = barsRectangle.Width;
+
+    //            // Health
+    //            barsRectangle.Width = (int)(originalWidth * healthMeter.Fullness);
+    //            __instance.m_spriteBatch.Draw(Constants.WhitePixel, barsRectangle, ColorCorrection.FromXNAToCustom(healthColor));
+
+    //            barsRectangle.Y += barsRectangle.Height;
+
+    //            // Energy
+    //            barsRectangle.Width = originalWidth;
+    //            __instance.m_spriteBatch.Draw(Constants.WhitePixel, barsRectangle, new Color(64, 64, 64));
+    //            barsRectangle.Width = (int)(originalWidth * __instance.Energy.Fullness);
+    //            __instance.m_spriteBatch.Draw(Constants.WhitePixel, barsRectangle, ColorCorrection.FromXNAToCustom(Constants.COLORS.ENERGY_BAR));
+    //        }
+    //    }
+
+    //    return false;
+    //}
 }

@@ -1,10 +1,11 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework.Input;
 using SFD;
+using SFD.Effects;
 using SFD.GameKeyboard;
+using System;
 using System.IO;
 using System.Threading;
-using System;
 
 namespace SFDCT.Game;
 
@@ -13,7 +14,7 @@ internal static class GameHandler
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SFDConfig), nameof(SFDConfig.SaveConfig))]
-    private static void SFDConfigSaveConfig(SFDConfigSaveMode mode)
+    private static void SFDConfig_SaveConfig_Postfix_ExtraConfig(SFDConfigSaveMode mode)
     {
         lock (SFDConfig.m_saveConfigLock)
         {
@@ -24,7 +25,7 @@ internal static class GameHandler
 
             string configPath = Constants.Paths.CustomConfig;
             if (string.IsNullOrWhiteSpace(configPath)) configPath = Constants.Paths.GetPath(Constants.Paths.UserDocumentsSFDUserDataPath, "config.ini");
-            
+
             if (!File.Exists(configPath))
             {
                 try
@@ -64,7 +65,7 @@ internal static class GameHandler
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.InitializeKeys))]
-    private static void InitializeKeys()
+    private static void GameSFD_InitializeKeys_Postfix_ExtraVoteKeys()
     {
         GameSFD.m_keyVotes = [
             Keys.F1,
@@ -80,7 +81,7 @@ internal static class GameHandler
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(VirtualKeyboard), nameof(VirtualKeyboard.LoadDefaultKeys))]
-    private static void LoadDefaultKeys()
+    private static void VirtualKeyboard_LoadDefaultKeys_Postfix_ExtraVoteKeys()
     {
         VirtualKeyboard.VOTE_MISC_KEYS =
         [
@@ -93,5 +94,12 @@ internal static class GameHandler
             47,
             48,
         ];
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(EffectHandler), nameof(EffectHandler.CreateEffect))]
+    private static bool EffectHandler_CreateEffect_Prefix_PreventConsoleSpam(string effectId)
+    {
+        return true;
     }
 }

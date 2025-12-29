@@ -7,16 +7,16 @@ public static class Globals
     public readonly struct Paths
     {
         public readonly static string SFDCT = Path.Combine(Program.GameDirectory, "SFDCT");
-
-        public static string ConfigurationIni { get { return Path.Combine(SFDCT, "config.ini"); } }
-        public static string Content { get { return Path.Combine(SFDCT, "Content"); } }
-        public static string Data { get { return Path.Combine(Content, "Data"); } }
-        public static string Language { get { return Path.Combine(Data, "Misc", "Language"); } }
+        public readonly static string ConfigurationIni = Path.Combine(SFDCT, "config.ini");
+        public readonly static string Content = Path.Combine(SFDCT, "Content");
+        public readonly static string SubContent = Path.Combine(SFDCT, "SubContent");
+        public readonly static string Data = Path.Combine(Content, "Data");
+        public readonly static string Language = Path.Combine(Data, "Misc", "Language");
     }
 
-    public struct Version
+    public readonly struct Version
     {
-        public static string SFDCT = "v.1.1.1";
-        public static string SFD = "v.1.4.2";
+        public const string SFDCT = "v.2.0.0";
+        public const string SFD = "v.1.4.2";
     }
 }

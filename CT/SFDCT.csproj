@@ -126,46 +126,55 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Bootstrap\AssetsHandler.cs" />
+    <Compile Include="Assets\AnimationLoader.cs" />
+    <Compile Include="Assets\ColorLoader.cs" />
+    <Compile Include="Assets\ColorPaletteLoader.cs" />
+    <Compile Include="Assets\ItemLoader.cs" />
+    <Compile Include="Assets\SoundLoader.cs" />
+    <Compile Include="Assets\SubContentHandler.cs" />
+    <Compile Include="Assets\TextureLoader.cs" />
+    <Compile Include="Assets\TileLoader.cs" />
+    <Compile Include="Bootstrap\CoreHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
-    <Compile Include="Configuration\IniSettingType.cs" />
-    <Compile Include="Configuration\SettingKey.cs" />
-    <Compile Include="Fighter\CreditHandler.cs" />
+    <Compile Include="Bootstrap\TrackHandler.cs" />
+    <Compile Include="Bootstrap\LanguageHandler.cs" />
+    <Compile Include="Configuration\CTIniHandler.cs" />
+    <Compile Include="Configuration\CTSettingKey.cs" />
+    <Compile Include="Configuration\SFDConfigHandler.cs" />
+    <Compile Include="Configuration\SFDCTConfig.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
     <Compile Include="Game\DebugMouse.cs" />
     <Compile Include="Game\GameHandler.cs" />
     <Compile Include="Helper\Input.cs" />
-    <Compile Include="OnlineServices\DSPreview.cs" />
+    <Compile Include="OnlineServices\DSPreviewHandler.cs" />
     <Compile Include="OnlineServices\Security.cs" />
-    <Compile Include="Configuration\IniSetting.cs" />
     <Compile Include="Sound\Panning.cs" />
     <Compile Include="Sound\PanningPatches\Objects\Default.cs" />
     <Compile Include="Sound\PanningPatches\Projectiles\Default.cs" />
     <Compile Include="Sync\ClientHandler.cs" />
-    <Compile Include="Sync\CustomSignalData.cs" />
-    <Compile Include="Sync\CustomSignalType.cs" />
+    <Compile Include="Sync\Data\SFDCTMessageData.cs" />
     <Compile Include="Sync\ServerHandler.cs" />
-    <Compile Include="Sync\SignalHandler.cs" />
+    <Compile Include="Sync\MessageHandler.cs" />
     <Compile Include="UI\FilmGrainHandler.cs" />
-    <Compile Include="UI\GameChatHandler.cs" />
-    <Compile Include="UI\Panels\HookHandler.cs" />
+    <Compile Include="UI\EventHelper.cs" />
+    <Compile Include="UI\MenuItems\SFDCTMenuItemDropdownColor.cs" />
+    <Compile Include="UI\Panels\SFDCTCreditsPanel.cs" />
+    <Compile Include="UI\Panels\SFDCTDropdownColorPanel.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
     <Compile Include="Game\CommandHandler.cs" />
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Editor\MapData.cs" />
-    <Compile Include="Configuration\IniFile.cs" />
-    <Compile Include="OnlineServices\Browser.cs" />
+    <Compile Include="UI\ServerBrowserHandler.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Misc\Globals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\MainMenuHandler.cs" />
+    <Compile Include="UI\MenuHandler.cs" />
     <Compile Include="Voting\GameVoteKick.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +196,7 @@
   <ItemGroup>
     <Folder Include="Objects\" />
     <Folder Include="Projectiles\" />
+    <Folder Include="UI\Elements\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />

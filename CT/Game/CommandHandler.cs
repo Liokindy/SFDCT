@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using HarmonyLib;
 using Lidgren.Network;
-using SFDCT.Sync;
-using SFDCT.Configuration;
+using Microsoft.Xna.Framework;
 using SFD;
-using SFD.Voting;
 using SFD.Core;
 using SFD.Parser;
-using HarmonyLib;
+using SFD.Voting;
+using SFDCT.Configuration;
+using SFDCT.Sync;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFDCT.Game;
 
@@ -18,24 +18,20 @@ internal static class CommandHandler
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.HandleCommand), typeof(ProcessCommandArgs))]
-    private static bool GameInfo_HandleCommands(ref bool __result, ProcessCommandArgs args, GameInfo __instance)
+    private static bool GameInfo_HandleCommand_Prefix_CustomCommands(ref bool __result, ProcessCommandArgs args, GameInfo __instance)
     {
         bool ranCustomCommand = false;
 
-        // We check to see if we handle custom commands before vanilla ones,
-        // this also allows us to replace them.
         if (__instance.GameOwner == GameOwnerEnum.Client || __instance.GameOwner == GameOwnerEnum.Local)
         {
-            // Client
             ranCustomCommand = ClientCommands(args, __instance);
         }
+
         if (!ranCustomCommand && (__instance.GameOwner == GameOwnerEnum.Server || __instance.GameOwner == GameOwnerEnum.Local))
         {
-            // Server
             ranCustomCommand = ServerCommands(args, __instance);
         }
 
-        // Don't execute the original method if a custom command was run.
         __result = ranCustomCommand;
         return !ranCustomCommand;
     }
@@ -89,16 +85,18 @@ internal static class CommandHandler
             return true;
         }
 
-        // Client-only commands (no offline)
         if (__instance.GameOwner == GameOwnerEnum.Client)
         {
-            if (args.IsCommand("CLIENTMOUSE"))
-            {
-                WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
+            //if (args.IsCommand("CLIENTMOUSE"))
+            //{
+            //    MessageHandler.Send(client, new Sync.Data.SFDCTMessageData());
 
-                string message = LanguageHelper.GetText("sfdct.command.clientmouse.message", LanguageHelper.GetBooleanText(WorldHandler.ClientMouse));
-                args.Feedback.Add(new(args.SenderGameUser, message, Color.LightBlue, args.SenderGameUser));
-            }
+            //    WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
+
+            //    string message = LanguageHelper.GetText("sfdct.command.clientmouse.message", LanguageHelper.GetBooleanText(WorldHandler.ClientMouse));
+            //    args.Feedback.Add(new(args.SenderGameUser, message, Color.LightBlue, args.SenderGameUser));
+            //    return true;
+            //}
         }
 
         return false;
@@ -112,15 +110,16 @@ internal static class CommandHandler
             return false;
         }
 
-        // Host commands
         if (args.HostPrivileges)
         {
-            if (args.IsCommand("SERVERMOUSEMODERATORS", "SERVERMOUSEMOD"))
+            if (args.IsCommand("DEBUGMOUSEMODERATORS"))
             {
-                WorldHandler.ServerMouseNoModerators = !WorldHandler.ServerMouseNoModerators;
+                MessageHandler.Send(server, new Sync.Data.SFDCTMessageData());
 
-                string message = LanguageHelper.GetText("sfdct.command.servermousemoderators.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouseNoModerators));
-                args.Feedback.Add(new(args.SenderGameUser, message));
+                //WorldHandler.ServerMouseNoModerators = !WorldHandler.ServerMouseNoModerators;
+
+                //string message = LanguageHelper.GetText("sfdct.command.servermousemoderators.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouseNoModerators));
+                //args.Feedback.Add(new(args.SenderGameUser, message));
             }
 
             if (args.IsCommand("MODCMD", "MODCMDS", "MODCOMMANDS", "MODCOMMAND"))
@@ -250,7 +249,7 @@ internal static class CommandHandler
 
                             if (canUseList.Count > 0)
                             {
-                            args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", canUseList)), moderatorAccentColor * 0.5f, args.SenderGameUser));
+                                args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", canUseList)), moderatorAccentColor * 0.5f, args.SenderGameUser));
                             }
                         }
                         break;
@@ -264,10 +263,6 @@ internal static class CommandHandler
             }
         }
 
-        // Moderator commands
-        // -    This can only be true if Constants.MODDERATOR_COMMANDS is empty,
-        //      contains the command or the user is the host checking
-        //      CanUseModeratorCommand is useless
         if (args.ModeratorPrivileges)
         {
             // Commands that interact with the gameworld
@@ -356,17 +351,12 @@ internal static class CommandHandler
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                // Enables debug functions of the editor, i.e
-                // Mouse-dragging, mouse-deletion, etc.
-                if (args.IsCommand("MOUSE", "SERVERMOUSE"))
+                if (args.IsCommand("MOUSE", "DEBUGMOUSE"))
                 {
-                    WorldHandler.ServerMouse = !WorldHandler.ServerMouse;
+                    ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
 
-                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouse));
+                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouse));
                     args.Feedback.Add(new(args.SenderGameUser, message, null, null));
-
-                    EditorDebugFlagSignalData signalData = new() { Enabled = WorldHandler.ServerMouse };
-                    server.SendMessage(MessageType.Signal, new NetMessage.Signal.Data((NetMessage.Signal.Type)30, signalData.Store()));
                     return true;
                 }
 
@@ -424,7 +414,6 @@ internal static class CommandHandler
             }
         }
 
-        // Public commands
         if (__instance.GameOwner == GameOwnerEnum.Server)
         {
             if (args.IsCommand("VOTEKICK"))
@@ -475,7 +464,7 @@ internal static class CommandHandler
 
         if (args.IsCommand("JOIN"))
         {
-            if (!args.SenderGameUser.IsModerator && Settings.Get<bool>(SettingKey.SpectatorsOnlyModerators))
+            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators))
             {
                 return true;
             }
@@ -534,11 +523,11 @@ internal static class CommandHandler
 
         if (args.IsCommand("SPECTATE"))
         {
-            if (!args.SenderGameUser.IsModerator && Settings.Get<bool>(SettingKey.SpectatorsOnlyModerators))
+            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators))
             {
                 return true;
             }
-            if (__instance.GetSpectatingUsers().Count >= Settings.Get<int>(SettingKey.SpectatorsMaximum))
+            if (__instance.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum))
             {
                 return true;
             }

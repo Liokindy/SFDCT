@@ -22,7 +22,6 @@ internal static class Program
     internal static readonly string GitHubRepositoryVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/version";
 
     internal static readonly Harmony Harmony = new("github.com/Liokindy/SFDCT");
-    internal static bool DebugMode = false;
 
     private static WebClient updateWebClient = null;
     private static string updateUrl = "https://github.com/Liokindy/SFDCT/releases/download/VERSION/SFDCT.zip";
@@ -45,7 +44,6 @@ internal static class Program
             Logger.LogWarn("- HELP            Show this help message");
             Logger.LogWarn("- SKIP            Skip version fetching");
             Logger.LogWarn("- SFD             Start SFD");
-            Logger.LogWarn("- DEBUG           Run in debug mode, shows debug messages");
             return 0;
         }
 
@@ -64,22 +62,12 @@ internal static class Program
             return -1;
         }
 
-        if (args.Contains("-DEBUG", StringComparer.OrdinalIgnoreCase))
-        {
-            DebugMode = true;
-        }
-
 #if DEBUG
-        DebugMode = true;
+        Logger.LogDebug("--------------------------------");
+        Logger.LogDebug("RUNNING IN DEBUG MODE");
+        Logger.LogDebug("DEBUG MESSAGES WILL APPEAR");
+        Logger.LogDebug("--------------------------------");
 #endif
-
-        if (DebugMode)
-        {
-            Logger.LogDebug("--------------------------------");
-            Logger.LogDebug("RUNNING IN DEBUG MODE");
-            Logger.LogDebug("DEBUG MESSAGES WILL APPEAR");
-            Logger.LogDebug("--------------------------------");
-        }
 
         Stopwatch sw = new();
         sw.Start();
@@ -108,7 +96,7 @@ internal static class Program
         Logger.LogInfo("Target SFD version is: " + Globals.Version.SFD);
 
         Logger.LogInfo("Initializing SFDCT...");
-        IniFile.Initialize();
+        SFDCTConfig.LoadFile();
 
         Logger.LogInfo("Patching SFD...");
         Harmony.PatchAll();
@@ -187,7 +175,7 @@ internal static class Program
         foreach (string file in Directory.GetFiles(Path.Combine(Globals.Paths.SFDCT, "Content"), "*.*", SearchOption.AllDirectories))
         {
             if (file.EndsWith("config.ini")) continue;
-            
+
             File.Delete(file);
         }
 

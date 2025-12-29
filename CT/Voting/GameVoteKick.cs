@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Lidgren.Network;
-using SFDCT.Configuration;
+﻿using Lidgren.Network;
+using Microsoft.Xna.Framework;
 using SFD;
 using SFD.ManageLists;
 using SFD.Voting;
+using SFDCT.Configuration;
 
 namespace SFDCT.Voting;
 
@@ -36,9 +36,9 @@ internal class GameVoteKick : GameVote
 
     public override void VoteTimeout(GameInfo gameInfo)
     {
-        if (this.m_voteHandled) return; 
+        if (this.m_voteHandled) return;
         this.m_voteHandled = true;
-        
+
         string messKick = "- The majority has voted 'yes', kicking '{0}' ({1})...";
         string messNoVotes = "- Not enough votes, '{0}' ({1}) will not be kicked";
         string messNoKick = "- The majority has voted 'no', '{0}' ({1}) will not be kicked";
@@ -55,7 +55,7 @@ internal class GameVoteKick : GameVote
                 if (highestAlternative.Index == m_alternativeYesOption)
                 {
                     gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messKick, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
-                    m_nextAvailableVoteKickTimeStamp = NetTime.Now + Settings.Get<int>(SettingKey.VoteKickSuccessCooldown);
+                    m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown);
 
                     KickList.Add(m_userAddressToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
                     GameUser userToKick = gameInfo.GetGameUserByIP(m_userAddressToKick);
@@ -67,14 +67,14 @@ internal class GameVoteKick : GameVote
                 }
                 else
                 {
-                    m_nextAvailableVoteKickTimeStamp = NetTime.Now + Settings.Get<int>(SettingKey.VoteKickFailCooldown);
+                    m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown);
                     gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messNoKick, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
                 }
             }
         }
         else
         {
-            m_nextAvailableVoteKickTimeStamp = NetTime.Now + Settings.Get<int>(SettingKey.VoteKickFailCooldown);
+            m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown);
             gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messNoVotes, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
         }
 

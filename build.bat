@@ -1,4 +1,4 @@
-SET SFD="C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe"
+SET SFD="F:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe"
 cd ..\..\..\
 
 copy CT\bin\%1\SFDCT.exe.config %SFD%

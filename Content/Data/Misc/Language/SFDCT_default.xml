@@ -1,4 +1,4 @@
-﻿<Texts name="Default">
+﻿<Texts name="SFDCT Default">
 	<!-- Language: en -->
 	<Text id="sfdct.generic.list">- {0}</Text>
 	
@@ -33,28 +33,40 @@
 	<Text id="sfdct.command.spectate.fail.localplayer">You can't spectate with more than 1 local player</Text>
 	<Text id="sfdct.command.spectate.message.info">- Use /JOIN to stop spectating and join an available game-slot</Text>
 
-	<Text id="sfdct.setting.name.soundpanningenabled">Enabled</Text>
-	<Text id="sfdct.setting.name.soundpanningstrength">Strength</Text>
-	<Text id="sfdct.setting.name.soundpanningforcescreenspace">Force Screen-Space</Text>
-	<Text id="sfdct.setting.name.soundpanninginworldthreshold">Threshold</Text>
-	<Text id="sfdct.setting.name.soundpanninginworlddistance">Distance</Text>
-	<Text id="sfdct.setting.name.soundattenuationenabled">Enabled</Text>
-	<Text id="sfdct.setting.name.soundattenuationmin">Minimum</Text>
-	<Text id="sfdct.setting.name.soundattenuationforcescreenspace">Force Screen-Space</Text>
-	<Text id="sfdct.setting.name.soundattenuationinworldthreshold">Threshold</Text>
-	<Text id="sfdct.setting.name.soundattenuationinworlddistance">Distance</Text>
-	<Text id="sfdct.setting.name.lowhealthsaturationfactor">Desaturation Strength</Text>
-	<Text id="sfdct.setting.name.lowhealththreshold">Desaturation Threshold</Text>
-	<Text id="sfdct.setting.name.lowhealthhurtlevel1threshold">HurtLevel1 Threshold</Text>
-	<Text id="sfdct.setting.name.lowhealthhurtlevel2threshold">HurtLevel2 Threshold</Text>
-	<Text id="sfdct.setting.name.hidefilmgrain">Hide FilmGrain</Text>
-	<Text id="sfdct.setting.name.disableclockticking">Disable ClockTicking</Text>
-	<Text id="sfdct.setting.name.language">Language File Name</Text>
-	<Text id="sfdct.setting.name.spectatorsmaximum">Maximum</Text>
-	<Text id="sfdct.setting.name.spectatorsonlymoderators">Only Moderators</Text>
-	<Text id="sfdct.setting.name.votekickenabled">Enabled</Text>
-	<Text id="sfdct.setting.name.votekicksuccesscooldown">Success cooldown</Text>
-	<Text id="sfdct.setting.name.votekickfailcooldown">Fail cooldown</Text>
+	<Text id="sfdct.credits.name">CREDITS</Text>
+	<Text id="sfdct.credits.header">SFDCT TEAM</Text>
+	<Text id="sfdct.credits.category.azure">Ideas, Testing</Text>
+	<Text id="sfdct.credits.category.eldous1">Ideas, Testing</Text>
+	<Text id="sfdct.credits.category.liokindy">Lead-Developer, Programmer</Text>
+	<Text id="sfdct.credits.category.nult">Ideas</Text>
+
+	<Text id="sfdct.setting.warning.settingsrequiregamerestart">Restart SFDCT to apply some settings.</Text>
+	
+	<Text id="sfdct.setting.name.soundpanningenabled">ENABLED</Text>
+	<Text id="sfdct.setting.name.soundpanningstrength">STRENGTH</Text>
+	<Text id="sfdct.setting.name.soundpanningforcescreenspace">ALWAYS SCREEN-SPACE</Text>
+	<Text id="sfdct.setting.name.soundpanninginworldthreshold">IN-WORLD THRESHOLD</Text>
+	<Text id="sfdct.setting.name.soundpanninginworlddistance">IN-WORLD DISTANCE</Text>
+	<Text id="sfdct.setting.name.soundattenuationenabled">ENABLED</Text>
+	<Text id="sfdct.setting.name.soundattenuationmin">MINIMUM</Text>
+	<Text id="sfdct.setting.name.soundattenuationforcescreenspace">ALWAYS SCREEN-SPACE</Text>
+	<Text id="sfdct.setting.name.soundattenuationinworldthreshold">IN-WORLD THRESHOLD</Text>
+	<Text id="sfdct.setting.name.soundattenuationinworlddistance">IN-WORLD DISTANCE</Text>
+	<Text id="sfdct.setting.name.lowhealthsaturationfactor">DESATURATION STRENGTH</Text>
+	<Text id="sfdct.setting.name.lowhealththreshold">DESATURATION HEALTH THRESHOLD</Text>
+	<Text id="sfdct.setting.name.lowhealthhurtlevel1threshold">HURT-LEVEL-1 HEALTH THRESHOLD</Text>
+	<Text id="sfdct.setting.name.lowhealthhurtlevel2threshold">HURT-LEVEL-2 HEALTH THRESHOLD</Text>
+	<Text id="sfdct.setting.name.hidefilmgrain">ALWAYS HIDE FILMGRAIN</Text>
+	<Text id="sfdct.setting.name.disableclockticking">DISABLE 'Clock Ticking' SOUNDTRACK</Text>
+	<Text id="sfdct.setting.name.language">LANGUAGE FILE NAME</Text>
+	<Text id="sfdct.setting.name.spectatorsmaximum">MAXIMUM</Text>
+	<Text id="sfdct.setting.name.spectatorsonlymoderators">ONLY MODERATORS</Text>
+	<Text id="sfdct.setting.name.votekickenabled">ENABLED</Text>
+	<Text id="sfdct.setting.name.votekicksuccesscooldown">SUCCESS COOLDOWN SECONDS</Text>
+	<Text id="sfdct.setting.name.votekickfailcooldown">FAIL COOLDOWN SECONDS</Text>
+
+	<Text id="sfdct.setting.name.primarycolor">COLOR</Text>
+	<Text id="sfdct.setting.name.primarycolorhex">HEX-CODE</Text>
 	
 	<Text id="sfdct.setting.help.soundpanningenabled">Enables or disables sound-panning</Text>
 	<Text id="sfdct.setting.help.soundpanningstrength">Controls the maximum panning of sounds</Text>
@@ -79,26 +91,12 @@
 	<Text id="sfdct.setting.help.votekicksuccesscooldown">Controls the cooldown in seconds of vote-kicking on success</Text>
 	<Text id="sfdct.setting.help.votekickfailcooldown">Controls the cooldown in seconds of vote-kicking on failure</Text>
 
-	<Text id="sfdct.setting.category.soundpanningenabled">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundpanningstrength">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundpanningforcescreenspace">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundpanninginworldthreshold">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundpanninginworlddistance">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundattenuationenabled">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.soundattenuationmin">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.soundattenuationforcescreenspace">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.soundattenuationinworldthreshold">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.soundattenuationinworlddistance">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.lowhealthsaturationfactor">LOW HEALTH</Text>
-	<Text id="sfdct.setting.category.lowhealththreshold">LOW HEALTH</Text>
-	<Text id="sfdct.setting.category.lowhealthhurtlevel1threshold">LOW HEALTH</Text>
-	<Text id="sfdct.setting.category.lowhealthhurtlevel2threshold">LOW HEALTH</Text>
-	<Text id="sfdct.setting.category.hidefilmgrain">MISC</Text>
-	<Text id="sfdct.setting.category.disableclockticking">MISC</Text>
-	<Text id="sfdct.setting.category.language">MISC</Text>
-	<Text id="sfdct.setting.category.spectatorsmaximum">SPECTATORS</Text>
-	<Text id="sfdct.setting.category.spectatorsonlymoderators">SPECTATORS</Text>
-	<Text id="sfdct.setting.category.votekickenabled">VOTE-KICK</Text>
-	<Text id="sfdct.setting.category.votekicksuccesscooldown">VOTE-KICK</Text>
-	<Text id="sfdct.setting.category.votekickfailcooldown">VOTE-KICK</Text>
+	<Text id="sfdct.setting.category.soundpanning">SOUND-PANNING</Text>
+	<Text id="sfdct.setting.category.soundattenuation">SOUND-ATTENUATION</Text>
+	<Text id="sfdct.setting.category.lowhealth">LOW HEALTH</Text>
+	<Text id="sfdct.setting.category.misc">MISC</Text>
+	<Text id="sfdct.setting.category.spectators">SPECTATORS</Text>
+	<Text id="sfdct.setting.category.votekick">VOTE-KICK</Text>
+
+	<Text id="sfdct.setting.category.primarycolor">PRIMARY-COLOR</Text>
 </Texts>
