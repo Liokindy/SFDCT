@@ -90,20 +90,9 @@ internal static class CommandHandler
 
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands)
     {
-        if (!args.IsCommand(commands))
-        {
-            return false;
-        }
-
-        if (args.HostPrivileges)
-        {
-            return true;
-        }
-
-        if (!args.ModeratorPrivileges)
-        {
-            return false;
-        }
+        if (!args.IsCommand(commands)) return false;
+        if (args.HostPrivileges) return true;
+        if (!args.ModeratorPrivileges) return false;
 
         return args.CanUseModeratorCommand(commands);
     }
@@ -124,6 +113,7 @@ internal static class CommandHandler
 
                 string message = LanguageHelper.GetText("sfdct.command.debugmousemoderators.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouseOnlyHost));
                 args.Feedback.Add(new(args.SenderGameUser, message));
+                return true;
             }
 
             if (args.IsCommand("MODCMD", "MODCMDS", "MODCOMMANDS", "MODCOMMAND"))
@@ -136,7 +126,7 @@ internal static class CommandHandler
                 if (args.Parameters.Count == 2 && args.Parameters[1] == "*") commands = GameInfo.ALL_MODERATOR_COMMANDS.ToList();
 
                 string header1, header2, message1;
-                Color moderatorAccentColor = new Color(159, 255, 64);
+                Color moderatorAccentColor = new(159, 255, 64);
                 bool shouldSave = false;
 
                 switch (action)
@@ -259,24 +249,20 @@ internal static class CommandHandler
                         break;
                 }
 
-                if (shouldSave)
-                {
-                    SFDConfig.SaveConfig((SFDConfigSaveMode)10);
-                }
+                if (shouldSave) SFDConfig.SaveConfig((SFDConfigSaveMode)10);
+
                 return true;
             }
         }
 
         if (args.ModeratorPrivileges)
         {
-            // Commands that interact with the gameworld
             if (__instance.GameWorld != null)
             {
-                if (args.IsCommand("GRAVITY", "GRAV"))
+                if (IsAndCanUseModeratorCommand(args, "GRAVITY", "GRAV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
 
-                    // Default
                     float gx = 0f;
                     float gy = -26f;
 
@@ -314,45 +300,35 @@ internal static class CommandHandler
                     return true;
                 }
 
-                if (args.IsCommand("DAMAGE", "HURT"))
+                if (IsAndCanUseModeratorCommand(args, "DAMAGE", "HURT"))
                 {
-                    if (args.Parameters.Count <= 1)
-                    {
-                        return true;
-                    }
+                    if (args.Parameters.Count <= 1) return true; 
 
                     float damage = 0f;
-                    if (!SFDXParser.TryParseFloat(args.Parameters[1], out damage))
-                    {
-                        return true;
-                    }
+                    if (!SFDXParser.TryParseFloat(args.Parameters[1], out damage)) return true;
 
                     GameUser user = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-                    if (user != null && !user.IsDisposed)
-                    {
-                        Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
-                        if (userPlayer != null && !userPlayer.IsDisposed)
-                        {
-                            if (damage >= 0f)
-                            {
-                                userPlayer.TakeMiscDamage(damage, false);
-                            }
-                            else
-                            {
-                                userPlayer.HealAmount(-damage);
-                            }
+                    if (user == null || user.IsDisposed) return true;
 
-                            string message = LanguageHelper.GetText("sfdct.command.damage.message", damage.ToString(), user.GetProfileName());
-                            args.Feedback.Add(new(args.SenderGameUser, message));
-                            return true;
-                        }
+                    Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
+                    if (userPlayer == null || userPlayer.IsDisposed) return true;
+
+                    if (damage >= 0f)
+                    {
+                        userPlayer.TakeMiscDamage(damage, false);
+                    }
+                    else
+                    {
+                        userPlayer.HealAmount(-damage);
                     }
 
+                    string message = LanguageHelper.GetText("sfdct.command.damage.message", damage.ToString(), user.GetProfileName());
+                    args.Feedback.Add(new(args.SenderGameUser, message));
                     return true;
                 }
             }
 
-            if (args.IsCommand("M", "MOUSE", "DEBUGMOUSE"))
+            if (IsAndCanUseModeratorCommand(args, "M", "MOUSE", "DEBUGMOUSE"))
             {
                 ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
 
@@ -364,55 +340,50 @@ internal static class CommandHandler
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                if (args.IsCommand("SERVERMOVEMENT", "SVMOV"))
+                if (IsAndCanUseModeratorCommand(args, "SERVERMOVEMENT", "SVMOV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
 
                     GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
-                    if (gameUser != null && !gameUser.IsDisposed)
+                    if (gameUser == null || gameUser.IsDisposed || gameUser.IsBot) return true;
+
+                    GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
+                    if (gameConnectionTag == null || gameConnectionTag.IsDisposed || gameConnectionTag.GameUsers == null) return true;
+                    
+                    bool useServerMovement = !gameConnectionTag.ForceServerMovement;
+                    bool resetServerMovement = false;
+                    if (args.Parameters.Count >= 2)
                     {
-                        GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
-                        if (gameConnectionTag != null && !gameConnectionTag.IsDisposed)
+                        if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
                         {
-                            bool useServerMovement = !gameConnectionTag.ForceServerMovement;
-                            bool resetServerMovement = false;
-                            if (args.Parameters.Count >= 2)
-                            {
-                                if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    resetServerMovement = true;
-                                }
-                                else
-                                {
-                                    bool.TryParse(args.Parameters[1], out useServerMovement);
-                                }
-                            }
-
-                            if (resetServerMovement)
-                            {
-                                gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
-                                gameConnectionTag.ForceServerMovement = false;
-                            }
-                            else
-                            {
-                                gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
-                                gameConnectionTag.ForceServerMovement = useServerMovement;
-                            }
-
-                            string message = LanguageHelper.GetText("sfdct.command.servermovement.message", gameUser.AccountName, resetServerMovement ? "NULL" : LanguageHelper.GetBooleanText(useServerMovement));
-                            args.Feedback.Add(new(args.SenderGameUser, message, args.SenderGameUser));
-
-                            if (gameConnectionTag.GameUsers != null)
-                            {
-                                foreach (var connectionUser in gameConnectionTag.GameUsers)
-                                {
-                                    connectionUser.ForceServerMovement = useServerMovement;
-
-                                    Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
-                                    playerByUserIdentifier?.UpdateCanDoPlayerAction();
-                                }
-                            }
+                            resetServerMovement = true;
                         }
+                        else
+                        {
+                            bool.TryParse(args.Parameters[1], out useServerMovement);
+                        }
+                    }
+
+                    if (resetServerMovement)
+                    {
+                        gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
+                        gameConnectionTag.ForceServerMovement = false;
+                    }
+                    else
+                    {
+                        gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
+                        gameConnectionTag.ForceServerMovement = useServerMovement;
+                    }
+
+                    string message = LanguageHelper.GetText("sfdct.command.servermovement.message", gameUser.AccountName, resetServerMovement ? "NULL" : LanguageHelper.GetBooleanText(useServerMovement));
+                    args.Feedback.Add(new(args.SenderGameUser, message, args.SenderGameUser));
+
+                    foreach (var connectionUser in gameConnectionTag.GameUsers)
+                    {
+                        connectionUser.ForceServerMovement = useServerMovement;
+
+                        Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
+                        playerByUserIdentifier?.UpdateCanDoPlayerAction();
                     }
                 }
             }
@@ -422,15 +393,18 @@ internal static class CommandHandler
         {
             if (args.IsCommand("VOTEKICK"))
             {
-                if (args.Parameters.Count <= 0)
+                if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
+
+                if (__instance.VoteInfo == null) return true;
+                if (__instance.VoteInfo.ActiveVotes.Count > 0)
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.nouser"), Color.Red, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.voteinprogress"), Color.Red, args.SenderGameUser));
                     return true;
                 }
 
-                if (__instance.VoteInfo == null || __instance.VoteInfo.ActiveVotes.Count > 0)
+                if (args.Parameters.Count <= 0)
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.voteinprogress"), Color.Red, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.nouser"), Color.Red, args.SenderGameUser));
                     return true;
                 }
 
@@ -464,28 +438,22 @@ internal static class CommandHandler
                 args.Feedback.Add(new(args.SenderGameUser, mess2, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, voteKickUserToKick));
                 args.Feedback.Add(new(args.SenderGameUser, mess3, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, args.SenderGameUser));
             }
-        }
-
-        if (args.IsCommand("JOIN"))
-        {
-            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators))
+            
+            if (args.IsCommand("JOIN"))
             {
-                return true;
-            }
+                if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
 
-            GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
+                GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
-            if (connectionTag != null)
-            {
+                if (connectionTag == null) return true;
                 if (connectionTag.GameUsers.Count() > 1)
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.localplayer"), Color.Red, args.SenderGameUser, null));
                     return true;
                 }
-                if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed || !connectionTag.FirstGameUser.JoinedAsSpectator)
-                {
-                    return true;
-                }
+
+                if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
+                if (!connectionTag.FirstGameUser.JoinedAsSpectator) return true;
 
                 GameSlot oldGameSlot = connectionTag.FirstGameUser.GameSlot;
                 List<GameSlot> gameSlots = server.FindOpenGameSlots(server.GameInfo.DropInMode, connectionTag.GameUsers.Count(), server.GameInfo.EvenTeams, null);
@@ -523,32 +491,24 @@ internal static class CommandHandler
 
                 return true;
             }
-        }
 
-        if (args.IsCommand("SPECTATE"))
-        {
-            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators))
+            if (args.IsCommand("SPECTATE"))
             {
-                return true;
-            }
-            if (__instance.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum))
-            {
-                return true;
-            }
+                if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
+                if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+                if (__instance.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
 
-            GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
+                GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
-            if (connectionTag != null)
-            {
+                if (connectionTag == null) return true;
                 if (connectionTag.GameUsers.Count() > 1)
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.fail.localplayer"), Color.Red, args.SenderGameUser, null));
                     return true;
                 }
-                if (connectionTag.FirstGameUser != null && !connectionTag.FirstGameUser.IsDisposed && connectionTag.FirstGameUser.JoinedAsSpectator)
-                {
-                    return true;
-                }
+
+                if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
+                if (connectionTag.FirstGameUser.JoinedAsSpectator) return true;
 
                 GameSlot gameSlot = connectionTag.FirstGameUser.GameSlot;
                 gameSlot.GameUser = null;
@@ -557,12 +517,9 @@ internal static class CommandHandler
                 connectionTag.FirstGameUser.GameSlot = null;
                 connectionTag.FirstGameUser.JoinedAsSpectator = true;
 
-                if (__instance.GameWorld != null)
-                {
-                    Player senderGamePlayer = __instance.GameWorld.GetPlayerByUserIdentifier(connectionTag.FirstGameUser.UserIdentifier);
-                    senderGamePlayer?.SetUser(0);
-                    senderGamePlayer?.Kill();
-                }
+                Player senderGamePlayer = __instance.GameWorld?.GetPlayerByUserIdentifier(connectionTag.FirstGameUser.UserIdentifier);
+                senderGamePlayer?.SetUser(0);
+                senderGamePlayer?.Kill();
 
                 string mess = "menu.lobby.newPlayerJoinedTeam";
                 string[] messArgs = [args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator")];

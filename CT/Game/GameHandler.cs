@@ -5,6 +5,7 @@ using SFD.Effects;
 using SFD.GameKeyboard;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace SFDCT.Game;
@@ -101,5 +102,14 @@ internal static class GameHandler
     private static bool EffectHandler_CreateEffect_Prefix_PreventConsoleSpam(string effectId)
     {
         return true;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameInfo), nameof(GameInfo.TotalGameUserCount), MethodType.Getter)]
+    private static bool GameInfo_Getter_TotalGameUserCount_Prefix_DetectSpectators(GameInfo __instance, ref int __result)
+    {
+        __result = __instance.GetGameUsers().Count((GameUser gameUser) => gameUser.IsUser && !gameUser.JoinedAsSpectator);
+
+        return false;
     }
 }
