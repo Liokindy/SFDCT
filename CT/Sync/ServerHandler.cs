@@ -12,6 +12,7 @@ namespace SFDCT.Sync;
 internal static class ServerHandler
 {
     internal static List<DebugMouse> DebugMouseList = [];
+    internal static bool DebugMouseOnlyHost = false;
     internal static bool DebugMouse
     {
         get;
@@ -95,7 +96,10 @@ internal static class ServerHandler
             default:
                 break;
             case MessageHandler.SFDCTMessageDataType.DebugMouseUpdate:
-                if (incomingMessage.GameConnectionTag() != null && incomingMessage.GameConnectionTag().IsModerator)
+                GameConnectionTag incomingTag = incomingMessage.GameConnectionTag();
+                if (incomingTag == null) break;
+
+                if (incomingTag.IsHost || (incomingTag.IsModerator && !DebugMouseOnlyHost))
                 {
                     Vector2 box2DPosition = new((float)messageData.Data[0], (float)messageData.Data[1]);
                     bool pressed = (bool)messageData.Data[2];

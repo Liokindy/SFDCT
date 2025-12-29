@@ -36,7 +36,7 @@ internal static class CommandHandler
         return !ranCustomCommand;
     }
 
-    private static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
+    internal static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
     {
         Client client = GameSFD.Handle.Client;
         if (client == null && __instance.GameOwner == GameOwnerEnum.Client)
@@ -85,24 +85,30 @@ internal static class CommandHandler
             return true;
         }
 
-        if (__instance.GameOwner == GameOwnerEnum.Client)
-        {
-            //if (args.IsCommand("CLIENTMOUSE"))
-            //{
-            //    MessageHandler.Send(client, new Sync.Data.SFDCTMessageData());
-
-            //    WorldHandler.ClientMouse = !WorldHandler.ClientMouse;
-
-            //    string message = LanguageHelper.GetText("sfdct.command.clientmouse.message", LanguageHelper.GetBooleanText(WorldHandler.ClientMouse));
-            //    args.Feedback.Add(new(args.SenderGameUser, message, Color.LightBlue, args.SenderGameUser));
-            //    return true;
-            //}
-        }
-
         return false;
     }
 
-    private static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
+    internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands)
+    {
+        if (!args.IsCommand(commands))
+        {
+            return false;
+        }
+
+        if (args.HostPrivileges)
+        {
+            return true;
+        }
+
+        if (!args.ModeratorPrivileges)
+        {
+            return false;
+        }
+
+        return args.CanUseModeratorCommand(commands);
+    }
+
+    internal static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
     {
         Server server = GameSFD.Handle.Server;
         if (server == null && __instance.GameOwner == GameOwnerEnum.Server)
@@ -112,14 +118,12 @@ internal static class CommandHandler
 
         if (args.HostPrivileges)
         {
-            if (args.IsCommand("DEBUGMOUSEMODERATORS"))
+            if (args.IsCommand("MOUSEMODERATORS", "MOUSEMOD"))
             {
-                MessageHandler.Send(server, new Sync.Data.SFDCTMessageData());
+                ServerHandler.DebugMouseOnlyHost = !ServerHandler.DebugMouseOnlyHost;
 
-                //WorldHandler.ServerMouseNoModerators = !WorldHandler.ServerMouseNoModerators;
-
-                //string message = LanguageHelper.GetText("sfdct.command.servermousemoderators.message", LanguageHelper.GetBooleanText(WorldHandler.ServerMouseNoModerators));
-                //args.Feedback.Add(new(args.SenderGameUser, message));
+                string message = LanguageHelper.GetText("sfdct.command.debugmousemoderators.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouseOnlyHost));
+                args.Feedback.Add(new(args.SenderGameUser, message));
             }
 
             if (args.IsCommand("MODCMD", "MODCMDS", "MODCOMMANDS", "MODCOMMAND"))
@@ -348,18 +352,18 @@ internal static class CommandHandler
                 }
             }
 
+            if (args.IsCommand("M", "MOUSE", "DEBUGMOUSE"))
+            {
+                ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
+
+                string message = LanguageHelper.GetText("sfdct.command.debugmouse.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouse));
+                args.Feedback.Add(new(args.SenderGameUser, message, null, null));
+                return true;
+            }
+
             // Server-only commands (no offline)
             if (__instance.GameOwner == GameOwnerEnum.Server)
             {
-                if (args.IsCommand("MOUSE", "DEBUGMOUSE"))
-                {
-                    ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
-
-                    string message = LanguageHelper.GetText("sfdct.command.servermouse.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouse));
-                    args.Feedback.Add(new(args.SenderGameUser, message, null, null));
-                    return true;
-                }
-
                 if (args.IsCommand("SERVERMOVEMENT", "SVMOV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
