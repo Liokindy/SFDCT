@@ -442,10 +442,10 @@ internal static class CommandHandler
                 vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
                 __instance.VoteInfo.AddVote(vote);
                 server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
-                
+
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName), Color.Yellow));
                 server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
-                
+
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.victim", kickOwnerUserProfileName, kickOwnerUserAccountName), Color.Yellow * 0.6f, userToKick));
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.owner", userToKickProfileName, userTokickAccountName), Color.Yellow * 0.6f, args.SenderGameUser));
                 return true;
