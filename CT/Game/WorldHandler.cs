@@ -8,7 +8,6 @@ using SFDCT.Helper;
 using SFDCT.Sync;
 using SFDCT.Sync.Data;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -65,7 +64,7 @@ internal static class WorldHandler
         if (!isLast) return;
 
         var currentState = world.m_game.CurrentState;
-        
+
         if (currentState is State.GameOffline)
         {
             world.UpdateDebugMouse();

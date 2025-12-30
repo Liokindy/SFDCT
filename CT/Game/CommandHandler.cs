@@ -302,7 +302,7 @@ internal static class CommandHandler
 
                 if (IsAndCanUseModeratorCommand(args, "DAMAGE", "HURT"))
                 {
-                    if (args.Parameters.Count <= 1) return true; 
+                    if (args.Parameters.Count <= 1) return true;
 
                     float damage = 0f;
                     if (!SFDXParser.TryParseFloat(args.Parameters[1], out damage)) return true;
@@ -349,7 +349,7 @@ internal static class CommandHandler
 
                     GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
                     if (gameConnectionTag == null || gameConnectionTag.IsDisposed || gameConnectionTag.GameUsers == null) return true;
-                    
+
                     bool useServerMovement = !gameConnectionTag.ForceServerMovement;
                     bool resetServerMovement = false;
                     if (args.Parameters.Count >= 2)
@@ -438,7 +438,7 @@ internal static class CommandHandler
                 args.Feedback.Add(new(args.SenderGameUser, mess2, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, voteKickUserToKick));
                 args.Feedback.Add(new(args.SenderGameUser, mess3, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, args.SenderGameUser));
             }
-            
+
             if (args.IsCommand("JOIN"))
             {
                 if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;

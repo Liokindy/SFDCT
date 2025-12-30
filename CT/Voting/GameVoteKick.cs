@@ -9,7 +9,7 @@ namespace SFDCT.Voting;
 
 internal class GameVoteKick : GameVote
 {
-    public GameVoteKick(int voteID, GameUser gameUserToKick) : base(voteID, GameVote.Type.KickVote)
+    internal GameVoteKick(int voteID, GameUser gameUserToKick) : base(voteID, GameVote.Type.KickVote)
     {
         this.m_userAddressToKick = gameUserToKick.GetNetIP();
         this.m_userAccountNameToKick = gameUserToKick.AccountName;
@@ -81,11 +81,11 @@ internal class GameVoteKick : GameVote
         ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Set vote-kicking cooldown to {0}, {1} seconds from now", m_nextAvailableVoteKickTimeStamp, m_nextAvailableVoteKickTimeStamp - NetTime.Now));
     }
 
-    public static float VOTE_MINIMUM_PERCENTAGE { get { return 0.60f; } }
-    public static Color PRIMARY_MESSAGE_COLOR { get { return Color.Yellow; } }
-    public static Color SECONDARY_MESSAGE_COLOR { get { return PRIMARY_MESSAGE_COLOR * 0.6f; } }
+    internal static float VOTE_MINIMUM_PERCENTAGE { get { return 0.60f; } }
+    internal static Color PRIMARY_MESSAGE_COLOR { get { return Color.Yellow; } }
+    internal static Color SECONDARY_MESSAGE_COLOR { get { return PRIMARY_MESSAGE_COLOR * 0.6f; } }
 
-    public static bool CanVoteKick { get { return NetTime.Now >= m_nextAvailableVoteKickTimeStamp; } }
+    internal static bool CanVoteKick { get { return NetTime.Now >= m_nextAvailableVoteKickTimeStamp; } }
     private static double m_nextAvailableVoteKickTimeStamp = 0;
 
     private bool m_voteHandled;

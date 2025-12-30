@@ -41,7 +41,7 @@ internal static class Panning
         return false;
     }
 
-    public static void PlayGlobalPannedSound(string soundID, GameWorld gameWorld, Vector2 worldPosition, float volumeModifier = 1f)
+    internal static void PlayGlobalPannedSound(string soundID, GameWorld gameWorld, Vector2 worldPosition, float volumeModifier = 1f)
     {
         if (SoundHandler.m_soundsDisabled)
         {

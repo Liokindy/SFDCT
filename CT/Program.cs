@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 
@@ -17,50 +16,17 @@ namespace SFDCT;
 /// </summary>
 internal static class Program
 {
-    internal static readonly string GameDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
-    internal static readonly string GitHubRepositoryURL = "https://github.com/Liokindy/SFDCT";
-    internal static readonly string GitHubRepositoryVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/version";
-
     internal static readonly Harmony Harmony = new("github.com/Liokindy/SFDCT");
+    internal static readonly string GameDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
 
-    private static WebClient updateWebClient = null;
-    private static string updateUrl = "https://github.com/Liokindy/SFDCT/releases/download/VERSION/SFDCT.zip";
+    private const string GitHubRepositoryVersionFileURL = "https://raw.githubusercontent.com/Liokindy/SFDCT/master/version";
+    private const string GitHubRepositoryReleaseArchiveFileURL = "https://github.com/Liokindy/SFDCT/releases/download/VERSION/SFDCT.zip";
+    private static WebClient UpdateWebClient = null;
 
     private static int Main(string[] args)
     {
-        foreach (string file in Directory.GetFiles(GameDirectory, "*.old", SearchOption.TopDirectoryOnly))
-        {
-            File.Delete(file);
-        }
-
-        foreach (string file in Directory.GetFiles(Globals.Paths.SFDCT, "*.old", SearchOption.TopDirectoryOnly))
-        {
-            File.Delete(file);
-        }
-
-        if (args.Contains("-HELP", StringComparer.OrdinalIgnoreCase))
-        {
-            Logger.LogInfo("Launch parameters");
-            Logger.LogWarn("- HELP            Show this help message");
-            Logger.LogWarn("- SKIP            Skip version fetching");
-            Logger.LogWarn("- SFD             Start SFD");
-            return 0;
-        }
-
-        if (args.Contains("-SFD", StringComparer.OrdinalIgnoreCase))
-        {
-            Logger.LogInfo("Starting SFD...");
-
-            string sfdFile = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
-            if (File.Exists(sfdFile))
-            {
-                Process.Start(sfdFile, string.Join(" ", args));
-                return 0;
-            }
-
-            Logger.LogError("SFD file not found");
-            return -1;
-        }
+        Logger.LogInfo("Thanks for downloading my mod! -Liokindy");
+        Logger.LogInfo("Official repository: https://github.com/Liokindy/SFDCT");
 
 #if DEBUG
         Logger.LogDebug("--------------------------------");
@@ -69,43 +35,72 @@ internal static class Program
         Logger.LogDebug("--------------------------------");
 #endif
 
-        Stopwatch sw = new();
-        sw.Start();
+        bool skipUpdateCheck = false;
 
-        if (!args.Contains("SKIP", StringComparer.OrdinalIgnoreCase))
+        for (int i = 0; i < args.Length; i++)
+        {
+            string arg = args[i];
+
+            if (arg.Equals("-SFD", StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.LogInfo("Starting SFD...");
+
+                Process.Start(Path.Combine(GameDirectory, "Superfighters Deluxe.exe"), string.Join(" ", args));
+                return 0;
+            }
+
+            if (arg.Equals("-HELP", StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.LogWarn("Launch parameters");
+                Logger.LogWarn("- HELP            Show this help message");
+                Logger.LogWarn("- SKIP            Skip check version");
+                Logger.LogWarn("- SERVER          Start SFDCT Dedicated Server");
+                Logger.LogWarn("- SFD             Start vanilla SFD");
+                return 0;
+            }
+
+            if (arg.Equals("-SKIP", StringComparison.OrdinalIgnoreCase))
+            {
+                skipUpdateCheck = true;
+            }
+        }
+
+        if (!skipUpdateCheck)
         {
             Logger.LogWarn("Checking for updates from repository...");
             Logger.LogWarn("To skip version fetching, use -skip");
 
             if (CheckForUpdates())
             {
-                Logger.LogWarn("Disposing web client");
-                Logger.LogWarn("Restart SFDCT to use newest repository version");
+                Logger.LogWarn("Disposing WebClient");
+                UpdateWebClient?.Dispose();
+                UpdateWebClient = null;
 
-                updateWebClient?.Dispose();
-                updateWebClient = null;
+                Logger.LogInfo("Restart SFDCT to finish update");
                 return 0;
             }
 
-            Logger.LogWarn("Disposing web client");
-            updateWebClient?.Dispose();
-            updateWebClient = null;
+            Logger.LogWarn("Disposing WebClient");
+            UpdateWebClient?.Dispose();
+            UpdateWebClient = null;
         }
 
-        Logger.LogInfo("Current SFDCT version is: " + Globals.Version.SFDCT);
-        Logger.LogInfo("Target SFD version is: " + Globals.Version.SFD);
+        Logger.LogInfo($"Starting SFDCT {Globals.Version.SFDCT} for SFD {Globals.Version.SFD}");
 
-        Logger.LogInfo("Initializing SFDCT...");
+        Logger.LogInfo("- Loading Configuration");
         SFDCTConfig.LoadFile();
 
-        Logger.LogInfo("Patching SFD...");
+        Stopwatch patchStopWatch = new();
+        patchStopWatch.Start();
+
+        Logger.LogInfo("- Loading Harmony");
         Harmony.PatchAll();
 
-        sw.Stop();
-        Logger.LogInfo($"Initialized and Patched in {sw.ElapsedMilliseconds}ms");
-        sw = null;
+        Logger.LogInfo($"Starting ({patchStopWatch.ElapsedMilliseconds}ms)");
 
-        Logger.LogInfo("Starting SFD...");
+        patchStopWatch.Stop();
+        patchStopWatch = null;
+
         SFD.Program.Main(args);
 
         return 0;
@@ -113,79 +108,84 @@ internal static class Program
 
     private static bool CheckForUpdates()
     {
-        updateWebClient = new();
+        UpdateWebClient = new();
 
         string repositoryVersion;
-        Logger.LogWarn("- Fetching version from repository...");
 
         try
         {
-            repositoryVersion = updateWebClient.DownloadString(GitHubRepositoryVersionFileURL).Trim();
+            Logger.LogWarn("Fetching version");
+            repositoryVersion = UpdateWebClient.DownloadString(GitHubRepositoryVersionFileURL).Trim();
         }
-        catch (WebException)
+        catch (WebException ex)
         {
+            Logger.LogError("Error fetching version from repository:");
+            Logger.LogError(ex.Message);
             return false;
         }
 
-        updateUrl = updateUrl.Replace("VERSION", repositoryVersion);
+        string updateUrl = GitHubRepositoryReleaseArchiveFileURL.Replace("VERSION", repositoryVersion);
 
-        Logger.LogWarn($"- Current: {Globals.Version.SFDCT}");
-        Logger.LogWarn($"- Repository: {repositoryVersion}");
+        Logger.LogWarn($"- Current: {Globals.Version.SFDCT}, Repository: {repositoryVersion}");
 
         switch (string.CompareOrdinal(Globals.Version.SFDCT, repositoryVersion))
         {
             case >= 0:
-                Logger.LogWarn("Current version is the same or newer than repository");
+                Logger.LogWarn("Current version is equal or newer than repository");
                 return false;
             case < 0:
+                Logger.LogWarn("Current version is older than repository");
                 return DownloadUpdate();
         }
     }
 
     private static bool DownloadUpdate()
     {
-        Logger.LogWarn($"All files at '{Globals.Paths.SFDCT}' will be deleted permanently");
-        Logger.LogWarn("Proceed? (Y/N): ", false);
+        Logger.LogWarn($"- Files at '{Globals.Paths.SFDCT}' will be deleted.");
+        Logger.LogWarn($"- Files at '{Globals.Paths.SubContent}' will be kept.");
+        Logger.LogWarn($"- Configuration file at '{Globals.Paths.ConfigurationIni}' will be kept.");
+        Logger.LogWarn("Download Update? (Y/N): ", false);
         bool choice = (Console.ReadLine() ?? string.Empty).Equals("Y", StringComparison.OrdinalIgnoreCase);
 
         if (!choice) return false;
 
         string archivePath = Path.Combine(GameDirectory, "SFDCT.zip");
-        Logger.LogWarn("Downloading repository version...");
+        Logger.LogWarn("Downloading update archive");
 
         try
         {
-            updateWebClient.DownloadFile(updateUrl, archivePath);
+            UpdateWebClient.DownloadFile(GitHubRepositoryReleaseArchiveFileURL, archivePath);
         }
-        catch (Exception)
+        catch
         {
             return false;
         }
 
-        Logger.LogWarn("- Replacing current files...");
+        Logger.LogWarn("Replacing files");
 
-        ReplaceOldFile(Assembly.GetExecutingAssembly().Location);
-        ReplaceOldFile(Path.Combine(GameDirectory, "SFDCT.exe.config"));
+        ReplaceOldFile(Assembly.GetExecutingAssembly().Location); // SFDCT.exe
+        ReplaceOldFile(Path.Combine(GameDirectory, "SFDCT.exe.config")); // SFDCT.exe.config
 
+        // SFDCT/*.dll
         foreach (string file in Directory.GetFiles(Globals.Paths.SFDCT, "*.dll", SearchOption.TopDirectoryOnly))
         {
             ReplaceOldFile(file);
         }
 
-        foreach (string file in Directory.GetFiles(Path.Combine(Globals.Paths.SFDCT, "Content"), "*.*", SearchOption.AllDirectories))
+        // SFDCT/Content/*
+        Logger.LogWarn("Deleting old content files");
+        foreach (string file in Directory.GetFiles(Path.Combine(Globals.Paths.Content), "*.*", SearchOption.AllDirectories))
         {
-            if (file.EndsWith("config.ini")) continue;
-
             File.Delete(file);
         }
 
-        Logger.LogWarn("- Extracting repository version...");
-
+        Logger.LogWarn("Extracting update archive");
         using (ZipArchive archive = ZipFile.OpenRead(archivePath))
         {
             archive.ExtractToDirectory(GameDirectory);
         }
 
+        Logger.LogWarn("Deleting update archive");
         File.Delete(archivePath);
         return true;
     }
