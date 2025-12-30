@@ -414,29 +414,41 @@ internal static class CommandHandler
                     return true;
                 }
 
-                GameUser voteKickUserToKick = __instance.GetGameUserByStringInput(args.SourceParameters);
-                if (voteKickUserToKick == null || voteKickUserToKick.IsDisposed || voteKickUserToKick.IsModerator || voteKickUserToKick.IsBot)
+                GameUser userToKick = __instance.GetGameUserByStringInput(args.SourceParameters);
+                if (userToKick == null || userToKick.IsDisposed || userToKick.IsModerator || userToKick.IsBot)
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.invaliduser"), Color.Red, args.SenderGameUser));
                     return true;
                 }
 
-                string consoleMess = "Creating vote-kick from '{0}' ({1}) against '{2}' ({3})";
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(consoleMess, args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName, voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName));
+                GameUser kickOwnerUser = args.SenderGameUser;
 
-                Voting.GameVoteKick vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), voteKickUserToKick);
-                vote.ValidRemoteUniqueIdentifiers.AddRange(server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.UserIdentifier != voteKickUserToKick.UserIdentifier && x.GameConnectionTag().FirstGameUser.CanVote));
+                string userToKickProfileName = userToKick.GetProfileName();
+                string userTokickAccountName = userToKick.IsBot ? "COM" : userToKick.AccountName;
+                string kickOwnerUserProfileName = kickOwnerUser.GetProfileName();
+                string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : kickOwnerUser.AccountName;
+
+                long[] validRemoteUniqueIdentifiers = server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.UserIdentifier != userToKick.UserIdentifier && x.GameConnectionTag().FirstGameUser.CanVote);
+
+                if (validRemoteUniqueIdentifiers.Length <= 3)
+                {
+                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.notenoughusers"), Color.Red, args.SenderGameUser));
+                    return true;
+                }
+
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
+
+                Voting.GameVoteKick vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKick);
+                vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
                 __instance.VoteInfo.AddVote(vote);
                 server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName), Color.Yellow));
                 server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
-
-                string mess = LanguageHelper.GetText("sfdct.command.votekick.message", args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName, voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName);
-                string mess2 = LanguageHelper.GetText("sfdct.command.votekick.message.victim", args.SenderGameUser.GetProfileName(), args.SenderGameUser.AccountName);
-                string mess3 = LanguageHelper.GetText("sfdct.command.votekick.message.owner", voteKickUserToKick.GetProfileName(), voteKickUserToKick.AccountName);
-
-                args.Feedback.Add(new(args.SenderGameUser, mess, Voting.GameVoteKick.PRIMARY_MESSAGE_COLOR));
-                args.Feedback.Add(new(args.SenderGameUser, mess2, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, voteKickUserToKick));
-                args.Feedback.Add(new(args.SenderGameUser, mess3, Voting.GameVoteKick.SECONDARY_MESSAGE_COLOR, args.SenderGameUser));
+                
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.victim", kickOwnerUserProfileName, kickOwnerUserAccountName), Color.Yellow * 0.6f, userToKick));
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.owner", userToKickProfileName, userTokickAccountName), Color.Yellow * 0.6f, args.SenderGameUser));
+                return true;
             }
 
             if (args.IsCommand("JOIN"))

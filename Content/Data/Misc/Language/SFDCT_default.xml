@@ -21,6 +21,7 @@
 	<Text id="sfdct.command.servermovement.message">Server-movement of '{0}' set to {1}</Text>
 	<Text id="sfdct.command.votekick.fail.nouser">You need to specify a user to kick</Text>
 	<Text id="sfdct.command.votekick.fail.voteinprogress">There is already a vote in progress</Text>
+	<Text id="sfdct.command.votekick.fail.notenoughusers">There aren't enough users to vote</Text>
 	<Text id="sfdct.command.votekick.fail.oncooldown">You can't start another vote-kick right now</Text>
 	<Text id="sfdct.command.votekick.fail.invaliduser">You can't start a vote-kick against this user</Text>
 	<Text id="sfdct.command.votekick.message">'{0}' ({1}) HAS STARTED A VOTE-KICK AGAINST '{2}' ({3})</Text>
@@ -38,6 +39,11 @@
 	<Text id="sfdct.credits.category.eldous1">Ideas, Testing</Text>
 	<Text id="sfdct.credits.category.liokindy">Lead-Developer, Programmer</Text>
 	<Text id="sfdct.credits.category.nult">Ideas</Text>
+
+	<Text id="sfdct.vote.kick.end">VOTE-KICK ENDED</Text>
+	<Text id="sfdct.vote.kick.nouser">'{0}' ({1}) HAS LEFT, ADDING TO KICK-LIST</Text>
+	<Text id="sfdct.vote.kick.fail">'{0}' ({1}) WILL NOT BE KICKED (NOT ENOUGH VOTES)</Text>
+	<Text id="sfdct.vote.kick.success">'{0}' ({1}) WILL BE KICKED</Text>
 
 	<Text id="sfdct.setting.warning.settingsrequiregamerestart">Restart SFDCT to apply some settings.</Text>
 	

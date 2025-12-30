@@ -11,86 +11,84 @@ internal class GameVoteKick : GameVote
 {
     internal GameVoteKick(int voteID, GameUser gameUserToKick) : base(voteID, GameVote.Type.KickVote)
     {
-        this.m_userAddressToKick = gameUserToKick.GetNetIP();
-        this.m_userAccountNameToKick = gameUserToKick.AccountName;
-        this.m_userProfileNameToKick = gameUserToKick.GetProfileName();
+        m_userNetAddressToKick = gameUserToKick.GetNetIP();
+        m_userAccountNameToKick = gameUserToKick.AccountName;
+        m_userProfileNameToKick = gameUserToKick.GetProfileName();
 
-        this.DescriptionTextID = "button.vote";
-        this.DescriptionParameters = new string[1];
-        this.DescriptionParameters[0] = string.Format("'{0}' ({1})", gameUserToKick.GetProfileName(), gameUserToKick.AccountName);
+        DescriptionTextID = "button.vote";
+        DescriptionParameters = [string.Format("'{0}' ({1})", gameUserToKick.GetProfileName(), gameUserToKick.AccountName)];
 
-        this.Alternatives.Add(new GameVoteAlternative(0, "general.yes"));
-        this.Alternatives.Add(new GameVoteAlternative(1, "general.no"));
-        m_alternativeYesOption = 0;
+        Alternatives.Add(new GameVoteAlternative(0, "general.yes"));
+        Alternatives.Add(new GameVoteAlternative(1, "general.no"));
     }
 
     public override void AnswersUpdated(GameInfo gameInfo)
     {
-        if (this.ValidRemoteUniqueIdentifiers.Count == this.VotedRemoteUniqueIdentifiers.Count)
+        int successVoteCount = ValidRemoteUniqueIdentifiers.Count / 2 + 1;
+
+        if (VotedRemoteUniqueIdentifiers.Count == ValidRemoteUniqueIdentifiers.Count || VotedRemoteUniqueIdentifiers.Count > successVoteCount)
         {
-            this.VoteTimeout(gameInfo);
-            this.Remove();
+            VoteTimeout(gameInfo);
+            Remove();
             return;
         }
     }
 
     public override void VoteTimeout(GameInfo gameInfo)
     {
-        if (this.m_voteHandled) return;
-        this.m_voteHandled = true;
+        if (m_voteHandled) return;
+        m_voteHandled = true;
 
-        string messKick = "- The majority has voted 'yes', kicking '{0}' ({1})...";
-        string messNoVotes = "- Not enough votes, '{0}' ({1}) will not be kicked";
-        string messNoKick = "- The majority has voted 'no', '{0}' ({1}) will not be kicked";
+        Color primaryMessageColor = Color.Yellow;
+        Color secondaryMessageColor = primaryMessageColor * 0.6f;
 
-        gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data("VOTE-KICK ENDED", GameVoteKick.PRIMARY_MESSAGE_COLOR));
+        gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(LanguageHelper.GetText("sfdct.vote.kick.end"), primaryMessageColor));
 
-        int num = (int)(this.ValidRemoteUniqueIdentifiers.Count * VOTE_MINIMUM_PERCENTAGE) + 1;
-        if (this.VotedRemoteUniqueIdentifiers.Count >= num)
+        GameUser userToKick = gameInfo.GetGameUserByIP(m_userNetAddressToKick);
+        if (userToKick == null || userToKick.IsDisposed)
         {
-            int num2 = 2;
-            GameVoteAlternative highestAlternative = this.GetHighestVoteCount(out num2);
-            if (highestAlternative != null && num >= num2)
+            gameInfo.ShowChatMessage(new(LanguageHelper.GetText("sfdct.vote.kick.nouser", m_userProfileNameToKick, m_userAccountNameToKick)));
+            KickList.Add(m_userNetAddressToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
+            return;
+        }
+
+        int successVoteCount = ValidRemoteUniqueIdentifiers.Count / 2 + 1;
+
+        if (VotedRemoteUniqueIdentifiers.Count >= successVoteCount)
+        {
+            int voteCount = 2;
+            GameVoteAlternative highestAlternative = GetHighestVoteCount(out voteCount);
+
+            if (highestAlternative != null)
             {
-                if (highestAlternative.Index == m_alternativeYesOption)
+                if (highestAlternative.Index == 0)
                 {
-                    gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messKick, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
+                    gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(LanguageHelper.GetText("sfdct.vote.kick.success", m_userProfileNameToKick, m_userAccountNameToKick), secondaryMessageColor));
                     m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown);
 
-                    KickList.Add(m_userAddressToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
-                    GameUser userToKick = gameInfo.GetGameUserByIP(m_userAddressToKick);
-
-                    if (userToKick != null && !userToKick.IsDisposed)
-                    {
-                        gameInfo.RunServerCommand("/KICK " + userToKick.UserIdentifier.ToString());
-                    }
+                    gameInfo.RunServerCommand("/KICK " + userToKick.UserIdentifier.ToString());
                 }
                 else
                 {
                     m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown);
-                    gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messNoKick, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
+                    gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(LanguageHelper.GetText("sfdct.vote.kick.fail", m_userProfileNameToKick, m_userAccountNameToKick), secondaryMessageColor));
                 }
             }
         }
         else
         {
             m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown);
-            gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(string.Format(messNoVotes, m_userProfileNameToKick, m_userAccountNameToKick), GameVoteKick.SECONDARY_MESSAGE_COLOR));
+            gameInfo.ShowChatMessage(new NetMessage.ChatMessage.Data(LanguageHelper.GetText("sfdct.vote.kick.fail", m_userProfileNameToKick, m_userAccountNameToKick), secondaryMessageColor));
         }
 
         ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Set vote-kicking cooldown to {0}, {1} seconds from now", m_nextAvailableVoteKickTimeStamp, m_nextAvailableVoteKickTimeStamp - NetTime.Now));
     }
 
-    internal static float VOTE_MINIMUM_PERCENTAGE { get { return 0.60f; } }
-    internal static Color PRIMARY_MESSAGE_COLOR { get { return Color.Yellow; } }
-    internal static Color SECONDARY_MESSAGE_COLOR { get { return PRIMARY_MESSAGE_COLOR * 0.6f; } }
-
     internal static bool CanVoteKick { get { return NetTime.Now >= m_nextAvailableVoteKickTimeStamp; } }
-    private static double m_nextAvailableVoteKickTimeStamp = 0;
+    private static double m_nextAvailableVoteKickTimeStamp;
 
     private bool m_voteHandled;
-    private readonly sbyte m_alternativeYesOption;
-    private readonly string m_userAddressToKick;
+    private readonly string m_userNetAddressToKick;
     private readonly string m_userProfileNameToKick;
     private readonly string m_userAccountNameToKick;
 }
