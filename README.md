@@ -5,6 +5,13 @@
 
 Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds and tweaks some features while mantaining compatibility with vanilla-SFD. Meaning that a player can join a normal SFD server with SFDCT, and players using normal SFD can join a server being hosted with SFDCT.
 
+<details>
+    <summary>Why "SFDCT"? Why not "SFDC", or "SFC"?</summary>
+
+*Yes, it is called "Superfighters CusTom" and abbreviated to "SFDCT", not "SFDC" or "SFC". [You wonder who did that? Me. I voted for it](https://youtu.be/981BU3u5imU?t=63). This was originally, believe or not, choosen to not sound like a big important mod (wow, its SFC!), and to not use [Odex's "SFDC" script](https://steamcommunity.com/sharedfiles/filedetails/?id=2379236732)'s name. The SFDCT team is NOT to be held responsible for any confusion on this matter as we hope our efforts are enough to differentiate us from these original creations. As of now, I have grown attached to the name, yeah it is technically wrong, but that gives it a bit of charm doesn't it?*
+    
+</details>
+
 ## Features
 
 You can find a detailed list of new features in this repository's Wiki: https://github.com/Liokindy/SFDCT/wiki
