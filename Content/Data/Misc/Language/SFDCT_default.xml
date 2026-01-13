@@ -70,6 +70,8 @@
 	<Text id="sfdct.setting.name.votekicksuccesscooldown">SUCCESS COOLDOWN SECONDS</Text>
 	<Text id="sfdct.setting.name.votekickfailcooldown">FAIL COOLDOWN SECONDS</Text>
 
+	<Text id="sfdct.setting.name.subcontentenabled">SUB-CONTENT ENABLED</Text>
+
 	<Text id="sfdct.setting.name.primarycolor">COLOR</Text>
 	<Text id="sfdct.setting.name.primarycolorhex">HEX-CODE</Text>
 	
@@ -95,6 +97,7 @@
 	<Text id="sfdct.setting.help.votekickenabled">Enables or disables vote-kicking</Text>
 	<Text id="sfdct.setting.help.votekicksuccesscooldown">Controls the cooldown in seconds of vote-kicking on success</Text>
 	<Text id="sfdct.setting.help.votekickfailcooldown">Controls the cooldown in seconds of vote-kicking on failure</Text>
+	<Text id="sfdct.setting.help.subcontentenabled">Enables or disables loading any files from "SFDCT/SubContent", sub-content files replace official files when loading, making modifying official content easier without needing to overwrite it</Text>
 
 	<Text id="sfdct.setting.category.soundpanning">SOUND-PANNING</Text>
 	<Text id="sfdct.setting.category.soundattenuation">SOUND-ATTENUATION</Text>

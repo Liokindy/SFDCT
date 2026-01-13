@@ -22,6 +22,8 @@ internal static class ItemLoader
         string officialItemsPath = Path.Combine(Constants.Paths.ContentPath, Constants.Paths.DATA_ITEMS);
         foreach (var filePath in Directory.GetFiles(officialItemsPath, "*.item", SearchOption.AllDirectories))
         {
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading equipment '{filePath}'");
+
             Item item = Content.Load<Item>(filePath);
 
             if (items.ContainsKey(item.ID))
@@ -40,6 +42,8 @@ internal static class ItemLoader
             Logger.LogInfo($"LOADING [ITEMS]: Documents");
             foreach (var filePath in Directory.GetFiles(officialItemsPath, "*.item", SearchOption.AllDirectories))
             {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading equipment '{filePath}'");
+
                 Item item = Content.Load<Item>(filePath);
 
                 if (items.ContainsKey(item.ID))
@@ -63,10 +67,14 @@ internal static class ItemLoader
 
                 foreach (var filePath in Directory.GetFiles(subContentItemsPath, "*.item", SearchOption.AllDirectories))
                 {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading equipment '{filePath}'");
+
                     Item item = Content.Load<Item>(filePath);
 
                     if (items.ContainsKey(item.ID))
                     {
+                        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Item ID collision, replacing '{items[item.ID]}' with '{item}'");
+
                         items[item.ID] = item;
                     }
                     else
@@ -90,10 +98,10 @@ internal static class ItemLoader
             Items.m_slotMaleItems[i] = [];
         }
 
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Post processing equipment");
+
         foreach (var item in items.Values)
         {
-            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading equipment '{item}'");
-
             item.PostProcess();
 
             Items.m_allItems.Add(item);

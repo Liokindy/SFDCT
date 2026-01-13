@@ -30,7 +30,6 @@ internal static class TileLoader
         TileDatabase.m_tiles.Clear();
         TileDatabase.m_categorizedTiles.Clear();
 
-        Logger.LogInfo("LOADING [TILES]: Official (Weapons)");
         string officialWeaponTilesPath = Path.Combine(Constants.Paths.ContentPath, Constants.Paths.DATA_WEAPONS);
         foreach (var filePath in Directory.GetFiles(officialWeaponTilesPath, "*.sfdx"))
         {
@@ -58,8 +57,6 @@ internal static class TileLoader
         string documentsWeaponTilesPath = Path.Combine(Constants.Paths.UserDocumentsContentCustomPath, Constants.Paths.DATA_WEAPONS);
         if (Directory.Exists(documentsWeaponTilesPath))
         {
-            Logger.LogInfo("LOADING [TILES]: Documents (Weapons)");
-
             foreach (var filePath in Directory.GetFiles(documentsWeaponTilesPath, "*.sfdx"))
             {
                 ReadTileFile(filePath);
@@ -92,8 +89,6 @@ internal static class TileLoader
 
             if (Directory.Exists(subContentWeaponTilesPath))
             {
-                Logger.LogInfo($"LOADING [TILES]: {subContentFolder} (Weapons)");
-
                 foreach (string filePath in Directory.GetFiles(subContentWeaponTilesPath, "*.sfdx"))
                 {
                     ReadTileFile(filePath);

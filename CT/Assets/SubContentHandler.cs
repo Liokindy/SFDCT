@@ -3,9 +3,11 @@ using SFD;
 using SFD.Colors;
 using SFD.Sounds;
 using SFD.Tiles;
+using SFDCT.Configuration;
 using SFDCT.Misc;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SFDCT.Assets;
 
@@ -16,12 +18,16 @@ internal static class SubContentHandler
 
     internal static void Load()
     {
-        Folders = Directory.GetDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly);
-
-        for (int i = 0; i < Folders.Length; i++)
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContentEnabled))
         {
-            Folders[i] = Path.GetFileName(Folders[i]);
+            Folders = [];
+            return;
         }
+
+        string[] subContentFilter = SFDCTConfig.Get<string>(CTSettingKey.SubContentFolders).Trim(['|']).Split('|');
+        Folders = Directory.GetDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly)
+            .Where(s => subContentFilter.Length == 0 || subContentFilter.Contains(s))
+            .ToArray();
     }
 
     internal static void AddOrSetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> dic, TKey key, TValue value)

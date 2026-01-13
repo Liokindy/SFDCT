@@ -8,41 +8,27 @@ namespace SFDCT.Configuration;
 
 internal static class SFDCTConfig
 {
-    private static CTIniHandler ConfigHandler;
     private static readonly Dictionary<CTSettingKey, object> Settings = [];
 
     internal static void SaveFile()
     {
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundPanningEnabled), Get<bool>(CTSettingKey.SoundPanningEnabled));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundPanningStrength), Get<float>(CTSettingKey.SoundPanningStrength));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), Get<bool>(CTSettingKey.SoundPanningForceScreenSpace));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundPanningInworldThreshold), Get<int>(CTSettingKey.SoundPanningInworldThreshold));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundPanningInworldDistance), Get<int>(CTSettingKey.SoundPanningInworldDistance));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundAttenuationEnabled), Get<bool>(CTSettingKey.SoundAttenuationEnabled));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundAttenuationMin), Get<float>(CTSettingKey.SoundAttenuationMin));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundAttenuationForceScreenSpace), Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundAttenuationInworldThreshold), Get<int>(CTSettingKey.SoundAttenuationInworldThreshold));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SoundAttenuationInworldDistance), Get<int>(CTSettingKey.SoundAttenuationInworldDistance));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.LowHealthSaturationFactor), Get<float>(CTSettingKey.LowHealthSaturationFactor));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.LowHealthThreshold), Get<float>(CTSettingKey.LowHealthThreshold));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.HideFilmgrain), Get<bool>(CTSettingKey.HideFilmgrain));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.DisableClockTicking), Get<bool>(CTSettingKey.DisableClockTicking));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.Language), Get<string>(CTSettingKey.Language));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SpectatorsMaximum), Get<int>(CTSettingKey.SpectatorsMaximum));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), Get<bool>(CTSettingKey.SpectatorsOnlyModerators));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.VoteKickEnabled), Get<bool>(CTSettingKey.VoteKickEnabled));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.VoteKickFailCooldown), Get<int>(CTSettingKey.VoteKickFailCooldown));
-        ConfigHandler.UpdateValue(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), Get<int>(CTSettingKey.VoteKickSuccessCooldown));
+        CTIniHandler handler = new();
 
-        ConfigHandler.SaveFile(Globals.Paths.ConfigurationIni);
+        SaveFile(handler);
+
+        handler.Dispose();
+    }
+
+    internal static void SaveFile(CTIniHandler handler)
+    {
+        ReadToFile(handler);
+        handler.SaveFile(Globals.Paths.ConfigurationIni);
     }
 
     internal static void LoadFile()
     {
-        ConfigHandler = new();
-        SetDefaultSettings();
+        SetDefault();
+        CTIniHandler handler = new();
 
         if (!File.Exists(Globals.Paths.ConfigurationIni))
         {
@@ -55,52 +41,48 @@ internal static class SFDCTConfig
             }
 
             Thread.Sleep(100);
-
-            ConfigHandler.AppendEmptyLines = true;
-            ConfigHandler.AutoAddMissingValues = true;
-
-            Logger.LogDebug("Setting UPDATING TO DEFAULTS");
-            LoadDefault();
-
-            SaveFile();
-
-            ConfigHandler.AppendEmptyLines = false;
-            ConfigHandler.AutoAddMissingValues = false;
         }
         else
         {
             // Load file and read settings
             Logger.LogDebug("Setting READING FILE");
 
-            ConfigHandler.ReadFile(Globals.Paths.ConfigurationIni);
+            handler.ReadFile(Globals.Paths.ConfigurationIni);
 
             Logger.LogDebug("Setting UPDATING");
-            Set(CTSettingKey.SoundPanningEnabled, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningEnabled), true));
-            Set(CTSettingKey.SoundPanningStrength, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.SoundPanningStrength), 0.71f, 0f, 1f));
-            Set(CTSettingKey.SoundPanningForceScreenSpace, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), false));
-            Set(CTSettingKey.SoundPanningInworldThreshold, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundPanningInworldThreshold), 60, 0, 1000));
-            Set(CTSettingKey.SoundPanningInworldDistance, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundPanningInworldDistance), 400, 0, 1000));
-            Set(CTSettingKey.SoundAttenuationEnabled, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.SoundAttenuationEnabled), true));
-            Set(CTSettingKey.SoundAttenuationMin, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.SoundAttenuationMin), 0.6f, 0f, 1f));
-            Set(CTSettingKey.SoundAttenuationForceScreenSpace, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.SoundAttenuationForceScreenSpace), false));
-            Set(CTSettingKey.SoundAttenuationInworldThreshold, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundAttenuationInworldThreshold), 60, 0, 1000));
-            Set(CTSettingKey.SoundAttenuationInworldDistance, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundAttenuationInworldDistance), 500, 0, 1000));
-            Set(CTSettingKey.LowHealthSaturationFactor, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthSaturationFactor), 0.71f, 0f, 1f));
-            Set(CTSettingKey.LowHealthThreshold, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthThreshold), 0.25f, 0f, 1f));
-            Set(CTSettingKey.LowHealthHurtLevel1Threshold, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), 0.25f, 0f, 1f));
-            Set(CTSettingKey.LowHealthHurtLevel2Threshold, ConfigHandler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), 0.12f, 0f, 1f));
-            Set(CTSettingKey.HideFilmgrain, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.HideFilmgrain), false));
-            Set(CTSettingKey.DisableClockTicking, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.DisableClockTicking), true));
-            Set(CTSettingKey.Language, ConfigHandler.ReadValueString(GetSettingKey(CTSettingKey.Language), "SFDCT_Default"));
-            Set(CTSettingKey.SpectatorsMaximum, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SpectatorsMaximum), 4, 0, 4));
-            Set(CTSettingKey.SpectatorsOnlyModerators, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), true));
-            Set(CTSettingKey.VoteKickEnabled, ConfigHandler.ReadValueBool(GetSettingKey(CTSettingKey.VoteKickEnabled), false));
-            Set(CTSettingKey.VoteKickFailCooldown, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150, 30, 300));
-            Set(CTSettingKey.VoteKickSuccessCooldown, ConfigHandler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60, 30, 300));
+            Set(CTSettingKey.SoundPanningEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningEnabled), true));
+            Set(CTSettingKey.SoundPanningStrength, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.SoundPanningStrength), 0.71f, 0f, 1f));
+            Set(CTSettingKey.SoundPanningForceScreenSpace, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), false));
+            Set(CTSettingKey.SoundPanningInworldThreshold, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundPanningInworldThreshold), 60, 0, 1000));
+            Set(CTSettingKey.SoundPanningInworldDistance, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundPanningInworldDistance), 400, 0, 1000));
+            Set(CTSettingKey.SoundAttenuationEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundAttenuationEnabled), true));
+            Set(CTSettingKey.SoundAttenuationMin, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.SoundAttenuationMin), 0.6f, 0f, 1f));
+            Set(CTSettingKey.SoundAttenuationForceScreenSpace, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundAttenuationForceScreenSpace), false));
+            Set(CTSettingKey.SoundAttenuationInworldThreshold, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundAttenuationInworldThreshold), 60, 0, 1000));
+            Set(CTSettingKey.SoundAttenuationInworldDistance, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SoundAttenuationInworldDistance), 500, 0, 1000));
+            Set(CTSettingKey.LowHealthSaturationFactor, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthSaturationFactor), 0.71f, 0f, 1f));
+            Set(CTSettingKey.LowHealthThreshold, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthThreshold), 0.25f, 0f, 1f));
+            Set(CTSettingKey.LowHealthHurtLevel1Threshold, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), 0.25f, 0f, 1f));
+            Set(CTSettingKey.LowHealthHurtLevel2Threshold, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), 0.12f, 0f, 1f));
+            Set(CTSettingKey.HideFilmgrain, handler.ReadValueBool(GetSettingKey(CTSettingKey.HideFilmgrain), false));
+            Set(CTSettingKey.DisableClockTicking, handler.ReadValueBool(GetSettingKey(CTSettingKey.DisableClockTicking), true));
+            Set(CTSettingKey.Language, handler.ReadValueString(GetSettingKey(CTSettingKey.Language), "SFDCT_Default"));
+            Set(CTSettingKey.SpectatorsMaximum, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SpectatorsMaximum), 4, 0, 4));
+            Set(CTSettingKey.SpectatorsOnlyModerators, handler.ReadValueBool(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), true));
+            Set(CTSettingKey.VoteKickEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.VoteKickEnabled), false));
+            Set(CTSettingKey.VoteKickFailCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150, 30, 300));
+            Set(CTSettingKey.VoteKickSuccessCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60, 30, 300));
+            Set(CTSettingKey.SubContentEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.SubContentEnabled), true));
+            Set(CTSettingKey.SubContentFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentFolders), string.Empty));
         }
+
+        ReadToFile(handler);
+        SaveFile(handler);
+
+        handler.Dispose();
     }
 
-    internal static void SetDefaultSettings()
+    internal static void SetDefault()
     {
         Logger.LogDebug("Setting REVERING TO DEFAULTS");
 
@@ -126,37 +108,42 @@ internal static class SFDCTConfig
         Set(CTSettingKey.VoteKickEnabled, false);
         Set(CTSettingKey.VoteKickFailCooldown, 150);
         Set(CTSettingKey.VoteKickSuccessCooldown, 60);
+        Set(CTSettingKey.SubContentEnabled, true);
+        Set(CTSettingKey.SubContentFolders, string.Empty);
     }
 
-    internal static void LoadDefault()
+    internal static void ReadToFile(CTIniHandler handler)
     {
-        ConfigHandler.ReadLine(";If this seems chaotic or shuffled randomly");
-        ConfigHandler.ReadLine(";you might want to make a copy of this file,");
-        ConfigHandler.ReadLine(";rename it and SFDCT will create a new one,");
-        ConfigHandler.ReadLine(";then manually copy your settings to it");
+        handler.Clear();
+        handler.ReadLine(";If this seems chaotic or shuffled randomly");
+        handler.ReadLine(";you might want to make a copy of this file,");
+        handler.ReadLine(";rename it and SFDCT will create a new one,");
+        handler.ReadLine(";then manually copy your settings to it");
 
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningEnabled), true);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningStrength), 0.71f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), false);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningInworldThreshold), 60);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningInworldDistance), 400);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationEnabled), true);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationMin), 0.6f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationForceScreenSpace), false);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationInworldThreshold), 60);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationInworldDistance), 500);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.LowHealthSaturationFactor), 0.71f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.LowHealthThreshold), 0.25f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), 0.25f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), 0.12f);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.HideFilmgrain), false);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.DisableClockTicking), true);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.Language), "SFDCT_Default");
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsMaximum), 4);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), true);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.VoteKickEnabled), false);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150);
-        ConfigHandler.ReadLine(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningEnabled), Get<bool>(CTSettingKey.SoundPanningEnabled));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningStrength), Get<float>(CTSettingKey.SoundPanningStrength));//, 0.71f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), Get<bool>(CTSettingKey.SoundPanningForceScreenSpace));//, false);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningInworldThreshold), Get<int>(CTSettingKey.SoundPanningInworldThreshold));//, 60);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundPanningInworldDistance), Get<int>(CTSettingKey.SoundPanningInworldDistance));//, 400);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationEnabled), Get<bool>(CTSettingKey.SoundAttenuationEnabled));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationMin), Get<float>(CTSettingKey.SoundAttenuationMin));//, 0.6f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationForceScreenSpace), Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace));//, false);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationInworldThreshold), Get<int>(CTSettingKey.SoundAttenuationInworldThreshold));//, 60);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SoundAttenuationInworldDistance), Get<int>(CTSettingKey.SoundAttenuationInworldDistance));//, 500);
+        handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthSaturationFactor), Get<float>(CTSettingKey.LowHealthSaturationFactor));//, 0.71f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthThreshold), Get<float>(CTSettingKey.LowHealthThreshold));//, 0.25f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold));//, 0.25f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold));//, 0.12f);
+        handler.ReadLine(GetSettingKey(CTSettingKey.HideFilmgrain), Get<bool>(CTSettingKey.HideFilmgrain));//, false);
+        handler.ReadLine(GetSettingKey(CTSettingKey.DisableClockTicking), Get<bool>(CTSettingKey.DisableClockTicking));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.Language), Get<string>(CTSettingKey.Language));//, "SFDCT_Default");
+        handler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsMaximum), Get<int>(CTSettingKey.SpectatorsMaximum));//, 4);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), Get<bool>(CTSettingKey.SpectatorsOnlyModerators));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickEnabled), Get<bool>(CTSettingKey.VoteKickEnabled));//, false);
+        handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickFailCooldown), Get<int>(CTSettingKey.VoteKickFailCooldown));//, 150);
+        handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), Get<int>(CTSettingKey.VoteKickSuccessCooldown));//, 60);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentEnabled), Get<bool>(CTSettingKey.SubContentEnabled));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentFolders), Get<string>(CTSettingKey.SubContentFolders));//, string.Empty);
     }
 
     internal static string GetSettingKey(CTSettingKey setting)
@@ -186,6 +173,8 @@ internal static class SFDCTConfig
             case CTSettingKey.VoteKickEnabled: return "VOTEKICK_ENABLED";
             case CTSettingKey.VoteKickSuccessCooldown: return "VOTEKICK_SUCCESS_COOLDOWN";
             case CTSettingKey.VoteKickFailCooldown: return "VOTEKICK_FAIL_COOLDOWN";
+            case CTSettingKey.SubContentEnabled: return "SUBCONTENT_ENABLED";
+            case CTSettingKey.SubContentFolders: return "SUBCONTENT_FOLDERS";
         }
     }
 
@@ -193,18 +182,14 @@ internal static class SFDCTConfig
     {
         if (Settings.ContainsKey(key) && typeof(T) == Settings[key].GetType())
         {
-            // Logger.LogDebug($"Setting GET: {key}, {typeof(T)}");
             return (T)Settings[key];
         }
 
-        // Logger.LogDebug($"Setting GET: {key}, {typeof(T)} not found!");
         return default;
     }
 
     internal static void Set<T>(CTSettingKey key, T value)
     {
-        // Logger.LogDebug($"Setting SET: {key}, {typeof(T)}: {value}");
-
         if (!Settings.ContainsKey(key))
         {
             Settings.Add(key, value);

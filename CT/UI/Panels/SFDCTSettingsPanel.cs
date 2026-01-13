@@ -2,6 +2,7 @@
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Configuration;
+using SFDCT.Helper;
 using SFDCT.UI.MenuItems;
 using System;
 using System.Collections.Generic;
@@ -35,11 +36,13 @@ internal class SFDCTSettingsPanel : Panel
     private MenuItemSlider m_menuItemVoteKickSuccessCooldown;
     private SFDCTMenuItemDropdownColor m_menuItemPrimaryColor;
     private MenuItemText m_menuItemPrimaryColorHex;
+    private MenuItemDropdown m_menuItemSubContentEnabled;
     private bool m_settingsNeedGameRestart;
 
     public SFDCTSettingsPanel() : base("SFDCT SETTINGS", 500, 500)
     {
         m_menu = new Menu(new Vector2(0, 50), Width, Height - 50, this, []);
+        m_settingsNeedGameRestart = false;
 
         m_menu.Add(new MenuItemButton(LanguageHelper.GetText("sfdct.credits.name"), new ControlEvents.ChooseEvent((object _) =>
         {
@@ -274,6 +277,17 @@ internal class SFDCTSettingsPanel : Panel
                 availableSFDCTLanguages.RemoveAt(i);
             }
         }
+
+        m_menuItemSubContentEnabled = new(LanguageHelper.GetText("sfdct.setting.name.subcontentenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
+        m_menuItemSubContentEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SubContentEnabled) ? 0 : 1);
+        m_menuItemSubContentEnabled.DropdownItemVisibleCount = 2;
+        m_menuItemSubContentEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.subcontentenabled");
+        EventHelper.Add(m_menuItemSubContentEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
+        {
+            m_settingsNeedGameRestart = true;
+            SFDCTConfig.Set<bool>(CTSettingKey.SubContentEnabled, m_menuItemSubContentEnabled.ValueId == 0);
+        }));
+        m_menu.Add(m_menuItemSubContentEnabled);
 
         m_menuItemLanguage = new(LanguageHelper.GetText("sfdct.setting.name.language"), [.. availableSFDCTLanguages]);
         m_menuItemLanguage.SetStartValue(Math.Max(0, availableSFDCTLanguages.IndexOf(SFDCTConfig.Get<string>(CTSettingKey.Language))));
