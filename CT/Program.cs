@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 
 namespace SFDCT;
 
@@ -36,6 +37,7 @@ internal static class Program
 #endif
 
         bool skipUpdateCheck = false;
+        bool skipProgramChoice = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -48,8 +50,7 @@ internal static class Program
                 Process.Start(Path.Combine(GameDirectory, "Superfighters Deluxe.exe"), string.Join(" ", args));
                 return 0;
             }
-
-            if (arg.Equals("-HELP", StringComparison.OrdinalIgnoreCase))
+            else if (arg.Equals("-HELP", StringComparison.OrdinalIgnoreCase))
             {
                 Logger.LogWarn("Launch parameters");
                 Logger.LogWarn("- HELP            Show this help message");
@@ -58,10 +59,41 @@ internal static class Program
                 Logger.LogWarn("- SFD             Start vanilla SFD");
                 return 0;
             }
-
-            if (arg.Equals("-SKIP", StringComparison.OrdinalIgnoreCase))
+            else if (arg.Equals("-SKIP", StringComparison.OrdinalIgnoreCase))
             {
                 skipUpdateCheck = true;
+                skipProgramChoice = true;
+            }
+        }
+        
+        if (!skipProgramChoice)
+        {
+            Logger.LogWarn("0. SFDCT; 1. SFD");
+            Logger.LogWarn("Start option: ", false);
+
+            ConsoleKeyInfo k = new();
+            for (int cnt = 0; cnt < 6; cnt++)
+            {
+                if (Console.KeyAvailable)
+                {
+                    k = Console.ReadKey();
+                    break;
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                }
+            }
+
+            Console.WriteLine();
+
+            if (k.Key == ConsoleKey.D1 || k.Key == ConsoleKey.NumPad1)
+            {
+                Logger.LogInfo("Starting SFD");
+
+                string SFD_exe = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
+                Process.Start(SFD_exe, string.Join(" ", args));
+                return 0;
             }
         }
 

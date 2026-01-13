@@ -11,7 +11,7 @@ using System.IO;
 namespace SFDCT.Bootstrap;
 
 [HarmonyPatch]
-internal class TrackHandler
+internal static class TrackHandler
 {
     private static bool m_clockTicking = true;
     private const MusicHandler.MusicTrackID m_clockTickingID = (MusicHandler.MusicTrackID)50;
