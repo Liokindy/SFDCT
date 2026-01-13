@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
 using SFD.Parser;
+using SFD.Sounds;
 using SFD.Voting;
 using SFDCT.Configuration;
 using SFDCT.Sync;
@@ -36,10 +37,10 @@ internal static class CommandHandler
         return !ranCustomCommand;
     }
 
-    internal static bool ClientCommands(ProcessCommandArgs args, GameInfo __instance)
+    internal static bool ClientCommands(ProcessCommandArgs args, GameInfo gameInfo)
     {
         Client client = GameSFD.Handle.Client;
-        if (client == null && __instance.GameOwner == GameOwnerEnum.Client)
+        if (client == null && gameInfo.GameOwner == GameOwnerEnum.Client)
         {
             return false;
         }
@@ -50,7 +51,7 @@ internal static class CommandHandler
             string bot = LanguageHelper.GetText("sfdct.command.players.message.bot");
 
             int gameUserCount = 0;
-            using (IEnumerator<GameUser> enumerator = __instance.GetGameUsers().GetEnumerator())
+            using (IEnumerator<GameUser> enumerator = gameInfo.GetGameUsers().GetEnumerator())
             {
                 while (enumerator.MoveNext())
                 {
@@ -97,13 +98,10 @@ internal static class CommandHandler
         return args.CanUseModeratorCommand(commands);
     }
 
-    internal static bool ServerCommands(ProcessCommandArgs args, GameInfo __instance)
+    internal static bool ServerCommands(ProcessCommandArgs args, GameInfo gameInfo)
     {
         Server server = GameSFD.Handle.Server;
-        if (server == null && __instance.GameOwner == GameOwnerEnum.Server)
-        {
-            return false;
-        }
+        if (server == null && gameInfo.GameOwner == GameOwnerEnum.Server) return false;
 
         if (args.HostPrivileges)
         {
@@ -257,7 +255,7 @@ internal static class CommandHandler
 
         if (args.ModeratorPrivileges)
         {
-            if (__instance.GameWorld != null)
+            if (gameInfo.GameWorld != null)
             {
                 if (IsAndCanUseModeratorCommand(args, "GRAVITY", "GRAV"))
                 {
@@ -293,8 +291,8 @@ internal static class CommandHandler
                     Vector2 gravityVector = new Vector2(gx, gy);
                     string message = LanguageHelper.GetText("sfdct.command.gravity.message", gravityVector.ToString());
 
-                    __instance.GameWorld.GetActiveWorld.Gravity = gravityVector;
-                    __instance.GameWorld.GetBackgroundWorld.Gravity = gravityVector;
+                    gameInfo.GameWorld.GetActiveWorld.Gravity = gravityVector;
+                    gameInfo.GameWorld.GetBackgroundWorld.Gravity = gravityVector;
 
                     args.Feedback.Add(new(args.SenderGameUser, message));
                     return true;
@@ -307,10 +305,10 @@ internal static class CommandHandler
                     float damage = 0f;
                     if (!SFDXParser.TryParseFloat(args.Parameters[1], out damage)) return true;
 
-                    GameUser user = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    GameUser user = gameInfo.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
                     if (user == null || user.IsDisposed) return true;
 
-                    Player userPlayer = __instance.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
+                    Player userPlayer = gameInfo.GameWorld.GetPlayerByUserIdentifier(user.UserIdentifier);
                     if (userPlayer == null || userPlayer.IsDisposed) return true;
 
                     if (damage >= 0f)
@@ -338,13 +336,13 @@ internal static class CommandHandler
             }
 
             // Server-only commands (no offline)
-            if (__instance.GameOwner == GameOwnerEnum.Server)
+            if (gameInfo.GameOwner == GameOwnerEnum.Server)
             {
                 if (IsAndCanUseModeratorCommand(args, "SERVERMOVEMENT", "SVMOV"))
                 {
                     if (args.Parameters.Count <= 0) return true;
 
-                    GameUser gameUser = __instance.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+                    GameUser gameUser = gameInfo.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
                     if (gameUser == null || gameUser.IsDisposed || gameUser.IsBot) return true;
 
                     GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
@@ -382,23 +380,22 @@ internal static class CommandHandler
                     {
                         connectionUser.ForceServerMovement = useServerMovement;
 
-                        Player playerByUserIdentifier = __instance.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
+                        Player playerByUserIdentifier = gameInfo.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
                         playerByUserIdentifier?.UpdateCanDoPlayerAction();
                     }
                 }
             }
         }
 
-        if (__instance.GameOwner == GameOwnerEnum.Server)
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
             if (args.IsCommand("VOTEKICK"))
             {
                 if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
 
-                if (__instance.VoteInfo == null) return true;
-                if (__instance.VoteInfo.ActiveVotes.Count > 0)
+                if (!Voting.GameVoteYesNo.CanStartVote(gameInfo) || (gameInfo.GameOwner == GameOwnerEnum.Server && !Voting.GameVoteKick.CanStartVote()))
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.voteinprogress"), Color.Red, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail"), Color.Red, args.SenderGameUser));
                     return true;
                 }
 
@@ -408,14 +405,10 @@ internal static class CommandHandler
                     return true;
                 }
 
-                if (!Voting.GameVoteKick.CanVoteKick)
-                {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.oncooldown"), Color.Red, args.SenderGameUser));
-                    return true;
-                }
+                GameUser userToKick = gameInfo.GetGameUserByStringInput(args.SourceParameters);
 
-                GameUser userToKick = __instance.GetGameUserByStringInput(args.SourceParameters);
-                if (userToKick == null || userToKick.IsDisposed || userToKick.IsModerator || userToKick.IsBot)
+                if (userToKick == null || userToKick.IsDisposed || userToKick == args.SenderGameUser) return true;
+                if (userToKick.IsModerator || userToKick.IsBot)
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.invaliduser"), Color.Red, args.SenderGameUser));
                     return true;
@@ -427,9 +420,9 @@ internal static class CommandHandler
                 string userTokickAccountName = userToKick.IsBot ? "COM" : userToKick.AccountName;
                 string kickOwnerUserProfileName = kickOwnerUser.GetProfileName();
                 string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : kickOwnerUser.AccountName;
+                string soundID = "PlayerLeave";
 
                 long[] validRemoteUniqueIdentifiers = server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.UserIdentifier != userToKick.UserIdentifier && x.GameConnectionTag().FirstGameUser.CanVote);
-
                 if (validRemoteUniqueIdentifiers.Length <= 3)
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.notenoughusers"), Color.Red, args.SenderGameUser));
@@ -438,23 +431,31 @@ internal static class CommandHandler
 
                 ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
 
-                Voting.GameVoteKick vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKick);
+                Voting.GameVoteKick vote = new(GameVote.GetNextVoteID(), userToKick);
                 vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
-                __instance.VoteInfo.AddVote(vote);
+
                 server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+                server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data(soundID, true, Vector2.Zero, 1f));
 
+                gameInfo.VoteInfo.AddVote(vote);
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName), Color.Yellow));
-                server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
-
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.victim", kickOwnerUserProfileName, kickOwnerUserAccountName), Color.Yellow * 0.6f, userToKick));
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message.owner", userToKickProfileName, userTokickAccountName), Color.Yellow * 0.6f, args.SenderGameUser));
                 return true;
             }
+        }
 
-            if (args.IsCommand("JOIN"))
+        if (args.IsCommand("JOIN"))
+        {
+            if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
+            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+
+            int userCount;
+            GameUser gameUser;
+            List<GameSlot> gameSlots;
+
+            if (gameInfo.GameOwner == GameOwnerEnum.Server)
             {
-                if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
-
                 GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
                 if (connectionTag == null) return true;
@@ -467,50 +468,72 @@ internal static class CommandHandler
                 if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
                 if (!connectionTag.FirstGameUser.JoinedAsSpectator) return true;
 
-                GameSlot oldGameSlot = connectionTag.FirstGameUser.GameSlot;
-                List<GameSlot> gameSlots = server.FindOpenGameSlots(server.GameInfo.DropInMode, connectionTag.GameUsers.Count(), server.GameInfo.EvenTeams, null);
+                gameUser = connectionTag.FirstGameUser;
+                userCount = connectionTag.GameUsers.Count();
+                gameSlots = server.FindOpenGameSlots(gameInfo.DropInMode, userCount, gameInfo.EvenTeams, null);
+            }
+            else
+            {
+                gameUser = args.SenderGameUser;
+                userCount = 1;
+                gameSlots = [gameInfo.GameSlots[0]];
+            }
 
-                if (gameSlots != null && gameSlots.Count > 0)
+            if (gameSlots != null && gameSlots.Count > 0)
+            {
+                GameSlot gameSlot = gameSlots.First();
+                gameSlot.ClearGameUser(gameInfo);
+                gameSlot.GameUser = gameUser;
+                gameSlot.CurrentState = GameSlot.State.Occupied;
+                gameUser.GameSlot = gameSlot;
+                gameUser.JoinedAsSpectator = false;
+
+                List<string> messArgs = [];
+                string mess = "menu.lobby.newPlayerJoined";
+                Color messColor = Constants.COLORS.PLAYER_CONNECTED;
+
+                messArgs.Add(gameUser.GetProfileName());
+                if (gameSlot.CurrentTeam != Team.Independent)
                 {
-                    GameSlot gameSlot = gameSlots.First();
-                    gameSlot.ClearGameUser(__instance);
-                    gameSlot.GameUser = connectionTag.FirstGameUser;
-                    gameSlot.CurrentState = GameSlot.State.Occupied;
-                    connectionTag.FirstGameUser.GameSlot = gameSlot;
-                    connectionTag.FirstGameUser.JoinedAsSpectator = false;
+                    mess = "menu.lobby.newPlayerJoinedTeam";
+                }
 
-                    List<string> messArgs = [];
-                    string mess = "menu.lobby.newPlayerJoined";
-                    Color messColor = Constants.COLORS.PLAYER_CONNECTED;
-
-                    messArgs.Add(connectionTag.FirstGameUser.GetProfileName());
-                    if (gameSlot.CurrentTeam != Team.Independent)
-                    {
-                        mess = "menu.lobby.newPlayerJoinedTeam";
-                    }
-
+                if (gameInfo.GameOwner == GameOwnerEnum.Server)
+                {
                     server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs.ToArray()), null, null);
                     server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f), null);
                     server.SyncGameSlotInfo(gameSlot);
-                    server.SyncGameUserInfo(connectionTag.FirstGameUser, null);
-
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser, null));
+                    server.SyncGameUserInfo(gameUser, null);
                 }
                 else
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser, null));
+                    gameInfo.ShowChatMessage(new(mess, messColor, messArgs.ToArray()));
+                    SoundHandler.PlayGlobalSound("PlayerJoin");
                 }
 
-                return true;
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser, null));
+            }
+            else
+            {
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser, null));
             }
 
-            if (args.IsCommand("SPECTATE"))
-            {
-                if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
-                if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
-                if (__instance.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
+            return true;
+        }
 
-                GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
+        if (args.IsCommand("SPECTATE"))
+        {
+            if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
+            if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+            if (gameInfo.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
+
+            GameSlot gameSlot = null;
+            int userIdentifier;
+            GameConnectionTag connectionTag = null;
+
+            if (gameInfo.GameOwner == GameOwnerEnum.Server)
+            {
+                connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
                 if (connectionTag == null) return true;
                 if (connectionTag.GameUsers.Count() > 1)
@@ -522,29 +545,47 @@ internal static class CommandHandler
                 if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
                 if (connectionTag.FirstGameUser.JoinedAsSpectator) return true;
 
-                GameSlot gameSlot = connectionTag.FirstGameUser.GameSlot;
-                gameSlot.GameUser = null;
-                gameSlot.ClearGameUser(null);
-                gameSlot.CurrentState = GameSlot.State.Open;
+                gameSlot = connectionTag.FirstGameUser.GameSlot;
+                userIdentifier = connectionTag.FirstGameUser.UserIdentifier;
+
                 connectionTag.FirstGameUser.GameSlot = null;
                 connectionTag.FirstGameUser.JoinedAsSpectator = true;
+            }
+            else
+            {
+                if (args.SenderGameUser.JoinedAsSpectator) return true;
 
-                Player senderGamePlayer = __instance.GameWorld?.GetPlayerByUserIdentifier(connectionTag.FirstGameUser.UserIdentifier);
-                senderGamePlayer?.SetUser(0);
-                senderGamePlayer?.Kill();
+                gameSlot = args.SenderGameUser.GameSlot;
+                userIdentifier = args.SenderGameUserIdentifier;
+            }
 
-                string mess = "menu.lobby.newPlayerJoinedTeam";
-                string[] messArgs = [args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator")];
-                Color messColor = Color.LightGray;
+            gameSlot.GameUser = null;
+            gameSlot.ClearGameUser(null);
+            gameSlot.CurrentState = GameSlot.State.Open;
 
+            Player senderGamePlayer = gameInfo.GameWorld?.GetPlayerByUserIdentifier(userIdentifier);
+            senderGamePlayer?.SetUser(0);
+            senderGamePlayer?.Kill();
+
+            string mess = "menu.lobby.newPlayerJoinedTeam";
+            string[] messArgs = [args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator")];
+            Color messColor = Color.LightGray;
+
+            if (gameInfo.GameOwner == GameOwnerEnum.Server)
+            {
                 server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs), null, null);
                 server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f), null);
                 server.SyncGameSlotInfo(gameSlot, null);
                 server.SyncGameUserInfo(connectionTag.FirstGameUser, null);
-
-                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.message.info"), Color.Gray, args.SenderGameUser, null));
-                return true;
             }
+            else
+            {
+                gameInfo.ShowChatMessage(new(mess, messColor, messArgs));
+                SoundHandler.PlayGlobalSound("PlayerLeave");
+            }
+
+            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.message.info"), Color.Gray, args.SenderGameUser, null));
+            return true;
         }
 
         return false;

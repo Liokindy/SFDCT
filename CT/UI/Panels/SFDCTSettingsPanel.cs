@@ -2,7 +2,6 @@
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Configuration;
-using SFDCT.Helper;
 using SFDCT.UI.MenuItems;
 using System;
 using System.Collections.Generic;

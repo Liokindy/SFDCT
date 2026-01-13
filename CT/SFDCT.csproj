@@ -176,6 +176,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\MenuHandler.cs" />
     <Compile Include="Voting\GameVoteKick.cs" />
+    <Compile Include="Voting\GameVoteYesNo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
