@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using SFDCT.Bootstrap;
 using SFDCT.Configuration;
 using SFDCT.Helper;
 using SFDCT.Misc;
@@ -65,10 +66,10 @@ internal static class Program
                 skipProgramChoice = true;
             }
         }
-        
+
         if (!skipProgramChoice)
         {
-            Logger.LogWarn("0. SFDCT; 1. SFD");
+            Logger.LogWarn("0. SFDCT; 1. SFD; E. SFDCT (Map Editor)");
             Logger.LogWarn("Start option: ", false);
 
             ConsoleKeyInfo k = new();
@@ -85,6 +86,7 @@ internal static class Program
                 }
             }
 
+            if (k.Key == default) Console.Write("0");
             Console.WriteLine();
 
             if (k.Key == ConsoleKey.D1 || k.Key == ConsoleKey.NumPad1)
@@ -94,6 +96,11 @@ internal static class Program
                 string SFD_exe = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
                 Process.Start(SFD_exe, string.Join(" ", args));
                 return 0;
+            }
+            else if (k.Key == ConsoleKey.E)
+            {
+                CoreHandler.SkipToEditor = true;
+                CoreHandler.SkipToTestRun = true;
             }
         }
 
