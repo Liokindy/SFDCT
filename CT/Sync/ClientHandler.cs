@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Lidgren.Network;
 using SFD;
+using SFDCT.Helper;
 using SFDCT.Sync.Data;
 
 namespace SFDCT.Sync;
@@ -14,8 +15,6 @@ internal static class ClientHandler
     {
         switch (messageData.Type)
         {
-            default:
-                break;
             case MessageHandler.SFDCTMessageDataType.DebugMouseToggle:
                 bool enabled = (bool)messageData.Data[0];
 

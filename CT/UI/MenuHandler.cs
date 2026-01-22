@@ -1,7 +1,12 @@
 ﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
 using SFD;
+using SFD.Code.MenuControls;
 using SFD.MenuControls;
+using SFD.States;
 using SFDCT.Misc;
+using SFDCT.Sync;
+using SFDCT.Sync.Data;
 using SFDCT.UI.Panels;
 using System;
 using System.Collections.Generic;
@@ -66,7 +71,7 @@ internal static class MenuHandler
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameMenuPanel), MethodType.Constructor)]
-    private static void GameMenuPanel_Constructor_Postfix_InsertSFDCTOption(GameMenuPanel __instance)
+    private static void GameMenuPanel_Constructor_Postfix_InsertExtraOptions(GameMenuPanel __instance)
     {
         var menu = (Menu)__instance.members[0];
         var sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
@@ -77,7 +82,142 @@ internal static class MenuHandler
         sfdctSettings.Initialize(menu);
 
         menu.Height += 1;
-
         menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
+
+        menu.NeighborUpId = 5;
+        menu.NeighborDownId = 4;
+
+        for (int i = 0; i < 8; i++)
+        {
+            var playerSlot = new MainMenuPlayerSlot(new Vector2(10, 100), __instance, i, i >= 2);
+            playerSlot.SetProfile(Profile.GetPlayerProfile(i));
+
+            __instance.members.Add(playerSlot);
+
+            switch (i)
+            {
+                case 0:
+                    playerSlot.NeighborUpId = 2;
+                    playerSlot.NeighborDownId = 8;
+                    break;
+                case 1:
+                    playerSlot.NeighborUpId = 3;
+                    playerSlot.NeighborDownId = 1;
+                    break;
+                case 2:
+                    playerSlot.NeighborUpId = 4;
+                    playerSlot.NeighborDownId = 2;
+                    break;
+                case 3:
+                    playerSlot.NeighborUpId = 0;
+                    playerSlot.NeighborDownId = 3;
+                    break;
+                case 4:
+                    playerSlot.NeighborUpId = 6;
+                    playerSlot.NeighborDownId = 0;
+                    break;
+                case 5:
+                    playerSlot.NeighborUpId = 7;
+                    playerSlot.NeighborDownId = 5;
+                    break;
+                case 6:
+                    playerSlot.NeighborUpId = 8;
+                    playerSlot.NeighborDownId = 6;
+                    break;
+                case 7:
+                    playerSlot.NeighborUpId = 1;
+                    playerSlot.NeighborDownId = 7;
+                    break;
+            }
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameMenuPanel), nameof(GameMenuPanel.Update))]
+    private static void GameMenuPanel_Update_Postfix_ProfilePlayerSlotPosition(GameMenuPanel __instance, float elapsed)
+    {
+        for (int i = 0; i < __instance.members.Count; i++)
+        {
+            if (__instance.members[i] is MainMenuPlayerSlot playerSlot)
+            {
+                playerSlot.Update(elapsed);
+            }
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameMenuPanel), nameof(GameMenuPanel.UpdatePosition))]
+    private static void GameMenuPanel_UpdatePosition_Postfix_ProfilePlayerSlotPosition(GameMenuPanel __instance)
+    {
+        // The scoreboard panel gets in the way of the PlayerSlots
+        // (since it isn't there in the main menu)
+
+        for (int i = 0; i < __instance.members.Count; i++)
+        {
+            if (__instance.members[i] is MainMenuPlayerSlot playerSlot)
+            {
+                int x = -__instance.Area.X + 8;
+                int y = -__instance.Area.Y;
+
+                if (i <= 4)
+                {
+                    y = -__instance.Area.Y + GameSFD.SCREEN_HEIGHT - GameSFD.GAME_SCREEN_OFFSET_Y * 2 - 100 - 58 * (i - 1);
+                }
+                else
+                {
+                    y = -__instance.Area.Y + GameSFD.GAME_SCREEN_OFFSET_Y * 2 + 8 + (58 * 4) - 58 * (i - 4);
+                }
+
+                playerSlot.LocalPosition = new(x, y);
+            }
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(MainMenuPlayerSlot), nameof(MainMenuPlayerSlot.ProfilePanel_SelectProfile))]
+    private static bool MainMenuPlayerSlot_ProfilePanel_SelectProfile_Prefix_ParentPanelRefreshFix(MainMenuPlayerSlot __instance, Profile selectedProfile, int profileSlot)
+    {
+        // This line in the original method causes the game
+        // to crash if the ParentPanel is not a MainMenuPanel
+        // > (this.ParentPanel as MainMenuPanel).RefreshProfiles();
+
+        if (selectedProfile == null) return false;
+
+        Constants.PLAYER_PROFILE[__instance.PlayerIndex] = profileSlot;
+        __instance.SetProfile(selectedProfile);
+
+        if (__instance.ParentPanel is MainMenuPanel mainMenuPanel)
+        {
+            mainMenuPanel.RefreshProfiles();
+        }
+        else
+        {
+            if (GameSFD.Handle.CurrentState == State.GameOffline)
+            {
+                var gameInfo = StateGameOffline.GameInfo;
+                var gameUser = gameInfo.GetGameUserByUserIdentifier(gameInfo.GetLocalGameUserIdentifier(__instance.PlayerIndex));
+
+                gameUser.Profile = selectedProfile;
+                gameUser.Profile.Updated = true;
+            }
+            else if (GameSFD.Handle.CurrentState == State.Game)
+            {
+                if (GameSFD.Handle.Client != null)
+                {
+                    SFDCTMessageData data = new()
+                    {
+                        Type = MessageHandler.SFDCTMessageDataType.ProfileChangeRequest,
+                        Data = [
+                            __instance.PlayerIndex,
+                            selectedProfile,
+                        ]
+                    };
+
+                    MessageHandler.Send(GameSFD.Handle.Client, data);
+                }
+            }
+        }
+
+        return false;
     }
 }

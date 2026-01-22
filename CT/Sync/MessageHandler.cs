@@ -16,6 +16,7 @@ internal static class MessageHandler
     {
         DebugMouseToggle,
         DebugMouseUpdate,
+        ProfileChangeRequest,
     }
 
     internal static void Send(ClientServerBase owner, SFDCTMessageData data)
@@ -56,8 +57,6 @@ internal static class MessageHandler
         data.Type = (SFDCTMessageDataType)incomingMessage.ReadByte();
         switch (data.Type)
         {
-            default:
-                break;
             case SFDCTMessageDataType.DebugMouseToggle:
                 data.Data =
                 [
@@ -71,6 +70,15 @@ internal static class MessageHandler
                     position.X,
                     position.Y,
                     incomingMessage.ReadBoolean(),
+                ];
+                break;
+            case SFDCTMessageDataType.ProfileChangeRequest:
+                var userIndex = incomingMessage.ReadInt32();
+                var profile = NetMessage.PlayerProfileMessage.Read(incomingMessage, Profile.ValidateProfileType.CanEquip);
+
+                data.Data = [
+                    userIndex,
+                    profile
                 ];
                 break;
         }
@@ -94,6 +102,10 @@ internal static class MessageHandler
             case SFDCTMessageDataType.DebugMouseUpdate:
                 outgoingMessage.WriteVector2Position(new Vector2((float)data.Data[0], (float)data.Data[1]));
                 outgoingMessage.Write((bool)data.Data[2]);
+                break;
+            case SFDCTMessageDataType.ProfileChangeRequest:
+                outgoingMessage.Write((int)data.Data[0]);
+                NetMessage.PlayerProfileMessage.Write((Profile)data.Data[1], outgoingMessage);
                 break;
         }
 

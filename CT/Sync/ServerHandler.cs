@@ -3,6 +3,7 @@ using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFDCT.Game;
+using SFDCT.Helper;
 using SFDCT.Sync.Data;
 using System.Collections.Generic;
 
@@ -91,12 +92,11 @@ internal static class ServerHandler
 
     internal static void HandleCustomMessage(Server server, SFDCTMessageData messageData, NetIncomingMessage incomingMessage)
     {
+        GameConnectionTag incomingTag = incomingMessage.GameConnectionTag();
+
         switch (messageData.Type)
         {
-            default:
-                break;
             case MessageHandler.SFDCTMessageDataType.DebugMouseUpdate:
-                GameConnectionTag incomingTag = incomingMessage.GameConnectionTag();
                 if (incomingTag == null) break;
 
                 if (incomingTag.IsHost || (incomingTag.IsModerator && !DebugMouseOnlyHost))
@@ -125,6 +125,33 @@ internal static class ServerHandler
                     tagDebugMouse.LastNetUpdateTime = (float)NetTime.Now;
                     tagDebugMouse.Box2DPosition = box2DPosition;
                     tagDebugMouse.Pressed = pressed;
+                }
+                break;
+            case MessageHandler.SFDCTMessageDataType.ProfileChangeRequest:
+                if (incomingTag == null) break;
+
+                var userIndex = (int)messageData.Data[0];
+
+                if (userIndex >= 0 && userIndex < incomingTag.GameUsers.Length)
+                {
+                    var gameUser = incomingTag.GameUsers[userIndex];
+                    var profile = (Profile)messageData.Data[1];
+
+                    if (gameUser != null && profile != null)
+                    {
+                        Logger.LogDebug($"ProfileChange {gameUser.AccountName} '{gameUser.GetProfileName()}'");
+
+                        gameUser.Profile = profile;
+                        gameUser.Profile.Updated = true;
+
+                        server.SyncGameUserInfo(gameUser);
+
+                        if (gameUser.GameSlot != null)
+                        {
+                            server.SyncGameSlotInfo(gameUser.GameSlot);
+                        }
+                        MessageHandler.Send(server, new(MessageHandler.SFDCTMessageDataType.ProfileChangeRequest));
+                    }
                 }
                 break;
         }
