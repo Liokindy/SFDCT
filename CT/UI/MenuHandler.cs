@@ -220,4 +220,41 @@ internal static class MenuHandler
 
         return false;
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(KeyBindPanel), MethodType.Constructor)]
+    private static void KeyBindPanel_Constructor_Postfix_8PlayerKeyBinds(KeyBindPanel __instance)
+    {
+        // Add all the elements of player 5-8 keybinds, and then
+        // shift the new keybind elements back (before the misc keys).
+        // This way uses the original code and saves a lot of hassle.
+
+        var originalElementCount = __instance.menu.Items.Count;
+        var currentKeyBinds = new KeyBindPanel.PlayerKeyBindItems[8];
+        for (int i = 0; i < 8; i++)
+        {
+            if (i < __instance.playerKeyBindings.Length)
+            {
+                currentKeyBinds[i] = __instance.playerKeyBindings[i];
+            }
+            else
+            {
+                var keyBind = new KeyBindPanel.PlayerKeyBindItems(i + 1);
+
+                keyBind.SetupControls(__instance.menu, __instance, true);
+                currentKeyBinds[i] = keyBind;
+            }
+        }
+
+        __instance.playerKeyBindings = currentKeyBinds;
+
+        var currentElementCount = __instance.menu.Items.Count;
+        var miscElementCount = 1 + __instance.miscKeys.Length + 3; // Separator + Misc Keys + Empty Separator + OK + CANCEL
+
+        var newKeyBindElements = __instance.menu.Items.GetRange(originalElementCount, currentElementCount - originalElementCount);
+        __instance.menu.Items.RemoveRange(originalElementCount, currentElementCount - originalElementCount);
+        __instance.menu.Items.InsertRange(originalElementCount - miscElementCount, newKeyBindElements);
+
+        __instance.UpdateGamePadTexts();
+    }
 }
