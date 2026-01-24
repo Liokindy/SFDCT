@@ -4,7 +4,9 @@ using SFD.Colors;
 using SFD.Sounds;
 using SFD.Tiles;
 using SFDCT.Configuration;
+using SFDCT.Helper;
 using SFDCT.Misc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +24,21 @@ internal static class SubContentHandler
         {
             Folders = [];
             return;
+        }
+
+        if (!Directory.Exists(Globals.Paths.SubContent))
+        {
+            try
+            {
+                Directory.CreateDirectory(Globals.Paths.SubContent);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Exception trying to create sub-content directory");
+                Logger.LogError(ex.Message);
+                Folders = [];
+                return;
+            }
         }
 
         string[] subContentFilter = SFDCTConfig.Get<string>(CTSettingKey.SubContentFolders).Trim(['|']).Split('|');
