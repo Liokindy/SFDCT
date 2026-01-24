@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using Lidgren.Network;
 using SFD;
-using SFDCT.Helper;
 using SFDCT.Sync.Data;
 
 namespace SFDCT.Sync;

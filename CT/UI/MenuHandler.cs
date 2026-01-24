@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Code.MenuControls;
+using SFD.GameKeyboard;
 using SFD.MenuControls;
 using SFD.States;
 using SFDCT.Misc;
@@ -256,5 +257,15 @@ internal static class MenuHandler
         __instance.menu.Items.InsertRange(originalElementCount - miscElementCount, newKeyBindElements);
 
         __instance.UpdateGamePadTexts();
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(KeyBindPanel), nameof(KeyBindPanel.keyBindPanel_OK))]
+    private static void KeyBindPanel_keyBindPanel_OK_Postfix_8PlayerKeyBinds()
+    {
+        for (int i = 5; i < 9; i++)
+        {
+            VirtualKeyboard.BindedKeys[i].Setup();
+        }
     }
 }
