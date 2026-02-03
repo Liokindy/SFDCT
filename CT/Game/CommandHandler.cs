@@ -7,9 +7,11 @@ using SFD.Parser;
 using SFD.Sounds;
 using SFD.Voting;
 using SFDCT.Configuration;
+using SFDCT.Misc;
 using SFDCT.Sync;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SFDCT.Game;
@@ -92,10 +94,75 @@ internal static class CommandHandler
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands)
     {
         if (!args.IsCommand(commands)) return false;
-        if (args.HostPrivileges) return true;
-        if (!args.ModeratorPrivileges) return false;
 
         return args.CanUseModeratorCommand(commands);
+    }
+
+    internal static ProcessCommandArgs ExecuteCommandsFile(ProcessCommandArgs args, GameInfo gameInfo, string fileName)
+    {
+        fileName = fileName.Trim();
+        fileName = fileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+
+        try
+        {
+            string filePath = Path.Combine(Globals.Paths.Commands, fileName);
+            filePath = Path.GetFullPath(filePath);
+            filePath = Path.ChangeExtension(filePath, ".txt");
+
+            if (!File.Exists(filePath))
+            {
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.exec.fail.nofile"), Color.Red, args.SenderGameUser));
+                return args;
+            }
+
+            string[] fileLines = File.ReadAllLines(filePath);
+
+            foreach (string line in fileLines)
+            {
+                string command = line.Trim();
+
+                if (string.IsNullOrWhiteSpace(command)) continue;
+                if (string.IsNullOrEmpty(command)) continue;
+                if (command.StartsWith("//")) continue;
+                if (!command.StartsWith("/")) command = "/" + command;
+                if (command.StartsWith("/exec", StringComparison.OrdinalIgnoreCase) && command.EndsWith(fileName)) continue;
+
+                // re-use the same args object to show feedback messages
+                args.SourceCommand = command.Remove(0, 1).Trim();
+                args.CommandValue = command;
+                args.SourceParameters = "";
+                args.Parameters.Clear();
+                args.Feedback.Clear();
+
+                int spaceIndex = args.SourceCommand.IndexOf(' ');
+                if (spaceIndex > 0)
+                {
+                    args.CommandValue = args.SourceCommand.Substring(0, spaceIndex);
+                    args.SourceParameters = args.SourceCommand.Substring(spaceIndex + 1);
+                    args.Parameters.AddRange(args.SourceParameters.Split([' '], StringSplitOptions.RemoveEmptyEntries));
+                }
+
+                args.CommandValue = args.CommandValue.ToUpperInvariant();
+
+                if (!gameInfo.HandleCommand(args))
+                {
+                    gameInfo.HandleMessageInScripts(args.SenderGameUserIdentifier, command);
+                }
+
+                gameInfo.ShowCommandFeedback(args);
+            }
+
+            args.Feedback.Clear();
+        }
+        catch (Exception ex)
+        {
+            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.exec.fail.error"), Color.Red, args.SenderGameUser));
+
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("Exception trying to execute commands file: '{0}'", fileName));
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Error, ex.Message);
+        }
+
+        return args;
     }
 
     internal static bool ServerCommands(ProcessCommandArgs args, GameInfo gameInfo)
@@ -335,7 +402,12 @@ internal static class CommandHandler
                 return true;
             }
 
-            // Server-only commands (no offline)
+            if (IsAndCanUseModeratorCommand(args, "EXEC"))
+            {
+                args = ExecuteCommandsFile(args, gameInfo, args.SourceParameters);
+                return true;
+            }
+
             if (gameInfo.GameOwner == GameOwnerEnum.Server)
             {
                 if (IsAndCanUseModeratorCommand(args, "SERVERMOVEMENT", "SVMOV"))
@@ -393,7 +465,7 @@ internal static class CommandHandler
             {
                 if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
 
-                if (!Voting.GameVoteYesNo.CanStartVote(gameInfo) || (gameInfo.GameOwner == GameOwnerEnum.Server && !Voting.GameVoteKick.CanStartVote()))
+                if (!Voting.GameVoteYesNo.CanStartVote(gameInfo))
                 {
                     args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail"), Color.Red, args.SenderGameUser));
                     return true;

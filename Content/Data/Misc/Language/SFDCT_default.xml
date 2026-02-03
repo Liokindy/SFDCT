@@ -24,6 +24,8 @@
 	<Text id="sfdct.command.votekick.fail.notenoughusers">There aren't enough users to vote</Text>
 	<Text id="sfdct.command.votekick.fail.invaliduser">You can't start a vote-kick against this user</Text>
 	<Text id="sfdct.command.votekick.fail">You can't start another vote-kick right now</Text>
+	<Text id="sfdct.command.exec.fail.nofile">Commands file does not exist</Text>
+	<Text id="sfdct.command.exec.fail.error">Error executing commands file</Text>
 	<Text id="sfdct.command.votekick.message">'{0}' ({1}) HAS STARTED A VOTE-KICK AGAINST '{2}' ({3})</Text>
 	<Text id="sfdct.command.votekick.message.victim">- '{0}' ({1}) has started a vote-kick against you</Text>
 	<Text id="sfdct.command.votekick.message.owner">- You started a vote-kick against '{0}' ({1})</Text>
