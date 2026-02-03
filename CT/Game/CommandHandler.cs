@@ -3,6 +3,7 @@ using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
+using SFD.GUI.Text;
 using SFD.Parser;
 using SFD.Sounds;
 using SFD.Voting;
@@ -318,6 +319,47 @@ internal static class CommandHandler
 
                 return true;
             }
+
+            if (args.IsCommand("META"))
+            {
+                if (string.IsNullOrEmpty(args.SourceParameters))
+                {
+                    string exampleMetaText = "- Default. [#FF00FF]Magenta[#]. [#FF0]Yellow[#]. Icon [ICO=TEAM_1]";
+
+                    args.Feedback.Add(new(args.SenderGameUser, "Meta-formatting allows to specify text color ('[#FFFFFF]'), reset text color ('[#]'), and display icons ('[ICO=]'). Example:", args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, exampleMetaText, true, Constants.COLORS.LIGHT_GRAY, args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, exampleMetaText, false, Constants.COLORS.LIGHT_GRAY, args.SenderGameUser));
+
+                    string availableIconsText = "- ";
+                    foreach (string iconKey in TextIcons.m_icons.Keys)
+                    {
+                        availableIconsText = availableIconsText + string.Format("{1} ([ICO={0}])", iconKey, TextMeta.EscapeText(iconKey)) + ", ";
+                    }
+                    availableIconsText.Remove(availableIconsText.Length - 2); // remove last ", "
+
+                    args.Feedback.Add(new(args.SenderGameUser, "Available Icons:", args.SenderGameUser));
+                    args.Feedback.Add(new(args.SenderGameUser, availableIconsText, true, Constants.COLORS.LIGHT_GRAY, args.SenderGameUser));
+                }
+                else
+                {
+                    string message = args.SourceParameters;
+
+                    if (args.Origin == HandleCommandOrigin.User)
+                    {
+                        message = string.Format("[ICO=TEAM_{0}][{1}]{2}:[#] [{3}]{4}",
+                                        (int)args.SenderGameUser.TeamIcon,
+                                        Constants.COLORS.GetTeamColor(args.SenderGameUser.TeamIcon, Constants.COLORS.TeamColorType.ChatName).ToHex(),
+                                        TextMeta.EscapeText(args.SenderGameUser.GetProfileName()),
+                                        Constants.COLORS.CHAT_ALL_MESSAGE.ToHex(),
+                                        args.SourceParameters
+                        );
+                    }
+
+                    server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(message, Color.White, args.SenderGameUser.GetProfileName(), true, args.SenderGameUser.UserIdentifier));
+                }
+
+                return true;
+            }
         }
 
         if (args.ModeratorPrivileges)
@@ -398,7 +440,7 @@ internal static class CommandHandler
                 ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
 
                 string message = LanguageHelper.GetText("sfdct.command.debugmouse.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouse));
-                args.Feedback.Add(new(args.SenderGameUser, message, null, null));
+                args.Feedback.Add(new(args.SenderGameUser, message));
                 return true;
             }
 
@@ -533,7 +575,7 @@ internal static class CommandHandler
                 if (connectionTag == null) return true;
                 if (connectionTag.GameUsers.Count() > 1)
                 {
-                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.localplayer"), Color.Red, args.SenderGameUser, null));
+                    args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.localplayer"), Color.Red, args.SenderGameUser));
                     return true;
                 }
 
@@ -572,7 +614,7 @@ internal static class CommandHandler
 
                 if (gameInfo.GameOwner == GameOwnerEnum.Server)
                 {
-                    server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs.ToArray()), null, null);
+                    server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs.ToArray()));
                     server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f), null);
                     server.SyncGameSlotInfo(gameSlot);
                     server.SyncGameUserInfo(gameUser, null);
@@ -583,11 +625,11 @@ internal static class CommandHandler
                     SoundHandler.PlayGlobalSound("PlayerJoin");
                 }
 
-                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser, null));
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser));
             }
             else
             {
-                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser, null));
+                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser));
             }
 
             return true;
@@ -656,7 +698,7 @@ internal static class CommandHandler
                 SoundHandler.PlayGlobalSound("PlayerLeave");
             }
 
-            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.message.info"), Color.Gray, args.SenderGameUser, null));
+            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.message.info"), Color.Gray, args.SenderGameUser));
             return true;
         }
 
