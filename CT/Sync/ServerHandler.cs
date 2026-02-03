@@ -139,7 +139,9 @@ internal static class ServerHandler
 
                     if (gameUser != null && profile != null)
                     {
+#if DEBUG
                         Logger.LogDebug($"ProfileChange {gameUser.AccountName} '{gameUser.GetProfileName()}'");
+#endif
 
                         gameUser.Profile = profile;
                         gameUser.Profile.Updated = true;

@@ -33,7 +33,9 @@ internal static class SFDCTConfig
         if (!File.Exists(Globals.Paths.ConfigurationIni))
         {
             // Create file and revert to defaults
+#if DEBUG
             Logger.LogDebug("Setting CREATING");
+#endif
 
             using (FileStream fileStream = File.Create(Globals.Paths.ConfigurationIni))
             {
@@ -45,11 +47,14 @@ internal static class SFDCTConfig
         else
         {
             // Load file and read settings
+#if DEBUG
             Logger.LogDebug("Setting READING FILE");
-
+#endif
             handler.ReadFile(Globals.Paths.ConfigurationIni);
 
+#if DEBUG
             Logger.LogDebug("Setting UPDATING");
+#endif
             Set(CTSettingKey.SoundPanningEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningEnabled), true));
             Set(CTSettingKey.SoundPanningStrength, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.SoundPanningStrength), 0.71f, 0f, 1f));
             Set(CTSettingKey.SoundPanningForceScreenSpace, handler.ReadValueBool(GetSettingKey(CTSettingKey.SoundPanningForceScreenSpace), false));
@@ -84,7 +89,9 @@ internal static class SFDCTConfig
 
     internal static void SetDefault()
     {
+#if DEBUG
         Logger.LogDebug("Setting REVERING TO DEFAULTS");
+#endif
 
         Set(CTSettingKey.SoundPanningEnabled, true);
         Set(CTSettingKey.SoundPanningStrength, 0.71f);

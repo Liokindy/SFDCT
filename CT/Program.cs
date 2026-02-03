@@ -39,6 +39,7 @@ internal static class Program
 
         bool skipUpdateCheck = false;
         bool skipProgramChoice = false;
+        int programChoice = 0;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -55,21 +56,37 @@ internal static class Program
             {
                 Logger.LogWarn("Launch parameters");
                 Logger.LogWarn("- HELP            Show this help message");
-                Logger.LogWarn("- SKIP            Skip check version");
-                Logger.LogWarn("- SERVER          Start SFDCT Dedicated Server");
-                Logger.LogWarn("- SFD             Start vanilla SFD");
+                Logger.LogWarn("- SKIP            Skip version check");
+                Logger.LogWarn("- SFD             Starts vanilla SFD");
+                Logger.LogWarn("- SFDCT           Starts SFDCT");
+                Logger.LogWarn("- EDITOR          Starts SFDCT's Map Editor");
+                Logger.LogWarn("- SERVER          Starts SFDCT Dedicated Server");
                 return 0;
             }
             else if (arg.Equals("-SKIP", StringComparison.OrdinalIgnoreCase))
             {
                 skipUpdateCheck = true;
+            }
+            else if (arg.Equals("-SERVER", StringComparison.OrdinalIgnoreCase))
+            {
+                programChoice = 3;
+                skipProgramChoice = true;
+            }
+            else if (arg.Equals("-SFDCT", StringComparison.OrdinalIgnoreCase))
+            {
+                programChoice = 0;
+                skipProgramChoice = true;
+            }
+            else if (arg.Equals("-EDITOR", StringComparison.OrdinalIgnoreCase))
+            {
+                programChoice = 2;
                 skipProgramChoice = true;
             }
         }
 
         if (!skipProgramChoice)
         {
-            Logger.LogWarn("0. SFDCT; 1. SFD; E. SFDCT (Map Editor)");
+            Logger.LogWarn("0. SFDCT; 1. SFD; E. SFDCT (Map Editor); S. SFDCT (Dedicated Server)");
             Logger.LogWarn("Start option: ", false);
 
             ConsoleKeyInfo k = new();
@@ -89,19 +106,47 @@ internal static class Program
             if (k.Key == default) Console.Write("0");
             Console.WriteLine();
 
-            if (k.Key == ConsoleKey.D1 || k.Key == ConsoleKey.NumPad1)
+            switch (k.Key)
             {
+                case ConsoleKey.NumPad1:
+                case ConsoleKey.D1:
+                    programChoice = 1;
+                    break;
+                case ConsoleKey.E:
+                    programChoice = 2;
+                    break;
+                case ConsoleKey.S:
+                    programChoice = 3;
+
+                    // "-server" is not in args
+                    string[] newArgs = new string[args.Length + 1];
+
+                    for (int i = 0; i < args.Length + 1; i++)
+                    {
+                        if (i == args.Length) newArgs[i] = "-server";
+                        else newArgs[i] = args[i];
+                    }
+
+                    args = newArgs;
+                    break;
+            }
+        }
+
+        switch (programChoice)
+        {
+            case 1:
                 Logger.LogInfo("Starting SFD");
 
                 string SFD_exe = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
                 Process.Start(SFD_exe, string.Join(" ", args));
                 return 0;
-            }
-            else if (k.Key == ConsoleKey.E)
-            {
+            case 2:
                 CoreHandler.SkipToEditor = true;
                 CoreHandler.SkipToTestRun = true;
-            }
+                break;
+            case 3:
+                skipUpdateCheck = true;
+                break;
         }
 
         if (!skipUpdateCheck)
