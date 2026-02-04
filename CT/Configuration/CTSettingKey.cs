@@ -33,6 +33,7 @@ internal enum CTSettingKey
     VoteKickSuccessCooldown,
     VoteKickFailCooldown,
 
-    SubContentEnabled,
-    SubContentFolders,
+    SubContent,
+    SubContentEnabledFolders,
+    SubContentDisabledFolders,
 }

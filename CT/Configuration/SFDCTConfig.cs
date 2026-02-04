@@ -2,6 +2,7 @@
 using SFDCT.Misc;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SFDCT.Configuration;
@@ -77,8 +78,9 @@ internal static class SFDCTConfig
             Set(CTSettingKey.VoteKickEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.VoteKickEnabled), false));
             Set(CTSettingKey.VoteKickFailCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150, 30, 300));
             Set(CTSettingKey.VoteKickSuccessCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60, 30, 300));
-            Set(CTSettingKey.SubContentEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.SubContentEnabled), true));
-            Set(CTSettingKey.SubContentFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentFolders), string.Empty));
+            Set(CTSettingKey.SubContent, handler.ReadValueBool(GetSettingKey(CTSettingKey.SubContent), true));
+            Set(CTSettingKey.SubContentDisabledFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentDisabledFolders), string.Empty));
+            Set(CTSettingKey.SubContentEnabledFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentEnabledFolders), string.Empty));
         }
 
         ReadToFile(handler);
@@ -115,8 +117,9 @@ internal static class SFDCTConfig
         Set(CTSettingKey.VoteKickEnabled, false);
         Set(CTSettingKey.VoteKickFailCooldown, 150);
         Set(CTSettingKey.VoteKickSuccessCooldown, 60);
-        Set(CTSettingKey.SubContentEnabled, true);
-        Set(CTSettingKey.SubContentFolders, string.Empty);
+        Set(CTSettingKey.SubContent, true);
+        Set(CTSettingKey.SubContentDisabledFolders, string.Empty);
+        Set(CTSettingKey.SubContentEnabledFolders, string.Empty);
     }
 
     internal static void ReadToFile(CTIniHandler handler)
@@ -149,8 +152,9 @@ internal static class SFDCTConfig
         handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickEnabled), Get<bool>(CTSettingKey.VoteKickEnabled));//, false);
         handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickFailCooldown), Get<int>(CTSettingKey.VoteKickFailCooldown));//, 150);
         handler.ReadLine(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), Get<int>(CTSettingKey.VoteKickSuccessCooldown));//, 60);
-        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentEnabled), Get<bool>(CTSettingKey.SubContentEnabled));//, true);
-        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentFolders), Get<string>(CTSettingKey.SubContentFolders));//, string.Empty);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SubContent), Get<bool>(CTSettingKey.SubContent));//, true);
+        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentDisabledFolders), Get<string>(CTSettingKey.SubContentDisabledFolders));
+        handler.ReadLine(GetSettingKey(CTSettingKey.SubContentEnabledFolders), Get<string>(CTSettingKey.SubContentEnabledFolders));
     }
 
     internal static string GetSettingKey(CTSettingKey setting)
@@ -180,8 +184,9 @@ internal static class SFDCTConfig
             case CTSettingKey.VoteKickEnabled: return "VOTEKICK_ENABLED";
             case CTSettingKey.VoteKickSuccessCooldown: return "VOTEKICK_SUCCESS_COOLDOWN";
             case CTSettingKey.VoteKickFailCooldown: return "VOTEKICK_FAIL_COOLDOWN";
-            case CTSettingKey.SubContentEnabled: return "SUBCONTENT_ENABLED";
-            case CTSettingKey.SubContentFolders: return "SUBCONTENT_FOLDERS";
+            case CTSettingKey.SubContent: return "SUBCONTENT";
+            case CTSettingKey.SubContentDisabledFolders: return "SUBCONTENT_ENABLED_FOLDERS";
+            case CTSettingKey.SubContentEnabledFolders: return "SUBCONTENT_DISABLED_FOLDERS";
         }
     }
 

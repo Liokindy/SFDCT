@@ -126,14 +126,8 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Assets\AnimationLoader.cs" />
-    <Compile Include="Assets\ColorLoader.cs" />
-    <Compile Include="Assets\ColorPaletteLoader.cs" />
-    <Compile Include="Assets\ItemLoader.cs" />
-    <Compile Include="Assets\SoundLoader.cs" />
+    <Compile Include="Assets\ContentOriginType.cs" />
     <Compile Include="Assets\SubContentHandler.cs" />
-    <Compile Include="Assets\TextureLoader.cs" />
-    <Compile Include="Assets\TileLoader.cs" />
     <Compile Include="Bootstrap\CoreHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
     <Compile Include="Bootstrap\TrackHandler.cs" />

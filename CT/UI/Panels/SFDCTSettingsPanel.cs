@@ -278,13 +278,13 @@ internal class SFDCTSettingsPanel : Panel
         }
 
         m_menuItemSubContentEnabled = new(LanguageHelper.GetText("sfdct.setting.name.subcontentenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSubContentEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SubContentEnabled) ? 0 : 1);
+        m_menuItemSubContentEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SubContent) ? 0 : 1);
         m_menuItemSubContentEnabled.DropdownItemVisibleCount = 2;
         m_menuItemSubContentEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.subcontentenabled");
         EventHelper.Add(m_menuItemSubContentEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
         {
             m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<bool>(CTSettingKey.SubContentEnabled, m_menuItemSubContentEnabled.ValueId == 0);
+            SFDCTConfig.Set<bool>(CTSettingKey.SubContent, m_menuItemSubContentEnabled.ValueId == 0);
         }));
         m_menu.Add(m_menuItemSubContentEnabled);
 
