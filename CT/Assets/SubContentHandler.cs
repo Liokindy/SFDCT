@@ -386,7 +386,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(Animations), nameof(Animations.Load))]
     private static bool Animations_Load_Prefix_OverrideLoad(ref bool __result)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         var analyzeDataDic = new Dictionary<string, Animations.AnalyzeAnimation>
         {
@@ -472,7 +472,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(Textures), nameof(Textures.Load), [typeof(string)])]
     private static bool Textures_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         Dictionary<string, string> textureFiles = [];
 
@@ -512,7 +512,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(Items), nameof(Items.Load), [typeof(GameSFD)])]
     private static bool Items_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         Items.m_allItems = [];
         Items.m_allFemaleItems = [];
@@ -588,7 +588,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(ColorPaletteDatabase), nameof(ColorPaletteDatabase.Load), [typeof(GameSFD)])]
     private static bool ColorPaletteDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         Dictionary<string, ColorPalette> colorPalettes = [];
 
@@ -626,7 +626,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(ColorDatabase), nameof(ColorDatabase.Load), [typeof(GameSFD)])]
     private static bool ColorDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         Dictionary<string, Color[]> colors = [];
 
@@ -664,7 +664,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(SoundHandler), nameof(SoundHandler.Load), [typeof(GameSFD)])]
     private static bool SoundHandler_Load_Prefix_OverrideLoad(GameSFD game)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds...");
         SoundHandler.game = game;
@@ -748,7 +748,7 @@ internal static partial class SubContentHandler
     [HarmonyPatch(typeof(TileDatabase), nameof(TileDatabase.Load), [typeof(GameSFD)])]
     private static bool TileDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return false;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
 
         Dictionary<string, Tile> tiles = [];
 
