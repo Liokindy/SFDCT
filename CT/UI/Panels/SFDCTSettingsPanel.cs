@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Configuration;
@@ -37,6 +38,33 @@ internal class SFDCTSettingsPanel : Panel
     private MenuItemText m_menuItemPrimaryColorHex;
     private MenuItemDropdown m_menuItemSubContentEnabled;
     private bool m_settingsNeedGameRestart;
+
+    private bool m_originalSoundPanningEnabled = SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningEnabled);
+    private float m_originalSoundPanningStrength = SFDCTConfig.Get<float>(CTSettingKey.SoundPanningStrength);
+    private bool m_originalSoundPanningForceScreenSpace = SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningForceScreenSpace);
+    private int m_originalSoundPanningInworldThreshold = SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldThreshold);
+    private int m_originalSoundPanningInworldDistance = SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldDistance);
+    private bool m_originalSoundAttenuationEnabled = SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationEnabled);
+    private float m_originalSoundAttenuationMin = SFDCTConfig.Get<float>(CTSettingKey.SoundAttenuationMin);
+    private bool m_originalSoundAttenuationForceScreenSpace = SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace);
+    private int m_originalSoundAttenuationInworldThreshold = SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldThreshold);
+    private int m_originalSoundAttenuationInworldDistance = SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldDistance);
+    private float m_originalLowHealthSaturationFactor = SFDCTConfig.Get<float>(CTSettingKey.LowHealthSaturationFactor);
+    private float m_originalLowHealthThreshold = SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold);
+    private float m_originalLowHealthHurtLevel1Threshold = SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold);
+    private float m_originalLowHealthHurtLevel2Threshold = SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold);
+    private bool m_originalHideFilmgrain = SFDCTConfig.Get<bool>(CTSettingKey.HideFilmgrain);
+    private bool m_originalDisableClockTicking = SFDCTConfig.Get<bool>(CTSettingKey.DisableClockTicking);
+    private string m_originalLanguage = SFDCTConfig.Get<string>(CTSettingKey.Language);
+    private int m_originalSpectatorsMaximum = SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum);
+    private bool m_originalSpectatorsOnlyModerators = SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators);
+    private bool m_originalVoteKickEnabled = SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled);
+    private int m_originalVoteKickFailCooldown = SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown);
+    private int m_originalVoteKickSuccessCooldown = SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown);
+    private bool m_originalSubContent = SFDCTConfig.Get<bool>(CTSettingKey.SubContent);
+    private string m_originalSubContentDisabledFolders = SFDCTConfig.Get<string>(CTSettingKey.SubContentDisabledFolders);
+    private string m_originalSubContentEnabledFolders = SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders);
+    private string m_originalPrimaryColorHex = Constants.COLORS.MENU_BLUE.ToHex();
 
     public SFDCTSettingsPanel() : base("SFDCT SETTINGS", 500, 500)
     {
@@ -271,7 +299,7 @@ internal class SFDCTSettingsPanel : Panel
         {
             string language = availableSFDCTLanguages[i];
 
-            if (!language.StartsWith("SFDCT", System.StringComparison.OrdinalIgnoreCase))
+            if (!language.StartsWith("SFDCT", StringComparison.OrdinalIgnoreCase))
             {
                 availableSFDCTLanguages.RemoveAt(i);
             }
@@ -310,8 +338,6 @@ internal class SFDCTSettingsPanel : Panel
             {
                 Constants.COLORS.MENU_BLUE = setText.ToColor();
                 if (m_menuItemPrimaryColor.Color != Constants.COLORS.MENU_BLUE) m_menuItemPrimaryColor.SetColor(Constants.COLORS.MENU_BLUE);
-
-                SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
             }
             else
             {
@@ -341,8 +367,6 @@ internal class SFDCTSettingsPanel : Panel
         {
             Constants.COLORS.MENU_BLUE = m_menuItemPrimaryColor.Color;
             if (m_menuItemPrimaryColorHex.Value != Constants.COLORS.MENU_BLUE.ToHex()) m_menuItemPrimaryColorHex.SetValue(Constants.COLORS.MENU_BLUE.ToHex());
-
-            SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
         };
         m_menu.Add(m_menuItemPrimaryColor);
 
@@ -354,26 +378,79 @@ internal class SFDCTSettingsPanel : Panel
         m_menu.SelectFirst();
     }
 
+    public override void KeyPress(Keys key)
+    {
+        if (subPanel == null && key == Keys.Escape)
+        {
+            back(null);
+            return;
+        }
+
+        base.KeyPress(key);
+    }
+
     private void ok(object _)
     {
         if (m_settingsNeedGameRestart)
         {
-            OpenSubPanel(new ConfirmOKPanel(LanguageHelper.GetText("sfdct.setting.warning.settingsrequiregamerestart"), LanguageHelper.GetText("button.ok"), (object _) =>
-            {
-                CloseSubPanel();
-                ParentPanel.CloseSubPanel();
-            }));
-        }
-        else
-        {
-            ParentPanel.CloseSubPanel();
+            MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
         }
 
         SFDCTConfig.SaveFile();
+
+        if (m_originalPrimaryColorHex != Constants.COLORS.MENU_BLUE.ToHex())
+        {
+            SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
+        }
+
+        ParentPanel.CloseSubPanel();
     }
 
     private void back(object _)
     {
-        ParentPanel.CloseSubPanel();
+        OpenSubPanel(new ConfirmYesNoPanel(LanguageHelper.GetText("menu.settings.confirmcancel"), LanguageHelper.GetText("general.yes"), LanguageHelper.GetText("general.no"), (object _) =>
+        {
+            SFDCTConfig.Set(CTSettingKey.SoundPanningEnabled, m_originalSoundPanningEnabled);
+            SFDCTConfig.Set(CTSettingKey.SoundPanningStrength, m_originalSoundPanningStrength);
+            SFDCTConfig.Set(CTSettingKey.SoundPanningForceScreenSpace, m_originalSoundPanningForceScreenSpace);
+            SFDCTConfig.Set(CTSettingKey.SoundPanningInworldThreshold, m_originalSoundPanningInworldThreshold);
+            SFDCTConfig.Set(CTSettingKey.SoundPanningInworldDistance, m_originalSoundPanningInworldDistance);
+            SFDCTConfig.Set(CTSettingKey.SoundAttenuationEnabled, m_originalSoundAttenuationEnabled);
+            SFDCTConfig.Set(CTSettingKey.SoundAttenuationMin, m_originalSoundAttenuationMin);
+            SFDCTConfig.Set(CTSettingKey.SoundAttenuationForceScreenSpace, m_originalSoundAttenuationForceScreenSpace);
+            SFDCTConfig.Set(CTSettingKey.SoundAttenuationInworldThreshold, m_originalSoundAttenuationInworldThreshold);
+            SFDCTConfig.Set(CTSettingKey.SoundAttenuationInworldDistance, m_originalSoundAttenuationInworldDistance);
+            SFDCTConfig.Set(CTSettingKey.LowHealthSaturationFactor, m_originalLowHealthSaturationFactor);
+            SFDCTConfig.Set(CTSettingKey.LowHealthThreshold, m_originalLowHealthThreshold);
+            SFDCTConfig.Set(CTSettingKey.LowHealthHurtLevel1Threshold, m_originalLowHealthHurtLevel1Threshold);
+            SFDCTConfig.Set(CTSettingKey.LowHealthHurtLevel2Threshold, m_originalLowHealthHurtLevel2Threshold);
+            SFDCTConfig.Set(CTSettingKey.HideFilmgrain, m_originalHideFilmgrain);
+            SFDCTConfig.Set(CTSettingKey.DisableClockTicking, m_originalDisableClockTicking);
+            SFDCTConfig.Set(CTSettingKey.Language, m_originalLanguage);
+            SFDCTConfig.Set(CTSettingKey.SpectatorsMaximum, m_originalSpectatorsMaximum);
+            SFDCTConfig.Set(CTSettingKey.SpectatorsOnlyModerators, m_originalSpectatorsOnlyModerators);
+            SFDCTConfig.Set(CTSettingKey.VoteKickEnabled, m_originalVoteKickEnabled);
+            SFDCTConfig.Set(CTSettingKey.VoteKickFailCooldown, m_originalVoteKickFailCooldown);
+            SFDCTConfig.Set(CTSettingKey.VoteKickSuccessCooldown, m_originalVoteKickSuccessCooldown);
+            SFDCTConfig.Set(CTSettingKey.SubContent, m_originalSubContent);
+            SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, m_originalSubContentDisabledFolders);
+            SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, m_originalSubContentEnabledFolders);
+
+            if (m_originalPrimaryColorHex != Constants.COLORS.MENU_BLUE.ToHex())
+            {
+                Constants.COLORS.MENU_BLUE = m_originalPrimaryColorHex.ToColor();
+                SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
+            }
+
+            if (m_settingsNeedGameRestart)
+            {
+                MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
+            }
+
+            ParentPanel.CloseSubPanel();
+        }, (object _) =>
+        {
+            CloseSubPanel();
+        }));
     }
 }
