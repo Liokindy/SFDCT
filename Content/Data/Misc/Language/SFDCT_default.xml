@@ -1,7 +1,9 @@
 ﻿<Texts name="SFDCT Default">
 	<!-- Language: en -->
 	<Text id="sfdct.generic.list">- {0}</Text>
-	
+	<Text id="sfdct.generic.disable">Disable</Text>
+	<Text id="sfdct.generic.enable">Enable</Text>
+
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
 	<Text id="sfdct.command.players.message.bot">- {0}: '{1}' {3}</Text>
 	<Text id="sfdct.command.players.footer">Found {0} users</Text>
@@ -47,8 +49,9 @@
 	<Text id="sfdct.vote.kick.fail">'{0}' ({1}) WILL NOT BE KICKED (NOT ENOUGH VOTES)</Text>
 	<Text id="sfdct.vote.kick.success">'{0}' ({1}) WILL BE KICKED</Text>
 
-	<Text id="sfdct.setting.warning.settingsrequiregamerestart">Restart SFDCT to apply some settings.</Text>
-	
+	<Text id="sfdct.setting.header">SFDCT SETTINGS</Text>
+	<Text id="sfdct.setting.header.subcontent">SUB-CONTENT FOLDERS</Text>
+
 	<Text id="sfdct.setting.name.soundpanningenabled">ENABLED</Text>
 	<Text id="sfdct.setting.name.soundpanningstrength">STRENGTH</Text>
 	<Text id="sfdct.setting.name.soundpanningforcescreenspace">ALWAYS SCREEN-SPACE</Text>
@@ -71,11 +74,10 @@
 	<Text id="sfdct.setting.name.votekickenabled">ENABLED</Text>
 	<Text id="sfdct.setting.name.votekicksuccesscooldown">SUCCESS COOLDOWN SECONDS</Text>
 	<Text id="sfdct.setting.name.votekickfailcooldown">FAIL COOLDOWN SECONDS</Text>
-
-	<Text id="sfdct.setting.name.subcontentenabled">SUB-CONTENT ENABLED</Text>
-
 	<Text id="sfdct.setting.name.primarycolor">COLOR</Text>
 	<Text id="sfdct.setting.name.primarycolorhex">HEX-CODE</Text>
+	<Text id="sfdct.setting.name.subcontentenabled">ENABLED</Text>
+	<Text id="sfdct.setting.name.subcontentfolders">CONFIGURE</Text>
 	
 	<Text id="sfdct.setting.help.soundpanningenabled">Enables or disables sound-panning</Text>
 	<Text id="sfdct.setting.help.soundpanningstrength">Controls the maximum panning of sounds</Text>
@@ -101,12 +103,12 @@
 	<Text id="sfdct.setting.help.votekickfailcooldown">Controls the cooldown in seconds of vote-kicking on failure</Text>
 	<Text id="sfdct.setting.help.subcontentenabled">Enables or disables loading any files from "SFDCT/SubContent", sub-content files replace official files when loading, making modifying official content easier without needing to overwrite it</Text>
 
-	<Text id="sfdct.setting.category.soundpanning">SOUND-PANNING</Text>
-	<Text id="sfdct.setting.category.soundattenuation">SOUND-ATTENUATION</Text>
-	<Text id="sfdct.setting.category.lowhealth">LOW HEALTH</Text>
-	<Text id="sfdct.setting.category.misc">MISC</Text>
-	<Text id="sfdct.setting.category.spectators">SPECTATORS</Text>
-	<Text id="sfdct.setting.category.votekick">VOTE-KICK</Text>
-
-	<Text id="sfdct.setting.category.primarycolor">PRIMARY-COLOR</Text>
+	<Text id="sfdct.setting.category.soundpanning">Sound-Panning</Text>
+	<Text id="sfdct.setting.category.soundattenuation">Sound-Attenuation</Text>
+	<Text id="sfdct.setting.category.lowhealth">Low Health</Text>
+	<Text id="sfdct.setting.category.misc">Misc</Text>
+	<Text id="sfdct.setting.category.spectators">Spectators</Text>
+	<Text id="sfdct.setting.category.votekick">Vote-Kick</Text>
+	<Text id="sfdct.setting.category.subcontent">Sub-Content</Text>
+	<Text id="sfdct.setting.category.primarycolor">Primary-Color</Text>
 </Texts>

@@ -20,7 +20,6 @@ internal enum CTSettingKey
     LowHealthHurtLevel2Threshold,
 
     HideFilmgrain,
-    DisableClockTicking,
     Language,
 
     FightersCanAlwaysRecoveryRoll,

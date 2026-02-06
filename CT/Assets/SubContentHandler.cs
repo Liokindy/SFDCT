@@ -24,6 +24,7 @@ namespace SFDCT.Assets;
 internal static partial class SubContentHandler
 {
     internal const string ANIMATIONS_FILE_NAME = "char_anims";
+    internal const char SUB_CONTENT_FOLDER_SEPARATOR = '|';
 
     internal static string[] Folders;
 
@@ -50,48 +51,67 @@ internal static partial class SubContentHandler
             }
         }
 
-        List<string> enabledSubContentFolders = SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders).Trim('|').Split('|').ToList();
-        List<string> disabledSubContentFolders = SFDCTConfig.Get<string>(CTSettingKey.SubContentDisabledFolders).Trim('|').Split('|').ToList();
+        List<string> enabledSubContentFolders = [.. GetEnabledFolders()];
+        List<string> disabledSubContentFolders = [.. GetDisabledFolders()];
 
         // Enable new sub content
-        foreach (string folder in Directory.GetDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly))
+        foreach (string folderName in GetNewFolders())
         {
-            if (enabledSubContentFolders.Contains(folder)) continue;
-            if (disabledSubContentFolders.Contains(folder)) continue;
-
-            enabledSubContentFolders.Add(Path.GetFileName(folder));
+            Logger.LogInfo($"[SUB-CONTENT] Adding new folder: {folderName}");
+            enabledSubContentFolders.Add(folderName);
         }
 
         // Remove sub content that does not exist
-        for(int i = enabledSubContentFolders.Count - 1; i >= 0; i--)
+        foreach (string folderName in GetDeletedFolders())
         {
-            string folder = enabledSubContentFolders[i];
-            if (string.IsNullOrEmpty(folder) && string.IsNullOrWhiteSpace(folder) && Directory.Exists(Path.Combine(Globals.Paths.SubContent, folder))) continue;
-
-            enabledSubContentFolders.RemoveAt(i);
+            if (enabledSubContentFolders.Contains(folderName)) enabledSubContentFolders.Remove(folderName);
+            if (disabledSubContentFolders.Contains(folderName)) disabledSubContentFolders.Remove(folderName);
         }
-
-        for (int i = disabledSubContentFolders.Count - 1; i >= 0; i--)
-        {
-            string folder = disabledSubContentFolders[i];
-            if (string.IsNullOrEmpty(folder) && string.IsNullOrWhiteSpace(folder) && Directory.Exists(Path.Combine(Globals.Paths.SubContent, folder))) continue;
-
-            disabledSubContentFolders.RemoveAt(i);
-        }
-
-        // Add enabled sub content in order
-        List<string> activeFolders = [];
-
-        foreach (string folder in enabledSubContentFolders)
-        {
-            activeFolders.Add(folder);
-        }
-
-        Folders = [.. activeFolders];
 
         SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, string.Join("|", enabledSubContentFolders));
         SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, string.Join("|", disabledSubContentFolders));
         SFDCTConfig.SaveFile();
+
+        Folders = [.. enabledSubContentFolders];
+    }
+
+    internal static string[] GetAllFolders()
+    {
+        return Directory.GetDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly).Select((string s) => { return Path.GetFileName(s); }).ToArray();
+    }
+
+    internal static string[] GetDeletedFolders()
+    {
+        string[] enabledFolders = GetEnabledFolders();
+        string[] disabledFolders = GetDisabledFolders();
+        List<string> allFolders = [.. enabledFolders, .. disabledFolders];
+        List<string> deletedFolders = [];
+
+        foreach (string folderName in allFolders)
+        {
+            if (!string.IsNullOrEmpty(folderName) && !string.IsNullOrWhiteSpace(folderName) && Directory.Exists(Path.Combine(Globals.Paths.SubContent, folderName))) continue;
+        }
+
+        return deletedFolders.ToArray();
+    }
+
+    internal static string[] GetNewFolders()
+    {
+        string[] allFolders = GetAllFolders();
+        string[] enabledFolders = GetEnabledFolders();
+        string[] disabledFolders = GetDisabledFolders();
+
+        return [.. allFolders.Where((string s) => !enabledFolders.Contains(s) && !disabledFolders.Contains(s))];
+    }
+
+    internal static string[] GetDisabledFolders()
+    {
+        return [.. SFDCTConfig.Get<string>(CTSettingKey.SubContentDisabledFolders).Trim('|').Split('|').Where((string s) => s != string.Empty)];
+    }
+
+    internal static string[] GetEnabledFolders()
+    {
+        return [.. SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders).Trim('|').Split('|').Where((string s) => s != string.Empty)];
     }
 
     internal static void AddOrSetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> dic, TKey key, TValue value)

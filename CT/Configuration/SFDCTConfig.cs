@@ -2,7 +2,6 @@
 using SFDCT.Misc;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SFDCT.Configuration;
@@ -71,7 +70,6 @@ internal static class SFDCTConfig
             Set(CTSettingKey.LowHealthHurtLevel1Threshold, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), 0.25f, 0f, 1f));
             Set(CTSettingKey.LowHealthHurtLevel2Threshold, handler.ReadValueFloatCapped(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), 0.12f, 0f, 1f));
             Set(CTSettingKey.HideFilmgrain, handler.ReadValueBool(GetSettingKey(CTSettingKey.HideFilmgrain), false));
-            Set(CTSettingKey.DisableClockTicking, handler.ReadValueBool(GetSettingKey(CTSettingKey.DisableClockTicking), true));
             Set(CTSettingKey.Language, handler.ReadValueString(GetSettingKey(CTSettingKey.Language), "SFDCT_Default"));
             Set(CTSettingKey.SpectatorsMaximum, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SpectatorsMaximum), 4, 0, 4));
             Set(CTSettingKey.SpectatorsOnlyModerators, handler.ReadValueBool(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), true));
@@ -110,7 +108,6 @@ internal static class SFDCTConfig
         Set(CTSettingKey.LowHealthHurtLevel1Threshold, 0.25f);
         Set(CTSettingKey.LowHealthHurtLevel2Threshold, 0.12f);
         Set(CTSettingKey.HideFilmgrain, false);
-        Set(CTSettingKey.DisableClockTicking, true);
         Set(CTSettingKey.Language, "SFDCT_Default");
         Set(CTSettingKey.SpectatorsMaximum, 4);
         Set(CTSettingKey.SpectatorsOnlyModerators, true);
@@ -145,7 +142,6 @@ internal static class SFDCTConfig
         handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel1Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold));//, 0.25f);
         handler.ReadLine(GetSettingKey(CTSettingKey.LowHealthHurtLevel2Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold));//, 0.12f);
         handler.ReadLine(GetSettingKey(CTSettingKey.HideFilmgrain), Get<bool>(CTSettingKey.HideFilmgrain));//, false);
-        handler.ReadLine(GetSettingKey(CTSettingKey.DisableClockTicking), Get<bool>(CTSettingKey.DisableClockTicking));//, true);
         handler.ReadLine(GetSettingKey(CTSettingKey.Language), Get<string>(CTSettingKey.Language));//, "SFDCT_Default");
         handler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsMaximum), Get<int>(CTSettingKey.SpectatorsMaximum));//, 4);
         handler.ReadLine(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), Get<bool>(CTSettingKey.SpectatorsOnlyModerators));//, true);
@@ -178,7 +174,6 @@ internal static class SFDCTConfig
             case CTSettingKey.LowHealthHurtLevel2Threshold: return "LOW_HEALTH_HURTLEVEL2_THRESHOLD";
             case CTSettingKey.HideFilmgrain: return "HIDE_FILMGRAIN";
             case CTSettingKey.Language: return "LANGUAGE_FILE_NAME";
-            case CTSettingKey.DisableClockTicking: return "DISABLE_CLOCK_TICKING";
             case CTSettingKey.SpectatorsMaximum: return "SPECTATORS_MAXIMUM";
             case CTSettingKey.SpectatorsOnlyModerators: return "SPECTATORS_ONLY_MODERATORS";
             case CTSettingKey.VoteKickEnabled: return "VOTEKICK_ENABLED";

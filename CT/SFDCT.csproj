@@ -130,7 +130,6 @@
     <Compile Include="Assets\SubContentHandler.cs" />
     <Compile Include="Bootstrap\CoreHandler.cs" />
     <Compile Include="API\Sandbox.cs" />
-    <Compile Include="Bootstrap\TrackHandler.cs" />
     <Compile Include="Bootstrap\LanguageHandler.cs" />
     <Compile Include="Configuration\CTIniHandler.cs" />
     <Compile Include="Configuration\CTSettingKey.cs" />
@@ -152,6 +151,7 @@
     <Compile Include="UI\FilmGrainHandler.cs" />
     <Compile Include="UI\EventHelper.cs" />
     <Compile Include="UI\MenuItems\SFDCTMenuItemDropdownColor.cs" />
+    <Compile Include="UI\Panels\SFDCTConfirmMultiplePanel.cs" />
     <Compile Include="UI\Panels\SFDCTCreditsPanel.cs" />
     <Compile Include="UI\Panels\SFDCTDropdownColorPanel.cs" />
     <Compile Include="UI\Panels\SFDCTSettingsPanel.cs" />
@@ -159,6 +159,7 @@
     <Compile Include="Game\WorldHandler.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Editor\MapData.cs" />
+    <Compile Include="UI\Panels\SFDCTSubContentPanel.cs" />
     <Compile Include="UI\ServerBrowserHandler.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

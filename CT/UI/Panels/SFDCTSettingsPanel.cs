@@ -27,7 +27,6 @@ internal class SFDCTSettingsPanel : Panel
     private MenuItemSlider m_menuItemLowHealthHurtLevel1Threshold;
     private MenuItemSlider m_menuItemLowHealthHurtLevel2Threshold;
     private MenuItemDropdown m_menuItemHideFilmgrain;
-    private MenuItemDropdown m_menuItemDisableClockTicking;
     private MenuItemDropdown m_menuItemLanguage;
     private MenuItemSlider m_menuItemSpectatorsMaximum;
     private MenuItemDropdown m_menuItemSpectatorsOnlyModerators;
@@ -36,6 +35,7 @@ internal class SFDCTSettingsPanel : Panel
     private MenuItemSlider m_menuItemVoteKickSuccessCooldown;
     private SFDCTMenuItemDropdownColor m_menuItemPrimaryColor;
     private MenuItemText m_menuItemPrimaryColorHex;
+    private MenuItemButton m_menuItemSubContentFolders;
     private MenuItemDropdown m_menuItemSubContentEnabled;
     private bool m_settingsNeedGameRestart;
 
@@ -54,7 +54,6 @@ internal class SFDCTSettingsPanel : Panel
     private float m_originalLowHealthHurtLevel1Threshold = SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold);
     private float m_originalLowHealthHurtLevel2Threshold = SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold);
     private bool m_originalHideFilmgrain = SFDCTConfig.Get<bool>(CTSettingKey.HideFilmgrain);
-    private bool m_originalDisableClockTicking = SFDCTConfig.Get<bool>(CTSettingKey.DisableClockTicking);
     private string m_originalLanguage = SFDCTConfig.Get<string>(CTSettingKey.Language);
     private int m_originalSpectatorsMaximum = SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum);
     private bool m_originalSpectatorsOnlyModerators = SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators);
@@ -66,7 +65,7 @@ internal class SFDCTSettingsPanel : Panel
     private string m_originalSubContentEnabledFolders = SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders);
     private string m_originalPrimaryColorHex = Constants.COLORS.MENU_BLUE.ToHex();
 
-    public SFDCTSettingsPanel() : base("SFDCT SETTINGS", 500, 500)
+    public SFDCTSettingsPanel() : base(LanguageHelper.GetText("sfdct.setting.header"), 500, 500)
     {
         m_menu = new Menu(new Vector2(0, 50), Width, Height - 50, this, []);
         m_settingsNeedGameRestart = false;
@@ -283,16 +282,6 @@ internal class SFDCTSettingsPanel : Panel
         }));
         m_menu.Add(m_menuItemHideFilmgrain);
 
-        m_menuItemDisableClockTicking = new(LanguageHelper.GetText("sfdct.setting.name.disableclockticking"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemDisableClockTicking.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.DisableClockTicking) ? 0 : 1);
-        m_menuItemDisableClockTicking.DropdownItemVisibleCount = 2;
-        m_menuItemDisableClockTicking.Tooltip = LanguageHelper.GetText("sfdct.setting.help.disableclockticking");
-        EventHelper.Add(m_menuItemDisableClockTicking, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.DisableClockTicking, m_menuItemDisableClockTicking.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemDisableClockTicking);
-
         var availableSFDCTLanguages = new List<string>();
         availableSFDCTLanguages.AddRange(LanguageFileTranslator.m_languageFileMappings.Keys);
         for (int i = availableSFDCTLanguages.Count - 1; i >= 0; i--)
@@ -305,6 +294,19 @@ internal class SFDCTSettingsPanel : Panel
             }
         }
 
+        m_menuItemLanguage = new(LanguageHelper.GetText("sfdct.setting.name.language"), [.. availableSFDCTLanguages]);
+        m_menuItemLanguage.SetStartValue(Math.Max(0, availableSFDCTLanguages.IndexOf(SFDCTConfig.Get<string>(CTSettingKey.Language))));
+        m_menuItemLanguage.DropdownItemVisibleCount = availableSFDCTLanguages.Count;
+        m_menuItemLanguage.Tooltip = LanguageHelper.GetText("sfdct.setting.help.language");
+        EventHelper.Add(m_menuItemLanguage, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
+        {
+            m_settingsNeedGameRestart = true;
+            SFDCTConfig.Set<string>(CTSettingKey.Language, m_menuItemLanguage.Value);
+        }));
+        m_menu.Add(m_menuItemLanguage);
+
+        m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.subcontent")));
+
         m_menuItemSubContentEnabled = new(LanguageHelper.GetText("sfdct.setting.name.subcontentenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
         m_menuItemSubContentEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SubContent) ? 0 : 1);
         m_menuItemSubContentEnabled.DropdownItemVisibleCount = 2;
@@ -316,16 +318,11 @@ internal class SFDCTSettingsPanel : Panel
         }));
         m_menu.Add(m_menuItemSubContentEnabled);
 
-        m_menuItemLanguage = new(LanguageHelper.GetText("sfdct.setting.name.language"), [.. availableSFDCTLanguages]);
-        m_menuItemLanguage.SetStartValue(Math.Max(0, availableSFDCTLanguages.IndexOf(SFDCTConfig.Get<string>(CTSettingKey.Language))));
-        m_menuItemLanguage.DropdownItemVisibleCount = availableSFDCTLanguages.Count;
-        m_menuItemLanguage.Tooltip = LanguageHelper.GetText("sfdct.setting.help.language");
-        EventHelper.Add(m_menuItemLanguage, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
+        m_menuItemSubContentFolders = new(LanguageHelper.GetText("sfdct.setting.name.subcontentfolders"), (object _) =>
         {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<string>(CTSettingKey.Language, m_menuItemLanguage.Value);
-        }));
-        m_menu.Add(m_menuItemLanguage);
+            OpenSubPanel(new SFDCTSubContentPanel());
+        }, MenuIcons.Settings);
+        m_menu.Add(m_menuItemSubContentFolders);
 
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.primarycolor")));
 
@@ -425,7 +422,6 @@ internal class SFDCTSettingsPanel : Panel
             SFDCTConfig.Set(CTSettingKey.LowHealthHurtLevel1Threshold, m_originalLowHealthHurtLevel1Threshold);
             SFDCTConfig.Set(CTSettingKey.LowHealthHurtLevel2Threshold, m_originalLowHealthHurtLevel2Threshold);
             SFDCTConfig.Set(CTSettingKey.HideFilmgrain, m_originalHideFilmgrain);
-            SFDCTConfig.Set(CTSettingKey.DisableClockTicking, m_originalDisableClockTicking);
             SFDCTConfig.Set(CTSettingKey.Language, m_originalLanguage);
             SFDCTConfig.Set(CTSettingKey.SpectatorsMaximum, m_originalSpectatorsMaximum);
             SFDCTConfig.Set(CTSettingKey.SpectatorsOnlyModerators, m_originalSpectatorsOnlyModerators);
