@@ -9,13 +9,22 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class Security
 {
-    internal static bool FilterSFDGameServer(SFD.SFDOnlineServices.SFDGameServer gameServer)
+    internal static bool IsInvalidGameServer(SFD.SFDOnlineServices.SFDGameServer gameServer)
     {
-        return gameServer == null ||
-                gameServer.MaxPlayers == 0 || gameServer.MaxPlayers > 16 ||
-                gameServer.Players > gameServer.MaxPlayers ||
-                gameServer.Bots > gameServer.MaxPlayers || gameServer.Bots + gameServer.Players > gameServer.MaxPlayers ||
-                gameServer.GameName?.Length > 24 || gameServer.GameName?.Length < 3;
+        if (gameServer == null) return true;
+
+        bool invalidMaxPlayers = gameServer.MaxPlayers == 0
+                                    || gameServer.MaxPlayers > 16;
+
+        bool invalidPlayerCount = gameServer.Players > gameServer.MaxPlayers
+                                    || gameServer.Bots > gameServer.MaxPlayers
+                                    || (gameServer.Bots + gameServer.Players) > gameServer.MaxPlayers;
+
+        bool invalidNameLength = gameServer.GameName == null
+                                    || gameServer.GameName.Length < 3
+                                    || gameServer.GameName.Length > 24;
+
+        return invalidMaxPlayers || invalidPlayerCount || invalidNameLength;
     }
 
     // This allows the DS server to bypass the ReadAccountData check in
@@ -59,11 +68,7 @@ internal static class Security
         if (!__result) return;
 
         // Try to stop invisible/empty accounts
-        var accName = accountName;
-        accName = accName.Replace(Environment.NewLine, "");
-        accName = accName.Replace("\r", "");
-        accName = accName.Replace("\n", "");
-        accName = accName.Trim();
+        var accName = accountName.Replace(Environment.NewLine, "").Replace("\r", "").Replace("\n", "").Trim();
         while (accName.Contains("  "))
         {
             accName = accName.Replace("  ", " ");
@@ -109,6 +114,6 @@ internal static class Security
     [HarmonyPatch(typeof(SFD.MenuControls.GameBrowserPanel), nameof(SFD.MenuControls.GameBrowserPanel.IncludeGameInFilter))]
     private static void GameBrowserPanel_IncludeGameInFilter_Postfix_SecurityChecks(ref bool __result, SFD.MenuControls.GameBrowserPanel __instance, SFD.MenuControls.SFDGameServerInstance gameServer)
     {
-        if (__result) __result = !FilterSFDGameServer(gameServer.SFDGameServer);
+        if (__result) __result = !IsInvalidGameServer(gameServer.SFDGameServer);
     }
 }

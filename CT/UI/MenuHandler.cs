@@ -52,20 +52,18 @@ internal static class MenuHandler
     [HarmonyPatch(typeof(MainMenuPanel), MethodType.Constructor)]
     private static void MainMenuPanel_Constructor_Postfix_InsertSFDCTOption(MainMenuPanel __instance)
     {
-        // if (!SFD.Program.IsGame) return;
-
         var menu = __instance.menu;
-        var sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
 
-        sfdctSettings.Initialize(menu);
+        sfdctMenuItem.Initialize(menu);
 
         __instance.Height += 1;
 
         menu.Height += 1;
-        menu.Items.Insert(Math.Max(menu.Items.Count - 2, 0), sfdctSettings);
+        menu.Items.Insert(Math.Max(menu.Items.Count - 2, 0), sfdctMenuItem);
 
         __instance.UpdatePosition();
     }
@@ -75,18 +73,21 @@ internal static class MenuHandler
     private static void GameMenuPanel_Constructor_Postfix_InsertExtraOptions(GameMenuPanel __instance)
     {
         var menu = (Menu)__instance.members[0];
-        var sfdctSettings = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
 
-        sfdctSettings.Initialize(menu);
+        sfdctMenuItem.Initialize(menu);
 
         menu.Height += 1;
-        menu.Items.Insert(menu.Items.Count - 1, sfdctSettings);
+        menu.Items.Insert(menu.Items.Count - 1, sfdctMenuItem);
 
         menu.NeighborUpId = 5;
         menu.NeighborDownId = 4;
+
+        int[] neighborUpMap = { 2, 3, 4, 0, 6, 7, 8, 1 };
+        int[] neighborDownMap = { 8, 1, 2, 3, 0, 5, 6, 7 };
 
         for (int i = 0; i < 8; i++)
         {
@@ -95,41 +96,8 @@ internal static class MenuHandler
 
             __instance.members.Add(playerSlot);
 
-            switch (i)
-            {
-                case 0:
-                    playerSlot.NeighborUpId = 2;
-                    playerSlot.NeighborDownId = 8;
-                    break;
-                case 1:
-                    playerSlot.NeighborUpId = 3;
-                    playerSlot.NeighborDownId = 1;
-                    break;
-                case 2:
-                    playerSlot.NeighborUpId = 4;
-                    playerSlot.NeighborDownId = 2;
-                    break;
-                case 3:
-                    playerSlot.NeighborUpId = 0;
-                    playerSlot.NeighborDownId = 3;
-                    break;
-                case 4:
-                    playerSlot.NeighborUpId = 6;
-                    playerSlot.NeighborDownId = 0;
-                    break;
-                case 5:
-                    playerSlot.NeighborUpId = 7;
-                    playerSlot.NeighborDownId = 5;
-                    break;
-                case 6:
-                    playerSlot.NeighborUpId = 8;
-                    playerSlot.NeighborDownId = 6;
-                    break;
-                case 7:
-                    playerSlot.NeighborUpId = 1;
-                    playerSlot.NeighborDownId = 7;
-                    break;
-            }
+            playerSlot.NeighborUpId = neighborUpMap[i];
+            playerSlot.NeighborDownId = neighborDownMap[i];
         }
     }
 

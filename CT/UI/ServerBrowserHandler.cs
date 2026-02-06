@@ -20,7 +20,7 @@ internal static class ServerBrowserHandler
             {
                 Color color = Constants.COLORS.RED;
 
-                if (Security.FilterSFDGameServer(__instance.m_game.SFDGameServer))
+                if (Security.IsInvalidGameServer(__instance.m_game.SFDGameServer))
                 {
                     color *= 0.25f;
                 }

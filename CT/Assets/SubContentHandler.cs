@@ -25,31 +25,11 @@ internal static partial class SubContentHandler
 {
     internal const string ANIMATIONS_FILE_NAME = "char_anims";
     internal const char SUB_CONTENT_FOLDER_SEPARATOR = '|';
-
-    internal static string[] Folders;
+    internal static string[] Folders = [];
 
     internal static void Load()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent))
-        {
-            Folders = [];
-            return;
-        }
-
-        if (!Directory.Exists(Globals.Paths.SubContent))
-        {
-            try
-            {
-                Directory.CreateDirectory(Globals.Paths.SubContent);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("Exception trying to create sub-content directory");
-                Logger.LogError(ex.Message);
-                Folders = [];
-                return;
-            }
-        }
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return;
 
         List<string> enabledSubContentFolders = [.. GetEnabledFolders()];
         List<string> disabledSubContentFolders = [.. GetDisabledFolders()];
@@ -92,7 +72,7 @@ internal static partial class SubContentHandler
             if (!string.IsNullOrEmpty(folderName) && !string.IsNullOrWhiteSpace(folderName) && Directory.Exists(Path.Combine(Globals.Paths.SubContent, folderName))) continue;
         }
 
-        return deletedFolders.ToArray();
+        return [.. deletedFolders];
     }
 
     internal static string[] GetNewFolders()
