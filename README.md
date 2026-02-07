@@ -1,7 +1,11 @@
 <p align="center"><img src="./docs/gif/sfdct_title_loop.gif" alt="SFDCT Logo"/></p>
 
-> [!NOTE]
-> This mod is in development. Features may be added, removed, or changed.
+> [!CAUTION]
+> SFDCT may get detected as a *malicious program*. This is a known problem.
+>
+> Do ***NOT*** download SFDCT from sources that are not [***THIS***](https://github.com/Liokindy/SFDCT/releases) official repository's releases.
+>
+> If you have doubts, you can manually review the source code and build SFDCT on your own PC.
 
 Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowered.com/app/855860/Superfighters_Deluxe). It adds and tweaks some features while mantaining compatibility with vanilla-SFD. Meaning that a player can join a normal SFD server with SFDCT, and players using normal SFD can join a server being hosted with SFDCT.
 
@@ -14,23 +18,19 @@ Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowe
 
 ## Features
 
+> [!NOTE]
+> Features may be added, removed, or changed. (The wiki may not be up to date so compare its version to yours!)
+
 You can find a detailed list of new features in this repository's Wiki: https://github.com/Liokindy/SFDCT/wiki
 
 ## Installation
 
-> [!CAUTION]
-> SFDCT may get detected as a *malicious program*. This is a known problem.
->
-> Do ***NOT*** download SFDCT from sources that are not [***THIS***](https://github.com/Liokindy/SFDCT/releases) official repository's releases.
->
-> If you have doubts, you can manually review the source code and build SFDCT on your own PC.
+> [!IMPORTANT]
+> SFDCT releases will ***only*** work in the SFD version specified for that release, any other version of SFD may ***not*** work
 
 1. **DOWNLOAD A RELEASE**
 
-> [!IMPORTANT]
-> SFDCT releases will ***only*** work in the SFD version specified for that release, any other version of SFD will ***not*** work
-
-Extract the contents to Superfighters Deluxe's root folder.
+You can get the [latest **stable** release](https://github.com/Liokindy/SFDCT/releases/latest), or you can check if there's a [latest **pre-release**](https://github.com/Liokindy/SFDCT/releases) instead. Extract the contents to Superfighters Deluxe's folder.
 
 2. **LAUNCH OPTIONS**
 
