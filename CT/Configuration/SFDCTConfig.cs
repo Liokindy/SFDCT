@@ -180,8 +180,8 @@ internal static class SFDCTConfig
             case CTSettingKey.VoteKickSuccessCooldown: return "VOTEKICK_SUCCESS_COOLDOWN";
             case CTSettingKey.VoteKickFailCooldown: return "VOTEKICK_FAIL_COOLDOWN";
             case CTSettingKey.SubContent: return "SUBCONTENT";
-            case CTSettingKey.SubContentDisabledFolders: return "SUBCONTENT_ENABLED_FOLDERS";
-            case CTSettingKey.SubContentEnabledFolders: return "SUBCONTENT_DISABLED_FOLDERS";
+            case CTSettingKey.SubContentDisabledFolders: return "SUBCONTENT_DISABLED_FOLDERS";
+            case CTSettingKey.SubContentEnabledFolders: return "SUBCONTENT_ENABLED_FOLDERS";
         }
     }
 

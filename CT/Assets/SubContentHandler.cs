@@ -36,18 +36,18 @@ internal static class SubContentHandler
         List<string> enabledSubContentFolders = [.. GetEnabledFolders()];
         List<string> disabledSubContentFolders = [.. GetDisabledFolders()];
 
-        // Enable new sub content
         foreach (string folderName in GetNewFolders())
         {
             Logger.LogInfo($"[SUB-CONTENT] Adding new folder: {folderName}");
             enabledSubContentFolders.Add(folderName);
         }
 
-        // Remove sub content that does not exist
         foreach (string folderName in GetDeletedFolders())
         {
-            if (enabledSubContentFolders.Contains(folderName)) enabledSubContentFolders.Remove(folderName);
-            if (disabledSubContentFolders.Contains(folderName)) disabledSubContentFolders.Remove(folderName);
+            if (enabledSubContentFolders.Remove(folderName) | disabledSubContentFolders.Remove(folderName))
+            {
+                Logger.LogInfo($"[SUB-CONTENT] Removing deleted folder: {folderName}");
+            }
         }
 
         SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, string.Join("|", enabledSubContentFolders));
@@ -64,17 +64,9 @@ internal static class SubContentHandler
 
     internal static string[] GetDeletedFolders()
     {
-        string[] enabledFolders = GetEnabledFolders();
-        string[] disabledFolders = GetDisabledFolders();
-        List<string> allFolders = [.. enabledFolders, .. disabledFolders];
-        List<string> deletedFolders = [];
+        List<string> folders = [.. GetEnabledFolders(), .. GetDisabledFolders()];
 
-        foreach (string folderName in allFolders)
-        {
-            if (!string.IsNullOrEmpty(folderName) && !string.IsNullOrWhiteSpace(folderName) && Directory.Exists(Path.Combine(Globals.Paths.SubContent, folderName))) continue;
-        }
-
-        return [.. deletedFolders];
+        return [.. folders.Where((string s) => string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s) || !Directory.Exists(Path.Combine(Globals.Paths.SubContent, s)))];
     }
 
     internal static string[] GetNewFolders()

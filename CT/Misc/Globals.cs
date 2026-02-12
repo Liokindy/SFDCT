@@ -17,7 +17,7 @@ internal static class Globals
 
     internal readonly struct Version
     {
-        internal const string SFDCT = "v.2.10.0";
+        internal const string SFDCT = "v.2.11.0";
         internal const string SFD = "v.1.4.2";
     }
 }
