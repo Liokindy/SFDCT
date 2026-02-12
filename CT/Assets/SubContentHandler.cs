@@ -6,6 +6,7 @@ using SFD;
 using SFD.Code;
 using SFD.Colors;
 using SFD.Core;
+using SFD.Loading;
 using SFD.Parser;
 using SFD.Sounds;
 using SFD.Tiles;
@@ -17,11 +18,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SFDCT.Assets;
 
 [HarmonyPatch]
-internal static partial class SubContentHandler
+internal static class SubContentHandler
 {
     internal const string ANIMATIONS_FILE_NAME = "char_anims";
     internal const char SUB_CONTENT_FOLDER_SEPARATOR = '|';
@@ -429,27 +431,14 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [ANIMATIONS]: " + originType);
+            Logger.LogInfo($"LOADING [ANIMATIONS]: {originType}");
 
-            switch (originType)
+            foreach (var filePath in filePaths)
             {
-                case ContentOriginType.Official:
-                    foreach (var filePath in filePaths)
-                    {
-                        AnimationsData animationsData = Content.Load<AnimationsData>(filePath);
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading animations file '{filePath}'");
+                AnimationsData animationsData = Content.Load<AnimationsData>(filePath);
 
-                        CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
-                    }
-                    break;
-                case ContentOriginType.Documents:
-                case ContentOriginType.SubContent:
-                    foreach (var filePath in filePaths)
-                    {
-                        AnimationsData animationsData = Content.Load<AnimationsData>(filePath);
-
-                        CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
-                    }
-                    break;
+                CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
             }
         }, ANIMATIONS_FILE_NAME, SearchOption.AllDirectories, Constants.Paths.DATA_ANIMATIONS);
 
@@ -478,29 +467,17 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [TEXTURES]: " + originType);
+            Logger.LogInfo($"LOADING [TEXTURES]: {originType}");
 
-            switch (originType)
+            foreach (var filePath in filePaths)
             {
-                case ContentOriginType.Official:
-                    foreach (var filePath in filePaths)
-                    {
-                        textureFiles.Add(Path.GetFileNameWithoutExtension(filePath), filePath);
-                    }
-                    break;
-                case ContentOriginType.Documents:
-                case ContentOriginType.SubContent:
-                    foreach (var filePath in filePaths)
-                    {
-                        AddOrSetDictionaryValue(textureFiles, Path.GetFileNameWithoutExtension(filePath), filePath);
-                    }
-                    break;
+                AddOrSetDictionaryValue(textureFiles, Path.GetFileNameWithoutExtension(filePath), filePath);
             }
         }, "*.png", SearchOption.AllDirectories, Constants.Paths.DATA_IMAGES);
 
         foreach (var filePath in textureFiles.Values)
         {
-            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading texture: " + filePath);
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading texture: {filePath}");
 
             LoadTexture(filePath);
         }
@@ -531,7 +508,7 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [ITEMS]: " + originType);
+            Logger.LogInfo($"LOADING [ITEMS]: {originType}");
 
             switch (originType)
             {
@@ -594,23 +571,11 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [COLOR-PALETTES]: " + originType);
+            Logger.LogInfo($"LOADING [COLOR-PALETTES]: {originType}");
 
-            switch (originType)
+            foreach (var filePath in filePaths)
             {
-                case ContentOriginType.Official:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
-                case ContentOriginType.Documents:
-                case ContentOriginType.SubContent:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
+                SFDXReader.ReadDataFromSFDXFile(filePath);
             }
 
             CopyAndReplaceDictionary(ColorPaletteDatabase.m_palettes, colorPalettes);
@@ -632,7 +597,7 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [COLOR]: " + originType);
+            Logger.LogInfo($"LOADING [COLOR]: {originType}");
 
             switch (originType)
             {
@@ -683,7 +648,7 @@ internal static partial class SubContentHandler
         int soundFileCount = 0;
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [SOUNDS]: " + originType);
+            Logger.LogInfo($"LOADING [SOUNDS]: {originType}");
             soundFileCount++;
 
             switch (originType)
@@ -754,23 +719,11 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [TILES]: " + originType);
+            Logger.LogInfo($"LOADING [TILES]: {originType}");
 
-            switch (originType)
+            foreach (var filePath in filePaths)
             {
-                case ContentOriginType.Official:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
-                case ContentOriginType.Documents:
-                case ContentOriginType.SubContent:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
+                SFDXReader.ReadDataFromSFDXFile(filePath);
             }
 
             CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
@@ -780,23 +733,11 @@ internal static partial class SubContentHandler
 
         EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
         {
-            Logger.LogInfo($"LOADING [WEAPON-TILES]: " + originType);
+            Logger.LogInfo($"LOADING [WEAPON-TILES]: {originType}");
 
-            switch (originType)
+            foreach (var filePath in filePaths)
             {
-                case ContentOriginType.Official:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
-                case ContentOriginType.Documents:
-                case ContentOriginType.SubContent:
-                    foreach (var filePath in filePaths)
-                    {
-                        SFDXReader.ReadDataFromSFDXFile(filePath);
-                    }
-                    break;
+                SFDXReader.ReadDataFromSFDXFile(filePath);
             }
 
             CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
@@ -810,6 +751,52 @@ internal static partial class SubContentHandler
         }
 
         TileDatabase.Add(new Tile(TileStructure.GetPlayerTileStructure()), true);
+
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BackgroundImage), nameof(BackgroundImage.Load))]
+    private static bool BackgroundImage_Load_Prefix_OverrideLoad()
+    {
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+
+        if (BackgroundImage.m_image != null && !BackgroundImage.m_image.IsDisposed)
+        {
+            BackgroundImage.m_image.Dispose();
+            BackgroundImage.m_image = null;
+        }
+
+        string SFDjpgImagePath = null;
+
+        EnumerateContentFiles((ContentOriginType originType, string folderPath, string[] filePaths) =>
+        {
+            Logger.LogInfo($"LOADING [BACKGROUND-IMAGE]: {originType}");
+
+            if (filePaths.Length > 0)
+            {
+                SFDjpgImagePath = filePaths.Last();
+            }
+        }, "SFD.jpg", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_MISC);
+
+        if (SFDjpgImagePath != null && File.Exists(SFDjpgImagePath))
+        {
+            try
+            {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image: {SFDjpgImagePath}");
+
+                using FileStream fileStream = File.OpenRead(SFDjpgImagePath);
+
+                Utils.WaitForGraphicsDevice();
+                BackgroundImage.m_image = Texture2D.FromStream(GameSFD.Handle.GraphicsDevice, fileStream);
+
+                fileStream.Close();
+            }
+            catch (Exception ex)
+            {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"file '{SFDjpgImagePath}' could not be loaded: " + ex.Message);
+            }
+        }
 
         return false;
     }
