@@ -34,21 +34,25 @@ internal class SFDCTSubContentPanel : Panel
 
         string[] disabledFolders = SubContentHandler.GetDisabledFolders();
         string[] enabledFolders = SubContentHandler.GetEnabledFolders();
+        string[] newFolders = SubContentHandler.GetNewFolders();
 
         m_enabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.on")));
-        foreach (string folderName in enabledFolders)
+        for (int i = enabledFolders.Length - 1; i >= 0; i--)
         {
+            var folderName = enabledFolders[i];
             m_enabledMenu.Add(new MenuItemButton(folderName, folder));
         }
 
-        foreach (string folderName in SubContentHandler.GetNewFolders())
+        for (int i = newFolders.Length - 1; i >= 0; i--)
         {
+            var folderName = newFolders[i];
             m_enabledMenu.Add(new MenuItemButton(folderName, folder));
         }
 
         m_disabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.off")));
-        foreach (string folderName in disabledFolders)
+        for (int i = disabledFolders.Length - 1; i >= 0; i--)
         {
+            var folderName = disabledFolders[i];
             m_disabledMenu.Add(new MenuItemButton(folderName, folder));
         }
     }
@@ -106,41 +110,119 @@ internal class SFDCTSubContentPanel : Panel
         }
         else if (menuItem.ParentMenu == m_enabledMenu)
         {
-            OpenSubPanel(new SFDCTConfirmMultiplePanel(menuItem.lblName.Text,
-            [
-                "Back",
-                "Disable",
-                "Move Up",
-                "Move Down"
-            ], [
-                (object _) =>
-                {
-                    CloseSubPanel();
-                },
-                (object _) =>
-                {
-                    m_changed = true;
-                    SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
-                    CloseSubPanel();
-                },
-                (object _) =>
-                {
-                    m_changed = true;
-                    MoveItem(m_enabledMenu, menuItem, true);
-                    CloseSubPanel();
-                },
-                (object _) =>
-                {
-                    m_changed = true;
-                    MoveItem(m_enabledMenu, menuItem, false);
-                    CloseSubPanel();
-                }
-            ], [
-                MenuIcons.Cancel,
-                MenuIcons.Settings,
-                null,
-                null
-            ]));
+            string[] optionTexts;
+            ControlEvents.ChooseEvent[] optionEvents;
+            string[] optionIcons;
+
+            if (menuItem.ParentMenu.IndexOf(menuItem) == 1)
+            {
+                optionTexts = [
+                    "Back",
+                    "Disable",
+                    "Move Down"
+                ];
+
+                optionEvents = [
+                    (object _) =>
+                    {
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        MoveItem(m_enabledMenu, menuItem, false);
+                        CloseSubPanel();
+                    }
+                ];
+
+                optionIcons = [
+                    MenuIcons.Cancel,
+                    MenuIcons.Settings,
+                    null
+                ];
+            }
+            else if (menuItem.ParentMenu.IndexOf(menuItem) == menuItem.ParentMenu.ItemCount - 1)
+            {
+                optionTexts = [
+                    "Back",
+                    "Disable",
+                    "Move Up",
+                ];
+
+                optionEvents = [
+                    (object _) =>
+                    {
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        MoveItem(m_enabledMenu, menuItem, true);
+                        CloseSubPanel();
+                    }
+                ];
+
+                optionIcons = [
+                    MenuIcons.Cancel,
+                    MenuIcons.Settings,
+                    null,
+                ];
+            }
+            else
+            {
+                optionTexts = [
+                    "Back",
+                    "Disable",
+                    "Move Up",
+                    "Move Down"
+                ];
+
+                optionEvents = [
+                    (object _) =>
+                    {
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        MoveItem(m_enabledMenu, menuItem, true);
+                        CloseSubPanel();
+                    },
+                    (object _) =>
+                    {
+                        m_changed = true;
+                        MoveItem(m_enabledMenu, menuItem, false);
+                        CloseSubPanel();
+                    }
+                ];
+
+                optionIcons = [
+                    MenuIcons.Cancel,
+                    MenuIcons.Settings,
+                    null,
+                    null
+                ];
+            }
+
+            OpenSubPanel(new SFDCTConfirmMultiplePanel(menuItem.lblName.Text, optionTexts, optionEvents, optionIcons));
         }
     }
 
@@ -149,8 +231,9 @@ internal class SFDCTSubContentPanel : Panel
         if (m_changed)
         {
             string enabledFolders = "";
-            foreach (var menuItem in m_enabledMenu.Items)
+            for (int i = m_enabledMenu.ItemCount - 1; i >= 0; i--)
             {
+                var menuItem = m_enabledMenu.Items[i];
                 if (menuItem is MenuItemSeparator) continue;
                 if (menuItem is not MenuItemButton menuItemButton) continue;
 
@@ -159,8 +242,9 @@ internal class SFDCTSubContentPanel : Panel
             enabledFolders += SubContentHandler.SUB_CONTENT_FOLDER_SEPARATOR;
 
             string disabledFolders = "";
-            foreach (var menuItem in m_disabledMenu.Items)
+            for (int i = m_disabledMenu.ItemCount - 1; i >= 0; i--)
             {
+                var menuItem = m_disabledMenu.Items[i];
                 if (menuItem is MenuItemSeparator) continue;
                 if (menuItem is not MenuItemButton menuItemButton) continue;
 
