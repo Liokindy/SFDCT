@@ -111,7 +111,7 @@ internal static class ServerCommands
             case "L":
             case "LIST":
                 header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.list");
-                message1 = LanguageHelper.GetText("sfdct.generic.list");
+                message1 = "- {0}";
 
                 args.Feedback.Add(new(args.SenderGameUser, header1, colLightGreen, args.SenderGameUser));
                 args.Feedback.Add(new(args.SenderGameUser, string.Format(message1, string.Join(" ", Constants.MODDERATOR_COMMANDS)), colLightGreen * 0.5f, args.SenderGameUser));
@@ -133,7 +133,7 @@ internal static class ServerCommands
                 if (commands.Count > 0)
                 {
                     header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.remove");
-                    message1 = LanguageHelper.GetText("sfdct.generic.list");
+                    message1 = "- {0}";
 
                     int removedCount = 0;
                     shouldSave = true;
@@ -161,7 +161,7 @@ internal static class ServerCommands
                 if (commands.Count > 0)
                 {
                     header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.add");
-                    message1 = LanguageHelper.GetText("sfdct.generic.list");
+                    message1 = "- {0}";
 
                     int addedCount = 0;
                     shouldSave = true;
@@ -188,7 +188,7 @@ internal static class ServerCommands
                 {
                     header1 = LanguageHelper.GetText("sfdct.command.modcommands.header.try.true");
                     header2 = LanguageHelper.GetText("sfdct.command.modcommands.header.try.false");
-                    message1 = LanguageHelper.GetText("sfdct.generic.list");
+                    message1 = "- {0}";
 
                     List<string> canUseList = [];
                     List<string> canNotUseList = [];

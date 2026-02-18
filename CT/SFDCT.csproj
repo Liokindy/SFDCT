@@ -146,6 +146,7 @@
     <Compile Include="Sync\Data\SFDCTMessageData.cs" />
     <Compile Include="Sync\ServerHandler.cs" />
     <Compile Include="Sync\MessageHandler.cs" />
+    <Compile Include="UI\ChatHandler.cs" />
     <Compile Include="UI\FilmGrainHandler.cs" />
     <Compile Include="UI\EventHelper.cs" />
     <Compile Include="UI\MenuItems\SFDCTMenuItemDropdownColor.cs" />

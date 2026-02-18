@@ -32,6 +32,10 @@ internal enum CTSettingKey
     VoteKickSuccessCooldown,
     VoteKickFailCooldown,
 
+    ChatWidth,
+    ChatHeight,
+    ChatExtraHeight,
+
     SubContent,
     SubContentEnabledFolders,
     SubContentDisabledFolders,

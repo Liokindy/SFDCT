@@ -94,11 +94,11 @@ internal class SFDCTSubContentPanel : Panel
                 "Back",
                 "Enable"
             ], [
-                (object _) =>
+                _ =>
                 {
                     CloseSubPanel();
                 },
-                (object _) =>
+                _ =>
                 {
                     m_changed = true;
                     SwapItem(m_disabledMenu, m_enabledMenu, menuItem);
@@ -124,17 +124,17 @@ internal class SFDCTSubContentPanel : Panel
                 ];
 
                 optionEvents = [
-                    (object _) =>
+                    _ =>
                     {
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         MoveItem(m_enabledMenu, menuItem, false);
@@ -157,17 +157,17 @@ internal class SFDCTSubContentPanel : Panel
                 ];
 
                 optionEvents = [
-                    (object _) =>
+                    _ =>
                     {
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         MoveItem(m_enabledMenu, menuItem, true);
@@ -191,23 +191,23 @@ internal class SFDCTSubContentPanel : Panel
                 ];
 
                 optionEvents = [
-                    (object _) =>
+                    _ =>
                     {
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         SwapItem(m_enabledMenu, m_disabledMenu, menuItem);
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         MoveItem(m_enabledMenu, menuItem, true);
                         CloseSubPanel();
                     },
-                    (object _) =>
+                    _ =>
                     {
                         m_changed = true;
                         MoveItem(m_enabledMenu, menuItem, false);

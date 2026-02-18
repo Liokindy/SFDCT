@@ -1,9 +1,5 @@
 ﻿<Texts name="SFDCT Default">
 	<!-- Language: en -->
-	<Text id="sfdct.generic.list">- {0}</Text>
-	<Text id="sfdct.generic.disable">Disable</Text>
-	<Text id="sfdct.generic.enable">Enable</Text>
-
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
 	<Text id="sfdct.command.players.message.bot">- {0}: '{1}'</Text>
 	<Text id="sfdct.command.debugmouse.message">Debug Mouse set to {0}</Text>
@@ -77,30 +73,18 @@
 	<Text id="sfdct.setting.name.primarycolorhex">HEX-CODE</Text>
 	<Text id="sfdct.setting.name.subcontentenabled">ENABLED</Text>
 	<Text id="sfdct.setting.name.subcontentfolders">CONFIGURE</Text>
-	
-	<Text id="sfdct.setting.help.soundpanningenabled">Enables or disables sound-panning</Text>
-	<Text id="sfdct.setting.help.soundpanningstrength">Controls the maximum panning of sounds</Text>
-	<Text id="sfdct.setting.help.soundpanningforcescreenspace">Controls if sound-panning is calculated using screen-space positions instead of world distances</Text>
+	<Text id="sfdct.setting.name.chatwidth">CHAT WIDTH</Text>
+	<Text id="sfdct.setting.name.chatheight">CHAT HEIGHT</Text>
+	<Text id="sfdct.setting.name.chatextraheight">CHAT EXTRA-HEIGHT</Text>
+
 	<Text id="sfdct.setting.help.soundpanninginworldthreshold">Controls the threshold of sound-panning, sounds closer than this will not be panned</Text>
 	<Text id="sfdct.setting.help.soundpanninginworlddistance">Controls the distance of sound-panning, sounds further than this will be fully panned</Text>
-	<Text id="sfdct.setting.help.soundattenuationenabled">Enables or disables sound-attenuation</Text>
 	<Text id="sfdct.setting.help.soundattenuationmin">Controls the minimum volume of sound-attenuation, sounds volume will be lowered to this amount at max attenuation</Text>
-	<Text id="sfdct.setting.help.soundattenuationforcescreenspace">Controls if sound-attenuation is calculated using screen-space positions instead of world distances</Text>
 	<Text id="sfdct.setting.help.soundattenuationinworldthreshold">Controls the threshold of sound-attenuation, sounds closer than this will not be attenuated</Text>
 	<Text id="sfdct.setting.help.soundattenuationinworlddistance">Controls the distance of sound-attenuation, sounds further than this will be fully attenuated</Text>
-	<Text id="sfdct.setting.help.lowhealthsaturationfactor">Controls the desaturation strength</Text>
-	<Text id="sfdct.setting.help.lowhealththreshold">Controls the desaturation threshold</Text>
-	<Text id="sfdct.setting.help.lowhealthhurtlevel1threshold">Controls the threshold for HurtLevel1 on fighters</Text>
-	<Text id="sfdct.setting.help.lowhealthhurtlevel2threshold">Controls the threshold for HurtLevel2 on fighters</Text>
-	<Text id="sfdct.setting.help.hidefilmgrain">Forcefully hides the FilmGrain even if Effect Level is set to Normal</Text>
-	<Text id="sfdct.setting.help.disableclockticking">Disables a 10% random chance for 'ClockTicking' to play as the game loads on startup</Text>
-	<Text id="sfdct.setting.help.language">Controls the name of the language file used</Text>
-	<Text id="sfdct.setting.help.spectatorsmaximum">Controls the maximum amount of spectators</Text>
 	<Text id="sfdct.setting.help.spectatorsonlymoderators">Controls if only moderators and the host can turn into spectators</Text>
-	<Text id="sfdct.setting.help.votekickenabled">Enables or disables vote-kicking</Text>
-	<Text id="sfdct.setting.help.votekicksuccesscooldown">Controls the cooldown in seconds of vote-kicking on success</Text>
-	<Text id="sfdct.setting.help.votekickfailcooldown">Controls the cooldown in seconds of vote-kicking on failure</Text>
 	<Text id="sfdct.setting.help.subcontentenabled">Enables or disables loading any files from "SFDCT/SubContent", sub-content files replace official files when loading, making modifying official content easier without needing to overwrite it</Text>
+	<Text id="sfdct.setting.help.chatextraheight">Extra height added to the chat when typing or pressing the 'SHOW CHAT' key</Text>
 
 	<Text id="sfdct.setting.category.soundpanning">Sound-Panning</Text>
 	<Text id="sfdct.setting.category.soundattenuation">Sound-Attenuation</Text>

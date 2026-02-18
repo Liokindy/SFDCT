@@ -18,19 +18,19 @@ internal class SFDCTCreditsPanel : Panel
     {
         m_menu = new Menu(new Vector2(0, 50), Width, Height, this, null);
 
-        m_buttonAzure = new MenuItemButton("\"Azure\", " + LanguageHelper.GetText("sfdct.credits.category.azure"), (object _) => { });
+        m_buttonAzure = new MenuItemButton("\"Azure\", " + LanguageHelper.GetText("sfdct.credits.category.azure"), _ => { });
         m_buttonAzure.lblName = new Label(m_buttonAzure.lblName.Text, Constants.Font1Outline, Color.White, false);
         m_buttonAzure.EnabledTextColor = CreditColors[0];
         m_menu.Add(m_buttonAzure);
-        m_buttonElDous1 = new MenuItemButton("\"ElDou's 1\", " + LanguageHelper.GetText("sfdct.credits.category.eldous1"), (object _) => { });
+        m_buttonElDous1 = new MenuItemButton("\"ElDou's 1\", " + LanguageHelper.GetText("sfdct.credits.category.eldous1"), _ => { });
         m_buttonElDous1.lblName = new Label(m_buttonElDous1.lblName.Text, Constants.Font1Outline, Color.White, false);
         m_buttonElDous1.EnabledTextColor = CreditColors[1];
         m_menu.Add(m_buttonElDous1);
-        m_buttonLiokindy = new MenuItemButton("\"Liokindy\", " + LanguageHelper.GetText("sfdct.credits.category.liokindy"), (object _) => { });
+        m_buttonLiokindy = new MenuItemButton("\"Liokindy\", " + LanguageHelper.GetText("sfdct.credits.category.liokindy"), _ => { });
         m_buttonLiokindy.lblName = new Label(m_buttonLiokindy.lblName.Text, Constants.Font1Outline, Color.White, false);
         m_buttonLiokindy.EnabledTextColor = CreditColors[2];
         m_menu.Add(m_buttonLiokindy);
-        m_buttonNult = new MenuItemButton("\"Nult\", " + LanguageHelper.GetText("sfdct.credits.category.nult"), (object _) => { });
+        m_buttonNult = new MenuItemButton("\"Nult\", " + LanguageHelper.GetText("sfdct.credits.category.nult"), _ => { });
         m_buttonNult.lblName = new Label(m_buttonNult.lblName.Text, Constants.Font1Outline, Color.White, false);
         m_buttonNult.EnabledTextColor = CreditColors[3];
         m_menu.Add(m_buttonNult);

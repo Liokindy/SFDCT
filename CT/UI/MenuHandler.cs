@@ -38,7 +38,7 @@ internal static class MenuHandler
     private static void MainMenuPanel_Constructor_Postfix_InsertSFDCTOption(MainMenuPanel __instance)
     {
         var menu = __instance.menu;
-        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent(_ =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
@@ -58,7 +58,7 @@ internal static class MenuHandler
     private static void GameMenuPanel_Constructor_Postfix_InsertExtraOptions(GameMenuPanel __instance)
     {
         var menu = (Menu)__instance.members[0];
-        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent((object _) =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent(_ =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
