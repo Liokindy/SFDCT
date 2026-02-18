@@ -67,22 +67,7 @@ internal static class ServerCommands
             return true;
         }
 
-        string message;
-
-        if (args.Origin == HandleCommandOrigin.User)
-        {
-            message = string.Format("[ICO=TEAM_{0}][{1}]{2}:[#] [{3}]{4}",
-                (int)args.SenderGameUser.TeamIcon,
-                Constants.COLORS.GetTeamColor(args.SenderGameUser.TeamIcon, Constants.COLORS.TeamColorType.ChatName).ToHex(),
-                TextMeta.EscapeText(args.SenderGameUser.GetProfileName()),
-                Constants.COLORS.CHAT_ALL_MESSAGE.ToHex(),
-                args.SourceParameters
-            );
-        }
-        else
-        {
-            message = args.SourceParameters;
-        }
+        string message = args.SourceParameters;
 
         server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(message, Color.White, args.SenderGameUser.GetProfileName(), true, args.SenderGameUser.UserIdentifier));
 

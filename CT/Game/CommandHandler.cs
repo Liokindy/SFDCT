@@ -114,11 +114,6 @@ internal static class CommandHandler
             {
                 return ServerCommands.HandleModCommands(server, args, gameInfo);
             }
-
-            if (args.IsCommand("META"))
-            {
-                return ServerCommands.HandleMeta(server, args, gameInfo);
-            }
         }
 
         if (args.ModeratorPrivileges)
@@ -144,6 +139,11 @@ internal static class CommandHandler
             if (IsAndCanUseModeratorCommand(args, "EXEC"))
             {
                 return ServerCommands.HandleExec(server, args, gameInfo);
+            }
+
+            if (IsAndCanUseModeratorCommand(args, "META"))
+            {
+                return ServerCommands.HandleMeta(server, args, gameInfo);
             }
 
             if (gameInfo.GameOwner == GameOwnerEnum.Server)
