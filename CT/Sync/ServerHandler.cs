@@ -22,7 +22,7 @@ internal static class ServerHandler
         get;
         set
         {
-            if (field != value && GameSFD.Handle.Server != null)
+            if (field != value && GameSFD.Handle.Server != null && GameSFD.Handle.Server.Running)
             {
                 var data = new SFDCTMessageData();
                 data.Type = MessageHandler.SFDCTMessageDataType.DebugMouseToggle;
