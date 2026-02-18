@@ -10,7 +10,7 @@ namespace SFDCT.UI.MenuItems;
 
 internal class SFDCTMenuItemDropdownColor : MenuItemButton
 {
-    internal SFDCTMenuItemDropdownColor(string name, Color color, Color[] availableColors) : base(name, null)
+    internal SFDCTMenuItemDropdownColor(string name, Color color, params Color[] availableColors) : base(name, null)
     {
         ChooseEvent = (ControlEvents.ChooseEvent)Delegate.Combine(ChooseEvent, new ControlEvents.ChooseEvent(openDropdownColor));
 

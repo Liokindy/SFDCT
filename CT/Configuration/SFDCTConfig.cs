@@ -12,7 +12,7 @@ internal static class SFDCTConfig
 
     internal static void SaveFile()
     {
-        CTIniHandler handler = new();
+        var handler = new CTIniHandler();
 
         SaveFile(handler);
 
@@ -28,7 +28,7 @@ internal static class SFDCTConfig
     internal static void LoadFile()
     {
         SetDefault();
-        CTIniHandler handler = new();
+        var handler = new CTIniHandler();
 
         if (!File.Exists(Globals.Paths.ConfigurationIni))
         {

@@ -18,7 +18,7 @@ internal class SFDCTConfirmMultiplePanel : Panel
         m_label.SetScrollingText(true);
         m_events = optionEvents;
 
-        Menu menu = new(new(0, 32), Width, Menu.ITEM_HEIGHT * optionTexts.Length, this);
+        var menu = new Menu(new(0, 32), Width, Menu.ITEM_HEIGHT * optionTexts.Length, this);
         for (int i = 0; i < optionTexts.Length; i++)
         {
             string optionText = optionTexts[i].ToUpperInvariant();

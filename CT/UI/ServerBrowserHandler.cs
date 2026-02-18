@@ -1,6 +1,5 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework;
-using SFD;
 using SFD.MenuControls;
 
 namespace SFDCT.OnlineServices;
@@ -8,53 +7,63 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class ServerBrowserHandler
 {
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
-    private static bool GameBrowserMenuItem_Setter_Game_Prefix_CustomServerColors(SFDGameServerInstance value, GameBrowserMenuItem __instance)
+    private static void GameBrowserMenuItem_Setter_Game_Postfix_CustomServerColors(GameBrowserMenuItem __instance)
     {
-        if (__instance.m_game != value)
+        if (__instance.labels != null) return;
+        if (__instance.m_game != null) return;
+
+        bool isInvalid = false;
+        bool isSFR = false;
+        bool isEmpty = false;
+        bool isFull = false;
+
+        if (Security.IsInvalidGameServer(__instance.m_game))
         {
-            __instance.m_game = value;
-
-            if (__instance.labels != null && __instance.m_game != null && __instance.m_game.SFDGameServer != null)
+            isInvalid = true;
+        }
+        else
+        {
+            if (__instance.m_game.Version.StartsWith("v.2"))
             {
-                Color color = Constants.COLORS.RED;
+                isSFR = true;
+            }
 
-                if (Security.IsInvalidGameServer(__instance.m_game.SFDGameServer))
-                {
-                    color *= 0.25f;
-                }
-                else
-                {
-                    if (__instance.m_game.SFDGameServer.Version == Constants.VERSION)
-                    {
-                        color = Color.White;
-                    }
-
-                    // Check if it's an SFR server
-                    if (__instance.m_game.SFDGameServer.Version.StartsWith("v.2"))
-                    {
-                        color = new Color(222, 66, 165);
-                    }
-
-                    // Empty servers are darkened and full servers are slightly darkened
-                    if (__instance.m_game.SFDGameServer.Players <= 0)
-                    {
-                        color *= 0.50f;
-                    }
-                    else if (__instance.m_game.SFDGameServer.Players >= __instance.m_game.SFDGameServer.MaxPlayers)
-                    {
-                        color *= 0.70f;
-                    }
-                }
-
-                foreach (Label label in __instance.labels)
-                {
-                    label.Color = color;
-                }
+            if (__instance.m_game.Players <= 0)
+            {
+                isEmpty = true;
+            }
+            else if (__instance.m_game.Players >= __instance.m_game.MaxAvailableSlots)
+            {
+                isFull = true;
             }
         }
 
-        return false;
+        foreach (Label label in __instance.labels)
+        {
+            if (isSFR)
+            {
+                label.Color = new Color(222, 66, 165);
+            }
+
+            if (isInvalid)
+            {
+                label.Color *= 0.25f;
+                continue;
+            }
+
+            if (isEmpty)
+            {
+                label.Color *= 0.5f;
+                continue;
+            }
+
+            if (isFull)
+            {
+                label.Color *= 0.7f;
+                continue;
+            }
+        }
     }
 }

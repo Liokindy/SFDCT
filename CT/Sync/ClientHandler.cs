@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using Lidgren.Network;
+using Networking.LidgrenAdapter;
 using SFD;
 using SFDCT.Sync.Data;
 

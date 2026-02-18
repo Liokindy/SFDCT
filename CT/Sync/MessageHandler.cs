@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
-using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using Networking.LidgrenAdapter;
+using SDR.Networking;
 using SFD;
 using SFDCT.Sync.Data;
 
@@ -52,7 +53,7 @@ internal static class MessageHandler
     internal static SFDCTMessageData Read(NetIncomingMessage incomingMessage, NetMessage.MessageData messageData)
     {
         // Logger.LogDebug("Reading SFDCTMessage");
-        SFDCTMessageData data = new();
+        var data = new SFDCTMessageData();
 
         data.Type = (SFDCTMessageDataType)incomingMessage.ReadByte();
         switch (data.Type)

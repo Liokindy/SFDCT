@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.States;
+using SteamLayer.SteamManagers;
+using Steamworks;
 
 namespace SFDCT.OnlineServices;
 
@@ -14,7 +16,15 @@ internal static class DSPreviewHandler
     {
         // If the host becomes a spectator it suddenly counts as the DS preview,
         // check if the account name is empty too
-        __result = __instance.IsHost && __instance.JoinedAsSpectator && string.IsNullOrEmpty(__instance.AccountName);
+
+        string accountName = string.Empty;
+        GameInfo gameInfo = LobbyCommandHandler.GetLobbyGameInfo();
+        if (gameInfo != null && gameInfo.AccountNameInfo.TryGetAccountID(__instance.UserIdentifier, out SteamId steamId))
+        {
+            accountName = SteamIdNameManager.Instance.GetAccountName(steamId);
+        }
+
+        __result = __instance.IsHost && __instance.JoinedAsSpectator && string.IsNullOrEmpty(accountName);
         return false;
     }
 

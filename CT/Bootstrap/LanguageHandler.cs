@@ -6,12 +6,17 @@ using SFDCT.Misc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SFDCT.Bootstrap;
 
 [HarmonyPatch]
 internal static class LanguageHandler
 {
+    internal static string[] GetAvailableLanguages() => LanguageFileTranslator.m_languageFileMappings.Keys
+                                                        .Where(lang => lang.StartsWith("SFDCT", StringComparison.OrdinalIgnoreCase))
+                                                        .ToArray();
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LanguageFileTranslator), nameof(LanguageFileTranslator.ListLanguageNames))]
     private static void LanguageFileTranslator_ListLanguageNames_Postfix_RemoveSFDCTLanguages(ref List<string> __result)

@@ -1,6 +1,6 @@
 ﻿using Box2D.XNA;
 using HarmonyLib;
-using Lidgren.Network;
+using Networking.LidgrenAdapter;
 using SFD;
 using SFD.States;
 using SFDCT.Configuration;
@@ -103,7 +103,7 @@ internal static class WorldHandler
                                     }
                                 }
 
-                                MouseJointDef mouseJointDef = new();
+                                var mouseJointDef = new MouseJointDef();
                                 mouseJointDef.target = debugMouse.Box2DPosition;
                                 mouseJointDef.localAnchor = objectAtMousePosition.Body.GetLocalPoint(mouseJointDef.target);
                                 mouseJointDef.maxForce = mass * 150;

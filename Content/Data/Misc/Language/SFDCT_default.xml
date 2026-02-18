@@ -5,8 +5,7 @@
 	<Text id="sfdct.generic.enable">Enable</Text>
 
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
-	<Text id="sfdct.command.players.message.bot">- {0}: '{1}' {3}</Text>
-	<Text id="sfdct.command.players.footer">Found {0} users</Text>
+	<Text id="sfdct.command.players.message.bot">- {0}: '{1}'</Text>
 	<Text id="sfdct.command.debugmouse.message">Debug Mouse set to {0}</Text>
 	<Text id="sfdct.command.debugmousemoderators.message">Debug Mouse allowed for moderators set to {0}</Text>
 	<Text id="sfdct.command.modcommands.header.help">Use this command to manage the moderator commands list, syntax is '/MODCMD [L/LIST][C/CLEAR][R/REMOVE][A/ADD][T/TRY] [...]'</Text>

@@ -89,7 +89,7 @@ internal static class Program
             Logger.LogWarn("0. SFDCT; 1. SFD; E. SFDCT (Map Editor); S. SFDCT (Dedicated Server)");
             Logger.LogWarn("Start option: ", false);
 
-            ConsoleKeyInfo k = new();
+            var k = new ConsoleKeyInfo();
             for (int cnt = 0; cnt < 6; cnt++)
             {
                 if (Console.KeyAvailable)
@@ -137,8 +137,8 @@ internal static class Program
             case 1:
                 Logger.LogInfo("Starting SFD");
 
-                string SFD_exe = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
-                Process.Start(SFD_exe, string.Join(" ", args));
+                string sfdBinary = Path.Combine(GameDirectory, "Superfighters Deluxe.exe");
+                Process.Start(sfdBinary, string.Join(" ", args));
                 return 0;
             case 2:
                 CoreHandler.SkipToEditor = true;
@@ -169,12 +169,30 @@ internal static class Program
             UpdateWebClient = null;
         }
 
-        Logger.LogInfo($"Starting SFDCT {Globals.Version.SFDCT} for SFD {Globals.Version.SFD}");
+        Logger.LogInfo($"Starting SFDCT {Globals.Version.SFDCT}, Core DLL {Globals.Version.SFD}");
+
+        try
+        {
+            string gameVersionFilePath = Path.Combine(GameDirectory, "Content", SFD.Constants.Paths.DATA_MISC, "gv.txt");
+            string gameVersion = File.ReadAllText(gameVersionFilePath);
+
+            Logger.LogInfo($"Detected SFD {gameVersion.Trim(['\n', '\r'])}");
+
+            if (!skipProgramChoice && SFD.Constants.VersionCheckDifference(gameVersion, Globals.Version.SFD) != SFD.VersionDifference.Same)
+            {
+                Logger.LogError("SFD version detected differs from SFDCT's target version!");
+                Logger.LogError("This may cause crashes. To skip this warning add '-SFDCT' to launch parameters.");
+                Logger.LogError("Press any key to continue: ", false);
+                Console.ReadKey();
+                Console.WriteLine();
+            }
+        }
+        catch { }
 
         Logger.LogInfo("- Loading Configuration");
         SFDCTConfig.LoadFile();
 
-        Stopwatch patchStopWatch = new();
+        var patchStopWatch = new Stopwatch();
         patchStopWatch.Start();
 
         Logger.LogInfo("- Loading Harmony");

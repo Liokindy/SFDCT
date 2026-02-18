@@ -32,7 +32,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -42,7 +42,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -72,7 +72,7 @@
     <OutputPath>bin\SFDBeta\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>default</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
@@ -81,38 +81,34 @@
     <Reference Include="0Harmony, Version=2.3.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Lib.Harmony.2.3.6\lib\net472\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Box2D.XNA">
+    <Reference Include="Box2D.XNA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=06438a52adbe5a67, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SFD\Box2D.XNA.dll</HintPath>
     </Reference>
-    <Reference Include="Core">
+    <Reference Include="Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SFD\Core.dll</HintPath>
     </Reference>
-    <Reference Include="Lidgren.Network">
-      <HintPath>..\SFD\Lidgren.Network.dll</HintPath>
+    <Reference Include="Facepunch.Steamworks.Win64">
+      <HintPath>..\SFD\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+    <Reference Include="FNA">
+      <HintPath>..\FNA\FNA.dll</HintPath>
+    </Reference>
+    <Reference Include="SFD.GameScriptInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e268491d151d9376, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\Microsoft.Xna.Framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\Microsoft.Xna.Framework.Game.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\Microsoft.Xna.Framework.Graphics.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SFD.GameScriptInterface">
       <HintPath>..\SFD\SFD.GameScriptInterface.dll</HintPath>
     </Reference>
-    <Reference Include="SFD.MP">
+    <Reference Include="SFD.MP, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66f68b349ab4d593, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SFD\SFD.MP.dll</HintPath>
     </Reference>
-    <Reference Include="SFD.ScriptEngine">
+    <Reference Include="SFD.ScriptEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ec9ab87b75dcef3f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SFD\SFD.ScriptEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamLayer">
+      <HintPath>..\SFD\SteamLayer.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>
@@ -136,6 +132,8 @@
     <Compile Include="Configuration\SFDConfigHandler.cs" />
     <Compile Include="Configuration\SFDCTConfig.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
+    <Compile Include="Game\ClientCommands.cs" />
+    <Compile Include="Game\ServerCommands.cs" />
     <Compile Include="Game\DebugMouse.cs" />
     <Compile Include="Game\GameHandler.cs" />
     <Compile Include="Helper\Input.cs" />

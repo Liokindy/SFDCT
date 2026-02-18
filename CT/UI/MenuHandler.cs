@@ -18,65 +18,13 @@ namespace SFDCT.UI;
 [HarmonyPatch]
 internal static class MenuHandler
 {
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Menu), nameof(Menu.Area), MethodType.Getter)]
-    private static void Menu_Area_Getter_Postfix_AccountForScrollBar(ref Rectangle __result, Menu __instance)
-    {
-        if (__instance.ScrollBarVisible) __result.Width += ScrollBar.WIDTH;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ScrollBar), nameof(ScrollBar.MouseClick))]
-    private static bool ScrollBar_MouseClick_Prefix_WhileLoopFix(ScrollBar __instance, Rectangle mouseSelection)
-    {
-        int handleCenter = __instance.handlePosition + __instance.handle.Height / 2;
-
-        if (mouseSelection.Y > handleCenter)
-        {
-            while (mouseSelection.Y > handleCenter)
-            {
-                __instance.parentMenu.Scroll(1);
-
-                handleCenter = __instance.handlePosition + __instance.handle.Height / 2;
-                if (__instance.parentMenu.topItemId == 0 || __instance.parentMenu.bottomItemId == __instance.parentMenu.VisibleItems.Count - 1) break;
-            }
-        }
-        else if (mouseSelection.Y < handleCenter)
-        {
-            while (mouseSelection.Y < handleCenter)
-            {
-                __instance.parentMenu.Scroll(-1);
-
-                handleCenter = __instance.handlePosition + __instance.handle.Height / 2;
-                if (__instance.parentMenu.topItemId == 0 || __instance.parentMenu.bottomItemId == __instance.parentMenu.VisibleItems.Count - 1) break;
-            }
-        }
-
-        return false;
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(MainMenuPanel), nameof(MainMenuPanel.KeyPress))]
-    private static IEnumerable<CodeInstruction> MainMenuPanel_KeyPress_Transpiler_EscapeKeyCheck(IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction?.opcode.Equals(OpCodes.Ldc_I4_7) == true)
-            {
-                instruction.opcode = OpCodes.Ldc_I4_8;
-            }
-        }
-
-        return instructions;
-    }
-
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.DrawInner))]
     private static IEnumerable<CodeInstruction> GameSFD_DrawInner_Transpiler_VersionLabel(IEnumerable<CodeInstruction> instructions)
     {
         foreach (var instruction in instructions)
         {
-            if (instruction?.operand?.Equals(Constants.VERSION) == true)
+            if (instruction.opcode == OpCodes.Ldstr && instruction.operand?.Equals(Constants.VERSION) == true)
             {
                 instruction.operand = $"{Constants.VERSION} - {Globals.Version.SFDCT}";
             }

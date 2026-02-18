@@ -3,6 +3,7 @@ using SFD;
 using SFD.MenuControls;
 using SFDCT.Assets;
 using SFDCT.Configuration;
+using System.Linq;
 
 namespace SFDCT.UI.Panels;
 
@@ -226,37 +227,27 @@ internal class SFDCTSubContentPanel : Panel
         }
     }
 
+    private static string ConcatFolderString(Menu menu)
+    {
+        var folderNames = menu.Items.OfType<MenuItemButton>().Select(b => b.lblName.Text);
+
+        return SubContentHandler.FilterSeparator + string.Join(SubContentHandler.FilterSeparator, folderNames) + SubContentHandler.FilterSeparator;
+    }
+
     private void ok(object _)
     {
         if (m_changed)
         {
-            string enabledFolders = "";
-            for (int i = m_enabledMenu.ItemCount - 1; i >= 0; i--)
-            {
-                var menuItem = m_enabledMenu.Items[i];
-                if (menuItem is MenuItemSeparator) continue;
-                if (menuItem is not MenuItemButton menuItemButton) continue;
+            string enabledFolders = ConcatFolderString(m_enabledMenu);
+            string disabledFolders = ConcatFolderString(m_disabledMenu);
 
-                enabledFolders += SubContentHandler.SUB_CONTENT_FOLDER_SEPARATOR + menuItemButton.lblName.Text;
-            }
-            enabledFolders += SubContentHandler.SUB_CONTENT_FOLDER_SEPARATOR;
-
-            string disabledFolders = "";
-            for (int i = m_disabledMenu.ItemCount - 1; i >= 0; i--)
-            {
-                var menuItem = m_disabledMenu.Items[i];
-                if (menuItem is MenuItemSeparator) continue;
-                if (menuItem is not MenuItemButton menuItemButton) continue;
-
-                disabledFolders += SubContentHandler.SUB_CONTENT_FOLDER_SEPARATOR + menuItemButton.lblName.Text;
-            }
-            disabledFolders += SubContentHandler.SUB_CONTENT_FOLDER_SEPARATOR;
-
-            SFDCTConfig.Set<string>(CTSettingKey.SubContentEnabledFolders, enabledFolders);
-            SFDCTConfig.Set<string>(CTSettingKey.SubContentDisabledFolders, disabledFolders);
+            SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, enabledFolders);
+            SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, disabledFolders);
             SFDCTConfig.SaveFile();
 
-            MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
+            MessageStack.Show(
+                LanguageHelper.GetText("menu.settings.restartrequiredmessage"),
+                MessageStackType.Information);
         }
 
         ParentPanel.CloseSubPanel();

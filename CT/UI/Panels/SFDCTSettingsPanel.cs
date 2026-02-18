@@ -2,41 +2,17 @@
 using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.MenuControls;
+using SFD.Sounds;
+using SFDCT.Bootstrap;
 using SFDCT.Configuration;
 using SFDCT.UI.MenuItems;
 using System;
-using System.Collections.Generic;
 
 namespace SFDCT.UI.Panels;
 
 internal class SFDCTSettingsPanel : Panel
 {
     private Menu m_menu;
-    private MenuItemDropdown m_menuItemSoundPanningEnabled;
-    private MenuItemSlider m_menuItemSoundPanningStrength;
-    private MenuItemDropdown m_menuItemSoundPanningForceScreenSpace;
-    private MenuItemSlider m_menuItemSoundPanningInworldThreshold;
-    private MenuItemSlider m_menuItemSoundPanningInworldDistance;
-    private MenuItemDropdown m_menuItemSoundAttenuationEnabled;
-    private MenuItemSlider m_menuItemSoundAttenuationMin;
-    private MenuItemDropdown m_menuItemSoundAttenuationForceScreenSpace;
-    private MenuItemSlider m_menuItemSoundAttenuationInworldThreshold;
-    private MenuItemSlider m_menuItemSoundAttenuationInworldDistance;
-    private MenuItemSlider m_menuItemLowHealthSaturationFactor;
-    private MenuItemSlider m_menuItemLowHealthThreshold;
-    private MenuItemSlider m_menuItemLowHealthHurtLevel1Threshold;
-    private MenuItemSlider m_menuItemLowHealthHurtLevel2Threshold;
-    private MenuItemDropdown m_menuItemHideFilmgrain;
-    private MenuItemDropdown m_menuItemLanguage;
-    private MenuItemSlider m_menuItemSpectatorsMaximum;
-    private MenuItemDropdown m_menuItemSpectatorsOnlyModerators;
-    private MenuItemDropdown m_menuItemVoteKickEnabled;
-    private MenuItemSlider m_menuItemVoteKickFailCooldown;
-    private MenuItemSlider m_menuItemVoteKickSuccessCooldown;
-    private SFDCTMenuItemDropdownColor m_menuItemPrimaryColor;
-    private MenuItemText m_menuItemPrimaryColorHex;
-    private MenuItemButton m_menuItemSubContentFolders;
-    private MenuItemDropdown m_menuItemSubContentEnabled;
     private bool m_settingsNeedGameRestart;
 
     private bool m_originalSoundPanningEnabled = SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningEnabled);
@@ -70,281 +46,88 @@ internal class SFDCTSettingsPanel : Panel
         m_menu = new Menu(new Vector2(0, 50), Width, Height - 50, this, []);
         m_settingsNeedGameRestart = false;
 
-        m_menu.Add(new MenuItemButton(LanguageHelper.GetText("sfdct.credits.name"), new ControlEvents.ChooseEvent((object _) =>
-        {
-            OpenSubPanel(new SFDCTCreditsPanel());
-        })));
+        // Credits
+        m_menu.Add(new MenuItemButton(LanguageHelper.GetText("sfdct.credits.name"), new ControlEvents.ChooseEvent(_ => OpenSubPanel(new SFDCTCreditsPanel()))));
 
+        // Sound Panning
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.soundpanning")));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.soundpanningenabled", "sfdct.setting.help.soundpanningenabled", CTSettingKey.SoundPanningEnabled));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.soundpanningstrength", "sfdct.setting.help.soundpanningstrength", CTSettingKey.SoundPanningStrength));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.soundpanningforcescreenspace", "sfdct.setting.help.soundpanningforcescreenspace", CTSettingKey.SoundPanningForceScreenSpace));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.soundpanninginworldthreshold", "sfdct.setting.help.soundpanninginworldthreshold", CTSettingKey.SoundPanningInworldThreshold, 0, 1000, 5));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.soundpanninginworlddistance", "sfdct.setting.help.soundpanninginworlddistance", CTSettingKey.SoundPanningInworldDistance, 0, 1000, 5));
 
-        m_menuItemSoundPanningEnabled = new(LanguageHelper.GetText("sfdct.setting.name.soundpanningenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSoundPanningEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningEnabled) ? 0 : 1);
-        m_menuItemSoundPanningEnabled.DropdownItemVisibleCount = 2;
-        m_menuItemSoundPanningEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundpanningenabled");
-        EventHelper.Add(m_menuItemSoundPanningEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set(CTSettingKey.SoundPanningEnabled, m_menuItemSoundPanningEnabled.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSoundPanningEnabled);
-
-        m_menuItemSoundPanningStrength = new(LanguageHelper.GetText("sfdct.setting.name.soundpanningstrength"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.SoundPanningStrength)), 0, 100, 1);
-        m_menuItemSoundPanningStrength.SetStartValue((int)(SFDCTConfig.Get<float>(CTSettingKey.SoundPanningStrength) * 100));
-        m_menuItemSoundPanningStrength.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundpanningstrength");
-        EventHelper.Add(m_menuItemSoundPanningStrength, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<float>(CTSettingKey.SoundPanningStrength, m_menuItemSoundPanningStrength.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemSoundPanningStrength);
-
-        m_menuItemSoundPanningForceScreenSpace = new(LanguageHelper.GetText("sfdct.setting.name.soundpanningforcescreenspace"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSoundPanningForceScreenSpace.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SoundPanningForceScreenSpace) ? 0 : 1);
-        m_menuItemSoundPanningForceScreenSpace.DropdownItemVisibleCount = 2;
-        m_menuItemSoundPanningForceScreenSpace.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundpanningforcescreenspace");
-        EventHelper.Add(m_menuItemSoundPanningForceScreenSpace, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.SoundPanningForceScreenSpace, m_menuItemSoundPanningForceScreenSpace.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSoundPanningForceScreenSpace);
-
-        m_menuItemSoundPanningInworldThreshold = new(LanguageHelper.GetText("sfdct.setting.name.soundpanninginworldthreshold"), SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldThreshold), 0, 1000, 5);
-        m_menuItemSoundPanningInworldThreshold.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldThreshold));
-        m_menuItemSoundPanningInworldThreshold.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundpanninginworldthreshold");
-        EventHelper.Add(m_menuItemSoundPanningInworldThreshold, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.SoundPanningInworldThreshold, m_menuItemSoundPanningInworldThreshold.Value);
-        }));
-        m_menu.Add(m_menuItemSoundPanningInworldThreshold);
-
-        m_menuItemSoundPanningInworldDistance = new(LanguageHelper.GetText("sfdct.setting.name.soundpanninginworlddistance"), SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldDistance), 0, 1000, 5);
-        m_menuItemSoundPanningInworldDistance.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.SoundPanningInworldDistance));
-        m_menuItemSoundPanningInworldDistance.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundpanninginworlddistance");
-        EventHelper.Add(m_menuItemSoundPanningInworldDistance, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.SoundPanningInworldDistance, m_menuItemSoundPanningInworldDistance.Value);
-        }));
-        m_menu.Add(m_menuItemSoundPanningInworldDistance);
-
+        // Sound Attenuation
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.soundattenuation")));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.soundattenuationenabled", "sfdct.setting.help.soundattenuationenabled", CTSettingKey.SoundAttenuationEnabled));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.soundattenuationmin", "sfdct.setting.help.soundattenuationmin", CTSettingKey.SoundAttenuationMin));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.soundattenuationforcescreenspace", "sfdct.setting.help.soundattenuationforcescreenspace", CTSettingKey.SoundAttenuationForceScreenSpace));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.soundattenuationinworldthreshold", "sfdct.setting.help.soundattenuationinworldthreshold", CTSettingKey.SoundAttenuationInworldThreshold, 0, 1000, 5));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.soundattenuationinworlddistance", "sfdct.setting.help.soundattenuationinworlddistance", CTSettingKey.SoundAttenuationInworldDistance, 0, 1000, 5, requiresRestart: true));
 
-        m_menuItemSoundAttenuationEnabled = new(LanguageHelper.GetText("sfdct.setting.name.soundattenuationenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSoundAttenuationEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationEnabled) ? 0 : 1);
-        m_menuItemSoundAttenuationEnabled.DropdownItemVisibleCount = 2;
-        m_menuItemSoundAttenuationEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundattenuationenabled");
-        EventHelper.Add(m_menuItemSoundAttenuationEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.SoundAttenuationEnabled, m_menuItemSoundAttenuationEnabled.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSoundAttenuationEnabled);
-
-        m_menuItemSoundAttenuationMin = new(LanguageHelper.GetText("sfdct.setting.name.soundattenuationmin"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.SoundAttenuationMin)), 0, 100, 1);
-        m_menuItemSoundAttenuationMin.SetStartValue((int)(100 * SFDCTConfig.Get<float>(CTSettingKey.SoundAttenuationMin)));
-        m_menuItemSoundAttenuationMin.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundattenuationmin");
-        EventHelper.Add(m_menuItemSoundAttenuationMin, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<float>(CTSettingKey.SoundAttenuationMin, m_menuItemSoundAttenuationMin.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemSoundAttenuationMin);
-
-        m_menuItemSoundAttenuationForceScreenSpace = new(LanguageHelper.GetText("sfdct.setting.name.soundattenuationforcescreenspace"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSoundAttenuationForceScreenSpace.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace) ? 0 : 1);
-        m_menuItemSoundAttenuationForceScreenSpace.DropdownItemVisibleCount = 2;
-        m_menuItemSoundAttenuationForceScreenSpace.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundattenuationforcescreenspace");
-        EventHelper.Add(m_menuItemSoundAttenuationForceScreenSpace, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.SoundAttenuationForceScreenSpace, m_menuItemSoundAttenuationForceScreenSpace.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSoundAttenuationForceScreenSpace);
-
-        m_menuItemSoundAttenuationInworldThreshold = new(LanguageHelper.GetText("sfdct.setting.name.soundattenuationinworldthreshold"), SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldThreshold), 0, 1000, 5);
-        m_menuItemSoundAttenuationInworldThreshold.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldThreshold));
-        m_menuItemSoundAttenuationInworldThreshold.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundattenuationinworldthreshold");
-        EventHelper.Add(m_menuItemSoundAttenuationInworldThreshold, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.SoundAttenuationInworldThreshold, m_menuItemSoundAttenuationInworldThreshold.Value);
-        }));
-        m_menu.Add(m_menuItemSoundAttenuationInworldThreshold);
-
-
-        m_menuItemSoundAttenuationInworldDistance = new(LanguageHelper.GetText("sfdct.setting.name.soundattenuationinworlddistance"), SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldDistance), 0, 1000, 5);
-        m_menuItemSoundAttenuationInworldDistance.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.SoundAttenuationInworldDistance));
-        m_menuItemSoundAttenuationInworldDistance.Tooltip = LanguageHelper.GetText("sfdct.setting.help.soundattenuationinworlddistance");
-        EventHelper.Add(m_menuItemSoundAttenuationInworldDistance, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<int>(CTSettingKey.SoundAttenuationInworldDistance, m_menuItemSoundAttenuationInworldDistance.Value);
-        }));
-        m_menu.Add(m_menuItemSoundAttenuationInworldDistance);
-
+        // Low Health
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.lowhealth")));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.lowhealthsaturationfactor", "sfdct.setting.help.lowhealthsaturationfactor", CTSettingKey.LowHealthSaturationFactor, requiresRestart: true));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.lowhealththreshold", "sfdct.setting.help.lowhealththreshold", CTSettingKey.LowHealthThreshold, requiresRestart: true));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.lowhealthhurtlevel1threshold", "sfdct.setting.help.lowhealthhurtlevel1threshold", CTSettingKey.LowHealthHurtLevel1Threshold, requiresRestart: true));
+        m_menu.Add(CreateFloatPercentSetting("sfdct.setting.name.lowhealthhurtlevel2threshold", "sfdct.setting.help.lowhealthhurtlevel2threshold", CTSettingKey.LowHealthHurtLevel2Threshold, requiresRestart: true));
 
-        m_menuItemLowHealthSaturationFactor = new(LanguageHelper.GetText("sfdct.setting.name.lowhealthsaturationfactor"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthSaturationFactor)), 0, 100, 1);
-        m_menuItemLowHealthSaturationFactor.SetStartValue((int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthSaturationFactor)));
-        m_menuItemLowHealthSaturationFactor.Tooltip = LanguageHelper.GetText("sfdct.setting.help.lowhealthsaturationfactor");
-        EventHelper.Add(m_menuItemLowHealthSaturationFactor, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<float>(CTSettingKey.LowHealthSaturationFactor, m_menuItemLowHealthSaturationFactor.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemLowHealthSaturationFactor);
-
-        m_menuItemLowHealthThreshold = new(LanguageHelper.GetText("sfdct.setting.name.lowhealththreshold"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold)), 0, 100, 1);
-        m_menuItemLowHealthThreshold.SetStartValue((int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold)));
-        m_menuItemLowHealthThreshold.Tooltip = LanguageHelper.GetText("sfdct.setting.help.lowhealththreshold");
-        EventHelper.Add(m_menuItemLowHealthThreshold, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<float>(CTSettingKey.LowHealthThreshold, m_menuItemLowHealthThreshold.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemLowHealthThreshold);
-
-        m_menuItemLowHealthHurtLevel1Threshold = new(LanguageHelper.GetText("sfdct.setting.name.lowhealthhurtlevel1threshold"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold)), 0, 100, 1);
-        m_menuItemLowHealthHurtLevel1Threshold.SetStartValue((int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold)));
-        m_menuItemLowHealthHurtLevel1Threshold.Tooltip = LanguageHelper.GetText("sfdct.setting.help.lowhealthhurtlevel1threshold");
-        EventHelper.Add(m_menuItemLowHealthHurtLevel1Threshold, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<float>(CTSettingKey.LowHealthHurtLevel1Threshold, m_menuItemLowHealthHurtLevel1Threshold.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemLowHealthHurtLevel1Threshold);
-
-        m_menuItemLowHealthHurtLevel2Threshold = new(LanguageHelper.GetText("sfdct.setting.name.lowhealthhurtlevel2threshold"), (int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold)), 0, 100, 1);
-        m_menuItemLowHealthHurtLevel2Threshold.SetStartValue((int)(100 * SFDCTConfig.Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold)));
-        m_menuItemLowHealthHurtLevel2Threshold.Tooltip = LanguageHelper.GetText("sfdct.setting.help.lowhealthhurtlevel2threshold");
-        EventHelper.Add(m_menuItemLowHealthHurtLevel2Threshold, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<float>(CTSettingKey.LowHealthHurtLevel2Threshold, m_menuItemLowHealthHurtLevel2Threshold.Value * 0.01f);
-        }));
-        m_menu.Add(m_menuItemLowHealthHurtLevel2Threshold);
-
+        // Spectators
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.spectators")));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.spectatorsmaximum", "sfdct.setting.help.spectatorsmaximum", CTSettingKey.SpectatorsMaximum, 1, 8, 1));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.spectatorsonlymoderators", "sfdct.setting.help.spectatorsonlymoderators", CTSettingKey.SpectatorsOnlyModerators));
 
-
-
-        m_menuItemSpectatorsMaximum = new(LanguageHelper.GetText("sfdct.setting.name.spectatorsmaximum"), SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum), 1, 8, 1);
-        m_menuItemSpectatorsMaximum.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum));
-        m_menuItemSpectatorsMaximum.Tooltip = LanguageHelper.GetText("sfdct.setting.help.spectatorsmaximum");
-        EventHelper.Add(m_menuItemSpectatorsMaximum, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.SpectatorsMaximum, m_menuItemSpectatorsMaximum.Value);
-        }));
-        m_menu.Add(m_menuItemSpectatorsMaximum);
-
-        m_menuItemSpectatorsOnlyModerators = new(LanguageHelper.GetText("sfdct.setting.name.spectatorsonlymoderators"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSpectatorsOnlyModerators.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators) ? 0 : 1);
-        m_menuItemSpectatorsOnlyModerators.DropdownItemVisibleCount = 2;
-        m_menuItemSpectatorsOnlyModerators.Tooltip = LanguageHelper.GetText("sfdct.setting.help.spectatorsonlymoderators");
-        EventHelper.Add(m_menuItemSpectatorsOnlyModerators, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.SpectatorsOnlyModerators, m_menuItemSpectatorsOnlyModerators.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSpectatorsOnlyModerators);
-
+        // Vote Kick
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.votekick")));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.votekickenabled", "sfdct.setting.help.votekickenabled", CTSettingKey.VoteKickEnabled));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.votekickfailcooldown", "sfdct.setting.help.votekickfailcooldown", CTSettingKey.VoteKickFailCooldown, 30, 300, 5));
+        m_menu.Add(CreateIntSetting("sfdct.setting.name.votekicksuccesscooldown", "sfdct.setting.help.votekicksuccesscooldown", CTSettingKey.VoteKickSuccessCooldown, 30, 300, 5));
 
-        m_menuItemVoteKickEnabled = new(LanguageHelper.GetText("sfdct.setting.name.votekickenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemVoteKickEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled) ? 0 : 1);
-        m_menuItemVoteKickEnabled.DropdownItemVisibleCount = 2;
-        m_menuItemVoteKickEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.votekickenabled");
-        EventHelper.Add(m_menuItemVoteKickEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.VoteKickEnabled, m_menuItemVoteKickEnabled.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemVoteKickEnabled);
-
-        m_menuItemVoteKickFailCooldown = new(LanguageHelper.GetText("sfdct.setting.name.votekickfailcooldown"), SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown), 30, 300, 5);
-        m_menuItemVoteKickFailCooldown.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.VoteKickFailCooldown));
-        m_menuItemVoteKickFailCooldown.Tooltip = LanguageHelper.GetText("sfdct.setting.help.votekickfailcooldown");
-        EventHelper.Add(m_menuItemVoteKickFailCooldown, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.VoteKickFailCooldown, m_menuItemVoteKickFailCooldown.Value);
-        }));
-        m_menu.Add(m_menuItemVoteKickFailCooldown);
-
-        m_menuItemVoteKickSuccessCooldown = new(LanguageHelper.GetText("sfdct.setting.name.votekicksuccesscooldown"), SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown), 30, 300, 5);
-        m_menuItemVoteKickSuccessCooldown.SetStartValue(SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown));
-        m_menuItemVoteKickSuccessCooldown.Tooltip = LanguageHelper.GetText("sfdct.setting.help.votekicksuccesscooldown");
-        EventHelper.Add(m_menuItemVoteKickSuccessCooldown, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<int>(CTSettingKey.VoteKickSuccessCooldown, m_menuItemVoteKickSuccessCooldown.Value);
-        }));
-        m_menu.Add(m_menuItemVoteKickSuccessCooldown);
-
+        // Misc
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.misc")));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.hidefilmgrain", "sfdct.setting.help.hidefilmgrain", CTSettingKey.HideFilmgrain));
 
-        m_menuItemHideFilmgrain = new(LanguageHelper.GetText("sfdct.setting.name.hidefilmgrain"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemHideFilmgrain.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.HideFilmgrain) ? 0 : 1);
-        m_menuItemHideFilmgrain.DropdownItemVisibleCount = 2;
-        m_menuItemHideFilmgrain.Tooltip = LanguageHelper.GetText("sfdct.setting.help.hidefilmgrain");
-        EventHelper.Add(m_menuItemHideFilmgrain, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            SFDCTConfig.Set<bool>(CTSettingKey.HideFilmgrain, m_menuItemHideFilmgrain.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemHideFilmgrain);
-
-        var availableSFDCTLanguages = new List<string>();
-        availableSFDCTLanguages.AddRange(LanguageFileTranslator.m_languageFileMappings.Keys);
-        for (int i = availableSFDCTLanguages.Count - 1; i >= 0; i--)
-        {
-            string language = availableSFDCTLanguages[i];
-
-            if (!language.StartsWith("SFDCT", StringComparison.OrdinalIgnoreCase))
-            {
-                availableSFDCTLanguages.RemoveAt(i);
-            }
-        }
-
-        m_menuItemLanguage = new(LanguageHelper.GetText("sfdct.setting.name.language"), [.. availableSFDCTLanguages]);
-        m_menuItemLanguage.SetStartValue(Math.Max(0, availableSFDCTLanguages.IndexOf(SFDCTConfig.Get<string>(CTSettingKey.Language))));
-        m_menuItemLanguage.DropdownItemVisibleCount = availableSFDCTLanguages.Count;
+        // Language
+        var availableSFDCTLanguages = LanguageHandler.GetAvailableLanguages();
+        var m_menuItemLanguage = new MenuItemDropdown(LanguageHelper.GetText("sfdct.setting.name.language"), availableSFDCTLanguages);
+        m_menuItemLanguage.SetStartValue(Math.Max(0, Array.IndexOf(availableSFDCTLanguages, SFDCTConfig.Get<string>(CTSettingKey.Language))));
+        m_menuItemLanguage.DropdownItemVisibleCount = availableSFDCTLanguages.Length;
         m_menuItemLanguage.Tooltip = LanguageHelper.GetText("sfdct.setting.help.language");
-        EventHelper.Add(m_menuItemLanguage, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
+        EventHelper.Add(m_menuItemLanguage, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
         {
             m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<string>(CTSettingKey.Language, m_menuItemLanguage.Value);
+            SFDCTConfig.Set(CTSettingKey.Language, m_menuItemLanguage.Value);
         }));
         m_menu.Add(m_menuItemLanguage);
 
+        // Subcontent
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.subcontent")));
+        m_menu.Add(CreateBoolSetting("sfdct.setting.name.subcontentenabled", "sfdct.setting.help.subcontentenabled", CTSettingKey.SubContent, requiresRestart: true));
+        m_menu.Add(new MenuItemButton(LanguageHelper.GetText("sfdct.setting.name.subcontentfolders"), _ => OpenSubPanel(new SFDCTSubContentPanel()), MenuIcons.Settings));
 
-        m_menuItemSubContentEnabled = new(LanguageHelper.GetText("sfdct.setting.name.subcontentenabled"), [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]);
-        m_menuItemSubContentEnabled.SetStartValue(SFDCTConfig.Get<bool>(CTSettingKey.SubContent) ? 0 : 1);
-        m_menuItemSubContentEnabled.DropdownItemVisibleCount = 2;
-        m_menuItemSubContentEnabled.Tooltip = LanguageHelper.GetText("sfdct.setting.help.subcontentenabled");
-        EventHelper.Add(m_menuItemSubContentEnabled, "ValueChangedEvent", new MenuItemValueChangedEvent((MenuItem _) =>
-        {
-            m_settingsNeedGameRestart = true;
-            SFDCTConfig.Set<bool>(CTSettingKey.SubContent, m_menuItemSubContentEnabled.ValueId == 0);
-        }));
-        m_menu.Add(m_menuItemSubContentEnabled);
+        // Primary Color
+        MenuItemText m_menuItemPrimaryColorHex = null;
+        SFDCTMenuItemDropdownColor m_menuItemPrimaryColor = null;
 
-        m_menuItemSubContentFolders = new(LanguageHelper.GetText("sfdct.setting.name.subcontentfolders"), (object _) =>
-        {
-            OpenSubPanel(new SFDCTSubContentPanel());
-        }, MenuIcons.Settings);
-        m_menu.Add(m_menuItemSubContentFolders);
-
-        m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.primarycolor")));
-
-        Color menuBlue = Constants.COLORS.MENU_BLUE;
-
-        m_menuItemPrimaryColorHex = new(LanguageHelper.GetText("sfdct.setting.name.primarycolorhex"), menuBlue.ToHex());
+        m_menuItemPrimaryColorHex = new MenuItemText(LanguageHelper.GetText("sfdct.setting.name.primarycolorhex"), Constants.COLORS.MENU_BLUE.ToHex());
         EventHelper.Add(m_menuItemPrimaryColorHex.TextSetValidationItem, "TextValidationEvent", new TextValidationEvent((string setText, TextValidationEventArgs _) =>
         {
             if (setText.IsHex())
             {
                 Constants.COLORS.MENU_BLUE = setText.ToColor();
-                if (m_menuItemPrimaryColor.Color != Constants.COLORS.MENU_BLUE) m_menuItemPrimaryColor.SetColor(Constants.COLORS.MENU_BLUE);
+
+                if (m_menuItemPrimaryColor.Color != Constants.COLORS.MENU_BLUE)
+                {
+                    m_menuItemPrimaryColor.SetColor(Constants.COLORS.MENU_BLUE);
+                }
             }
             else
             {
                 m_menuItemPrimaryColorHex.SetValue(Constants.COLORS.MENU_BLUE.ToHex());
             }
         }));
-        m_menu.Add(m_menuItemPrimaryColorHex);
 
-        Color[] presetColors =
-        [
+        m_menuItemPrimaryColor = new SFDCTMenuItemDropdownColor(LanguageHelper.GetText("sfdct.setting.name.primarycolor"), Constants.COLORS.MENU_BLUE, [
             new Color (064, 064, 064),
             new Color (232, 96, 96),
             new Color (180, 032, 000),
@@ -355,16 +138,20 @@ internal class SFDCTSettingsPanel : Panel
             new Color (48, 48, 192),
             new Color (160, 032, 160),
             new Color (096, 048, 032),
-
-            new Color(32, 0, 192),
-        ];
-
-        m_menuItemPrimaryColor = new(LanguageHelper.GetText("sfdct.setting.name.primarycolor"), Constants.COLORS.MENU_BLUE, presetColors);
+            new Color(32, 0, 192), // MENU_BLUE Default
+        ]);
         m_menuItemPrimaryColor.ValueChangedEvent += (MenuItem _) =>
         {
             Constants.COLORS.MENU_BLUE = m_menuItemPrimaryColor.Color;
-            if (m_menuItemPrimaryColorHex.Value != Constants.COLORS.MENU_BLUE.ToHex()) m_menuItemPrimaryColorHex.SetValue(Constants.COLORS.MENU_BLUE.ToHex());
+
+            if (m_menuItemPrimaryColorHex.Value != Constants.COLORS.MENU_BLUE.ToHex())
+            {
+                m_menuItemPrimaryColorHex.SetValue(Constants.COLORS.MENU_BLUE.ToHex());
+            }
         };
+
+        m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.primarycolor")));
+        m_menu.Add(m_menuItemPrimaryColorHex);
         m_menu.Add(m_menuItemPrimaryColor);
 
         m_menu.Add(new MenuItemSeparator(string.Empty));
@@ -375,15 +162,78 @@ internal class SFDCTSettingsPanel : Panel
         m_menu.SelectFirst();
     }
 
+    private MenuItemDropdown CreateBoolSetting(string labelKey, string tooltipKey, CTSettingKey configKey, bool requiresRestart = false)
+    {
+        var item = new MenuItemDropdown(
+            LanguageHelper.GetText(labelKey),
+            [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]
+        );
+        item.SetStartValue(SFDCTConfig.Get<bool>(configKey) ? 0 : 1);
+        item.DropdownItemVisibleCount = 2;
+        item.Tooltip = LanguageHelper.GetText(tooltipKey);
+
+        EventHelper.Add(item, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
+        {
+            if (requiresRestart) m_settingsNeedGameRestart = true;
+            SFDCTConfig.Set(configKey, item.ValueId == 0);
+        }));
+
+        return item;
+    }
+
+    private MenuItemSlider CreateIntSetting(string labelKey, string tooltipKey, CTSettingKey configKey, int min, int max, int step, bool requiresRestart = false)
+    {
+        var item = new MenuItemSlider(
+            LanguageHelper.GetText(labelKey),
+            SFDCTConfig.Get<int>(configKey),
+            min, max, step
+        );
+        item.SetStartValue(SFDCTConfig.Get<int>(configKey));
+        item.Tooltip = LanguageHelper.GetText(tooltipKey);
+
+        EventHelper.Add(item, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
+        {
+            if (requiresRestart) m_settingsNeedGameRestart = true;
+            SFDCTConfig.Set(configKey, item.Value);
+        }));
+
+        return item;
+    }
+
+    private MenuItemSlider CreateFloatPercentSetting(string labelKey, string tooltipKey, CTSettingKey configKey, bool requiresRestart = false)
+    {
+        var item = new MenuItemSlider(
+            LanguageHelper.GetText(labelKey),
+            (int)(100 * SFDCTConfig.Get<float>(configKey)),
+            0, 100, 1
+        );
+        item.SetStartValue((int)(100 * SFDCTConfig.Get<float>(configKey)));
+        item.Tooltip = LanguageHelper.GetText(tooltipKey);
+
+        EventHelper.Add(item, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
+        {
+            if (requiresRestart) m_settingsNeedGameRestart = true;
+            SFDCTConfig.Set(configKey, item.Value * 0.01f);
+        }));
+
+        return item;
+    }
+
     public override void KeyPress(Keys key)
     {
-        if (subPanel == null && key == Keys.Escape)
+        if (subPanel != null && key == Keys.Escape)
         {
-            back(null);
+            base.KeyPress(key);
             return;
         }
 
-        base.KeyPress(key);
+        if (m_menu.FocusMenuAndSelectLastItem())
+        {
+            SoundHandler.PlayGlobalSound("MenuMove");
+            return;
+        }
+
+        back(null);
     }
 
     private void ok(object _)

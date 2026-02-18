@@ -1,8 +1,9 @@
-﻿using Lidgren.Network;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using Networking.LidgrenAdapter;
 using SFD;
 using SFD.ManageLists;
 using SFDCT.Configuration;
+using Steamworks;
 
 namespace SFDCT.Voting;
 
@@ -13,15 +14,15 @@ internal class GameVoteKick : GameVoteYesNo
 
     private static double m_nextAvailableVoteKickTimeStamp;
 
-    private readonly string m_userNetAddressToKick;
+    private readonly SteamId m_userSteamIdToKick;
     private readonly string m_userProfileNameToKick;
     private readonly string m_userAccountNameToKick;
 
-    internal GameVoteKick(int voteID, GameUser gameUserToKick) : base(voteID, [string.Format("'{0}' ({1})", gameUserToKick.GetProfileName(), gameUserToKick.AccountName)])
+    internal GameVoteKick(int voteID, string userProfileName, string userAccountName, SteamId userSteamId) : base(voteID, [string.Format("'{0}' ({1})", userProfileName, userAccountName)])
     {
-        m_userNetAddressToKick = gameUserToKick.GetNetIP();
-        m_userAccountNameToKick = gameUserToKick.AccountName;
-        m_userProfileNameToKick = gameUserToKick.GetProfileName();
+        m_userSteamIdToKick = userSteamId;
+        m_userAccountNameToKick = userAccountName;
+        m_userProfileNameToKick = userProfileName;
     }
 
     internal static bool CanStartVote()
@@ -51,11 +52,10 @@ internal class GameVoteKick : GameVoteYesNo
     public override void OnYes(GameInfo gameInfo)
     {
         SetVoteKickCooldown();
-
-        GameUser userToKick = gameInfo.GetGameUserByIP(m_userNetAddressToKick);
+        GameUser userToKick = gameInfo.GetGameUserByAccount(m_userSteamIdToKick);
         if (userToKick == null || userToKick.IsDisposed)
         {
-            KickList.Add(m_userNetAddressToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
+            KickList.Add(m_userSteamIdToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
 
             ShowEndingChatMessage(gameInfo);
             gameInfo.ShowChatMessage(new(LanguageHelper.GetText("sfdct.vote.kick.nouser", m_userProfileNameToKick, m_userAccountNameToKick)));
