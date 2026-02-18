@@ -63,27 +63,13 @@ internal static class ClientCommands
         return true;
     }
 
-    internal static bool HandleHelp(Client client, ProcessCommandArgs args, GameInfo gameInfo)
+    internal static bool HandleCTHelp(Client client, ProcessCommandArgs args, GameInfo gameInfo)
     {
         var colYellow = Color.Yellow;
 
-        args.Feedback.Add(new(args.SenderGameUser, "'/PLAYERS' to list all players.", colYellow, args.SenderGameUser, null));
-        args.Feedback.Add(new(args.SenderGameUser, "'/MUTE [PLAYER]' to mute a player's chat messages.", colYellow, args.SenderGameUser, null));
-        args.Feedback.Add(new(args.SenderGameUser, "'/UNMUTE [PLAYER]' to unmute a muted player's chat messages.", colYellow, args.SenderGameUser, null));
-        args.Feedback.Add(new(args.SenderGameUser, "'/SCRIPTS' to list all current scripts.", colYellow, args.SenderGameUser, null));
-        args.Feedback.Add(new(args.SenderGameUser, "'/SHOWDIFFICULTY' to show current difficulty for campaign maps.", colYellow, args.SenderGameUser, null));
+        args.Feedback.Add(new(args.SenderGameUser, "'/CLEARCHAT' to clear the chat in your screen.", colYellow, args.SenderGameUser, null));
 
-        if (gameInfo.GameOwner == GameOwnerEnum.Client)
-        {
-            args.Feedback.Add(new(args.SenderGameUser, "'/PING' to show your ping to the server.", colYellow, args.SenderGameUser, null));
-            args.Feedback.Add(new(args.SenderGameUser, "'/W [PLAYER] [TEXT]' to whisper a player.", colYellow, args.SenderGameUser, null));
-            args.Feedback.Add(new(args.SenderGameUser, "'/T [TEXT]' to send a team message.", colYellow, args.SenderGameUser, null));
-            args.Feedback.Add(new(args.SenderGameUser, "'/S [TEXT]' to send a staff message.", colYellow, args.SenderGameUser, null));
-            args.Feedback.Add(new(args.SenderGameUser, "'/R [TEXT]' to reply to the last player who whispered you.", colYellow, args.SenderGameUser, null));
-
-            return false;
-        }
-
-        return true;
+        // pass the command to the server
+        return false;
     }
 }

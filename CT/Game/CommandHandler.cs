@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
+using SDR.Networking;
 using SFD;
+using SFD.MenuControls;
 using SFDCT.Misc;
 using System;
 using System.IO;
@@ -33,6 +35,24 @@ internal static class CommandHandler
         }
 
         return true;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(LobbyPanel), MethodType.Constructor, [typeof(LobbyPanel.LobbyMode)])]
+    private static void LobbyPanel_Postfix_Constructor_ShowCTHelp(LobbyPanel.LobbyMode mode)
+    {
+        if (mode != LobbyPanel.LobbyMode.Offline) return;
+
+        ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Server), nameof(Server.ConnectionRequestAttachToGameSlots))]
+    private static void Server_Postfix_ConnectionRequestAttachToGameSlots_ShowCTHelp(NetConnection netConnection)
+    {
+        if (!SFD.Program.IsGame || !netConnection.IsHost) return;
+
+        ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
     }
 
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands) => args.IsCommand(commands) && args.CanUseModeratorCommand(commands);
@@ -98,6 +118,11 @@ internal static class CommandHandler
         if (args.IsCommand("CLEARCHAT"))
         {
             return ClientCommands.HandleClearChat(client, args, gameInfo);
+        }
+
+        if (args.IsCommand("CTHELP"))
+        {
+            return ClientCommands.HandleCTHelp(client, args, gameInfo);
         }
 
         return false;
@@ -171,6 +196,11 @@ internal static class CommandHandler
         if (args.IsCommand("SPECTATE"))
         {
             return ServerCommands.HandleSpectatorSpectate(server, args, gameInfo);
+        }
+
+        if (args.IsCommand("CTHELP"))
+        {
+            return ServerCommands.HandleCTHelp(server, args, gameInfo);
         }
 
         return false;

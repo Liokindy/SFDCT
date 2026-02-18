@@ -5,7 +5,6 @@ using SFD.Core;
 using SFD.GUI.Text;
 using SFD.Parser;
 using SFD.Sounds;
-using SFD.States;
 using SFD.Voting;
 using SFDCT.Configuration;
 using SFDCT.Sync;
@@ -370,7 +369,7 @@ internal static class ServerCommands
     internal static bool HandleSpectatorJoin(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
         if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
-        if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+        if (!args.ModeratorPrivileges && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
 
         int userCount;
         GameUser gameUser;
@@ -446,7 +445,7 @@ internal static class ServerCommands
     internal static bool HandleSpectatorSpectate(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
         if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
-        if (!args.SenderGameUser.IsModerator && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+        if (!args.ModeratorPrivileges && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
         if (gameInfo.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
 
         GameSlot gameSlot = null;
@@ -510,96 +509,45 @@ internal static class ServerCommands
         return true;
     }
 
-    internal static bool HandleHelp(Server server, ProcessCommandArgs args, GameInfo gameInfo)
+    internal static bool HandleCTHelp(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
+        var colYellow = Color.Yellow;
         var colOrange = new Color(255, 181, 26);
         var colLightGreen = new Color(159, 255, 64);
-        var colRedOrange = new Color(255, 91, 51);
 
-        if (!args.SenderGameUser.IsModerator) return true;
+        var colOnlyHost = new Color(255, 91, 51);
 
-        if (args.CanUseModeratorCommand("SLOMO", "SLOWMOTION")) args.Feedback.Add(new(args.SenderGameUser, "'/SLOMO [1/0]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SETTIME")) args.Feedback.Add(new(args.SenderGameUser, "'/SETTIME [0,1-2,0]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("INFINITE_AMMO", "IA")) args.Feedback.Add(new(args.SenderGameUser, "'/INFINITE_AMMO [1/0]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("INFINITE_LIFE", "INFINITE_HEALTH", "IL", "IH")) args.Feedback.Add(new(args.SenderGameUser, "'/INFINITE_LIFE [1/0]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("INFINITE_ENERGY", "IE")) args.Feedback.Add(new(args.SenderGameUser, "'/INFINITE_ENERGY [1/0]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("GIVE")) args.Feedback.Add(new(args.SenderGameUser, "'/GIVE [PLAYER] [ITEM]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("REMOVE")) args.Feedback.Add(new(args.SenderGameUser, "'/REMOVE [PLAYER] [ITEM/SLOT]'", colLightGreen, args.SenderGameUser));
-
-        args.Feedback.Add(new(args.SenderGameUser, "'/ITEMS' to list all available items in the game.", colLightGreen, args.SenderGameUser));
-
-        if (args.CanUseModeratorCommand("SETSTARTHEALTH", "SETSTARTLIFE", "STARTHEALTH", "STARTLIFE")) args.Feedback.Add(new(args.SenderGameUser, "'/STARTLIFE [1-100]'", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("STARTITEMS", "STARTITEM", "SETSTARTITEMS", "SETSTARTITEM", "SETSTARTUPITEMS", "SETSTARTUPITEM")) args.Feedback.Add(new(args.SenderGameUser, "'/SETSTARTITEMS ID ID ID ...' to set start items.", colLightGreen, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("CLEAR", "RESET")) args.Feedback.Add(new(args.SenderGameUser, "'/CLEAR' to reset cheats.", colLightGreen, args.SenderGameUser));
-
-        if (args.SenderGameUser.IsHost && gameInfo.GameOwner != GameOwnerEnum.Local)
+        if (args.ModeratorPrivileges || !SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators))
         {
-            args.Feedback.Add(new(args.SenderGameUser, "'/CHAT [1/0]' to enable/disable global chat.", colRedOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/MODERATORS' to list all moderators with index.", colRedOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/ADDMODERATOR [PLAYER]' to add someone to the moderator list.", colRedOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/REMOVEMODERATOR [INDEX|PLAYER]' to remove from the moderator list.", colRedOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/SETMODPASS [INDEX|PLAYER] [PASS]' to set mod password.", colRedOrange, args.SenderGameUser));
+            args.Feedback.Add(new(args.SenderGameUser, "'/SPECTATE' become a spectator", colYellow, args.SenderGameUser));
+            args.Feedback.Add(new(args.SenderGameUser, "'/JOIN' join back from spectating to an available game-slot", colYellow, args.SenderGameUser));
         }
 
-        if (args.CanUseModeratorCommand("MSG", "MESSAGE")) args.Feedback.Add(new(args.SenderGameUser, "'/MSG [TEXT]' to show a message to everyone.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SERVERDESCRIPTION")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERDESCRIPTION' to show the server description as a reminder.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("GAMEOVER")) args.Feedback.Add(new(args.SenderGameUser, "'/GAMEOVER' to restart the game.", colOrange, args.SenderGameUser));
-
-        if (GameSFD.Handle.CurrentState == State.EditorTestRun)
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
-            args.Feedback.Add(new(args.SenderGameUser, "'/RS' or '/RESTART' to restart instant.", colOrange, args.SenderGameUser));
-        }
-
-        if (args.CanUseModeratorCommand("SCRIPTS")) args.Feedback.Add(new(args.SenderGameUser, "'/SCRIPTS' to list all available scripts.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("LOADSCRIPT", "STARTSCRIPT")) args.Feedback.Add(new(args.SenderGameUser, "'/STARTSCRIPT X' to start script X.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("UNLOADSCRIPT", "STOPSCRIPT")) args.Feedback.Add(new(args.SenderGameUser, "'/STOPSCRIPT X' to stop script X.", colOrange, args.SenderGameUser));
-
-        if (args.SenderGameUser.IsHost)
-        {
-            args.Feedback.Add(new(args.SenderGameUser, "'/RELOADSCRIPTS' to reload scripts from disk.", colOrange, args.SenderGameUser));
-        }
-
-        if (args.CanUseModeratorCommand("MAPS", "LISTMAPS", "SHOWMAPS")) args.Feedback.Add(new(args.SenderGameUser, "'/MAPS' to list all maps.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("MAPS", "LISTMAPS", "SHOWMAPS")) args.Feedback.Add(new(args.SenderGameUser, "'/MAPS [CATEGORY]' to list all maps in category X.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("LISTMAPCATEGORIES", "LISTMAPCAT", "SHOWMAPCATEGORIES", "SHOWMAPCAT", "LISTMC", "SHOWMC", "MAPCATEGORIES")) args.Feedback.Add(new(args.SenderGameUser, "'/MAPCATEGORIES' to list all map categories.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("CHANGEMAPCATEGORY", "CHANGEMAPCAT", "CHANGEMC")) args.Feedback.Add(new(args.SenderGameUser, "'/CHANGEMAPCATEGORY [CATEGORY]' to change the map category.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("MAP", "CHANGEMAP")) args.Feedback.Add(new(args.SenderGameUser, "'/CHANGEMAP [MAP]' to change the map next fight.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("NEXTMAP")) args.Feedback.Add(new(args.SenderGameUser, "'/NEXTMAP' to change map in the current map rotation to the next map.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("MAPPARTS", "SHOWMAPPARTS", "LISTMAPPARTS", "CHAPTERS", "LISTCHAPTERS")) args.Feedback.Add(new(args.SenderGameUser, "'/CHAPTERS' to list available chapters for the current map.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SETMAPPART", "CHANGEMAPPART", "SMP", "CMP", "SETCHAPTER")) args.Feedback.Add(new(args.SenderGameUser, "'/SETCHAPTER [X]' to change to chapter X.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("NEXTMAPPART", "NEXTCHAPTER")) args.Feedback.Add(new(args.SenderGameUser, "'/NEXTCHAPTER' to change to the next chapter.", colOrange, args.SenderGameUser));
-
-        if (args.CanUseModeratorCommand("MAPROTATION", "MR"))
-        {
-            args.Feedback.Add(new(args.SenderGameUser, "'/MAPROTATION [X]' to enable map rotation every X fights.", colOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/MAPROTATION [M]' to change map rotation mode where M is A, B, C or D.", colOrange, args.SenderGameUser));
-            args.Feedback.Add(new(args.SenderGameUser, "'/MAPROTATION [M] [X]' to change map rotation mode and interval.", colOrange, args.SenderGameUser));
-        }
-
-        if (args.CanUseModeratorCommand("SETDIFFICULTY"))
-        {
-            args.Feedback.Add(new(args.SenderGameUser, "'/SETDIFFICULTY [1/2/3/4/EASY/NORMAL/HARD/EXPERT]' to change the difficulty for campaign maps.", colOrange, args.SenderGameUser));
-        }
-
-        if (gameInfo.GameOwner != GameOwnerEnum.Local)
-        {
-            if (args.CanUseModeratorCommand("BAN", "BAN_USER")) args.Feedback.Add(new(args.SenderGameUser, "'/BAN [PLAYER]' to ban a player by name or index.", colOrange, args.SenderGameUser));
-
-            if (args.CanUseModeratorCommand("KICK", "KICK_USER"))
+            if (SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled))
             {
-                args.Feedback.Add(new(args.SenderGameUser, "'/KICK [PLAYER]' to kick player by name or index.", colOrange, args.SenderGameUser));
-                args.Feedback.Add(new(args.SenderGameUser, "'/KICK [X] [PLAYER]' to kick a player by name or index for X minutes (max 60 minutes).", colOrange, args.SenderGameUser));
+                args.Feedback.Add(new(args.SenderGameUser, "'/VOTEKICK' [PLAYER] to start a vote-kick against a player.", colYellow, args.SenderGameUser));
+            }
+        }
+
+        if (!args.ModeratorPrivileges) return true;
+
+        if (args.CanUseModeratorCommand("GRAVITY", "GRAV")) args.Feedback.Add(new(args.SenderGameUser, "'/GRAVITY [X] [Y]' to set the world's gravity.", colOrange, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("DAMAGE", "HURT")) args.Feedback.Add(new(args.SenderGameUser, "'/HURT [AMOUNT] [PLAYER]' to deal damage to a player, negative amounts heal.", colOrange, args.SenderGameUser));
+
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
+        {
+            if (args.SenderGameUser.IsHost)
+            {
+                args.Feedback.Add(new(args.SenderGameUser, "'/MODCMD [A|R|L|C|T] [...]' to add/remove/list/clear/try moderator commands.", colOnlyHost, args.SenderGameUser));
             }
 
-            if (args.CanUseModeratorCommand("MAXPING", "MAX_PING")) args.Feedback.Add(new(args.SenderGameUser, "'/MAXPING [X]' to set a maximum ping to X (range 50-500). 0 to disable.", colOrange, args.SenderGameUser));
-            if (args.CanUseModeratorCommand("AUTO_KICK_AFK", "AUTOKICKAFK", "KICK_AFK", "KICKAFK", "AUTO_KICK_IDLE", "AUTOKICKIDLE", "KICK_IDLE", "KICKIDLE")) args.Feedback.Add(new(args.SenderGameUser, "'/KICKIDLE [X]' to set a maximum idle time to X seconds (range 30-600). 0 to disable.", colOrange, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [TRUE|FALSE|NULL]' to force a server-movement state or reset it.", colLightGreen, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
         }
-
-        if (args.CanUseModeratorCommand("TIMELIMIT", "TL")) args.Feedback.Add(new(args.SenderGameUser, "'/TIMELIMIT [X]' to set time limit to X seconds (range 30-600). 0=disable.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SUDDENDEATH", "SD")) args.Feedback.Add(new(args.SenderGameUser, "'/SUDDENDEATH [1/0]' to set sudden death on/off.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SHUFFLETEAMS", "ST")) args.Feedback.Add(new(args.SenderGameUser, "'/SHUFFLETEAMS' to shuffle the teams next fight.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SHUFFLETEAMS", "ST")) args.Feedback.Add(new(args.SenderGameUser, "'/SHUFFLETEAMS [X]' to shuffle the teams each X fights.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("SETTEAMS")) args.Feedback.Add(new(args.SenderGameUser, "'/SETTEAMS 00000000' to set new teams next fight. 0=independent, 1=team1...", colOrange, args.SenderGameUser));
 
         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Scroll the chat using the scroll-wheel to see all commands.", Color.LightBlue, args.SenderGameUser));
         return true;

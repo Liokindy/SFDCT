@@ -82,7 +82,7 @@ internal static class SFDCTConfig
             Set(CTSettingKey.SubContentEnabledFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentEnabledFolders), string.Empty));
             Set(CTSettingKey.ChatWidth, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatWidth), 428, 428 / 2, 428 * 4));
             Set(CTSettingKey.ChatHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatHeight), 10 * (int)GameChat.MESSAGE_HEIGHT, 10 * (int)GameChat.MESSAGE_HEIGHT / 2, 10 * (int)GameChat.MESSAGE_HEIGHT * 4));
-            Set(CTSettingKey.ChatExtraHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatExtraHeight), 0, 0, 10 * (int)GameChat.MESSAGE_HEIGHT) * 4); 
+            Set(CTSettingKey.ChatExtraHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatExtraHeight), 0, 0, 10 * (int)GameChat.MESSAGE_HEIGHT) * 4);
         }
 
         ReadToFile(handler);
