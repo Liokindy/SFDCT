@@ -11,8 +11,8 @@ internal static class ServerBrowserHandler
     [HarmonyPatch(typeof(GameBrowserMenuItem), nameof(GameBrowserMenuItem.Game), MethodType.Setter)]
     private static void GameBrowserMenuItem_Setter_Game_Postfix_CustomServerColors(GameBrowserMenuItem __instance)
     {
-        if (__instance.labels != null) return;
-        if (__instance.m_game != null) return;
+        if (__instance.labels == null) return;
+        if (__instance.m_game == null) return;
 
         bool isInvalid = false;
         bool isSFR = false;
@@ -40,7 +40,7 @@ internal static class ServerBrowserHandler
             }
         }
 
-        foreach (Label label in __instance.labels)
+        foreach (var label in __instance.labels)
         {
             if (isSFR)
             {

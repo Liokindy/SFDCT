@@ -38,20 +38,20 @@ internal class SFDCTSubContentPanel : Panel
         string[] newFolders = SubContentHandler.GetNewFolders();
 
         m_enabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.on")));
-        for (int i = enabledFolders.Length - 1; i >= 0; i--)
+        for (int i = 0; i < enabledFolders.Length; i++)
         {
             var folderName = enabledFolders[i];
             m_enabledMenu.Add(new MenuItemButton(folderName, folder));
         }
 
-        for (int i = newFolders.Length - 1; i >= 0; i--)
+        for (int i = 0; i < newFolders.Length; i++)
         {
             var folderName = newFolders[i];
             m_enabledMenu.Add(new MenuItemButton(folderName, folder));
         }
 
         m_disabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.off")));
-        for (int i = disabledFolders.Length - 1; i >= 0; i--)
+        for (int i = 0; i < disabledFolders.Length; i++)
         {
             var folderName = disabledFolders[i];
             m_disabledMenu.Add(new MenuItemButton(folderName, folder));
@@ -229,7 +229,7 @@ internal class SFDCTSubContentPanel : Panel
 
     private static string ConcatFolderString(Menu menu)
     {
-        var folderNames = menu.Items.OfType<MenuItemButton>().Select(b => b.lblName.Text);
+        var folderNames = menu.Items.Where(b => b is not MenuItemSeparator).OfType<MenuItemButton>().Select(b => b.lblName.Text);
 
         return SubContentHandler.FilterSeparator + string.Join(SubContentHandler.FilterSeparator, folderNames) + SubContentHandler.FilterSeparator;
     }
@@ -245,9 +245,7 @@ internal class SFDCTSubContentPanel : Panel
             SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, disabledFolders);
             SFDCTConfig.SaveFile();
 
-            MessageStack.Show(
-                LanguageHelper.GetText("menu.settings.restartrequiredmessage"),
-                MessageStackType.Information);
+            MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
         }
 
         ParentPanel.CloseSubPanel();

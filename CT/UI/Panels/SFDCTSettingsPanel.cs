@@ -221,19 +221,19 @@ internal class SFDCTSettingsPanel : Panel
 
     public override void KeyPress(Keys key)
     {
-        if (subPanel != null && key == Keys.Escape)
+        if (key == Keys.Escape)
         {
-            base.KeyPress(key);
+            if (m_menu.FocusMenuAndSelectLastItem())
+            {
+                SoundHandler.PlayGlobalSound("MenuMove");
+                return;
+            }
+
+            back(null);
             return;
         }
 
-        if (m_menu.FocusMenuAndSelectLastItem())
-        {
-            SoundHandler.PlayGlobalSound("MenuMove");
-            return;
-        }
-
-        back(null);
+        base.KeyPress(key);
     }
 
     private void ok(object _)

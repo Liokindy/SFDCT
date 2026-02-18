@@ -37,7 +37,7 @@ internal static class CommandHandler
 
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands) => args.IsCommand(commands) && args.CanUseModeratorCommand(commands);
 
-    internal static ProcessCommandArgs ExecuteCommandsFile(ref ProcessCommandArgs args, GameInfo gameInfo, string fileName)
+    internal static void ExecuteCommandsFile(ref ProcessCommandArgs args, GameInfo gameInfo, string fileName)
     {
         fileName = fileName.Trim();
         fileName = fileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
@@ -51,7 +51,7 @@ internal static class CommandHandler
             if (!File.Exists(filePath))
             {
                 args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.exec.fail.nofile"), Color.Red, args.SenderGameUser));
-                return args;
+                return;
             }
 
             string[] fileLines = File.ReadAllLines(filePath);
@@ -63,35 +63,18 @@ internal static class CommandHandler
                 if (string.IsNullOrWhiteSpace(command)) continue;
                 if (string.IsNullOrEmpty(command)) continue;
                 if (command.StartsWith("//")) continue;
-                if (!command.StartsWith("/")) command = "/" + command;
-                if (command.StartsWith("/exec", StringComparison.OrdinalIgnoreCase) && command.EndsWith(fileName)) continue;
+                if (command.StartsWith("/EXEC", StringComparison.OrdinalIgnoreCase) && command.EndsWith(fileName)) continue;
 
-                // re-use the same args object to show feedback messages
-                args.SourceCommand = command.Remove(0, 1).Trim();
-                args.CommandValue = command;
-                args.SourceParameters = "";
-                args.Parameters.Clear();
-                args.Feedback.Clear();
-
-                int spaceIndex = args.SourceCommand.IndexOf(' ');
-                if (spaceIndex > 0)
+                var handleCommandArgs = new HandleCommandArgs
                 {
-                    args.CommandValue = args.SourceCommand.Substring(0, spaceIndex);
-                    args.SourceParameters = args.SourceCommand.Substring(spaceIndex + 1);
-                    args.Parameters.AddRange(args.SourceParameters.Split([' '], StringSplitOptions.RemoveEmptyEntries));
-                }
+                    Command = command,
+                    UserIdentifier = args.SenderGameUserIdentifier,
+                    LastWhisperedUserIdentifier = args.LastWhisperedUserIdentifier,
+                    Origin = HandleCommandOrigin.User
+                };
 
-                args.CommandValue = args.CommandValue.ToUpperInvariant();
-
-                if (!gameInfo.HandleCommand(args))
-                {
-                    gameInfo.HandleMessageInScripts(args.SenderGameUserIdentifier, command);
-                }
-
-                gameInfo.ShowCommandFeedback(args);
+                gameInfo.HandleCommand(handleCommandArgs);
             }
-
-            args.Feedback.Clear();
         }
         catch (Exception ex)
         {
@@ -100,8 +83,6 @@ internal static class CommandHandler
             ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("Exception trying to execute commands file: '{0}'", fileName));
             ConsoleOutput.ShowMessage(ConsoleOutputType.Error, ex.Message);
         }
-
-        return args;
     }
 
     internal static bool HandleClient(ProcessCommandArgs args, GameInfo gameInfo)
