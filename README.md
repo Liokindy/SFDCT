@@ -16,13 +16,6 @@ Superfighters Custom is a mod for [Superfighters Deluxe](https://store.steampowe
     
 </details>
 
-## Features
-
-> [!NOTE]
-> Features may be added, removed, or changed. (The wiki may not be up to date so compare its version to yours!)
-
-You can find a detailed list of new features in this repository's Wiki: https://github.com/Liokindy/SFDCT/wiki
-
 ## Installation
 
 > [!IMPORTANT]
