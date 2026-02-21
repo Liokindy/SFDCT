@@ -2,6 +2,9 @@
 	<!-- Language: en -->
 	<Text id="sfdct.menu.lobby.helpText">Type /cthelp for a list of SFDCT's commands</Text>
 
+	<Text id="sfdct.button.connectspectator">Connect (as spectator)</Text>
+	<Text id="sfdct.button.requestservermovement">Request Server-Movement</Text>
+
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
 	<Text id="sfdct.command.players.message.bot">- {0}: '{1}'</Text>
 	<Text id="sfdct.command.debugmouse.message">Debug Mouse set to {0}</Text>

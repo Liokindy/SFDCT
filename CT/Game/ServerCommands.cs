@@ -250,47 +250,24 @@ internal static class ServerCommands
     {
         if (args.Parameters.Count == 0) return true;
 
-        GameUser gameUser = gameInfo.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
+        var gameUser = gameInfo.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
         if (gameUser == null || gameUser.IsDisposed || gameUser.IsBot) return true;
 
-        GameConnectionTag gameConnectionTag = gameUser.GetGameConnectionTag();
-        if (gameConnectionTag == null || gameConnectionTag.IsDisposed || gameConnectionTag.GameUsers == null) return true;
+        var gameUserTag = gameUser.GetGameConnectionTag();
+        if (gameUserTag == null || gameUserTag.IsDisposed || gameUserTag.GameUsers == null) return true;
 
-        bool useServerMovement = !gameConnectionTag.ForceServerMovement;
-        bool resetServerMovement = false;
+        var serverMovement = 0;
         if (args.Parameters.Count >= 2)
         {
-            if (args.Parameters[1].Equals("NULL", StringComparison.OrdinalIgnoreCase))
-            {
-                resetServerMovement = true;
-            }
-            else
-            {
-                bool.TryParse(args.Parameters[1], out useServerMovement);
-            }
+            int.TryParse(args.Parameters[1], out serverMovement);
         }
 
-        if (resetServerMovement)
-        {
-            gameConnectionTag.ForcedServerMovementToggleTime = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
-            gameConnectionTag.ForceServerMovement = false;
-        }
-        else
-        {
-            gameConnectionTag.ForcedServerMovementToggleTime = useServerMovement ? -1f : -2f;
-            gameConnectionTag.ForceServerMovement = useServerMovement;
-        }
+        gameUserTag.ForcedServerMovementToggleTime = serverMovement == 0 ? Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS : serverMovement == 2 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE : ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE;
+        gameUserTag.ForceServerMovement = serverMovement != 0 && serverMovement == 2;
 
-        string message = LanguageHelper.GetText("sfdct.command.servermovement.message", gameUser.GetProfileName(), resetServerMovement ? "NULL" : LanguageHelper.GetBooleanText(useServerMovement));
+        string messageKey = "sfdct.command.servermovement.message";
+        string message = LanguageHelper.GetText(messageKey, gameUser.GetProfileName(), serverMovement == 0 ? LanguageHelper.GetText("properties.script.spawnFire.type.default") : LanguageHelper.GetBooleanText(serverMovement == 2));
         args.Feedback.Add(new(args.SenderGameUser, message, args.SenderGameUser));
-
-        foreach (var connectionUser in gameConnectionTag.GameUsers)
-        {
-            connectionUser.ForceServerMovement = useServerMovement;
-
-            Player playerByUserIdentifier = gameInfo.GameWorld.GetPlayerByUserIdentifier(connectionUser.UserIdentifier);
-            playerByUserIdentifier?.UpdateCanDoPlayerAction();
-        }
 
         return true;
     }
@@ -544,7 +521,7 @@ internal static class ServerCommands
             }
 
             if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
-            if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [TRUE|FALSE|NULL]' to force a server-movement state or reset it.", colLightGreen, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [0|1|2]' to control the server-movement state (0 is default, 1 is off, 2 is on).", colLightGreen, args.SenderGameUser));
             if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
             if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
         }

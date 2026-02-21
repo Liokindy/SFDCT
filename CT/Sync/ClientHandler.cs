@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Networking.LidgrenAdapter;
 using SFD;
+using SFD.SteamIntegration;
 using SFDCT.Sync.Data;
 
 namespace SFDCT.Sync;
@@ -9,17 +10,37 @@ namespace SFDCT.Sync;
 internal static class ClientHandler
 {
     internal static bool DebugMouse;
+    internal static bool NextConnectionAsSpectator;
 
     internal static void HandleCustomMessage(Client client, SFDCTMessageData messageData, NetIncomingMessage incomingMessage)
     {
         switch (messageData.Type)
         {
             case MessageHandler.SFDCTMessageDataType.DebugMouseToggle:
-                bool enabled = (bool)messageData.Data[0];
-
-                DebugMouse = enabled;
+                DebugMouse = (bool)messageData.Data[0];
                 break;
         }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Client), nameof(Client.CreateDiscoveryConnectRequestMessage))]
+    private static bool Client_CreateDiscoveryConnectRequestMessage_Prefix_RequestAsSpectator(ref NetOutgoingMessage __result, Client __instance, NetOutgoingMessage nom, string passphrase)
+    {
+        if (NextConnectionAsSpectator)
+        {
+            NextConnectionAsSpectator = false;
+
+            var asSpectator = true;
+            var playerCount = GameInfo.LocalPlayerCount;
+            var activePlayerIndex = GameInfo.GetActiveLocalUserIndexes();
+            var activePlayerProfiles = GameInfo.GetActiveLocalUserProfiles();
+            var personaShortName = SteamInfo.GetPersonaNameShort();
+
+            __result = NetMessage.Connection.DiscoveryConnectRequest.Write(new(Constants.PApplicationInstance, Constants.SApplicationInstance, 9, "v.1.5.0", passphrase, playerCount, activePlayerIndex, activePlayerProfiles, asSpectator, personaShortName, Constants.CLIENT_REQUEST_SERVER_MOVEMENT), nom);
+            return false;
+        }
+
+        return true;
     }
 
     [HarmonyPrefix]

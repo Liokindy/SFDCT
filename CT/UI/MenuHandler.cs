@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
+using SDR.Networking;
 using SFD;
 using SFD.Code.MenuControls;
 using SFD.GameKeyboard;
@@ -11,6 +12,7 @@ using SFDCT.Sync.Data;
 using SFDCT.UI.Panels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 
 namespace SFDCT.UI;
@@ -220,5 +222,49 @@ internal static class MenuHandler
         {
             VirtualKeyboard.BindedKeys[i].Setup();
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(JoinGamePanel), MethodType.Constructor, [typeof(GameServerInfo)])]
+    private static void JoinGamePanel_Constructor_Postfix_JoinAsSpectatorButton(JoinGamePanel __instance)
+    {
+        var connectAsSpectatorButton = new MenuItemButton(LanguageHelper.GetText("sfdct.button.connectspectator").ToUpperInvariant(), _ =>
+        {
+            ClientHandler.NextConnectionAsSpectator = true;
+            __instance.connect(_);
+
+            if (__instance.SubPanel != null && __instance.SubPanel is ConnectingPanel subPanel)
+            {
+                var cancelButton = ((MenuItemButton)((Menu)subPanel.members[0]).Items.Last());
+
+                cancelButton.ChooseEvent = (ControlEvents.ChooseEvent)Delegate.Combine(cancelButton.ChooseEvent, new ControlEvents.ChooseEvent((object _) =>
+                {
+                    ClientHandler.NextConnectionAsSpectator = false;
+                }));
+            }
+        }, "micon_ok");
+
+        var requestServerMovementToggle = new MenuItemDropdown(
+            LanguageHelper.GetText("sfdct.button.requestservermovement"),
+            [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]
+        );
+
+        requestServerMovementToggle.SetStartValue(Constants.CLIENT_REQUEST_SERVER_MOVEMENT ? 0 : 1);
+        requestServerMovementToggle.DropdownItemVisibleCount = 2;
+
+        EventHelper.Add(requestServerMovementToggle, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
+        {
+            bool value = requestServerMovementToggle.ValueId == 0;
+
+            if (Constants.CLIENT_REQUEST_SERVER_MOVEMENT != value)
+            {
+                Constants.CLIENT_REQUEST_SERVER_MOVEMENT = value;
+                SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
+            }
+        }));
+
+        __instance.m_menu.Height += 2;
+        __instance.m_menu.Add(requestServerMovementToggle, __instance.m_menu.ItemCount - 2);
+        __instance.m_menu.Add(connectAsSpectatorButton, __instance.m_menu.ItemCount - 2);
     }
 }
