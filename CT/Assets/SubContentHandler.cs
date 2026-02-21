@@ -18,8 +18,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SFDCT.Assets;
@@ -371,14 +369,12 @@ internal static class SubContentHandler
 
             foreach (var path in kvp.Value)
             {
-                GameSFD.Handle.SetLoadingProgress(current, total);
                 AnimationsData animationsData = Content.Load<AnimationsData>(path);
                 CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
 
                 current++;
             }
 
-            GameSFD.Handle.SetLoadingProgress(0, 0);
             currentContent++;
         }
 
@@ -419,16 +415,13 @@ internal static class SubContentHandler
             int current = 0;
             int total = kvp.Value.Length;
 
-            GameSFD.Handle.SetLoadingProgress(current, total);
-            Parallel.ForEach(kvp.Value, (path) =>
+            foreach (var path in kvp.Value)
             {
                 Textures.m_tileTextures.Load(path, kvp.Key != ContentOriginType.Official);
 
-                Interlocked.Increment(ref current);
-                GameSFD.Handle.SetLoadingProgress(current, total);
-            });
+                current++;
+            }
 
-            GameSFD.Handle.SetLoadingProgress(0, 0);
 
             currentContent++;
         }
@@ -456,7 +449,6 @@ internal static class SubContentHandler
             Items.m_slotMaleItems[i] = [];
         }
 
-        var semaphore = new SemaphoreSlim(1);
         var itemLoadedIDs = new HashSet<string>();
         var itemContents = GetContentFiles("*.item", SearchOption.AllDirectories, Constants.Paths.DATA_ITEMS);
         var currentContent = 1;
@@ -470,49 +462,35 @@ internal static class SubContentHandler
             int current = 0;
             int total = kvp.Value.Length;
 
-            GameSFD.Handle.SetLoadingProgress(current, total);
-            Parallel.ForEach(kvp.Value, (path) =>
+            foreach (var path in kvp.Value)
             {
-                if (GameSFD.Closing) return;
+                if (GameSFD.Closing) return false;
 
                 Item item = Content.Load<Item>(path);
                 item.PostProcess();
 
-                try
+                current++;
+                if (!itemLoadedIDs.Add(item.ID) && kvp.Key == ContentOriginType.Official)
                 {
-                    semaphore.Wait();
-
-                    Interlocked.Increment(ref current);
-                    GameSFD.Handle.SetLoadingProgress(current, total);
-
-                    if (!itemLoadedIDs.Add(item.ID) && kvp.Key == ContentOriginType.Official)
+                    foreach (Item item2 in Items.m_allItems)
                     {
-                        foreach (Item item2 in Items.m_allItems)
+                        if (item2.ID == item.ID)
                         {
-                            if (item2.ID == item.ID)
-                            {
-                                throw new Exception($"Error: Item ID collision between item '{item2}' and '{item}' while loading '{path}'");
-                            }
+                            throw new Exception($"Error: Item ID collision between item '{item2}' and '{item}' while loading '{path}'");
                         }
-
-                        throw new Exception($"Error: Item ID collision, item with ID '{item.ID}' has already been loaded, cannot load item '{item}' from '{path}'");
                     }
 
-                    Items.m_allItems.Add(item);
-                    Items.m_slotAllItems[item.EquipmentLayer].Add(item);
+                    throw new Exception($"Error: Item ID collision, item with ID '{item.ID}' has already been loaded, cannot load item '{item}' from '{path}'");
                 }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
 
-            GameSFD.Handle.SetLoadingProgress(0, 0);
+                Items.m_allItems.Add(item);
+                Items.m_slotAllItems[item.EquipmentLayer].Add(item);
+            }
+
 
             currentContent++;
         }
 
-        semaphore.Dispose();
 
         Items.PostProcessGenders();
 
@@ -801,11 +779,14 @@ internal static class SubContentHandler
     [HarmonyPatch(typeof(TileTextures), nameof(TileTextures.AddTexture))]
     private static IEnumerable<CodeInstruction> TileTextures_AddTexture_Prefix_DuplicateTextureMessage(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(27).opcode = OpCodes.Nop;
-        instructions.ElementAt(28).opcode = OpCodes.Nop;
-        instructions.ElementAt(29).opcode = OpCodes.Nop;
-        instructions.ElementAt(30).opcode = OpCodes.Nop;
-        instructions.ElementAt(31).opcode = OpCodes.Nop;
+        // Remove this line to avoid clutter when loading sub-content
+        // 'ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("Error: A texture with name '{0}' already exist.", name));'
+
+        instructions.ElementAt(8).opcode = OpCodes.Nop;
+        instructions.ElementAt(9).opcode = OpCodes.Nop;
+        instructions.ElementAt(10).opcode = OpCodes.Nop;
+        instructions.ElementAt(11).opcode = OpCodes.Nop;
+        instructions.ElementAt(12).opcode = OpCodes.Nop;
 
         return instructions;
     }

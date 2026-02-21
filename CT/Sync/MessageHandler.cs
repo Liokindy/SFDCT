@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
-using Networking.LidgrenAdapter;
-using SDR.Networking;
 using SFD;
 using SFDCT.Sync.Data;
 

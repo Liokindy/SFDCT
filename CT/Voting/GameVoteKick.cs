@@ -1,9 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using Networking.LidgrenAdapter;
+﻿using Lidgren.Network;
+using Microsoft.Xna.Framework;
 using SFD;
 using SFD.ManageLists;
 using SFDCT.Configuration;
-using Steamworks;
 
 namespace SFDCT.Voting;
 
@@ -14,13 +13,13 @@ internal class GameVoteKick : GameVoteYesNo
 
     private static double m_nextAvailableVoteKickTimeStamp;
 
-    private readonly SteamId m_userSteamIdToKick;
+    private readonly string m_userNetAddressToKick;
     private readonly string m_userProfileNameToKick;
     private readonly string m_userAccountNameToKick;
 
-    internal GameVoteKick(int voteID, string userProfileName, string userAccountName, SteamId userSteamId) : base(voteID, [string.Format("'{0}' ({1})", userProfileName, userAccountName)])
+    internal GameVoteKick(int voteID, string userProfileName, string userAccountName, string userNetAddress) : base(voteID, [string.Format("'{0}' ({1})", userProfileName, userAccountName)])
     {
-        m_userSteamIdToKick = userSteamId;
+        m_userNetAddressToKick = userNetAddress;
         m_userAccountNameToKick = userAccountName;
         m_userProfileNameToKick = userProfileName;
     }
@@ -52,10 +51,10 @@ internal class GameVoteKick : GameVoteYesNo
     public override void OnYes(GameInfo gameInfo)
     {
         SetVoteKickCooldown();
-        GameUser userToKick = gameInfo.GetGameUserByAccount(m_userSteamIdToKick);
+        GameUser userToKick = gameInfo.GetGameUserByAccount(m_userNetAddressToKick);
         if (userToKick == null || userToKick.IsDisposed)
         {
-            KickList.Add(m_userSteamIdToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
+            KickList.Add(m_userNetAddressToKick, m_userProfileNameToKick, Constants.HOST_GAME_DEFAULT_KICK_DURATION_MINUTES);
 
             ShowEndingChatMessage(gameInfo);
             gameInfo.ShowChatMessage(new(LanguageHelper.GetText("sfdct.vote.kick.nouser", m_userProfileNameToKick, m_userAccountNameToKick)));

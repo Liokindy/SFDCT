@@ -1,13 +1,10 @@
 ﻿using HarmonyLib;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
-using Networking.LidgrenAdapter;
-using SDR.Networking;
 using SFD;
 using SFDCT.Game;
 using SFDCT.Helper;
 using SFDCT.Sync.Data;
-using SteamLayer.SteamManagers;
-using Steamworks;
 using System.Collections.Generic;
 
 namespace SFDCT.Sync;
@@ -54,7 +51,7 @@ internal static class ServerHandler
         var serverUpdate = Server.ServerUpdateLockObject;
         lock (serverUpdate)
         {
-            foreach (var connection in __instance.m_server.GetNetConnections(true))
+            foreach (var connection in __instance.m_server.Connections)
             {
                 var tag = connection.GameConnectionTag();
                 if (tag == null) continue;
@@ -97,7 +94,7 @@ internal static class ServerHandler
 
     internal static void HandleCustomMessage(Server server, SFDCTMessageData messageData, NetIncomingMessage incomingMessage, NetConnection connection)
     {
-        GameConnectionTag incomingTag = connection.ConnectionTag;
+        GameConnectionTag incomingTag = connection.GameConnectionTag();
 
         switch (messageData.Type)
         {
@@ -145,13 +142,7 @@ internal static class ServerHandler
                     if (gameUser != null && profile != null)
                     {
 #if DEBUG
-                        string accountName = string.Empty;
-                        if (server.GameInfo.AccountNameInfo.TryGetAccountID(gameUser.UserIdentifier, out SteamId steamId))
-                        {
-                            accountName = SteamIdNameManager.Instance.GetAccountName(steamId);
-                        }
-
-                        Logger.LogDebug($"ProfileChange {accountName} '{gameUser.GetProfileName()}'");
+                        Logger.LogDebug($"ProfileChange {gameUser.AccountName} '{gameUser.GetProfileName()}'");
 #endif
 
                         gameUser.Profile = profile;
@@ -172,12 +163,12 @@ internal static class ServerHandler
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Server), nameof(Server.HandleDataMessage))]
-    private static bool Server_HandleDataMessage_Prefix_CustomSignals(Server __instance, NetMessage.MessageData messageData, NetIncomingMessage msg, NetConnection netConnection)
+    private static bool Server_HandleDataMessage_Prefix_CustomSignals(Server __instance, NetMessage.MessageData messageData, NetIncomingMessage msg)
     {
         if (messageData.MessageType == MessageHandler.SFDCTMessageType)
         {
             var data = MessageHandler.Read(msg, messageData);
-            HandleCustomMessage(__instance, data, msg, netConnection);
+            HandleCustomMessage(__instance, data, msg, msg.SenderConnection);
             return false;
         }
 

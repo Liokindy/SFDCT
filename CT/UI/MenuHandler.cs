@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
-using SDR.Networking;
 using SFD;
 using SFD.Code.MenuControls;
 using SFD.GameKeyboard;
 using SFD.MenuControls;
+using SFD.SFDOnlineServices;
 using SFD.States;
 using SFDCT.Misc;
 using SFDCT.Sync;
@@ -225,8 +225,8 @@ internal static class MenuHandler
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(JoinGamePanel), MethodType.Constructor, [typeof(GameServerInfo)])]
-    private static void JoinGamePanel_Constructor_Postfix_JoinAsSpectatorButton(JoinGamePanel __instance)
+    [HarmonyPatch(typeof(JoinGamePanel), MethodType.Constructor, [typeof(SFDGameServer)])]
+    private static void JoinGamePanel_Constructor_Postfix_ExtraButtons(JoinGamePanel __instance)
     {
         var connectAsSpectatorButton = new MenuItemButton(LanguageHelper.GetText("sfdct.button.connectspectator").ToUpperInvariant(), _ =>
         {
@@ -263,6 +263,7 @@ internal static class MenuHandler
             }
         }));
 
+        __instance.Height += Menu.ITEM_HEIGHT * 2;
         __instance.m_menu.Height += 2;
         __instance.m_menu.Add(requestServerMovementToggle, __instance.m_menu.ItemCount - 2);
         __instance.m_menu.Add(connectAsSpectatorButton, __instance.m_menu.ItemCount - 2);

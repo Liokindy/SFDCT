@@ -1,6 +1,6 @@
 ﻿using Box2D.XNA;
 using HarmonyLib;
-using Networking.LidgrenAdapter;
+using Lidgren.Network;
 using SFD;
 using SFD.States;
 using SFDCT.Configuration;

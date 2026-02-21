@@ -13,28 +13,31 @@ internal static class ServerBrowserHandler
     {
         if (__instance.labels == null) return;
         if (__instance.m_game == null) return;
+        if (__instance.m_game.SFDGameServer == null) return;
+
+        var game = __instance.m_game.SFDGameServer;
 
         bool isInvalid = false;
         bool isSFR = false;
         bool isEmpty = false;
         bool isFull = false;
 
-        if (Security.IsInvalidGameServer(__instance.m_game))
+        if (Security.IsInvalidGameServer(game))
         {
             isInvalid = true;
         }
         else
         {
-            if (__instance.m_game.Version.StartsWith("v.2"))
+            if (game.Version.StartsWith("v.2"))
             {
                 isSFR = true;
             }
 
-            if (__instance.m_game.Players <= 0)
+            if (game.Players <= 0)
             {
                 isEmpty = true;
             }
-            else if (__instance.m_game.Players >= __instance.m_game.MaxAvailableSlots)
+            else if (game.Players >= game.MaxPlayers)
             {
                 isFull = true;
             }

@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
-using Networking.LidgrenAdapter;
+using Lidgren.Network;
 using SFD;
-using SFD.SteamIntegration;
 using SFDCT.Sync.Data;
 
 namespace SFDCT.Sync;
@@ -23,20 +22,22 @@ internal static class ClientHandler
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Client), nameof(Client.CreateDiscoveryConnectRequestMessage))]
-    private static bool Client_CreateDiscoveryConnectRequestMessage_Prefix_RequestAsSpectator(ref NetOutgoingMessage __result, Client __instance, NetOutgoingMessage nom, string passphrase)
+    [HarmonyPatch(typeof(Client), nameof(Client.CreateConnectRequestMessage))]
+    private static bool Client_CreateConnectRequestMessage_Prefix_RequestAsSpectator(ref NetOutgoingMessage __result, Client __instance, string cryptPhraseB)
     {
         if (NextConnectionAsSpectator)
         {
             NextConnectionAsSpectator = false;
 
+            var outgoingMessage = __instance.m_client.CreateMessage();
             var asSpectator = true;
             var playerCount = GameInfo.LocalPlayerCount;
             var activePlayerIndex = GameInfo.GetActiveLocalUserIndexes();
             var activePlayerProfiles = GameInfo.GetActiveLocalUserProfiles();
-            var personaShortName = SteamInfo.GetPersonaNameShort();
+            var accountData = Constants.Account.CreateAccountData(cryptPhraseB + Constants.Account.AccountSignature);
 
-            __result = NetMessage.Connection.DiscoveryConnectRequest.Write(new(Constants.PApplicationInstance, Constants.SApplicationInstance, 9, "v.1.5.0", passphrase, playerCount, activePlayerIndex, activePlayerProfiles, asSpectator, personaShortName, Constants.CLIENT_REQUEST_SERVER_MOVEMENT), nom);
+            var data = new NetMessage.Connection.ConnectRequest.Data(Constants.PApplicationInstance, Constants.SApplicationInstance, playerCount, activePlayerIndex, activePlayerProfiles, asSpectator, accountData, Constants.CLIENT_REQUEST_SERVER_MOVEMENT);
+            __result = NetMessage.Connection.ConnectRequest.Write(ref data, outgoingMessage);
             return false;
         }
 

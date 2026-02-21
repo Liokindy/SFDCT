@@ -1,20 +1,22 @@
 ﻿using HarmonyLib;
-using SDR.Networking;
 using SFD;
 using SFD.MenuControls;
+using SFD.SFDOnlineServices;
 
 namespace SFDCT.OnlineServices;
 
 [HarmonyPatch]
 internal static class Security
 {
-    internal static bool IsInvalidGameServer(GameServerInfo gameServer)
+    internal static bool IsInvalidGameServer(SFDGameServer gameServer)
     {
-        bool invalidMaxPlayers = gameServer.MaxAvailableSlots == 0
-                                    || gameServer.MaxAvailableSlots > 16;
+        if (gameServer == null) return true;
+
+        bool invalidMaxPlayers = gameServer.MaxPlayers == 0
+                                    || gameServer.MaxPlayers > 16;
 
         int totalPlayerCount = gameServer.Players + gameServer.Bots;
-        bool invalidPlayerCount = totalPlayerCount > gameServer.MaxAvailableSlots;
+        bool invalidPlayerCount = totalPlayerCount > gameServer.MaxPlayers;
 
         bool invalidNameLength = gameServer.GameName == null
                                     || gameServer.GameName.Length < 3
@@ -36,8 +38,8 @@ internal static class Security
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameBrowserPanel), nameof(GameBrowserPanel.IncludeGameInFilter))]
-    private static void GameBrowserPanel_IncludeGameInFilter_Postfix_SecurityChecks(ref bool __result, GameServerInfo gameServer)
+    private static void GameBrowserPanel_IncludeGameInFilter_Postfix_SecurityChecks(ref bool __result, SFDGameServerInstance gameServer)
     {
-        if (__result) __result = !IsInvalidGameServer(gameServer);
+        if (__result) __result = !IsInvalidGameServer(gameServer.SFDGameServer);
     }
 }

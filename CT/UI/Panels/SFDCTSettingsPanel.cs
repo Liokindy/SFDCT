@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Input;
 using SFD;
 using SFD.MenuControls;
-using SFD.Sounds;
 using SFDCT.Bootstrap;
 using SFDCT.Configuration;
 using SFDCT.UI.MenuItems;
@@ -230,12 +229,6 @@ internal class SFDCTSettingsPanel : Panel
     {
         if (key == Keys.Escape)
         {
-            if (m_menu.FocusMenuAndSelectLastItem())
-            {
-                SoundHandler.PlayGlobalSound("MenuMove");
-                return;
-            }
-
             back(null);
             return;
         }

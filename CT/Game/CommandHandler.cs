@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
-using SDR.Networking;
 using SFD;
 using SFD.MenuControls;
 using SFDCT.Misc;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Emit;
 
 namespace SFDCT.Game;
 
@@ -46,13 +47,26 @@ internal static class CommandHandler
         ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Server), nameof(Server.ConnectionRequestAttachToGameSlots))]
-    private static void Server_Postfix_ConnectionRequestAttachToGameSlots_ShowCTHelp(NetConnection netConnection)
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Server), nameof(Server.DoReadRun))]
+    private static IEnumerable<CodeInstruction> Server_Transpiler_DoReadRun_ShowCTHelp(IEnumerable<CodeInstruction> instructions)
     {
-        if (!SFD.Program.IsGame || !netConnection.IsHost) return;
+        var code = new List<CodeInstruction>(instructions);
 
-        ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
+        // ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
+        var targetIndex = 873;
+        var targetInstructions = new List<CodeInstruction>
+        {
+            new(OpCodes.Ldstr, "sfdct.menu.lobby.helpText"),
+            new(OpCodes.Call, AccessTools.Method(typeof(LanguageHelper), nameof(LanguageHelper.GetText), [typeof(string)])),
+            new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Color), nameof(Color.Yellow))),
+            new(OpCodes.Ldstr, ""),
+            new(OpCodes.Ldc_I4_0),
+            new(OpCodes.Call, AccessTools.Method(typeof(ChatMessage), nameof(ChatMessage.Show), [typeof(string), typeof(Color), typeof(string), typeof(bool)]))
+        };
+
+        code.InsertRange(targetIndex, targetInstructions);
+        return code;
     }
 
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands) => args.IsCommand(commands) && args.CanUseModeratorCommand(commands);

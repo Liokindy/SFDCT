@@ -1,5 +1,5 @@
-﻿using Microsoft.Xna.Framework;
-using SDR.Networking;
+﻿using Lidgren.Network;
+using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
 using SFD.GUI.Text;
@@ -8,8 +8,6 @@ using SFD.Sounds;
 using SFD.Voting;
 using SFDCT.Configuration;
 using SFDCT.Sync;
-using SteamLayer.SteamManagers;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -262,8 +260,8 @@ internal static class ServerCommands
             int.TryParse(args.Parameters[1], out serverMovement);
         }
 
-        gameUserTag.ForcedServerMovementToggleTime = serverMovement == 0 ? Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS : serverMovement == 2 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE : ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE;
-        gameUserTag.ForceServerMovement = serverMovement != 0 && serverMovement == 2;
+        gameUserTag.ForcedServerMovementToggleTime = serverMovement == 1 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE : serverMovement == 0 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE : Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
+        gameUserTag.ForceServerMovement = serverMovement == 1;
 
         string messageKey = "sfdct.command.servermovement.message";
         string message = LanguageHelper.GetText(messageKey, gameUser.GetProfileName(), serverMovement == 0 ? LanguageHelper.GetText("properties.script.spawnFire.type.default") : LanguageHelper.GetBooleanText(serverMovement == 2));
@@ -300,24 +298,10 @@ internal static class ServerCommands
         GameUser kickOwnerUser = args.SenderGameUser;
 
         string userToKickProfileName = userToKick.GetProfileName();
-        string userTokickAccountName = userToKick.IsBot ? "COM" : string.Empty;
-        if (server.GameInfo.AccountNameInfo.TryGetAccountID(userToKick.UserIdentifier, out SteamId steamId))
-        {
-            userTokickAccountName = SteamIdNameManager.Instance.GetAccountName(steamId);
-        }
+        string userTokickAccountName = userToKick.IsBot ? "COM" : userToKick.AccountName;
 
         string kickOwnerUserProfileName = kickOwnerUser.GetProfileName();
-        string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : string.Empty;
-        SteamId userToKickSteamId = 0L;
-        if (server.GameInfo.AccountNameInfo.TryGetAccountID(kickOwnerUser.UserIdentifier, out userToKickSteamId))
-        {
-            kickOwnerUserAccountName = SteamIdNameManager.Instance.GetAccountName(userToKickSteamId);
-        }
-
-        if (!userToKickSteamId.IsValid)
-        {
-            return true;
-        }
+        string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : kickOwnerUser.AccountName;
 
         string soundID = "PlayerLeave";
 
@@ -330,7 +314,7 @@ internal static class ServerCommands
 
         ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
 
-        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKickProfileName, userTokickAccountName, userToKickSteamId);
+        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKickProfileName, userTokickAccountName, userToKick.GetNetIP());
         vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
 
         server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
@@ -521,7 +505,7 @@ internal static class ServerCommands
             }
 
             if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
-            if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [0|1|2]' to control the server-movement state (0 is default, 1 is off, 2 is on).", colLightGreen, args.SenderGameUser));
+            if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [0|1]' to control the server-movement state (empty is default, 0 is off, 1 is on).", colLightGreen, args.SenderGameUser));
             if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
             if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
         }
