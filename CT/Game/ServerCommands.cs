@@ -1,5 +1,5 @@
-﻿using Lidgren.Network;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using SDR.Networking;
 using SFD;
 using SFD.Core;
 using SFD.GUI.Text;
@@ -8,6 +8,8 @@ using SFD.Sounds;
 using SFD.Voting;
 using SFDCT.Configuration;
 using SFDCT.Sync;
+using SteamLayer.SteamManagers;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -298,10 +300,19 @@ internal static class ServerCommands
         GameUser kickOwnerUser = args.SenderGameUser;
 
         string userToKickProfileName = userToKick.GetProfileName();
-        string userTokickAccountName = userToKick.IsBot ? "COM" : userToKick.AccountName;
+        string userTokickAccountName = userToKick.IsBot ? "COM" : string.Empty;
+        if (server.GameInfo.AccountNameInfo.TryGetAccountID(userToKick.UserIdentifier, out SteamId steamId))
+        {
+            userTokickAccountName = SteamIdNameManager.Instance.GetAccountName(steamId);
+        }
 
         string kickOwnerUserProfileName = kickOwnerUser.GetProfileName();
-        string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : kickOwnerUser.AccountName;
+        string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : string.Empty;
+        SteamId userToKickSteamId = 0L;
+        if (server.GameInfo.AccountNameInfo.TryGetAccountID(kickOwnerUser.UserIdentifier, out userToKickSteamId))
+        {
+            kickOwnerUserAccountName = SteamIdNameManager.Instance.GetAccountName(userToKickSteamId);
+        }
 
         string soundID = "PlayerLeave";
 
@@ -314,7 +325,7 @@ internal static class ServerCommands
 
         ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
 
-        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKickProfileName, userTokickAccountName, userToKick.GetNetIP());
+        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKickProfileName, userTokickAccountName, userToKickSteamId);
         vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
 
         server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));

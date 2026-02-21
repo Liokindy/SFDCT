@@ -14,7 +14,7 @@ internal static class DSPreviewHandler
     {
         // If the host becomes a spectator it suddenly counts as the DS preview,
         // check if the account name is empty too
-        __result = __instance.IsHost && __instance.JoinedAsSpectator && string.IsNullOrEmpty(__instance.AccountName);
+        __result = __instance.IsHost && __instance.JoinedAsSpectator && __instance.UserIdentifier == 1;
         return false;
     }
 

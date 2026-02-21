@@ -40,11 +40,17 @@ internal static class ClientCommands
 
                 if (noSlot) messageColor *= 0.5f;
 
+                string gameUserAccountName;
+                if (!gameInfo.AccountNameInfo.TryGetAccountName(gameUser.UserIdentifier, out gameUserAccountName))
+                {
+                    gameUserAccountName = "#" + gameUser.UserIdentifier.ToString();
+                }
+
                 messageArgs =
                 [
                     noSlot ? "#" : gameUser.GameSlotIndex.ToString(),
                     gameUser.GetProfileName(),
-                    gameUser.IsBot ? Profile.DEFAULT_BOT_NAME : gameUser.AccountName,
+                    gameUser.IsBot ? Profile.DEFAULT_BOT_NAME : gameUserAccountName,
                     gameUser.IsHost ? "HOST" : gameUser.IsModerator ? "MOD" : "",
                 ];
             }

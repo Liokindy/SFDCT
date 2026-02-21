@@ -13,9 +13,8 @@ internal static class ServerBrowserHandler
     {
         if (__instance.labels == null) return;
         if (__instance.m_game == null) return;
-        if (__instance.m_game.SFDGameServer == null) return;
 
-        var game = __instance.m_game.SFDGameServer;
+        var game = __instance.m_game;
 
         bool isInvalid = false;
         bool isSFR = false;
@@ -37,7 +36,7 @@ internal static class ServerBrowserHandler
             {
                 isEmpty = true;
             }
-            else if (game.Players >= game.MaxPlayers)
+            else if (game.Players >= game.MaxAvailableSlots)
             {
                 isFull = true;
             }

@@ -1,11 +1,13 @@
 ﻿using HarmonyLib;
-using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using Networking.LidgrenAdapter;
+using SDR.Networking;
 using SFD;
 using SFDCT.Game;
 using SFDCT.Helper;
 using SFDCT.Sync.Data;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace SFDCT.Sync;
 
@@ -51,7 +53,7 @@ internal static class ServerHandler
         var serverUpdate = Server.ServerUpdateLockObject;
         lock (serverUpdate)
         {
-            foreach (var connection in __instance.m_server.Connections)
+            foreach (var connection in __instance.m_server.GetNetConnections(true))
             {
                 var tag = connection.GameConnectionTag();
                 if (tag == null) continue;
@@ -142,7 +144,7 @@ internal static class ServerHandler
                     if (gameUser != null && profile != null)
                     {
 #if DEBUG
-                        Logger.LogDebug($"ProfileChange {gameUser.AccountName} '{gameUser.GetProfileName()}'");
+                        Logger.LogDebug($"ProfileChange '{gameUser.GetProfileName()}'");
 #endif
 
                         gameUser.Profile = profile;
@@ -161,18 +163,93 @@ internal static class ServerHandler
         }
     }
 
+    internal static bool HandleServerResponse(ref ServerResponse serverResponse, Server server, NetMessage.Connection.DiscoveryConnectRequest.Data connectData)
+    {
+        if (connectData.AsSpectators && connectData.ConnectingUserCount > 1)
+        {
+            serverResponse = ServerResponse.RefuseConnect;
+            return true;
+        }
+
+        return false;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Server), nameof(Server.HandleDataMessage))]
-    private static bool Server_HandleDataMessage_Prefix_CustomSignals(Server __instance, NetMessage.MessageData messageData, NetIncomingMessage msg)
+    private static bool Server_HandleDataMessage_Prefix_CustomSignals(Server __instance, NetMessage.MessageData messageData, NetIncomingMessage msg, NetConnection netConnection)
     {
         if (messageData.MessageType == MessageHandler.SFDCTMessageType)
         {
             var data = MessageHandler.Read(msg, messageData);
-            HandleCustomMessage(__instance, data, msg, msg.SenderConnection);
+            HandleCustomMessage(__instance, data, msg, netConnection);
             return false;
         }
 
         return true;
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Server), nameof(Server.ConnectionRequestAttachToGameSlots))]
+    private static IEnumerable<CodeInstruction> Server_ConnectionRequestAttachToGameSlots_Transpiler_SpectatorFix(IEnumerable<CodeInstruction> instructions)
+    {
+        // SFD accepts spectators that aren't the host, however 'JoinedAsSpectator'
+        // is only set for the host if 'IsServer' is true, if 'IsGame' is true
+        // then SFD hard codes 'JoinedAsSpectator' as false even though the
+        // connection data may have 'AsSpectator' as true, and it will be accepted
+
+        var code = new List<CodeInstruction>(instructions);
+        var gameUserLocalIndex = 10;
+
+        var isGameInstruction = code[181];
+        var isServerInstruction = code[187];
+
+        var asSpectatorInstructions = new List<CodeInstruction>
+        {
+            new(OpCodes.Ldloc_S, gameUserLocalIndex),
+            new(OpCodes.Ldarg_2), // connectData
+            new(OpCodes.Ldfld, AccessTools.Field(typeof(NetMessage.Connection.DiscoveryConnectRequest.Data), nameof(NetMessage.Connection.DiscoveryConnectRequest.Data.AsSpectators))),
+            new(OpCodes.Callvirt, AccessTools.PropertySetter(typeof(GameUser), nameof(GameUser.JoinedAsSpectator)))
+        };
+
+        // Replace 'false'
+        var isGameIndex = code.IndexOf(isGameInstruction);
+        code.RemoveRange(isGameIndex, 3);
+        code.InsertRange(isGameIndex, asSpectatorInstructions);
+
+        // Replace 'netConnection.IsHost &&'
+        var isServerIndex = code.IndexOf(isServerInstruction);
+        code.RemoveRange(isServerIndex, 9);
+        code.InsertRange(isServerIndex, asSpectatorInstructions);
+
+        return code;
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Server), nameof(Server.HandleMessageDiscoveryConnectRequest))]
+    private static IEnumerable<CodeInstruction> Server_HandleMessageDiscoveryConnectRequest_Transpiler_InjectHandleResponse(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+    {
+        // This is after reading connectData, doing some vanilla checks,
+        // but before game slots are searched
+        var code = new List<CodeInstruction>(instructions);
+
+        var finalSendDiscoveryConnectResponseLabel = il.DefineLabel();
+        var connectDataLocalIndex = 4;
+        var serverResponseLocalIndex = 2;
+
+        code[285].labels.Add(finalSendDiscoveryConnectResponseLabel);
+
+        var targetIndex = 149;
+        var targetInstructions = new List<CodeInstruction>
+        {
+            new(OpCodes.Ldloca_S, serverResponseLocalIndex), // ref serverResponse
+            new(OpCodes.Ldarg_0), // this (Server)
+            new(OpCodes.Ldloc_S, connectDataLocalIndex), // data
+            new(OpCodes.Call, AccessTools.Method(typeof(ServerHandler), nameof(HandleServerResponse))),
+            new(OpCodes.Brtrue, finalSendDiscoveryConnectResponseLabel),
+        };
+
+        code.InsertRange(targetIndex, targetInstructions);
+        return code;
     }
 
     [HarmonyPrefix]
