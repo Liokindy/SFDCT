@@ -1,39 +1,70 @@
-# Contents
+# CONTRIBUTING
 
-1. [Building](CONTRIBUTING.md#building)
-2. [Localization](CONTRIBUTING.md#localization)
+## Language
+
+- [![English](https://img.shields.io/badge/Language-English-blue)](CONTRIBUTING.md)
+- [![Español](https://img.shields.io/badge/Idioma-Español-red)](CONTRIBUTING.es.md)
 
 ## Building
 
-#### PREREQUISITES
+You will need:
+- Experience with C# and Reflection.
 - [Visual Studio](https://visualstudio.microsoft.com/) with ".NET Desktop development" and .NET Framework 4.7.2 SDK installed
 - [dnSpy](https://github.com/dnSpyEx/dnSpy)
 
-Clone the repository, or download the Source code.
+### 1. GET THE REPOSITORY'S FILES
 
-Open its solution with Visual Studio. Wait for NuGet to install all dependencies. Right click on SFDCT's project and choose properties, change your configuration from `Active` to `All Configurations`
+You can manually download it in "code" -> "download ZIP", or you can clone it using Git or GitHub Desktop.
 
-In the `Debug` section change your working directory to your SFD installation and external program to `SFDCT.exe`
+<p><img src="./docs/png/building_0.png" alt="Getting the files from the repository"/></p>
+
+### 2. SETUP THE SOLUTION
+
+- Open the solution file (`.sln`) with Visual Studio.
+- Wait for NuGet to install all dependencies.
+- Right click on `SFDCT` and choose properties.
+
+<p><img src="./docs/png/building_1.png" alt="Visual Studio Solution Properties"/></p>
+
+- Go to the "debug" tab on the side and change your configuration to "all configurations".
+- Go to your Superfighters Deluxe installation, copy and paste `Superfighters Deluxe.exe` to create a dummy file, rename it to `SFDCT.exe`.
+- On "start action" change to "start external program", navigate to the dummy file you created and select it, i.e: `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe\SFDCT.exe`.
+- On "start options" Change the working directory to your Superfighters Deluxe installation root folder, i.e: `C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe\`.
+
+<p><img src="./docs/png/building_2.png" alt="Visual Studio Solution Properties"/></p>
+
+> [!NOTE]
+>
+> If you have installed Superfighters Deluxe in a another directory or drive, you must modify `build.bat`.
+> - Change `SFD` variable with yours, i.e: `SET SFD="C:\Program Files (x86)\Steam\steamapps\common\Superfighters Deluxe"`
+> 
+
+### 3. SETUP SFDCT
+
+- Go to your Superfighters Deluxe installation and create a `SFDCT` folder.
+- Go back to the repository's files and copy these to the folder you created:
+- - `Content` folder
+- - `Core.dll` file inside `SFD`.
+
+<p><img src="./docs/png/building_3.png" alt="Visual Studio Solution Properties"/></p>
+
+### 4. BUILDING AND TESTING
+
+In Visual Studio try to build the solution, you can use the "build solution" button at "build" on the top bar or use `Ctrl + Shift + B`. If you don't see any errors and see messages of files being copied in the output: You did it, nice!
+
+Open `Core.dll` with dnSpy in to inspect SFD's code, the main way to modify behavior is through Harmony patches. You can learn more [about patching using this official Harmony guide](https://harmony.pardeike.net/articles/patching.html), you can learn more about [harmony's transpiler patches with this Terraria guide](https://gist.github.com/JavidPack/454477b67db8b017cb101371a8c49a1c).
 
 > [!TIP]
-> If you don't have a `SFDCT.exe` to select, create a dummy file and choose that. It will get replaced when you build the solution.
-
-If you have installed SFD in a another directory or drive, you must modify `build.bat` as well. You need to change `SFD` variable with your actual installation path.
-
-One last step is to create a `SFDCT` folder inside your Superfighters Deluxe installation, and manually copy `Core.dll` and `Content` folder from SFDCT solution to the newly created folder.
-
-Now in Visual Studio try to build the solution, if you don't see any errors you're good to go!
-
-You can open `Core.dll` with dnSpy in order to inspect SFD code. It is a slightly modified `Superfighters Deluxe.exe` assembly.
-
-> [!TIP]
-> You can learn how to write patches using this [Harmony guide](https://harmony.pardeike.net/articles/patching.html)
+>
+> - There are some SFD settings you can change make the initial loading faster like resolution or disabling the music.
+> - You can use Visual Studio's debugger by attaching it to the `SFDCT.exe` process.
+> 
 
 ## Localization
 
-SFDCT uses the same system SFD uses for localization, that is, text is stored in an XML file and later accessed and formated with arguments in-game.
+SFDCT uses the same system SFD uses for languages: language-specific texts are stored in a file, referenced with IDs and formated with arguments given by the game.
 
-Here's a snippet of SFDCT's `SFDCT_default.xml` language file:
+Here is a snippet of SFDCT's `SFDCT_default.xml` language file:
 
 ```xml
 <Texts name="Default">
@@ -45,19 +76,10 @@ Here's a snippet of SFDCT's `SFDCT_default.xml` language file:
 </Texts>
 ```
 
-Inside there are `<Text>` elements with an `id` that define texts. In these texts there are arguments that are later replaced with other text in-game, such as `{0}`, `{1}`, etc.
+In the language-specific texts there are arguments (`{0}`, `{1}`, `{2}`, etc.) that are later replaced by the game.
 
-To create a new language file copy the default one and rename it to something else. Like `SFDCT_mynewlanguage.xml`. Now you can freely edit or translate the contents shifting the arguments about depending on the text as some languages may not have the same "syntax" as English.
+To create a new language for SFDCT:
+- Copy the default one and rename it, **keeping `SFDCT_` at the start**, i.e: `SFDCT_mynewlanguage.xml`.
+- Edit/Translate the language-specific texts, **keeping in mind the arguments and their order**.
 
-Here's a snipper of a modified language file.
-```xml
-<Texts name="CustomDefault">
-    <!--  ...  -->
-    <Text id="sfdct.command.servermouse.message">the sv mouse has been set to {0}</Text>
-    <Text id="sfdct.command.servermousemoderators.message">no sv mouse mods is {0} from now on</Text>
-    <Text id="sfdct.command.addmodcommands.header">creating moderator wizard spells...</Text>
-    <!--  ...  -->
-</Texts>
-```
-
-Inside SFDCT settings panel, or in the `config.ini` file there's a Language setting that holds the name of the language file to be used, by default it is set to `SFDCT_default`. Set it to the name of your file without the `.xml` extension and restart SFDCT. If the file is not found an error message will appear on SFDCT's console and the language will be reverted to `SFDCT_default`.
+Inside SFD go to SFDCT's settings (or in the `config.ini` file) and check inside the "language" dropdown if there's an option that holds the name of your language file, you may need to restart SFD to refresh this list. If the file is not found an error message will appear on SFDCT's console and the language will be reverted to `SFDCT_default`.
