@@ -186,6 +186,7 @@
     <Compile Include="Game\ServerCommands.cs" />
     <Compile Include="Game\DebugMouse.cs" />
     <Compile Include="Game\GameHandler.cs" />
+    <Compile Include="Helper\ColorHelper.cs" />
     <Compile Include="Helper\Input.cs" />
     <Compile Include="OnlineServices\DSPreviewHandler.cs" />
     <Compile Include="OnlineServices\Security.cs" />

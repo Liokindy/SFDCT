@@ -47,28 +47,6 @@ internal static class CommandHandler
         ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
     }
 
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(Server), nameof(Server.DoReadRun))]
-    private static IEnumerable<CodeInstruction> Server_Transpiler_DoReadRun_ShowCTHelp(IEnumerable<CodeInstruction> instructions)
-    {
-        var code = new List<CodeInstruction>(instructions);
-
-        // ChatMessage.Show(LanguageHelper.GetText("sfdct.menu.lobby.helpText"), Color.Yellow, "", false);
-        var targetIndex = 873;
-        var targetInstructions = new List<CodeInstruction>
-        {
-            new(OpCodes.Ldstr, "sfdct.menu.lobby.helpText"),
-            new(OpCodes.Call, AccessTools.Method(typeof(LanguageHelper), nameof(LanguageHelper.GetText), [typeof(string)])),
-            new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Color), nameof(Color.Yellow))),
-            new(OpCodes.Ldstr, ""),
-            new(OpCodes.Ldc_I4_0),
-            new(OpCodes.Call, AccessTools.Method(typeof(ChatMessage), nameof(ChatMessage.Show), [typeof(string), typeof(Color), typeof(string), typeof(bool)]))
-        };
-
-        code.InsertRange(targetIndex, targetInstructions);
-        return code;
-    }
-
     internal static bool IsAndCanUseModeratorCommand(ProcessCommandArgs args, params string[] commands) => args.IsCommand(commands) && args.CanUseModeratorCommand(commands);
 
     internal static void ExecuteCommandsFile(ref ProcessCommandArgs args, GameInfo gameInfo, string fileName)

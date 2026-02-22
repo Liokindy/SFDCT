@@ -76,7 +76,8 @@ internal static class MessageHandler
                 var userIndex = incomingMessage.ReadInt32();
                 var profile = NetMessage.PlayerProfileMessage.Read(incomingMessage, Profile.ValidateProfileType.CanEquip);
 
-                data.Data = [
+                data.Data =
+                [
                     userIndex,
                     profile
                 ];

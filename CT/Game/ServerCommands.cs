@@ -210,7 +210,7 @@ internal static class ServerCommands
                 break;
         }
 
-        if (shouldSave) SFDConfig.SaveConfig((SFDConfigSaveMode)10);
+        if (shouldSave) SFDConfig.SaveConfig(SFDConfigHandler.SAVE_MODERATOR_COMMANDS);
 
         return true;
     }
@@ -245,10 +245,25 @@ internal static class ServerCommands
 
     internal static bool HandleDebugMouse(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
-        ServerHandler.DebugMouse = !ServerHandler.DebugMouse;
+        if (args.Parameters.Count < 1) return true;
 
-        string message = LanguageHelper.GetText("sfdct.command.debugmouse.message", LanguageHelper.GetBooleanText(ServerHandler.DebugMouse));
-        args.Feedback.Add(new(args.SenderGameUser, message));
+        var messageKey = "sfdct.command.debugmouse.message";
+
+        if (args.Parameters[0] == "0" || args.Parameters[0].ToUpperInvariant() == "FALSE")
+        {
+            ServerHandler.DebugMouse = false;
+
+            string message = LanguageHelper.GetText(messageKey, LanguageHelper.GetBooleanText(false));
+            args.Feedback.Add(new(args.SenderGameUser, message));
+        }
+        else if (args.Parameters[0] == "1" || args.Parameters[0].ToUpperInvariant() == "TRUE")
+        {
+            ServerHandler.DebugMouse = true;
+
+            string message = LanguageHelper.GetText(messageKey, LanguageHelper.GetBooleanText(true));
+            args.Feedback.Add(new(args.SenderGameUser, message));
+        }
+
         return true;
     }
 
@@ -281,16 +296,11 @@ internal static class ServerCommands
     internal static bool HandleVoteKick(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
         if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
+        if (args.Parameters.Count <= 0) return true;
 
         if (!Voting.GameVoteYesNo.CanStartVote(gameInfo))
         {
             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail"), Color.Red, args.SenderGameUser));
-            return true;
-        }
-
-        if (args.Parameters.Count <= 0)
-        {
-            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.nouser"), Color.Red, args.SenderGameUser));
             return true;
         }
 
@@ -337,140 +347,104 @@ internal static class ServerCommands
 
     internal static bool HandleSpectatorJoin(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
-        if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
-        if (!args.ModeratorPrivileges && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
+        if (!args.SenderGameUser.JoinedAsSpectator) return true;
 
-        int userCount;
-        GameUser gameUser;
-        List<GameSlot> gameSlots;
+        List<GameSlot> availableGameSlots = null;
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
+        {
+            var connectionTag = args.SenderGameUser.GetGameConnectionTag();
+            if (connectionTag == null) return true;
+            if (connectionTag.GameUsers.Length > 1) return true;
+
+            availableGameSlots = server.FindOpenGameSlots(gameInfo.DropInMode, 1, gameInfo.EvenTeams);
+        }
+        else
+        {
+            availableGameSlots = [gameInfo.GameSlots[0]];
+        }
+
+        if (availableGameSlots == null || availableGameSlots.Count == 0)
+        {
+            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser));
+            return true;
+        }
+
+        GameSlot gameSlot = availableGameSlots[0];
+        gameSlot.ClearGameUser(gameInfo);
+        gameSlot.GameUser = args.SenderGameUser;
+        gameSlot.CurrentState = GameSlot.State.Occupied;
+        args.SenderGameUser.GameSlot = gameSlot;
+        args.SenderGameUser.JoinedAsSpectator = false;
+        args.SenderGameUser.SpectatingWhileWaitingToPlay = true;
+
+        var messageKey = "menu.lobby.newPlayerJoined";
+        var messageArgs = new List<string>();
+        var messageColor = Constants.COLORS.PLAYER_CONNECTED;
+
+        messageArgs.Add(args.SenderGameUser.GetProfileName());
+        if (gameSlot.CurrentTeam != Team.Independent)
+        {
+            messageKey = "menu.lobby.newPlayerJoinedTeam";
+            messageArgs.Add(((int)gameSlot.CurrentTeam).ToString());
+        }
 
         if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
-            GameConnectionTag connectionTag = args.SenderGameUser.GetGameConnectionTag();
-
-            if (connectionTag == null) return true;
-            if (connectionTag.GameUsers.Count() > 1)
-            {
-                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.localplayer"), Color.Red, args.SenderGameUser));
-                return true;
-            }
-
-            if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
-            if (!connectionTag.FirstGameUser.JoinedAsSpectator) return true;
-
-            gameUser = connectionTag.FirstGameUser;
-            userCount = connectionTag.GameUsers.Count();
-            gameSlots = server.FindOpenGameSlots(gameInfo.DropInMode, userCount, gameInfo.EvenTeams, null);
+            server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(messageKey, messageColor, messageArgs.ToArray()));
+            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f));
+            server.SyncGameUserInfo(args.SenderGameUser);
+            server.SyncGameSlotInfo(gameSlot);
         }
         else
         {
-            gameUser = args.SenderGameUser;
-            userCount = 1;
-            gameSlots = [gameInfo.GameSlots[0]];
+            gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs.ToArray()));
+            SoundHandler.PlayGlobalSound("PlayerJoin");
         }
 
-        if (gameSlots != null && gameSlots.Count > 0)
-        {
-            GameSlot gameSlot = gameSlots.First();
-            gameSlot.ClearGameUser(gameInfo);
-            gameSlot.GameUser = gameUser;
-            gameSlot.CurrentState = GameSlot.State.Occupied;
-            gameUser.GameSlot = gameSlot;
-            gameUser.JoinedAsSpectator = false;
-
-            List<string> messArgs = [];
-            string mess = "menu.lobby.newPlayerJoined";
-            Color messColor = Constants.COLORS.PLAYER_CONNECTED;
-
-            messArgs.Add(gameUser.GetProfileName());
-            if (gameSlot.CurrentTeam != Team.Independent)
-            {
-                mess = "menu.lobby.newPlayerJoinedTeam";
-            }
-
-            if (gameInfo.GameOwner == GameOwnerEnum.Server)
-            {
-                server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs.ToArray()));
-                server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f), null);
-                server.SyncGameSlotInfo(gameSlot);
-                server.SyncGameUserInfo(gameUser, null);
-            }
-            else
-            {
-                gameInfo.ShowChatMessage(new(mess, messColor, messArgs.ToArray()));
-                SoundHandler.PlayGlobalSound("PlayerJoin");
-            }
-
-            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser));
-        }
-        else
-        {
-            args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.fail.nogameslot"), Color.Red, args.SenderGameUser));
-        }
-
+        args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser));
         return true;
     }
 
     internal static bool HandleSpectatorSpectate(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
-        if (SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum) <= 0) return true;
+        if (args.SenderGameUser.JoinedAsSpectator) return true;
         if (!args.ModeratorPrivileges && SFDCTConfig.Get<bool>(CTSettingKey.SpectatorsOnlyModerators)) return true;
-        if (gameInfo.GetSpectatingUsers().Count >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
+        if (gameInfo.SpectatorGameUserCount >= SFDCTConfig.Get<int>(CTSettingKey.SpectatorsMaximum)) return true;
 
-        GameSlot gameSlot = null;
-        int userIdentifier;
-        GameConnectionTag connectionTag = null;
+        var gameSlot = args.SenderGameUser.GameSlot;
+        var userIdentifier = args.SenderGameUser.UserIdentifier;
+        var connectionTag = args.SenderGameUser.GetGameConnectionTag();
 
         if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
-            connectionTag = args.SenderGameUser.GetGameConnectionTag();
-
             if (connectionTag == null) return true;
-            if (connectionTag.GameUsers.Count() > 1)
-            {
-                args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.fail.localplayer"), Color.Red, args.SenderGameUser));
-                return true;
-            }
-
-            if (connectionTag.FirstGameUser == null || connectionTag.FirstGameUser.IsDisposed) return true;
-            if (connectionTag.FirstGameUser.JoinedAsSpectator) return true;
-
-            gameSlot = connectionTag.FirstGameUser.GameSlot;
-            userIdentifier = connectionTag.FirstGameUser.UserIdentifier;
-
-            connectionTag.FirstGameUser.GameSlot = null;
-            connectionTag.FirstGameUser.JoinedAsSpectator = true;
-        }
-        else
-        {
-            if (args.SenderGameUser.JoinedAsSpectator) return true;
-
-            gameSlot = args.SenderGameUser.GameSlot;
-            userIdentifier = args.SenderGameUserIdentifier;
+            if (connectionTag.GameUsers.Length > 1) return true;
         }
 
-        gameSlot.GameUser = null;
         gameSlot.ClearGameUser(null);
-        gameSlot.CurrentState = GameSlot.State.Open;
+
+        args.SenderGameUser.GameSlot = null;
+        args.SenderGameUser.JoinedAsSpectator = true;
+        args.SenderGameUser.SpectatingWhileWaitingToPlay = false;
 
         Player senderGamePlayer = gameInfo.GameWorld?.GetPlayerByUserIdentifier(userIdentifier);
         senderGamePlayer?.SetUser(0);
         senderGamePlayer?.Kill();
 
-        string mess = "menu.lobby.newPlayerJoinedTeam";
-        string[] messArgs = [args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator")];
-        Color messColor = Color.LightGray;
+        var messageKey = "menu.lobby.newPlayerJoinedTeam";
+        var messageArgs = new string[] { args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator") };
+        var messageColor = Color.LightGray;
 
         if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
-            server.SendMessage(MessageType.ChatMessageSuppressDSForm, new NetMessage.ChatMessage.Data(mess, messColor, messArgs), null, null);
-            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f), null);
-            server.SyncGameSlotInfo(gameSlot, null);
-            server.SyncGameUserInfo(connectionTag.FirstGameUser, null);
+            server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(messageKey, messageColor, messageArgs));
+            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
+            server.SyncGameUserInfo(args.SenderGameUser);
+            server.SyncGameSlotInfo(gameSlot);
         }
         else
         {
-            gameInfo.ShowChatMessage(new(mess, messColor, messArgs));
+            gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs));
             SoundHandler.PlayGlobalSound("PlayerLeave");
         }
 

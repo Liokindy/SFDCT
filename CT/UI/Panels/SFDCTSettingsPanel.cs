@@ -42,6 +42,7 @@ internal class SFDCTSettingsPanel : Panel
     private readonly int m_originalChatWidth = SFDCTConfig.Get<int>(CTSettingKey.ChatWidth);
     private readonly int m_originalChatHeight = SFDCTConfig.Get<int>(CTSettingKey.ChatHeight);
     private readonly int m_originalChatExtraHeight = SFDCTConfig.Get<int>(CTSettingKey.ChatExtraHeight);
+    private readonly int m_originalChatIndependentTeamRandomColors = SFDCTConfig.Get<int>(CTSettingKey.ChatIndependentTeamRandomColors);
 
     public SFDCTSettingsPanel() : base(LanguageHelper.GetText("sfdct.setting.header"), 500, 500)
     {
@@ -76,7 +77,7 @@ internal class SFDCTSettingsPanel : Panel
 
         // Spectators
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.spectators")));
-        m_menu.Add(CreateIntSetting(CTSettingKey.SpectatorsMaximum, 1, 8, 1, "sfdct.setting.name.spectatorsmaximum"));
+        m_menu.Add(CreateIntSetting(CTSettingKey.SpectatorsMaximum, 0, 4, 1, "sfdct.setting.name.spectatorsmaximum"));
         m_menu.Add(CreateBoolSetting(CTSettingKey.SpectatorsOnlyModerators, "sfdct.setting.name.spectatorsonlymoderators", "sfdct.setting.help.spectatorsonlymoderators"));
 
         // Vote Kick
@@ -94,6 +95,7 @@ internal class SFDCTSettingsPanel : Panel
         m_menu.Add(CreateIntSetting(CTSettingKey.ChatWidth, 218, 848, 10, "sfdct.setting.name.chatwidth"));
         m_menu.Add(CreateIntSetting(CTSettingKey.ChatHeight, 90, 360, 10, "sfdct.setting.name.chatheight"));
         m_menu.Add(CreateIntSetting(CTSettingKey.ChatExtraHeight, 0, 180, 10, "sfdct.setting.name.chatextraheight", "sfdct.setting.help.chatextraheight"));
+        m_menu.Add(CreateBoolSetting(CTSettingKey.ChatIndependentTeamRandomColors, "sfdct.setting.name.chatindependentteamrandomcolors", "sfdct.setting.help.chatindependentteamrandomcolors"));
 
         var availableSFDCTLanguages = LanguageHandler.GetAvailableLanguages();
         var m_menuItemLanguage = new MenuItemDropdown(LanguageHelper.GetText("sfdct.setting.name.language"), availableSFDCTLanguages);

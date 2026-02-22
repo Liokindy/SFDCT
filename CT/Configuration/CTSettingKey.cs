@@ -35,6 +35,7 @@ internal enum CTSettingKey
     ChatWidth,
     ChatHeight,
     ChatExtraHeight,
+    ChatIndependentTeamRandomColors,
 
     SubContent,
     SubContentEnabledFolders,

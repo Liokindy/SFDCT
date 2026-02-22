@@ -40,18 +40,16 @@ internal static class MenuHandler
     private static void MainMenuPanel_Constructor_Postfix_InsertSFDCTOption(MainMenuPanel __instance)
     {
         var menu = __instance.menu;
-        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent(_ =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new(_ =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
 
         sfdctMenuItem.Initialize(menu);
 
-        __instance.Height += 1;
-
+        __instance.Height += Menu.ITEM_HEIGHT;
         menu.Height += 1;
         menu.Items.Insert(Math.Max(menu.Items.Count - 2, 0), sfdctMenuItem);
-
         __instance.UpdatePosition();
     }
 
@@ -60,7 +58,7 @@ internal static class MenuHandler
     private static void GameMenuPanel_Constructor_Postfix_InsertExtraOptions(GameMenuPanel __instance)
     {
         var menu = (Menu)__instance.members[0];
-        var sfdctMenuItem = new MainMenuItem("SFDCT", new ControlEvents.ChooseEvent(_ =>
+        var sfdctMenuItem = new MainMenuItem("SFDCT", new(_ =>
         {
             __instance.OpenSubPanel(new SFDCTSettingsPanel());
         }));
@@ -110,22 +108,21 @@ internal static class MenuHandler
 
         for (int i = 0; i < __instance.members.Count; i++)
         {
-            if (__instance.members[i] is MainMenuPlayerSlot playerSlot)
+            if (__instance.members[i] is not MainMenuPlayerSlot playerSlot) continue;
+
+            int x = -__instance.Area.X + 8;
+            int y = -__instance.Area.Y;
+
+            if (i <= 4)
             {
-                int x = -__instance.Area.X + 8;
-                int y = -__instance.Area.Y;
-
-                if (i <= 4)
-                {
-                    y = -__instance.Area.Y + GameSFD.SCREEN_HEIGHT - GameSFD.GAME_SCREEN_OFFSET_Y * 2 - 100 - 58 * (i - 1);
-                }
-                else
-                {
-                    y = -__instance.Area.Y + GameSFD.GAME_SCREEN_OFFSET_Y * 2 + 8 + (58 * 4) - 58 * (i - 4);
-                }
-
-                playerSlot.LocalPosition = new(x, y);
+                y = -__instance.Area.Y + GameSFD.SCREEN_HEIGHT - GameSFD.GAME_SCREEN_OFFSET_Y * 2 - 100 - 58 * (i - 1);
             }
+            else
+            {
+                y = -__instance.Area.Y + GameSFD.GAME_SCREEN_OFFSET_Y * 2 + 8 + (58 * 4) - 58 * (i - 4);
+            }
+
+            playerSlot.LocalPosition = new(x, y);
         }
     }
 
@@ -137,40 +134,34 @@ internal static class MenuHandler
         // to crash if the ParentPanel is not a MainMenuPanel
         // > (this.ParentPanel as MainMenuPanel).RefreshProfiles();
 
-        if (selectedProfile == null) return false;
+        if (selectedProfile == null) return true;
+        if (__instance.ParentPanel is MainMenuPanel mainMenuPanel) return true;
 
         Constants.PLAYER_PROFILE[__instance.PlayerIndex] = profileSlot;
         __instance.SetProfile(selectedProfile);
 
-        if (__instance.ParentPanel is MainMenuPanel mainMenuPanel)
+        if (GameSFD.Handle.CurrentState == State.GameOffline)
         {
-            mainMenuPanel.RefreshProfiles();
+            var gameInfo = StateGameOffline.GameInfo;
+            var gameUser = gameInfo.GetGameUserByUserIdentifier(gameInfo.GetLocalGameUserIdentifier(__instance.PlayerIndex));
+
+            gameUser.Profile = selectedProfile;
+            gameUser.Profile.Updated = true;
         }
-        else
+        else if (GameSFD.Handle.CurrentState == State.Game)
         {
-            if (GameSFD.Handle.CurrentState == State.GameOffline)
+            if (GameSFD.Handle.Client != null)
             {
-                var gameInfo = StateGameOffline.GameInfo;
-                var gameUser = gameInfo.GetGameUserByUserIdentifier(gameInfo.GetLocalGameUserIdentifier(__instance.PlayerIndex));
-
-                gameUser.Profile = selectedProfile;
-                gameUser.Profile.Updated = true;
-            }
-            else if (GameSFD.Handle.CurrentState == State.Game)
-            {
-                if (GameSFD.Handle.Client != null)
+                SFDCTMessageData data = new()
                 {
-                    SFDCTMessageData data = new()
-                    {
-                        Type = MessageHandler.SFDCTMessageDataType.ProfileChangeRequest,
-                        Data = [
-                            __instance.PlayerIndex,
-                            selectedProfile,
-                        ]
-                    };
+                    Type = MessageHandler.SFDCTMessageDataType.ProfileChangeRequest,
+                    Data = [
+                        __instance.PlayerIndex,
+                        selectedProfile,
+                    ]
+                };
 
-                    MessageHandler.Send(GameSFD.Handle.Client, data);
-                }
+                MessageHandler.Send(GameSFD.Handle.Client, data);
             }
         }
 
@@ -225,6 +216,51 @@ internal static class MenuHandler
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(ConnectToIpPanel), MethodType.Constructor)]
+    private static void ConnectToIpPanel_Constructor_Postfix_ExtraButtons(ConnectToIpPanel __instance)
+    {
+        var connectAsSpectatorButton = new MenuItemButton(LanguageHelper.GetText("sfdct.button.connectspectator").ToUpperInvariant(), _ =>
+        {
+            ClientHandler.NextConnectionAsSpectator = true;
+            __instance.connect(_);
+
+            if (__instance.SubPanel != null && __instance.SubPanel is ConnectingPanel subPanel)
+            {
+                var cancelButton = ((MenuItemButton)((Menu)subPanel.members[0]).Items.Last());
+
+                cancelButton.ChooseEvent = (ControlEvents.ChooseEvent)Delegate.Combine(cancelButton.ChooseEvent, new ControlEvents.ChooseEvent((object _) =>
+                {
+                    ClientHandler.NextConnectionAsSpectator = false;
+                }));
+            }
+        });
+
+        var requestServerMovementToggle = new MenuItemDropdown(
+            LanguageHelper.GetText("sfdct.button.requestservermovement").ToUpperInvariant(),
+            [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]
+        );
+
+        requestServerMovementToggle.SetStartValue(Constants.CLIENT_REQUEST_SERVER_MOVEMENT ? 0 : 1);
+        requestServerMovementToggle.DropdownItemVisibleCount = 2;
+
+        EventHelper.Add(requestServerMovementToggle, "ValueChangedEvent", new MenuItemValueChangedEvent(_ =>
+        {
+            bool value = requestServerMovementToggle.ValueId == 0;
+
+            if (Constants.CLIENT_REQUEST_SERVER_MOVEMENT != value)
+            {
+                Constants.CLIENT_REQUEST_SERVER_MOVEMENT = value;
+                SFDConfig.SaveConfig(SFDConfigSaveMode.Settings);
+            }
+        }));
+
+        __instance.Height += Menu.ITEM_HEIGHT * 2;
+        __instance.m_menu.Height += 2;
+        __instance.m_menu.Add(requestServerMovementToggle, __instance.m_menu.ItemCount - 2);
+        __instance.m_menu.Add(connectAsSpectatorButton, __instance.m_menu.ItemCount - 2);
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(JoinGamePanel), MethodType.Constructor, [typeof(SFDGameServer)])]
     private static void JoinGamePanel_Constructor_Postfix_ExtraButtons(JoinGamePanel __instance)
     {
@@ -245,7 +281,7 @@ internal static class MenuHandler
         }, "micon_ok");
 
         var requestServerMovementToggle = new MenuItemDropdown(
-            LanguageHelper.GetText("sfdct.button.requestservermovement"),
+            LanguageHelper.GetText("sfdct.button.requestservermovement").ToUpperInvariant(),
             [LanguageHelper.GetText("general.on"), LanguageHelper.GetText("general.off")]
         );
 

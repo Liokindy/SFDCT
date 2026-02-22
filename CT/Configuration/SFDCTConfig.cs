@@ -83,6 +83,7 @@ internal static class SFDCTConfig
             Set(CTSettingKey.ChatWidth, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatWidth), 428, 428 / 2, 428 * 4));
             Set(CTSettingKey.ChatHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatHeight), 10 * (int)GameChat.MESSAGE_HEIGHT, 10 * (int)GameChat.MESSAGE_HEIGHT / 2, 10 * (int)GameChat.MESSAGE_HEIGHT * 4));
             Set(CTSettingKey.ChatExtraHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatExtraHeight), 0, 0, 10 * (int)GameChat.MESSAGE_HEIGHT * 2));
+            Set(CTSettingKey.ChatIndependentTeamRandomColors, handler.ReadValueBool(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), true));
         }
 
         ReadToFile(handler);
@@ -124,6 +125,7 @@ internal static class SFDCTConfig
         Set(CTSettingKey.ChatWidth, 428);
         Set(CTSettingKey.ChatHeight, 10 * (int)GameChat.MESSAGE_HEIGHT);
         Set(CTSettingKey.ChatExtraHeight, 0);
+        Set(CTSettingKey.ChatIndependentTeamRandomColors, true);
     }
 
     internal static void ReadToFile(CTIniHandler handler)
@@ -161,6 +163,7 @@ internal static class SFDCTConfig
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatWidth), Get<int>(CTSettingKey.ChatWidth));
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatHeight), Get<int>(CTSettingKey.ChatHeight));
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatExtraHeight), Get<int>(CTSettingKey.ChatExtraHeight));
+        handler.ReadLine(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), Get<bool>(CTSettingKey.ChatIndependentTeamRandomColors));
     }
 
     internal static string GetSettingKey(CTSettingKey setting)
@@ -195,6 +198,7 @@ internal static class SFDCTConfig
             case CTSettingKey.ChatWidth: return "CHAT_WIDTH";
             case CTSettingKey.ChatHeight: return "CHAT_HEIGHT";
             case CTSettingKey.ChatExtraHeight: return "CHAT_EXTRA_HEIGHT";
+            case CTSettingKey.ChatIndependentTeamRandomColors: return "CHAT_TEAM_INDEPENDENT_RANDOM_NAME_COLOR";
         }
     }
 

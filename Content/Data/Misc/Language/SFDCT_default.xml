@@ -7,7 +7,7 @@
 
 	<Text id="sfdct.command.players.message.user">- {0}: '{1}' ({2}) {3}</Text>
 	<Text id="sfdct.command.players.message.bot">- {0}: '{1}'</Text>
-	<Text id="sfdct.command.debugmouse.message">Debug Mouse set to {0}</Text>
+	<Text id="sfdct.command.debugmouse.message">Debug mouse {0}</Text>
 	<Text id="sfdct.command.debugmousemoderators.message">Debug Mouse allowed for moderators set to {0}</Text>
 	<Text id="sfdct.command.modcommands.header.help">Use this command to manage the moderator commands list, syntax is '/MODCMD [L/LIST][C/CLEAR][R/REMOVE][A/ADD][T/TRY] [...]'</Text>
 	<Text id="sfdct.command.modcommands.header.list">Listing moderator commands</Text>
@@ -21,7 +21,6 @@
 	<Text id="sfdct.command.gravity.message">World Gravity set to {0}</Text>
 	<Text id="sfdct.command.damage.message">Dealt {0} damage to '{1}'</Text>
 	<Text id="sfdct.command.servermovement.message">Server-movement of '{0}' set to {1}</Text>
-	<Text id="sfdct.command.votekick.fail.nouser">You need to specify a user to kick</Text>
 	<Text id="sfdct.command.votekick.fail.voteinprogress">There is already a vote in progress</Text>
 	<Text id="sfdct.command.votekick.fail.notenoughusers">There aren't enough users to vote</Text>
 	<Text id="sfdct.command.votekick.fail.invaliduser">You can't start a vote-kick against this user</Text>
@@ -31,10 +30,8 @@
 	<Text id="sfdct.command.votekick.message">'{0}' ({1}) HAS STARTED A VOTE-KICK AGAINST '{2}' ({3})</Text>
 	<Text id="sfdct.command.votekick.message.victim">- '{0}' ({1}) has started a vote-kick against you</Text>
 	<Text id="sfdct.command.votekick.message.owner">- You started a vote-kick against '{0}' ({1})</Text>
-	<Text id="sfdct.command.join.fail.localplayer">You can't join back with more than 1 local player</Text>
 	<Text id="sfdct.command.join.fail.nogameslot">You can't join back, unavailable game-slot</Text>
 	<Text id="sfdct.command.join.message">You stopped spectating and joined back</Text>
-	<Text id="sfdct.command.spectate.fail.localplayer">You can't spectate with more than 1 local player</Text>
 	<Text id="sfdct.command.spectate.message.info">- Use /JOIN to stop spectating and join an available game-slot</Text>
 
 	<Text id="sfdct.credits.name">CREDITS</Text>
@@ -81,6 +78,7 @@
 	<Text id="sfdct.setting.name.chatwidth">CHAT WIDTH</Text>
 	<Text id="sfdct.setting.name.chatheight">CHAT HEIGHT</Text>
 	<Text id="sfdct.setting.name.chatextraheight">CHAT EXTRA-HEIGHT</Text>
+	<Text id="sfdct.setting.name.chatindependentteamrandomcolors">CHAT INDEPENDENT-TEAM RANDOM NAME COLORS</Text>
 
 	<Text id="sfdct.setting.help.soundpanninginworldthreshold">Controls the threshold of sound-panning, sounds closer than this will not be panned</Text>
 	<Text id="sfdct.setting.help.soundpanninginworlddistance">Controls the distance of sound-panning, sounds further than this will be fully panned</Text>
@@ -90,6 +88,7 @@
 	<Text id="sfdct.setting.help.spectatorsonlymoderators">Controls if only moderators and the host can turn into spectators</Text>
 	<Text id="sfdct.setting.help.subcontentenabled">Enables or disables loading any files from "SFDCT/SubContent", sub-content files replace official files when loading, making modifying official content easier without needing to overwrite it</Text>
 	<Text id="sfdct.setting.help.chatextraheight">Extra height added to the chat when typing or pressing the 'SHOW CHAT' key</Text>
+	<Text id="sfdct.setting.help.chatindependentteamrandomcolors">Enables or disables slightly tinting the names of players in the independent team a 'random' color in the chat.</Text>
 
 	<Text id="sfdct.setting.category.soundpanning">Sound-Panning</Text>
 	<Text id="sfdct.setting.category.soundattenuation">Sound-Attenuation</Text>

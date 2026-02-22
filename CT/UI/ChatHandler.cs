@@ -2,10 +2,13 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
+using SFD.Core;
 using SFD.MenuControls;
 using SFD.States;
+using SFD.SteamIntegration;
 using SFDCT.Configuration;
 using SFDCT.Helper;
+using System;
 
 namespace SFDCT.UI;
 
@@ -14,6 +17,41 @@ internal static class ChatHandler
 {
     internal static bool GameChatInLobby = false;
     internal static int GameChatInLobbyRequestedRows = 0;
+    
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ChatMessage), nameof(ChatMessage.Show))]
+    public static bool ChatMessage_Show_Prefix_RandomNameColors(string message, Color color, string name, bool isMetaText)
+    {
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.ChatIndependentTeamRandomColors))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(name) && ChatMessage.ContainsIgnoreName(name))
+        {
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Chat, string.Format("[IGNORING MESSAGE]: {0}", message));
+            return false;
+        }
+
+        var defaultStart = "[ICO=TEAM_0][#EBEBEB]";
+        if (isMetaText && color == Color.White && message.StartsWith(defaultStart))
+        {
+            var gameUser = GameSFD.Handle.Client?.GameInfo?.GetGameUserByName(name);
+
+            if (gameUser != null)
+            {
+                var gameUserRandom = new Random(gameUser.UserIdentifier);
+                var gameUserColor = ColorHelper.HSVToColor((float)gameUserRandom.NextDouble() * 360, 0.15f, 0.9f);
+
+                message = message.Replace(defaultStart, defaultStart.Replace("#EBEBEB", gameUserColor.ToHex()));
+            }
+        }
+
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Chat, message);
+        ChatMessage.m_newMessages.Enqueue(new ChatMessageEntry(message, color, name, isMetaText));
+        return false;
+    }
+
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameChat), nameof(GameChat.InLobby))]

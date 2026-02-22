@@ -64,7 +64,6 @@ internal static class WorldHandler
         if (!isLast) return;
 
         var currentState = world.m_game.CurrentState;
-
         if (currentState is State.GameOffline)
         {
             world.UpdateDebugMouse();
@@ -72,111 +71,120 @@ internal static class WorldHandler
         }
 
         if (currentState is not State.Game) return;
-
         if (world.GameOwner == GameOwnerEnum.Server)
         {
-            if (ServerHandler.DebugMouse)
-            {
-                var inactiveDebugMouseList = new List<DebugMouse>();
-
-                foreach (var debugMouse in ServerHandler.DebugMouseList)
-                {
-                    if (debugMouse.Pressed)
-                    {
-                        debugMouse.LastNetUpdateTime = (float)NetTime.Now;
-
-                        if (debugMouse.Object == null)
-                        {
-                            ObjectData objectAtMousePosition = world.GetObjectAtPosition(debugMouse.Box2DPosition, true, true, true, world.EditGroupID, new Func<ObjectData, bool>(world.DebugMouseFilter));
-
-                            if (objectAtMousePosition != null)
-                            {
-                                objectAtMousePosition.Body.SetAwake(true);
-
-                                float mass = objectAtMousePosition.Body.GetMass();
-                                List<Body> connectedWeldedBodies = objectAtMousePosition.Body.GetConnectedWeldedBodies();
-                                if (connectedWeldedBodies != null)
-                                {
-                                    foreach (Body connectedWeldedBody in connectedWeldedBodies)
-                                    {
-                                        mass += connectedWeldedBody.GetMass();
-                                    }
-                                }
-
-                                var mouseJointDef = new MouseJointDef();
-                                mouseJointDef.target = debugMouse.Box2DPosition;
-                                mouseJointDef.localAnchor = objectAtMousePosition.Body.GetLocalPoint(mouseJointDef.target);
-                                mouseJointDef.maxForce = mass * 150;
-                                mouseJointDef.dampingRatio = 1;
-                                mouseJointDef.frequencyHz = 40;
-                                mouseJointDef.collideConnected = false;
-                                mouseJointDef.bodyA = objectAtMousePosition.Body.GetWorld().GroundBody;
-                                mouseJointDef.bodyB = objectAtMousePosition.Body;
-
-                                debugMouse.Object = objectAtMousePosition;
-                                debugMouse.World = objectAtMousePosition.Body.GetWorld();
-                                debugMouse.Joint = (MouseJoint)objectAtMousePosition.Body.GetWorld().CreateJoint(mouseJointDef);
-                            }
-                        }
-                        else if (debugMouse.Object != null && !debugMouse.Object.IsDisposed)
-                        {
-                            debugMouse.Joint.SetTarget(debugMouse.Box2DPosition);
-
-                            if (debugMouse.Object.IsPlayer)
-                            {
-                                Player player = (Player)debugMouse.Object.InternalData;
-
-                                if (!player.IsRemoved && !player.Falling)
-                                {
-                                    player.Fall();
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (debugMouse.Object != null) debugMouse.Object = null;
-                        if (debugMouse.Joint != null && debugMouse.World != null)
-                        {
-                            debugMouse.World.DestroyJoint(debugMouse.Joint);
-                            debugMouse.Joint = null;
-                            debugMouse.World = null;
-                        }
-                    }
-
-                    if (NetTime.Now - debugMouse.LastNetUpdateTime >= 3)
-                    {
-                        inactiveDebugMouseList.Add(debugMouse);
-                    }
-                }
-
-                foreach (var inactiveDebugMouse in inactiveDebugMouseList)
-                {
-                    ServerHandler.DebugMouseList.Remove(inactiveDebugMouse);
-                }
-            }
+            UpdateDebugMouseServer(world);
         }
         else if (world.GameOwner == GameOwnerEnum.Client)
         {
-            if (ClientHandler.DebugMouse)
+            UpdateDebugMouseClient(world);
+        }
+    }
+
+    internal static void UpdateDebugMouseServer(GameWorld world)
+    {
+        if (!ServerHandler.DebugMouse) return;
+
+        var inactiveDebugMouseList = new List<DebugMouse>();
+
+        foreach (var debugMouse in ServerHandler.DebugMouseList)
+        {
+            if (debugMouse.Pressed)
             {
-                if (((int)(NetTime.Now * 20) % 2) == 1)
+                debugMouse.LastNetUpdateTime = (float)NetTime.Now;
+
+                if (debugMouse.Object == null)
                 {
-                    var mouseBox2DPosition = world.GetMouseBox2DPosition();
+                    ObjectData objectAtMousePosition = world.GetObjectAtPosition(debugMouse.Box2DPosition, true, true, true, world.EditGroupID, new Func<ObjectData, bool>(world.DebugMouseFilter));
 
-                    var data = new SFDCTMessageData();
-                    data.Type = MessageHandler.SFDCTMessageDataType.DebugMouseUpdate;
-                    data.Data =
-                    [
-                        mouseBox2DPosition.X,
-                        mouseBox2DPosition.Y,
-                        Input.IsMouseLeftButtonDown,
-                    ];
+                    if (objectAtMousePosition != null)
+                    {
+                        objectAtMousePosition.Body.SetAwake(true);
 
-                    MessageHandler.Send(world.m_game.Client, data);
+                        float mass = objectAtMousePosition.Body.GetMass();
+                        List<Body> connectedWeldedBodies = objectAtMousePosition.Body.GetConnectedWeldedBodies();
+                        if (connectedWeldedBodies != null)
+                        {
+                            foreach (Body connectedWeldedBody in connectedWeldedBodies)
+                            {
+                                mass += connectedWeldedBody.GetMass();
+                            }
+                        }
+
+                        var mouseJointDef = new MouseJointDef();
+                        mouseJointDef.target = debugMouse.Box2DPosition;
+                        mouseJointDef.localAnchor = objectAtMousePosition.Body.GetLocalPoint(mouseJointDef.target);
+                        mouseJointDef.maxForce = mass * 150;
+                        mouseJointDef.dampingRatio = 1;
+                        mouseJointDef.frequencyHz = 40;
+                        mouseJointDef.collideConnected = false;
+                        mouseJointDef.bodyA = objectAtMousePosition.Body.GetWorld().GroundBody;
+                        mouseJointDef.bodyB = objectAtMousePosition.Body;
+
+                        debugMouse.Object = objectAtMousePosition;
+                        debugMouse.World = objectAtMousePosition.Body.GetWorld();
+                        debugMouse.Joint = (MouseJoint)objectAtMousePosition.Body.GetWorld().CreateJoint(mouseJointDef);
+                    }
+                }
+                else if (debugMouse.Object != null && !debugMouse.Object.IsDisposed)
+                {
+                    debugMouse.Joint.SetTarget(debugMouse.Box2DPosition);
+
+                    if (debugMouse.Object.IsPlayer)
+                    {
+                        Player player = (Player)debugMouse.Object.InternalData;
+
+                        if (!player.IsRemoved && !player.Falling)
+                        {
+                            player.Fall();
+                            return;
+                        }
+                    }
                 }
             }
+            else
+            {
+                if (debugMouse.Object != null) debugMouse.Object = null;
+                if (debugMouse.Joint != null && debugMouse.World != null)
+                {
+                    debugMouse.World.DestroyJoint(debugMouse.Joint);
+                    debugMouse.Joint = null;
+                    debugMouse.World = null;
+                }
+            }
+
+            if (NetTime.Now - debugMouse.LastNetUpdateTime >= 3)
+            {
+                inactiveDebugMouseList.Add(debugMouse);
+            }
+        }
+
+        foreach (var inactiveDebugMouse in inactiveDebugMouseList)
+        {
+            ServerHandler.DebugMouseList.Remove(inactiveDebugMouse);
+        }
+    }
+
+    internal static void UpdateDebugMouseClient(GameWorld world)
+    {
+        if (!ClientHandler.DebugMouse) return;
+
+        if (((int)(NetTime.Now * 20) % 2) == 1)
+        {
+            var mouseBox2DPosition = world.GetMouseBox2DPosition();
+
+            var data = new SFDCTMessageData
+            {
+                Type = MessageHandler.SFDCTMessageDataType.DebugMouseUpdate,
+                Data =
+                [
+                    mouseBox2DPosition.X,
+                    mouseBox2DPosition.Y,
+                    Input.IsMouseLeftButtonDown,
+                ]
+            };
+
+            MessageHandler.Send(world.m_game.Client, data);
         }
     }
 }
