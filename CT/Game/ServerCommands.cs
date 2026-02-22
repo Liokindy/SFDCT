@@ -64,9 +64,17 @@ internal static class ServerCommands
             return true;
         }
 
-        string message = args.SourceParameters;
+        var message = args.SourceParameters;
+        var chatMessageData = new NetMessage.ChatMessage.Data(message, Color.White, args.SenderGameUser.GetProfileName(), true, args.SenderGameUser.UserIdentifier);
 
-        server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(message, Color.White, args.SenderGameUser.GetProfileName(), true, args.SenderGameUser.UserIdentifier));
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
+        {
+            server.SendMessage(MessageType.ChatMessage, chatMessageData);
+        }
+        else
+        {
+            gameInfo.ShowChatMessage(chatMessageData);
+        }
 
         return true;
     }
