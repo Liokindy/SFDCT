@@ -49,7 +49,7 @@ internal static class SubContentHandler
 
         SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, string.Join(FilterSeparator, enabled));
         SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, string.Join(FilterSeparator, disabled));
-        SFDCTConfig.SaveFile();
+        SFDCTConfig.Save();
 
         Folders = enabled.ToArray();
     }

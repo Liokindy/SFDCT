@@ -326,7 +326,7 @@ internal static class ServerCommands
             return true;
         }
 
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("SFDCT: Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
 
         var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKick);
         vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
@@ -487,7 +487,7 @@ internal static class ServerCommands
         if (gameInfo.VoteInfo.ActiveVotes.Count >= 1) return true;
         if (args.Parameters.Count <= 0) return true;
 
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format($"Creating yes-no vote: {args.SourceParameters}"));
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format($"SFDCT: Creating yes-no vote: {args.SourceParameters}"));
 
         var vote = new Voting.GameVoteManual(GameVote.GetNextVoteID(), args.SourceParameters);
         gameInfo.VoteInfo.AddVote(vote);

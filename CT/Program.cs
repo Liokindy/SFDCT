@@ -190,7 +190,7 @@ internal static class Program
         catch { }
 
         Logger.LogInfo("- Loading Configuration");
-        SFDCTConfig.LoadFile();
+        SFDCTConfig.Load();
 
         var patchStopWatch = new Stopwatch();
         patchStopWatch.Start();

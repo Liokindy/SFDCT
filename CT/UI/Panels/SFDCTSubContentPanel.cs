@@ -243,7 +243,7 @@ internal class SFDCTSubContentPanel : Panel
 
             SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, enabledFolders);
             SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, disabledFolders);
-            SFDCTConfig.SaveFile();
+            SFDCTConfig.Save();
 
             MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
         }

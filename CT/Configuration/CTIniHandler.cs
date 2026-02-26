@@ -6,37 +6,37 @@ internal class CTIniHandler : IniHandler
 {
     internal void ReadLine(string key, string value)
     {
-        this.ReadLine(key + "=" + value);
+        ReadLine(key + "=" + value);
     }
 
     internal void ReadLine(string key, bool value)
     {
-        this.ReadLine(key + "=" + (value ? "1" : "0"));
+        ReadLine(key + "=" + (value ? "1" : "0"));
     }
 
     internal void ReadLine(string key, int value)
     {
-        this.ReadLine(key + "=" + value.ToString());
+        ReadLine(key + "=" + value.ToString());
     }
 
     internal void ReadLine(string key, float value)
     {
-        this.ReadLine(key + "=" + value.ToString());
+        ReadLine(key + "=" + value.ToString().Replace(',', '.'));
     }
 
     internal void ReadLine(string key, Microsoft.Xna.Framework.Color value)
     {
-        this.ReadLine(key + "=" + SFD.Constants.ColorToString(value));
+        ReadLine(key + "=" + SFD.Constants.ColorToString(value));
     }
 
     internal void ReadLine(string key, SFD.GameKeyboard.GamePadCode value)
     {
-        this.ReadLine(key + "=" + value.ToString());
+        ReadLine(key + "=" + value.ToString());
     }
 
     internal string ReadValueString(string key, string backupValue)
     {
-        string value = this.ReadValue(key);
+        string value = ReadValue(key);
         if (string.IsNullOrEmpty(value))
         {
             return backupValue;

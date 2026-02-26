@@ -245,7 +245,7 @@ internal class SFDCTSettingsPanel : Panel
             MessageStack.Show(LanguageHelper.GetText("menu.settings.restartrequiredmessage"), MessageStackType.Information);
         }
 
-        SFDCTConfig.SaveFile();
+        SFDCTConfig.Save();
 
         if (m_originalPrimaryColorHex != Constants.COLORS.MENU_BLUE.ToHex())
         {
@@ -286,6 +286,7 @@ internal class SFDCTSettingsPanel : Panel
             SFDCTConfig.Set(CTSettingKey.ChatWidth, m_originalChatWidth);
             SFDCTConfig.Set(CTSettingKey.ChatHeight, m_originalChatHeight);
             SFDCTConfig.Set(CTSettingKey.ChatExtraHeight, m_originalChatExtraHeight);
+            SFDCTConfig.Set(CTSettingKey.ChatIndependentTeamRandomColors, m_originalChatIndependentTeamRandomColors);
 
             if (m_originalPrimaryColorHex != Constants.COLORS.MENU_BLUE.ToHex())
             {

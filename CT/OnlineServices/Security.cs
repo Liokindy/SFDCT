@@ -39,7 +39,7 @@ internal static class Security
         // this can make them harder to track and kick/ban, *try* to deny
         // their account negotation
         byte failedAtStep = 0;
-        string failedMessage = "AccountData: SFDCT deny at {0}, key '{1}', data '{2}', name '{3}', account '{4}'";
+        string failedMessage = "SFDCT: AccountData deny at {0}, key '{1}', data '{2}', name '{3}', account '{4}'";
 
         bool doLimitAccountNameLength = true;
         bool doEnforce666On666Users = true;

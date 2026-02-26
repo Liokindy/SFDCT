@@ -90,7 +90,7 @@ internal static class CommandHandler
         {
             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.exec.fail.error"), Color.Red, args.SenderGameUser));
 
-            ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("Exception trying to execute commands file: '{0}'", fileName));
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("SFDCT: Exception trying to execute commands file: '{0}'", fileName));
             ConsoleOutput.ShowMessage(ConsoleOutputType.Error, ex.Message);
         }
     }

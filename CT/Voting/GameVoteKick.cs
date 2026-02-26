@@ -34,7 +34,7 @@ internal class GameVoteKick : GameVoteYesNo
     private static void SetVoteKickCooldown()
     {
         m_nextAvailableVoteKickTimeStamp = NetTime.Now + SFDCTConfig.Get<int>(CTSettingKey.VoteKickSuccessCooldown);
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Set vote-kicking cooldown to {0}, {1} seconds from now", m_nextAvailableVoteKickTimeStamp, m_nextAvailableVoteKickTimeStamp - NetTime.Now));
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("SFDCT: vote-kicking cooldown: {0}, {1} seconds from now", m_nextAvailableVoteKickTimeStamp, m_nextAvailableVoteKickTimeStamp - NetTime.Now));
     }
 
     private static void ShowEndingChatMessage(GameInfo gameInfo)
