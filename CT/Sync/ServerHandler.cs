@@ -26,7 +26,7 @@ internal static class ServerHandler
             if (field != value && GameSFD.Handle.Server != null && GameSFD.Handle.Server.Running)
             {
                 var data = new SFDCTMessageData();
-                data.Type = MessageHandler.SFDCTMessageDataType.DebugMouseToggle;
+                data.Type = SFDCTMessageDataType.DebugMouseToggle;
                 data.Data = [value];
 
                 MessageHandler.Send(GameSFD.Handle.Server, data);
@@ -99,7 +99,7 @@ internal static class ServerHandler
 
         switch (messageData.Type)
         {
-            case MessageHandler.SFDCTMessageDataType.DebugMouseUpdate:
+            case SFDCTMessageDataType.DebugMouseUpdate:
                 if (incomingTag == null) break;
 
                 if (incomingTag.IsHost || (incomingTag.IsModerator && !DebugMouseOnlyHost))
@@ -130,7 +130,7 @@ internal static class ServerHandler
                     tagDebugMouse.Pressed = pressed;
                 }
                 break;
-            case MessageHandler.SFDCTMessageDataType.ProfileChangeRequest:
+            case SFDCTMessageDataType.ProfileChangeRequest:
                 if (incomingTag == null) break;
 
                 var userIndex = (int)messageData.Data[0];
@@ -155,7 +155,7 @@ internal static class ServerHandler
                         {
                             server.SyncGameSlotInfo(gameUser.GameSlot);
                         }
-                        MessageHandler.Send(server, new(MessageHandler.SFDCTMessageDataType.ProfileChangeRequest));
+                        MessageHandler.Send(server, new(SFDCTMessageDataType.ProfileChangeRequest));
                     }
                 }
                 break;

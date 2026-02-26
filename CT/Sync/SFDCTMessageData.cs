@@ -3,12 +3,12 @@
 internal class SFDCTMessageData
 {
     internal SFDCTMessageData() { }
-    internal SFDCTMessageData(MessageHandler.SFDCTMessageDataType type, params object[] data)
+    internal SFDCTMessageData(SFDCTMessageDataType type, params object[] data)
     {
         Type = type;
         Data = data;
     }
 
-    internal MessageHandler.SFDCTMessageDataType Type;
+    internal SFDCTMessageDataType Type;
     internal object[] Data;
 }

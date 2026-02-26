@@ -191,7 +191,7 @@ internal static class MenuHandler
             {
                 SFDCTMessageData data = new()
                 {
-                    Type = MessageHandler.SFDCTMessageDataType.ProfileChangeRequest,
+                    Type = SFDCTMessageDataType.ProfileChangeRequest,
                     Data = [
                         __instance.PlayerIndex,
                         selectedProfile,

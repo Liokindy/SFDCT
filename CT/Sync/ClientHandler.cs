@@ -15,7 +15,7 @@ internal static class ClientHandler
     {
         switch (messageData.Type)
         {
-            case MessageHandler.SFDCTMessageDataType.DebugMouseToggle:
+            case SFDCTMessageDataType.DebugMouseToggle:
                 DebugMouse = (bool)messageData.Data[0];
                 break;
         }

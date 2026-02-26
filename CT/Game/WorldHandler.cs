@@ -204,7 +204,7 @@ internal static class WorldHandler
 
             var data = new SFDCTMessageData
             {
-                Type = MessageHandler.SFDCTMessageDataType.DebugMouseUpdate,
+                Type = SFDCTMessageDataType.DebugMouseUpdate,
                 Data =
                 [
                     mouseBox2DPosition.X,

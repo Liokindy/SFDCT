@@ -193,9 +193,10 @@
     <Compile Include="OnlineServices\Security.cs" />
     <Compile Include="Sound\PanningHandler.cs" />
     <Compile Include="Sync\ClientHandler.cs" />
-    <Compile Include="Sync\Data\SFDCTMessageData.cs" />
+    <Compile Include="Sync\SFDCTMessageData.cs" />
     <Compile Include="Sync\ServerHandler.cs" />
     <Compile Include="Sync\MessageHandler.cs" />
+    <Compile Include="Sync\SFDCTMessageDataType.cs" />
     <Compile Include="UI\ChatHandler.cs" />
     <Compile Include="UI\FilmGrainHandler.cs" />
     <Compile Include="UI\EventHelper.cs" />

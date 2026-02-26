@@ -7,17 +7,11 @@ using SFDCT.Sync.Data;
 namespace SFDCT.Sync;
 
 [HarmonyPatch]
-internal static class MessageHandler
+internal static partial class MessageHandler
 {
     // MessageTypes 33, 34 and 36 are unused and not read by vanilla clients
     internal static readonly NET_DELIVERY SFDCTMessageDelivery = new(NetDeliveryMethod.ReliableOrdered, 31);
     internal const MessageType SFDCTMessageType = (MessageType)33;
-    internal enum SFDCTMessageDataType : byte
-    {
-        DebugMouseToggle,
-        DebugMouseUpdate,
-        ProfileChangeRequest,
-    }
 
     internal static void Send(ClientServerBase owner, SFDCTMessageData data)
     {
