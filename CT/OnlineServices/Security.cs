@@ -39,7 +39,8 @@ internal static class Security
         // this can make them harder to track and kick/ban, *try* to deny
         // their account negotation
         byte failedAtStep = 0;
-        string failedMessage = "SFDCT: AccountData deny at {0}, key '{1}', data '{2}', name '{3}', account '{4}'";
+        string failedMessage = "SFDCT: AccountData deny at {0}, '{1}' - '{2}' - '{3}' - '{4}'";
+        var accountDataMessage = BitConverter.ToString(accountData);
 
         bool doLimitAccountNameLength = true;
         bool doEnforce666On666Users = true;
@@ -63,7 +64,7 @@ internal static class Security
             if ((account == "S666" && !accountName.StartsWith("666:")) || (account != "S666" && accountName.StartsWith("666:")))
             {
                 __result = false;
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountDataMessage, accountName, account));
                 return;
             }
         }
@@ -73,7 +74,7 @@ internal static class Security
             if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  ")
             {
                 __result = false;
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountDataMessage, accountName, account));
                 return;
             }
 
@@ -90,7 +91,7 @@ internal static class Security
             if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
             {
                 __result = false;
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountDataMessage, accountName, account));
                 return;
             }
         }
@@ -100,7 +101,7 @@ internal static class Security
             if (accountName.Length <= 2 || accountName.Length >= 24)
             {
                 __result = false;
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountDataMessage, accountName, account));
                 return;
             }
         }
