@@ -462,7 +462,7 @@ internal static class ServerCommands
         if (args.CanUseModeratorCommand("DAMAGE", "HURT")) args.Feedback.Add(new(args.SenderGameUser, "'/HURT [AMOUNT] [PLAYER]' to deal damage to a player, negative amounts heal.", colOrange, args.SenderGameUser));
         if (args.CanUseModeratorCommand("VOTE")) args.Feedback.Add(new(args.SenderGameUser, "'/VOTE [...]' to start a yes/no vote with the parameters given.", colOrange, args.SenderGameUser));
 
-        if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE [1/0]' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
         if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
         if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
 
@@ -470,7 +470,7 @@ internal static class ServerCommands
         {
             if (args.SenderGameUser.IsHost)
             {
-                args.Feedback.Add(new(args.SenderGameUser, "'/MODCMD [A|R|L|C|T] [...]' to add/remove/list/clear/try moderator commands.", colOnlyHost, args.SenderGameUser));
+                args.Feedback.Add(new(args.SenderGameUser, "'/MODCMD [A|R|L|C|T] [...]' to add/remove/list/clear/try moderator commands separated by spaces.", colOnlyHost, args.SenderGameUser));
             }
 
             if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [0|1]' to control the server-movement state (empty is default, 0 is off, 1 is on).", colLightGreen, args.SenderGameUser));

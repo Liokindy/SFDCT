@@ -46,6 +46,8 @@
 	<Text id="sfdct.vote.kick.fail">'{0}' ({1}) WILL NOT BE KICKED (NOT ENOUGH VOTES)</Text>
 	<Text id="sfdct.vote.kick.success">'{0}' ({1}) WILL BE KICKED</Text>
 
+	<Text id="sfdct.vote.manual">VOTE: '{0}' ({1}, {2})</Text>
+
 	<Text id="sfdct.setting.header">SFDCT SETTINGS</Text>
 	<Text id="sfdct.setting.header.subcontent">SUB-CONTENT FOLDERS</Text>
 
