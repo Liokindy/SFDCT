@@ -40,4 +40,6 @@ internal enum CTSettingKey
     SubContent,
     SubContentEnabledFolders,
     SubContentDisabledFolders,
+
+    ExtraAccountDataChecking,
 }

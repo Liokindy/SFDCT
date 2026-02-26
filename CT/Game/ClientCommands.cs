@@ -18,8 +18,6 @@ internal static class ClientCommands
 
         foreach (GameUser gameUser in gameInfo.GetGameUsers().OrderBy(g => g.GameSlotIndex))
         {
-            if (gameUser.IsDedicatedPreview && !GameSFD.Handle.ImHosting) continue;
-
             var messageKey = gameUser.IsBot ? "sfdct.command.players.message.bot" : "sfdct.command.players.message.user";
             var messageColor = gameUser.IsHost ? Color.LightPink : gameUser.IsModerator ? Color.LightGreen : Color.LightBlue;
             string[] messageArgs;
@@ -31,21 +29,19 @@ internal static class ClientCommands
                 messageArgs =
                 [
                     gameUser.GameSlotIndex.ToString(),
-                        gameUser.GetProfileName(),
-                    ];
+                    gameUser.GetProfileName(),
+                ];
             }
             else
             {
-                bool noSlot = gameUser.JoinedAsSpectator || gameUser.GameSlotIndex == -1;
-
-                if (noSlot) messageColor *= 0.5f;
+                if (gameUser.GameSlotIndex == -1) messageColor *= 0.8f;
 
                 messageArgs =
                 [
-                    noSlot ? "#" : gameUser.GameSlotIndex.ToString(),
+                    gameUser.GameSlotIndex == -1 ? "#" : gameUser.GameSlotIndex.ToString(),
                     gameUser.GetProfileName(),
-                    gameUser.IsBot ? Profile.DEFAULT_BOT_NAME : gameUser.AccountName,
-                    gameUser.IsHost ? "HOST" : gameUser.IsModerator ? "MOD" : "",
+                    gameUser.AccountName,
+                    (gameUser.IsHost ? "HOST" : gameUser.IsModerator ? "MOD" : "") + (gameUser.JoinedAsSpectator ? " SPECTATOR" : ""),
                 ];
             }
 

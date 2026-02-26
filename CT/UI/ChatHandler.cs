@@ -2,10 +2,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using SFD.Core;
 using SFD.MenuControls;
 using SFD.States;
-using SFD.SteamIntegration;
 using SFDCT.Configuration;
 using SFDCT.Helper;
 using System;
@@ -17,7 +15,7 @@ internal static class ChatHandler
 {
     internal static bool GameChatInLobby = false;
     internal static int GameChatInLobbyRequestedRows = 0;
-    
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ChatMessage), nameof(ChatMessage.Show))]
     public static bool ChatMessage_Show_Prefix_RandomNameColors(string message, Color color, string name, bool isMetaText)

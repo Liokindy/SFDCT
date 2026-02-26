@@ -43,13 +43,31 @@ internal static class WorldHandler
 
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.Update))]
-    private static IEnumerable<CodeInstruction> GameWorld_Update_Transpiler_Saturation(IEnumerable<CodeInstruction> instructions)
+    private static IEnumerable<CodeInstruction> GameWorld_Update_Transpiler_HealthSaturation(IEnumerable<CodeInstruction> instructions)
     {
-        instructions.ElementAt(783).operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold);
-        instructions.ElementAt(787).operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold);
-        instructions.ElementAt(793).operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthSaturationFactor);
+        var code = new List<CodeInstruction>(instructions);
 
-        return instructions;
+        code[783].operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold);
+        code[787].operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthThreshold);
+        code[793].operand = SFDCTConfig.Get<float>(CTSettingKey.LowHealthSaturationFactor);
+
+        return code;
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.UpdateGameOverData), [typeof(bool)])]
+    private static IEnumerable<CodeInstruction> GameWorld_Postfix_UpdateGameOverData_Transpiler_SpectatorFix(IEnumerable<CodeInstruction> instructions)
+    {
+        var code = new List<CodeInstruction>(instructions);
+
+        // The original IL code uses LINQ keywords and checks
+        // if the users are 'SpectatingWhileWaitingToPlay',
+        // add 'JoinedAsSpectator'
+
+        var enumeratorAnyInstruction = code[554];
+        enumeratorAnyInstruction.operand = AccessTools.Method(typeof(UserHandler), nameof(UserHandler.IsNotJoinedAsSpectatorAndIsSpectatingWhileWaitingToPlay));
+
+        return code;
     }
 
     [HarmonyPostfix]

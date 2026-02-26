@@ -205,7 +205,9 @@ internal static class ServerHandler
         var isServerInstruction = code[779];
         var isLocalHostInstruction = code[455];
         var whileLoopEndInstruction = code[1686];
-        var afterLobbyHelpTextInstruction = code[873];
+        var afterLobbyHelpTextInstruction = code[872 + 1];
+        var afterReadAccountDataTrueInstruction = code[611 + 1];
+        var afterNotNegotiatedConnectionInstruction = code[613 + 1];
 
         var asSpectatorInstructions = new List<CodeInstruction>
         {
@@ -257,6 +259,24 @@ internal static class ServerHandler
         };
 
         code.InsertRange(afterLobbyHelpTextIndex, showCTHelpTextInstructions);
+
+        // Skip checking ReadAccountData if senderConnection is
+        // the local host, this fixes the dedicated preview being denied
+        // because the server user is not given an account name
+        var skipReadAccountDataLabel = il.DefineLabel();
+
+        afterNotNegotiatedConnectionInstruction.labels.Add(skipReadAccountDataLabel);
+
+        var isReadAccountDataTrueIndex = code.IndexOf(afterReadAccountDataTrueInstruction);
+        var skipReadAccountDataInstructions = new List<CodeInstruction>
+        {
+            new(OpCodes.Ldloc_S, senderConnectionLocalIndex),
+            new(OpCodes.Call, AccessTools.Method(typeof(LidgrenNetworkExtensions), nameof(LidgrenNetworkExtensions.IsLocalHost), [typeof(NetConnection)])),
+            new(OpCodes.Brtrue, skipReadAccountDataLabel)
+        };
+
+        code.InsertRange(isReadAccountDataTrueIndex, skipReadAccountDataInstructions);
+
         return code;
     }
 
@@ -266,5 +286,19 @@ internal static class ServerHandler
     {
         DebugMouse = false;
         DebugMouseList.Clear();
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Server), nameof(Server.HandleChatMessage))]
+    private static void Server_HandleChatMessage_Postfix_SecurityChecks(ref bool __result, GameUser senderGameUser, string stringMsg)
+    {
+        // Already rejected by vanilla checks
+        if (!__result) return;
+
+        // Long chat messages can cause stuttering on clients,
+        // make the server reject those messages as spam using
+        // the chat's textbox max character limit
+        var maxChars = GameChat.m_textbox.maxChars;
+        __result = stringMsg.Length <= maxChars;
     }
 }

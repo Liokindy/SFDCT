@@ -69,4 +69,14 @@ internal static class ServerBrowserHandler
             }
         }
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameBrowserPanel), nameof(GameBrowserPanel.IncludeGameInFilter))]
+    private static void GameBrowserPanel_IncludeGameInFilter_Postfix_SecurityChecks(ref bool __result, SFDGameServerInstance gameServer)
+    {
+        // Already filtered by vanilla checks
+        if (!__result) return;
+
+        __result = !Security.IsInvalidGameServer(gameServer.SFDGameServer);
+    }
 }

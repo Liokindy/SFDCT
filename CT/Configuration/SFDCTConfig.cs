@@ -84,6 +84,7 @@ internal static class SFDCTConfig
             Set(CTSettingKey.ChatHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatHeight), 10 * (int)GameChat.MESSAGE_HEIGHT, 10 * (int)GameChat.MESSAGE_HEIGHT / 2, 10 * (int)GameChat.MESSAGE_HEIGHT * 4));
             Set(CTSettingKey.ChatExtraHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatExtraHeight), 0, 0, 10 * (int)GameChat.MESSAGE_HEIGHT * 2));
             Set(CTSettingKey.ChatIndependentTeamRandomColors, handler.ReadValueBool(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), true));
+            Set(CTSettingKey.ExtraAccountDataChecking, handler.ReadValueBool(GetSettingKey(CTSettingKey.ExtraAccountDataChecking), true));
         }
 
         ReadToFile(handler);
@@ -126,6 +127,7 @@ internal static class SFDCTConfig
         Set(CTSettingKey.ChatHeight, 10 * (int)GameChat.MESSAGE_HEIGHT);
         Set(CTSettingKey.ChatExtraHeight, 0);
         Set(CTSettingKey.ChatIndependentTeamRandomColors, true);
+        Set(CTSettingKey.ExtraAccountDataChecking, true);
     }
 
     internal static void ReadToFile(CTIniHandler handler)
@@ -164,6 +166,7 @@ internal static class SFDCTConfig
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatHeight), Get<int>(CTSettingKey.ChatHeight));
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatExtraHeight), Get<int>(CTSettingKey.ChatExtraHeight));
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), Get<bool>(CTSettingKey.ChatIndependentTeamRandomColors));
+        handler.ReadLine(GetSettingKey(CTSettingKey.ExtraAccountDataChecking), Get<bool>(CTSettingKey.ExtraAccountDataChecking));
     }
 
     internal static string GetSettingKey(CTSettingKey setting)
@@ -199,6 +202,7 @@ internal static class SFDCTConfig
             case CTSettingKey.ChatHeight: return "CHAT_HEIGHT";
             case CTSettingKey.ChatExtraHeight: return "CHAT_EXTRA_HEIGHT";
             case CTSettingKey.ChatIndependentTeamRandomColors: return "CHAT_TEAM_INDEPENDENT_RANDOM_NAME_COLOR";
+            case CTSettingKey.ExtraAccountDataChecking: return "EXTRA_ACCOUNT_DATA_CHECKING";
         }
     }
 

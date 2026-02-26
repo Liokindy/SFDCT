@@ -4,9 +4,7 @@ using SFD;
 using SFD.MenuControls;
 using SFDCT.Misc;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection.Emit;
 
 namespace SFDCT.Game;
 

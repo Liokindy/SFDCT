@@ -183,6 +183,7 @@
     <Compile Include="Configuration\SFDCTConfig.cs" />
     <Compile Include="Fighter\PlayerHandler.cs" />
     <Compile Include="Game\ClientCommands.cs" />
+    <Compile Include="Game\UserHandler.cs" />
     <Compile Include="Game\ServerCommands.cs" />
     <Compile Include="Game\DebugMouse.cs" />
     <Compile Include="Game\GameHandler.cs" />

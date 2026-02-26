@@ -8,16 +8,6 @@ namespace SFDCT.OnlineServices;
 [HarmonyPatch]
 internal static class DSPreviewHandler
 {
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(GameUser), nameof(GameUser.IsDedicatedPreview), MethodType.Getter)]
-    private static bool GameUser_Getter_IsDedicatedPreview_Prefix_BetterIsDSCheck(GameUser __instance, ref bool __result)
-    {
-        // If the host becomes a spectator it suddenly counts as the DS preview,
-        // check if the account name is empty too
-        __result = __instance.IsHost && __instance.JoinedAsSpectator && string.IsNullOrEmpty(__instance.AccountName);
-        return false;
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameSFD), nameof(GameSFD.StateKeyDownEvent))]
     private static void GameSFD_StateKeyDownEvent_Postfix_DSKeyInput(Keys key)

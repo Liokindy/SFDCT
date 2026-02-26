@@ -1,7 +1,8 @@
 ﻿using HarmonyLib;
 using SFD;
-using SFD.MenuControls;
 using SFD.SFDOnlineServices;
+using SFDCT.Configuration;
+using System;
 
 namespace SFDCT.OnlineServices;
 
@@ -25,21 +26,83 @@ internal static class Security
         return invalidMaxPlayers || invalidPlayerCount || invalidNameLength;
     }
 
-    // Large chat messages cause stuttering on other clients, reject those messages as spam
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(Server), nameof(Server.HandleChatMessage))]
-    private static void Server_HandleChatMessage_Postfix_SecurityChecks(ref bool __result, GameUser senderGameUser, string stringMsg)
+    [HarmonyPatch(typeof(Constants.Account), nameof(Constants.Account.ReadAccountData))]
+    private static void Constants_Account_Postfix_ReadAccountData(ref bool __result, byte[] accountData, string key, ref string accountName, ref string account)
     {
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.ExtraAccountDataChecking)) return;
+
+        // Already failed by vanilla checks
         if (!__result) return;
 
-        var maxChars = GameChat.m_textbox?.maxChars ?? GameChat.m_textbox.maxChars;
-        if (stringMsg.Length > maxChars) __result = false;
-    }
+        // Modified clients can enter the server and use an empty AccountName,
+        // this can make them harder to track and kick/ban, *try* to deny
+        // their account negotation
+        byte failedAtStep = 0;
+        string failedMessage = "AccountData: SFDCT deny at {0}, key '{1}', data '{2}', name '{3}', account '{4}'";
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameBrowserPanel), nameof(GameBrowserPanel.IncludeGameInFilter))]
-    private static void GameBrowserPanel_IncludeGameInFilter_Postfix_SecurityChecks(ref bool __result, SFDGameServerInstance gameServer)
-    {
-        if (__result) __result = !IsInvalidGameServer(gameServer.SFDGameServer);
+        bool doLimitAccountNameLength = true;
+        bool doEnforce666On666Users = true;
+        bool doCheck666On666Users = true;
+        bool doCheckEmptyAccountName = true;
+
+        if (doEnforce666On666Users)
+        {
+            if (!account.StartsWith("S666") && accountName.StartsWith("666:"))
+            {
+                account = "S666";
+            }
+            else if (account.StartsWith("S666") && !accountName.StartsWith("666:"))
+            {
+                accountName = "666:" + accountName;
+            }
+        }
+
+        if (doCheck666On666Users)
+        {
+            if ((account == "S666" && !accountName.StartsWith("666:")) || (account != "S666" && accountName.StartsWith("666:")))
+            {
+                __result = false;
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                return;
+            }
+        }
+
+        if (doCheckEmptyAccountName)
+        {
+            if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accountName) || accountName == "  ")
+            {
+                __result = false;
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                return;
+            }
+
+            string accName = accountName;
+            accName = accName.Replace(Environment.NewLine, "");
+            accName = accName.Replace("\r", "");
+            accName = accName.Replace("\n", "");
+            accName = accName.Trim();
+            while (accName.Contains("  "))
+            {
+                accName = accName.Replace("  ", " ");
+            }
+
+            if (string.IsNullOrEmpty(accountName) || string.IsNullOrWhiteSpace(accName))
+            {
+                __result = false;
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                return;
+            }
+        }
+
+        if (doLimitAccountNameLength)
+        {
+            if (accountName.Length <= 2 || accountName.Length >= 24)
+            {
+                __result = false;
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format(failedMessage, failedAtStep, key, accountData.Length, accountName, account));
+                return;
+            }
+        }
     }
 }
