@@ -1,5 +1,4 @@
-﻿using Lidgren.Network;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using SFD;
 using SFD.Core;
 using SFD.GUI.Text;
@@ -66,15 +65,7 @@ internal static class ServerCommands
 
         var message = args.SourceParameters;
         var chatMessageData = new NetMessage.ChatMessage.Data(message, Color.White, args.SenderGameUser.GetProfileName(), true, args.SenderGameUser.UserIdentifier);
-
-        if (gameInfo.GameOwner == GameOwnerEnum.Server)
-        {
-            server.SendMessage(MessageType.ChatMessage, chatMessageData);
-        }
-        else
-        {
-            gameInfo.ShowChatMessage(chatMessageData);
-        }
+        gameInfo.ShowChatMessage(chatMessageData);
 
         return true;
     }
@@ -295,36 +286,41 @@ internal static class ServerCommands
 
     internal static bool HandleVoteKick(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
+        if (gameInfo.InLobby) return true;
+        if (gameInfo.VoteInfo == null) return true;
+        if (gameInfo.VoteInfo.ActiveVotes.Count >= 1) return true;
         if (args.Parameters.Count <= 0) return true;
+        if (!SFDCTConfig.Get<bool>(CTSettingKey.VoteKickEnabled)) return true;
 
-        if (!Voting.GameVoteYesNo.CanStartVote(gameInfo))
+        if (!Voting.GameVoteKick.CanStartVoteKick(gameInfo))
         {
             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail"), Color.Red, args.SenderGameUser));
             return true;
         }
 
-        GameUser userToKick = gameInfo.GetGameUserByStringInput(args.SourceParameters);
+        var kickOwnerUser = args.SenderGameUser;
+        var userToKick = gameInfo.GetGameUserByStringInput(args.SourceParameters);
 
         if (userToKick == null || userToKick.IsDisposed || userToKick == args.SenderGameUser) return true;
-        if (userToKick.IsModerator || userToKick.IsBot)
+        if (userToKick.IsHost || userToKick.IsModerator || userToKick.IsBot)
         {
             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.invaliduser"), Color.Red, args.SenderGameUser));
             return true;
         }
 
-        GameUser kickOwnerUser = args.SenderGameUser;
-
         string userToKickProfileName = userToKick.GetProfileName();
-        string userTokickAccountName = userToKick.IsBot ? "COM" : userToKick.AccountName;
+        string userTokickAccountName = userToKick.AccountName;
 
         string kickOwnerUserProfileName = kickOwnerUser.GetProfileName();
-        string kickOwnerUserAccountName = kickOwnerUser.IsBot ? "COM" : kickOwnerUser.AccountName;
+        string kickOwnerUserAccountName = kickOwnerUser.AccountName;
 
-        string soundID = "PlayerLeave";
+        long[] validRemoteUniqueIdentifiers = server.GetConnectedUniqueIdentifiers(n => n.GameConnectionTag() != null
+                                                                                    && n.GameConnectionTag().FirstGameUser != null
+                                                                                    && n.GameConnectionTag().FirstGameUser.CanVote
+                                                                                    && n.GameConnectionTag().FirstGameUser != kickOwnerUser
+                                                                                    && n.GameConnectionTag().FirstGameUser != userToKick);
 
-        long[] validRemoteUniqueIdentifiers = server.GetConnectedUniqueIdentifiers((NetConnection x) => x.GameConnectionTag() != null && x.GameConnectionTag().FirstGameUser != null && x.GameConnectionTag().FirstGameUser.UserIdentifier != userToKick.UserIdentifier && x.GameConnectionTag().FirstGameUser.CanVote);
-        if (validRemoteUniqueIdentifiers.Length <= 3)
+        if (validRemoteUniqueIdentifiers.Length <= 2)
         {
             args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.fail.notenoughusers"), Color.Red, args.SenderGameUser));
             return true;
@@ -332,11 +328,17 @@ internal static class ServerCommands
 
         ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format("Creating vote-kick from '{0}' ({1}) against '{2}' ({3})", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName));
 
-        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKickProfileName, userTokickAccountName, userToKick.GetNetIP());
+        var vote = new Voting.GameVoteKick(GameVote.GetNextVoteID(), userToKick);
         vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
 
-        server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
-        server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data(soundID, true, Vector2.Zero, 1f));
+        foreach (var id in validRemoteUniqueIdentifiers)
+        {
+            var connection = server.GetConnectionByRemoteUniqueIdentifier(id);
+            if (connection == null) continue;
+
+            server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false), null, connection);
+            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f), null, connection);
+        }
 
         gameInfo.VoteInfo.AddVote(vote);
         args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.votekick.message", kickOwnerUserProfileName, kickOwnerUserAccountName, userToKickProfileName, userTokickAccountName), Color.Yellow));
@@ -388,18 +390,8 @@ internal static class ServerCommands
             messageArgs.Add(((int)gameSlot.CurrentTeam).ToString());
         }
 
-        if (gameInfo.GameOwner == GameOwnerEnum.Server)
-        {
-            server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(messageKey, messageColor, messageArgs.ToArray()));
-            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerJoin", true, Vector2.Zero, 1f));
-            server.SyncGameUserInfo(args.SenderGameUser);
-            server.SyncGameSlotInfo(gameSlot);
-        }
-        else
-        {
-            gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs.ToArray()));
-            SoundHandler.PlayGlobalSound("PlayerJoin");
-        }
+        gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs.ToArray()));
+        SoundHandler.PlaySound("PlayerJoin", gameInfo.GameWorld);
 
         args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.join.message"), Color.Gray, args.SenderGameUser));
         return true;
@@ -435,18 +427,8 @@ internal static class ServerCommands
         var messageArgs = new string[] { args.SenderGameUser.GetProfileName(), LanguageHelper.GetText("general.spectator") };
         var messageColor = Color.LightGray;
 
-        if (gameInfo.GameOwner == GameOwnerEnum.Server)
-        {
-            server.SendMessage(MessageType.ChatMessage, new NetMessage.ChatMessage.Data(messageKey, messageColor, messageArgs));
-            server.SendMessage(MessageType.Sound, new NetMessage.Sound.Data("PlayerLeave", true, Vector2.Zero, 1f));
-            server.SyncGameUserInfo(args.SenderGameUser);
-            server.SyncGameSlotInfo(gameSlot);
-        }
-        else
-        {
-            gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs));
-            SoundHandler.PlayGlobalSound("PlayerLeave");
-        }
+        gameInfo.ShowChatMessage(new(messageKey, messageColor, messageArgs));
+        SoundHandler.PlaySound("PlayerLeave", gameInfo.GameWorld);
 
         args.Feedback.Add(new(args.SenderGameUser, LanguageHelper.GetText("sfdct.command.spectate.message.info"), Color.Gray, args.SenderGameUser));
         return true;
@@ -478,6 +460,11 @@ internal static class ServerCommands
 
         if (args.CanUseModeratorCommand("GRAVITY", "GRAV")) args.Feedback.Add(new(args.SenderGameUser, "'/GRAVITY [X] [Y]' to set the world's gravity.", colOrange, args.SenderGameUser));
         if (args.CanUseModeratorCommand("DAMAGE", "HURT")) args.Feedback.Add(new(args.SenderGameUser, "'/HURT [AMOUNT] [PLAYER]' to deal damage to a player, negative amounts heal.", colOrange, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("VOTE")) args.Feedback.Add(new(args.SenderGameUser, "'/VOTE [...]' to start a yes/no vote with the parameters given.", colOrange, args.SenderGameUser));
+
+        if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
 
         if (gameInfo.GameOwner == GameOwnerEnum.Server)
         {
@@ -486,13 +473,39 @@ internal static class ServerCommands
                 args.Feedback.Add(new(args.SenderGameUser, "'/MODCMD [A|R|L|C|T] [...]' to add/remove/list/clear/try moderator commands.", colOnlyHost, args.SenderGameUser));
             }
 
-            if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));
             if (args.CanUseModeratorCommand("SERVERMOVEMENT", "SVMOV")) args.Feedback.Add(new(args.SenderGameUser, "'/SERVERMOVEMENT [PLAYER] [0|1]' to control the server-movement state (empty is default, 0 is off, 1 is on).", colLightGreen, args.SenderGameUser));
-            if (args.CanUseModeratorCommand("META")) args.Feedback.Add(new(args.SenderGameUser, "'/META [...]' to send a message with meta formatting.", colLightGreen, args.SenderGameUser));
-            if (args.CanUseModeratorCommand("EXEC")) args.Feedback.Add(new(args.SenderGameUser, "'/EXEC [PATH/TO/FILE]' to execute a commands file.", colLightGreen, args.SenderGameUser));
         }
 
         args.Feedback.Add(new ProcessCommandMessage(args.SenderGameUser, "Scroll the chat using the scroll-wheel to see all commands.", Color.LightBlue, args.SenderGameUser));
+        return true;
+    }
+
+    internal static bool HandleVote(Server server, ProcessCommandArgs args, GameInfo gameInfo)
+    {
+        if (gameInfo.InLobby) return true;
+        if (gameInfo.VoteInfo == null) return true;
+        if (gameInfo.VoteInfo.ActiveVotes.Count >= 1) return true;
+        if (args.Parameters.Count <= 0) return true;
+
+        ConsoleOutput.ShowMessage(ConsoleOutputType.Information, string.Format($"Creating yes-no vote: {args.SourceParameters}"));
+
+        var vote = new Voting.GameVoteManual(GameVote.GetNextVoteID(), args.SourceParameters);
+        gameInfo.VoteInfo.AddVote(vote);
+
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
+        {
+            long[] validRemoteUniqueIdentifiers = server.GetConnectedUniqueIdentifiers(n => n.GameConnectionTag() != null
+                                                                    && n.GameConnectionTag().FirstGameUser != null
+                                                                    && n.GameConnectionTag().FirstGameUser.CanVote);
+
+            vote.ValidRemoteUniqueIdentifiers.AddRange(validRemoteUniqueIdentifiers);
+            server.SendMessage(MessageType.GameVote, new Pair<GameVote, bool>(vote, false));
+        }
+        else
+        {
+            vote.ValidRemoteUniqueIdentifiers.Add(1L);
+        }
+
         return true;
     }
 }

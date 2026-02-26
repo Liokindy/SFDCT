@@ -161,6 +161,11 @@ internal static class CommandHandler
                 return ServerCommands.HandleMeta(server, args, gameInfo);
             }
 
+            if (IsAndCanUseModeratorCommand(args, "VOTE"))
+            {
+                return ServerCommands.HandleVote(server, args, gameInfo);
+            }
+
             if (gameInfo.GameOwner == GameOwnerEnum.Server)
             {
                 if (IsAndCanUseModeratorCommand(args, "SERVERMOVEMENT", "SVMOV"))

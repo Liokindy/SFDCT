@@ -2,6 +2,7 @@
 using HarmonyLib;
 using Lidgren.Network;
 using SFD;
+using SFD.Effects;
 using SFD.States;
 using SFDCT.Configuration;
 using SFDCT.Helper;
@@ -39,6 +40,16 @@ internal static class WorldHandler
         }
 
         return false;
+    }
+
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(EffectHandler), nameof(EffectHandler.CreateEffect))]
+    private static bool EffectHandler_CreateEffect_Prefix_AvoidConsoleOutputFlood(string effectId)
+    {
+        if (effectId.Equals("HIT")) return false;
+
+        return true;
     }
 
     [HarmonyTranspiler]

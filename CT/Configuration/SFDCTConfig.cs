@@ -75,8 +75,8 @@ internal static class SFDCTConfig
             Set(CTSettingKey.SpectatorsMaximum, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.SpectatorsMaximum), 4, 0, 4));
             Set(CTSettingKey.SpectatorsOnlyModerators, handler.ReadValueBool(GetSettingKey(CTSettingKey.SpectatorsOnlyModerators), true));
             Set(CTSettingKey.VoteKickEnabled, handler.ReadValueBool(GetSettingKey(CTSettingKey.VoteKickEnabled), false));
-            Set(CTSettingKey.VoteKickFailCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150, 30, 300));
-            Set(CTSettingKey.VoteKickSuccessCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60, 30, 300));
+            Set(CTSettingKey.VoteKickFailCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickFailCooldown), 150, 15, 300));
+            Set(CTSettingKey.VoteKickSuccessCooldown, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.VoteKickSuccessCooldown), 60, 15, 300));
             Set(CTSettingKey.SubContent, handler.ReadValueBool(GetSettingKey(CTSettingKey.SubContent), true));
             Set(CTSettingKey.SubContentDisabledFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentDisabledFolders), string.Empty));
             Set(CTSettingKey.SubContentEnabledFolders, handler.ReadValueString(GetSettingKey(CTSettingKey.SubContentEnabledFolders), string.Empty));
@@ -85,6 +85,8 @@ internal static class SFDCTConfig
             Set(CTSettingKey.ChatExtraHeight, handler.ReadValueIntCapped(GetSettingKey(CTSettingKey.ChatExtraHeight), 0, 0, 10 * (int)GameChat.MESSAGE_HEIGHT * 2));
             Set(CTSettingKey.ChatIndependentTeamRandomColors, handler.ReadValueBool(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), true));
             Set(CTSettingKey.ExtraAccountDataChecking, handler.ReadValueBool(GetSettingKey(CTSettingKey.ExtraAccountDataChecking), true));
+            Set(CTSettingKey.LogConsoleOutput, handler.ReadValueBool(GetSettingKey(CTSettingKey.LogConsoleOutput), false));
+            Set(CTSettingKey.LogConsoleOutputFolder, handler.ReadValueString(GetSettingKey(CTSettingKey.LogConsoleOutputFolder), ""));
         }
 
         ReadToFile(handler);
@@ -128,6 +130,8 @@ internal static class SFDCTConfig
         Set(CTSettingKey.ChatExtraHeight, 0);
         Set(CTSettingKey.ChatIndependentTeamRandomColors, true);
         Set(CTSettingKey.ExtraAccountDataChecking, true);
+        Set(CTSettingKey.LogConsoleOutput, false);
+        Set(CTSettingKey.LogConsoleOutputFolder, "");
     }
 
     internal static void ReadToFile(CTIniHandler handler)
@@ -167,6 +171,8 @@ internal static class SFDCTConfig
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatExtraHeight), Get<int>(CTSettingKey.ChatExtraHeight));
         handler.ReadLine(GetSettingKey(CTSettingKey.ChatIndependentTeamRandomColors), Get<bool>(CTSettingKey.ChatIndependentTeamRandomColors));
         handler.ReadLine(GetSettingKey(CTSettingKey.ExtraAccountDataChecking), Get<bool>(CTSettingKey.ExtraAccountDataChecking));
+        handler.ReadLine(GetSettingKey(CTSettingKey.LogConsoleOutput), Get<bool>(CTSettingKey.LogConsoleOutput));
+        handler.ReadLine(GetSettingKey(CTSettingKey.LogConsoleOutputFolder), Get<string>(CTSettingKey.LogConsoleOutputFolder));
     }
 
     internal static string GetSettingKey(CTSettingKey setting)
@@ -203,6 +209,8 @@ internal static class SFDCTConfig
             case CTSettingKey.ChatExtraHeight: return "CHAT_EXTRA_HEIGHT";
             case CTSettingKey.ChatIndependentTeamRandomColors: return "CHAT_TEAM_INDEPENDENT_RANDOM_NAME_COLOR";
             case CTSettingKey.ExtraAccountDataChecking: return "EXTRA_ACCOUNT_DATA_CHECKING";
+            case CTSettingKey.LogConsoleOutput: return "LOG_CONSOLE";
+            case CTSettingKey.LogConsoleOutputFolder: return "LOG_CONSOLE_FOLDER";
         }
     }
 

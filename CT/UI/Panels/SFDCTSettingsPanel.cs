@@ -83,8 +83,8 @@ internal class SFDCTSettingsPanel : Panel
         // Vote Kick
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.votekick")));
         m_menu.Add(CreateBoolSetting(CTSettingKey.VoteKickEnabled, "sfdct.setting.name.votekickenabled"));
-        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickFailCooldown, 30, 300, 5, "sfdct.setting.name.votekickfailcooldown"));
-        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickSuccessCooldown, 30, 300, 5, "sfdct.setting.name.votekicksuccesscooldown"));
+        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickFailCooldown, 15, 300, 5, "sfdct.setting.name.votekickfailcooldown"));
+        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickSuccessCooldown, 15, 300, 5, "sfdct.setting.name.votekicksuccesscooldown"));
 
         // Misc
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.misc")));

@@ -1,10 +1,14 @@
 ﻿using SFD;
+using SFD.Core;
 using SFD.Voting;
 
 namespace SFDCT.Voting;
 
 internal class GameVoteYesNo : GameVote
 {
+    internal const sbyte ALTERNATIVE_INDEX_YES = 0;
+    internal const sbyte ALTERNATIVE_INDEX_NO = 1;
+
     private bool m_resolved;
 
     internal GameVoteYesNo(int voteID, params string[] description) : base(voteID, (GameVote.Type)2)
@@ -12,17 +16,8 @@ internal class GameVoteYesNo : GameVote
         DescriptionTextID = "button.vote";
         DescriptionParameters = description;
 
-        Alternatives.Add(new(0, "general.yes"));
-        Alternatives.Add(new(1, "general.no"));
-    }
-
-    internal static bool CanStartVote(GameInfo gameInfo)
-    {
-        if (gameInfo.InLobby) return false;
-        if (gameInfo.VoteInfo == null) return false;
-        if (gameInfo.VoteInfo.ActiveVotes.Count > 0) return false;
-
-        return true;
+        Alternatives.Add(new(ALTERNATIVE_INDEX_YES, "general.yes"));
+        Alternatives.Add(new(ALTERNATIVE_INDEX_NO, "general.no"));
     }
 
     private GameVoteAlternative GetWinningAlternative()
@@ -37,6 +32,29 @@ internal class GameVoteYesNo : GameVote
         }
 
         return null;
+    }
+
+    private void SendRemove(GameInfo gameInfo)
+    {
+        if (gameInfo.GameOwner == GameOwnerEnum.Server)
+        {
+            var server = GameSFD.Handle.Server;
+            if (server == null) return;
+
+            var data = new Pair<GameVote, bool>(this, true);
+
+            foreach (var id in ValidRemoteUniqueIdentifiers)
+            {
+                var connection = server.GetConnectionByRemoteUniqueIdentifier(id);
+                if (connection == null) continue;
+
+                server.SendMessage(MessageType.GameVote, data, null, connection);
+            }
+        }
+        else
+        {
+            gameInfo.VoteInfo.RemoveVote(VoteID, false);
+        }
     }
 
     public override void AnswersUpdated(GameInfo gameInfo)
@@ -64,7 +82,7 @@ internal class GameVoteYesNo : GameVote
         GameVoteAlternative winnerAlternative = GetWinningAlternative();
         if (winnerAlternative != null)
         {
-            if (winnerAlternative.Index == 0)
+            if (winnerAlternative.Index == ALTERNATIVE_INDEX_YES)
             {
                 OnYes(gameInfo);
             }
@@ -77,6 +95,8 @@ internal class GameVoteYesNo : GameVote
         {
             OnTie(gameInfo);
         }
+
+        SendRemove(gameInfo);
     }
 
     public virtual void OnTie(GameInfo gameInfo) { }

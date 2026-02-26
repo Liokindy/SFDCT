@@ -155,6 +155,8 @@ internal static class SubContentHandler
 
                 try
                 {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound file: {variationPath}");
+
                     SoundEffect variationSound = null;
                     variationSound = Content.Load<SoundEffect>(variationPath);
 
@@ -369,6 +371,8 @@ internal static class SubContentHandler
 
             foreach (var path in kvp.Value)
             {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading animations file: {path}");
+
                 AnimationsData animationsData = Content.Load<AnimationsData>(path);
                 CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
 
@@ -417,6 +421,8 @@ internal static class SubContentHandler
 
             foreach (var path in kvp.Value)
             {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading texture file: {path}");
+
                 Textures.m_tileTextures.Load(path, kvp.Key != ContentOriginType.Official);
 
                 current++;
@@ -465,6 +471,8 @@ internal static class SubContentHandler
             foreach (var path in kvp.Value)
             {
                 if (GameSFD.Closing) return false;
+
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading item file: {path}");
 
                 Item item = Content.Load<Item>(path);
                 item.PostProcess();
@@ -520,6 +528,8 @@ internal static class SubContentHandler
 
             foreach (var path in kvp.Value)
             {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color-palette file: {path}");
+
                 SFDXReader.ReadDataFromSFDXFile(path);
 
                 CopyAndReplaceDictionary(ColorPaletteDatabase.m_palettes, colorPalettes);
@@ -551,6 +561,8 @@ internal static class SubContentHandler
 
             foreach (var path in kvp.Value)
             {
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color file: {path}");
+
                 SFDXReader.ReadDataFromSFDXFile(path);
 
                 CopyAndReplaceDictionary(ColorDatabase.m_colors, colors);
@@ -595,6 +607,8 @@ internal static class SubContentHandler
             {
                 foreach (var path in kvp.Value)
                 {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
+
                     var folderPath = Path.GetDirectoryName(path);
                     var soundGroups = LoadSoundEffectGroups(folderPath, path);
 
@@ -615,6 +629,8 @@ internal static class SubContentHandler
             {
                 foreach (var path in kvp.Value)
                 {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
+
                     var folderPath = Path.GetDirectoryName(path);
                     var soundGroups = LoadSoundEffectGroups(folderPath, path);
 
@@ -669,9 +685,11 @@ internal static class SubContentHandler
             Logger.LogInfo($"LOADING [TILES]: {kvp.Key}");
             GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
 
-            foreach (var filePath in kvp.Value)
+            foreach (var path in kvp.Value)
             {
-                SFDXReader.ReadDataFromSFDXFile(filePath);
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading tile file: {path}");
+
+                SFDXReader.ReadDataFromSFDXFile(path);
 
                 CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
                 TileDatabase.m_tiles.Clear();
@@ -689,9 +707,11 @@ internal static class SubContentHandler
             Logger.LogInfo($"LOADING [WEAPON-TILES]: {kvp.Key}");
             GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
 
-            foreach (var filePath in kvp.Value)
+            foreach (var path in kvp.Value)
             {
-                SFDXReader.ReadDataFromSFDXFile(filePath);
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading weapon tile file: {path}");
+
+                SFDXReader.ReadDataFromSFDXFile(path);
             }
 
             CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
@@ -739,7 +759,7 @@ internal static class SubContentHandler
         {
             try
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image: {SFDjpgImagePath}");
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image file: {SFDjpgImagePath}");
 
                 using (FileStream fileStream = File.OpenRead(SFDjpgImagePath))
                 {

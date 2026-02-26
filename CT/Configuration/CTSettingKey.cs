@@ -42,4 +42,7 @@ internal enum CTSettingKey
     SubContentDisabledFolders,
 
     ExtraAccountDataChecking,
+
+    LogConsoleOutput,
+    LogConsoleOutputFolder,
 }
