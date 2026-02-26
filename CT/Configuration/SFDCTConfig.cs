@@ -1,5 +1,4 @@
 ﻿using SFD;
-using SFDCT.Helper;
 using SFDCT.Misc;
 using System.Collections.Generic;
 using System.IO;

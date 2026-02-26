@@ -83,8 +83,8 @@ internal class SFDCTSettingsPanel : Panel
         // Vote Kick
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.votekick")));
         m_menu.Add(CreateBoolSetting(CTSettingKey.VoteKickEnabled, "sfdct.setting.name.votekickenabled"));
-        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickFailCooldown, 15, 300, 5, "sfdct.setting.name.votekickfailcooldown"));
-        m_menu.Add(CreateIntSetting(CTSettingKey.VoteKickSuccessCooldown, 15, 300, 5, "sfdct.setting.name.votekicksuccesscooldown"));
+        m_menu.Add(CreateTimeSetting(CTSettingKey.VoteKickFailCooldown, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(300), "sfdct.setting.name.votekickfailcooldown"));
+        m_menu.Add(CreateTimeSetting(CTSettingKey.VoteKickSuccessCooldown, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(300), "sfdct.setting.name.votekicksuccesscooldown"));
 
         // Misc
         m_menu.Add(new MenuItemSeparator(LanguageHelper.GetText("sfdct.setting.category.misc")));
@@ -203,6 +203,30 @@ internal class SFDCTSettingsPanel : Panel
         {
             if (requiresRestart) m_settingsNeedGameRestart = true;
             SFDCTConfig.Set(configKey, item.Value);
+        }));
+
+        return item;
+    }
+
+    private MenuItemTime CreateTimeSetting(CTSettingKey configKey, TimeSpan min, TimeSpan max, string labelKey, string tooltipKey = null, bool requiresRestart = false)
+    {
+        var value = TimeSpan.FromSeconds(SFDCTConfig.Get<int>(configKey));
+        var item = new MenuItemTime(
+            LanguageHelper.GetText(labelKey),
+            value, min, max
+        );
+        item.SetStartValue(value);
+        item.Tooltip = tooltipKey != null ? LanguageHelper.GetText(tooltipKey) : null;
+
+        item.ChooseEvent = (ControlEvents.ChooseEvent)Delegate.Combine(item.ChooseEvent, (ControlEvents.ChooseEvent)(_ =>
+        {
+            var timePanel = (TimePanel)item.ParentMenu.ParentPanel.SubPanel;
+            var timePanelOkButton = (MenuItemButton)timePanel.m_menu.Items[0];
+
+            timePanelOkButton.ChooseEvent = (ControlEvents.ChooseEvent)Delegate.Combine(timePanelOkButton.ChooseEvent, (ControlEvents.ChooseEvent)(_ =>
+            {
+                SFDCTConfig.Set(configKey, item.Value.Seconds);
+            }));
         }));
 
         return item;

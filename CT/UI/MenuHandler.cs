@@ -90,6 +90,20 @@ internal static class MenuHandler
         __instance.UpdatePosition();
     }
 
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(MainMenuPanel), nameof(MainMenuPanel.KeyPress))]
+    private static IEnumerable<CodeInstruction> MainMenuPanel_KeyPress_Transpiler_EscapeKeySelectLast(IEnumerable<CodeInstruction> instructions)
+    {
+        var code = new List<CodeInstruction>(instructions);
+
+        var selectItemIndexInstruction = code[10];
+        var selectItemIndexIndex = code.IndexOf(selectItemIndexInstruction);
+
+        code[selectItemIndexIndex] = new(OpCodes.Ldc_I4, 7 + 1);
+
+        return code;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameMenuPanel), MethodType.Constructor)]
     private static void GameMenuPanel_Constructor_Postfix_InsertExtraOptions(GameMenuPanel __instance)
