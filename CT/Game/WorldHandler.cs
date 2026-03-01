@@ -93,7 +93,7 @@ internal static class WorldHandler
         if (!isLast) return;
 
         var currentState = world.m_game.CurrentState;
-        if (currentState is State.GameOffline)
+        if (currentState is State.GameOffline && ServerHandler.DebugMouse)
         {
             world.UpdateDebugMouse();
             return;

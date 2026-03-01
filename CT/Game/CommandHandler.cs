@@ -83,7 +83,13 @@ internal static class CommandHandler
                     Origin = HandleCommandOrigin.User
                 };
 
-                gameInfo.HandleCommand(handleCommandArgs);
+                bool handled = gameInfo.HandleCommand(handleCommandArgs);
+                if (!handled)
+                {
+                    if (!command.StartsWith("/")) command = "/" + command;
+
+                    gameInfo.HandleMessageInScripts(args.SenderGameUserIdentifier, command);
+                }
             }
         }
         catch (Exception ex)

@@ -458,8 +458,8 @@ internal static class ServerCommands
 
         if (!args.ModeratorPrivileges) return true;
 
-        if (args.CanUseModeratorCommand("GRAVITY", "GRAV")) args.Feedback.Add(new(args.SenderGameUser, "'/GRAVITY [X] [Y]' to set the world's gravity.", colOrange, args.SenderGameUser));
-        if (args.CanUseModeratorCommand("DAMAGE", "HURT")) args.Feedback.Add(new(args.SenderGameUser, "'/HURT [AMOUNT] [PLAYER]' to deal damage to a player, negative amounts heal.", colOrange, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("GRAVITY", "GRAV")) args.Feedback.Add(new(args.SenderGameUser, "'/GRAVITY [X] [Y]' to set the world's gravity, leave empty to reset it.", colOrange, args.SenderGameUser));
+        if (args.CanUseModeratorCommand("DAMAGE", "HURT")) args.Feedback.Add(new(args.SenderGameUser, "'/HURT [PLAYER] [AMOUNT]' to deal damage to a player, negative amounts heal.", colOrange, args.SenderGameUser));
         if (args.CanUseModeratorCommand("VOTE")) args.Feedback.Add(new(args.SenderGameUser, "'/VOTE [...]' to start a yes/no vote with the parameters given.", colOrange, args.SenderGameUser));
 
         if (args.CanUseModeratorCommand("M", "MOUSE", "DEBUGMOUSE")) args.Feedback.Add(new(args.SenderGameUser, "'/MOUSE [1/0]' to enable or disable the debug mouse.", colLightGreen, args.SenderGameUser));

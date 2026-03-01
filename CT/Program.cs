@@ -212,12 +212,17 @@ internal static class Program
     {
         UpdateWebClient = new();
 
-        string repositoryVersion;
+        string repositoryVersionString;
+        Version repositoryVersion;
+        Version currentVersion = new(Globals.Version.SFDCT.TrimStart('v', '.'));
 
         try
         {
             Logger.LogWarn("Fetching version");
-            repositoryVersion = UpdateWebClient.DownloadString(GitHubRepositoryVersionFileURL).Trim();
+            var versionFileContent = UpdateWebClient.DownloadString(GitHubRepositoryVersionFileURL);
+
+            repositoryVersionString = versionFileContent.TrimStart('v', '.');
+            repositoryVersion = new(repositoryVersionString);
         }
         catch (WebException ex)
         {
@@ -225,23 +230,21 @@ internal static class Program
             Logger.LogError(ex.Message);
             return false;
         }
+      
+        Logger.LogWarn($"- Current: {Globals.Version.SFDCT}, Repository: {repositoryVersionString}");
 
-        string updateUrl = GitHubRepositoryReleaseArchiveFileURL.Replace("VERSION", repositoryVersion);
-
-        Logger.LogWarn($"- Current: {Globals.Version.SFDCT}, Repository: {repositoryVersion}");
-
-        switch (string.CompareOrdinal(Globals.Version.SFDCT, repositoryVersion))
+        switch (currentVersion.CompareTo(repositoryVersion))
         {
             case >= 0:
                 Logger.LogWarn("Current version is equal or newer than repository");
                 return false;
             case < 0:
                 Logger.LogWarn("Current version is older than repository");
-                return DownloadUpdate();
+                return DownloadUpdate(GitHubRepositoryReleaseArchiveFileURL.Replace("VERSION", repositoryVersionString));
         }
     }
 
-    private static bool DownloadUpdate()
+    private static bool DownloadUpdate(string url)
     {
         Logger.LogWarn($"- Files at '{Globals.Paths.SFDCT}' will be deleted.");
         Logger.LogWarn($"- Files at '{Globals.Paths.SubContent}' will be kept.");
@@ -256,7 +259,7 @@ internal static class Program
 
         try
         {
-            UpdateWebClient.DownloadFile(GitHubRepositoryReleaseArchiveFileURL, archivePath);
+            UpdateWebClient.DownloadFile(url, archivePath);
         }
         catch
         {
