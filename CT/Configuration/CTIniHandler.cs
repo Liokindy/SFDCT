@@ -19,11 +19,6 @@ internal class CTIniHandler : IniHandler
         ReadLine(key + "=" + value.ToString());
     }
 
-    internal void ReadLine(string key, float value)
-    {
-        ReadLine(key + "=" + value.ToString().Replace(',', '.'));
-    }
-
     internal void ReadLine(string key, Microsoft.Xna.Framework.Color value)
     {
         ReadLine(key + "=" + SFD.Constants.ColorToString(value));

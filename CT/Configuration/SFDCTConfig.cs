@@ -51,19 +51,19 @@ internal static class SFDCTConfig
 
             handler.ReadFile(Globals.Paths.ConfigurationIni);
             Set(CTSettingKey.SoundPanningEnabled, handler.ReadValueBool(GetKey(CTSettingKey.SoundPanningEnabled), true));
-            Set(CTSettingKey.SoundPanningStrength, handler.ReadValueFloatCapped(GetKey(CTSettingKey.SoundPanningStrength), 0.71f, 0f, 1f));
+            Set(CTSettingKey.SoundPanningStrength, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundPanningStrength), 70, 0, 100) * 0.01f);
             Set(CTSettingKey.SoundPanningForceScreenSpace, handler.ReadValueBool(GetKey(CTSettingKey.SoundPanningForceScreenSpace), false));
             Set(CTSettingKey.SoundPanningInworldThreshold, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundPanningInworldThreshold), 60, 0, 1000));
             Set(CTSettingKey.SoundPanningInworldDistance, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundPanningInworldDistance), 400, 0, 1000));
             Set(CTSettingKey.SoundAttenuationEnabled, handler.ReadValueBool(GetKey(CTSettingKey.SoundAttenuationEnabled), true));
-            Set(CTSettingKey.SoundAttenuationMin, handler.ReadValueFloatCapped(GetKey(CTSettingKey.SoundAttenuationMin), 0.6f, 0f, 1f));
+            Set(CTSettingKey.SoundAttenuationMin, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundAttenuationMin), 60, 0, 100) * 0.01f);
             Set(CTSettingKey.SoundAttenuationForceScreenSpace, handler.ReadValueBool(GetKey(CTSettingKey.SoundAttenuationForceScreenSpace), false));
             Set(CTSettingKey.SoundAttenuationInworldThreshold, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundAttenuationInworldThreshold), 60, 0, 1000));
             Set(CTSettingKey.SoundAttenuationInworldDistance, handler.ReadValueIntCapped(GetKey(CTSettingKey.SoundAttenuationInworldDistance), 500, 0, 1000));
-            Set(CTSettingKey.LowHealthSaturationFactor, handler.ReadValueFloatCapped(GetKey(CTSettingKey.LowHealthSaturationFactor), 0.71f, 0f, 1f));
-            Set(CTSettingKey.LowHealthThreshold, handler.ReadValueFloatCapped(GetKey(CTSettingKey.LowHealthThreshold), 0.25f, 0f, 1f));
-            Set(CTSettingKey.LowHealthHurtLevel1Threshold, handler.ReadValueFloatCapped(GetKey(CTSettingKey.LowHealthHurtLevel1Threshold), 0.25f, 0f, 1f));
-            Set(CTSettingKey.LowHealthHurtLevel2Threshold, handler.ReadValueFloatCapped(GetKey(CTSettingKey.LowHealthHurtLevel2Threshold), 0.12f, 0f, 1f));
+            Set(CTSettingKey.LowHealthSaturationFactor, handler.ReadValueIntCapped(GetKey(CTSettingKey.LowHealthSaturationFactor), 70, 0, 100) * 0.01f);
+            Set(CTSettingKey.LowHealthThreshold, handler.ReadValueIntCapped(GetKey(CTSettingKey.LowHealthThreshold), 25, 0, 100) * 0.01f);
+            Set(CTSettingKey.LowHealthHurtLevel1Threshold, handler.ReadValueIntCapped(GetKey(CTSettingKey.LowHealthHurtLevel1Threshold), 25, 0, 100) * 0.01f);
+            Set(CTSettingKey.LowHealthHurtLevel2Threshold, handler.ReadValueIntCapped(GetKey(CTSettingKey.LowHealthHurtLevel2Threshold), 12, 0, 100) * 0.01f);
             Set(CTSettingKey.HideFilmgrain, handler.ReadValueBool(GetKey(CTSettingKey.HideFilmgrain), false));
             Set(CTSettingKey.Language, handler.ReadValueString(GetKey(CTSettingKey.Language), "SFDCT_Default"));
             Set(CTSettingKey.SpectatorsMaximum, handler.ReadValueIntCapped(GetKey(CTSettingKey.SpectatorsMaximum), 4, 0, 4));
@@ -92,7 +92,7 @@ internal static class SFDCTConfig
     private static void SetSettingsToDefaults()
     {
         Set(CTSettingKey.SoundPanningEnabled, true);
-        Set(CTSettingKey.SoundPanningStrength, 0.71f);
+        Set(CTSettingKey.SoundPanningStrength, 0.70f);
         Set(CTSettingKey.SoundPanningForceScreenSpace, false);
         Set(CTSettingKey.SoundPanningInworldThreshold, 60);
         Set(CTSettingKey.SoundPanningInworldDistance, 400);
@@ -101,7 +101,7 @@ internal static class SFDCTConfig
         Set(CTSettingKey.SoundAttenuationForceScreenSpace, false);
         Set(CTSettingKey.SoundAttenuationInworldThreshold, 60);
         Set(CTSettingKey.SoundAttenuationInworldDistance, 500);
-        Set(CTSettingKey.LowHealthSaturationFactor, 0.71f);
+        Set(CTSettingKey.LowHealthSaturationFactor, 0.70f);
         Set(CTSettingKey.LowHealthThreshold, 0.25f);
         Set(CTSettingKey.LowHealthHurtLevel1Threshold, 0.25f);
         Set(CTSettingKey.LowHealthHurtLevel2Threshold, 0.12f);
@@ -133,19 +133,19 @@ internal static class SFDCTConfig
         handler.ReadLine(";then manually copy your settings to it");
 
         handler.ReadLine(GetKey(CTSettingKey.SoundPanningEnabled), Get<bool>(CTSettingKey.SoundPanningEnabled));
-        handler.ReadLine(GetKey(CTSettingKey.SoundPanningStrength), Get<float>(CTSettingKey.SoundPanningStrength));
+        handler.ReadLine(GetKey(CTSettingKey.SoundPanningStrength), (int)(Get<float>(CTSettingKey.SoundPanningStrength) * 100));
         handler.ReadLine(GetKey(CTSettingKey.SoundPanningForceScreenSpace), Get<bool>(CTSettingKey.SoundPanningForceScreenSpace));
         handler.ReadLine(GetKey(CTSettingKey.SoundPanningInworldThreshold), Get<int>(CTSettingKey.SoundPanningInworldThreshold));
         handler.ReadLine(GetKey(CTSettingKey.SoundPanningInworldDistance), Get<int>(CTSettingKey.SoundPanningInworldDistance));
         handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationEnabled), Get<bool>(CTSettingKey.SoundAttenuationEnabled));
-        handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationMin), Get<float>(CTSettingKey.SoundAttenuationMin));
+        handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationMin), (int)(Get<float>(CTSettingKey.SoundAttenuationMin) * 100));
         handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationForceScreenSpace), Get<bool>(CTSettingKey.SoundAttenuationForceScreenSpace));
         handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationInworldThreshold), Get<int>(CTSettingKey.SoundAttenuationInworldThreshold));
         handler.ReadLine(GetKey(CTSettingKey.SoundAttenuationInworldDistance), Get<int>(CTSettingKey.SoundAttenuationInworldDistance));
-        handler.ReadLine(GetKey(CTSettingKey.LowHealthSaturationFactor), Get<float>(CTSettingKey.LowHealthSaturationFactor));
-        handler.ReadLine(GetKey(CTSettingKey.LowHealthThreshold), Get<float>(CTSettingKey.LowHealthThreshold));
-        handler.ReadLine(GetKey(CTSettingKey.LowHealthHurtLevel1Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold));
-        handler.ReadLine(GetKey(CTSettingKey.LowHealthHurtLevel2Threshold), Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold));
+        handler.ReadLine(GetKey(CTSettingKey.LowHealthSaturationFactor), (int)(Get<float>(CTSettingKey.LowHealthSaturationFactor) * 100));
+        handler.ReadLine(GetKey(CTSettingKey.LowHealthThreshold), (int)(Get<float>(CTSettingKey.LowHealthThreshold) * 100));
+        handler.ReadLine(GetKey(CTSettingKey.LowHealthHurtLevel1Threshold), (int)(Get<float>(CTSettingKey.LowHealthHurtLevel1Threshold) * 100));
+        handler.ReadLine(GetKey(CTSettingKey.LowHealthHurtLevel2Threshold), (int)(Get<float>(CTSettingKey.LowHealthHurtLevel2Threshold) * 100));
         handler.ReadLine(GetKey(CTSettingKey.HideFilmgrain), Get<bool>(CTSettingKey.HideFilmgrain));
         handler.ReadLine(GetKey(CTSettingKey.Language), Get<string>(CTSettingKey.Language));
         handler.ReadLine(GetKey(CTSettingKey.SpectatorsMaximum), Get<int>(CTSettingKey.SpectatorsMaximum));
@@ -169,7 +169,7 @@ internal static class SFDCTConfig
     {
         switch (setting)
         {
-            default: return "UNKNOWN";
+            default: return "UNKNOWN_" + (int)setting;
             case CTSettingKey.SoundPanningEnabled: return "SOUNDPANNING_ENABLED";
             case CTSettingKey.SoundPanningStrength: return "SOUNDPANNING_STRENGTH";
             case CTSettingKey.SoundPanningForceScreenSpace: return "SOUNDPANNING_FORCE_SCREEN_SPACE";
