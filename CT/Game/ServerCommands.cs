@@ -260,7 +260,7 @@ internal static class ServerCommands
 
     internal static bool HandleServerMovement(Server server, ProcessCommandArgs args, GameInfo gameInfo)
     {
-        if (args.Parameters.Count == 0) return true;
+        if (args.Parameters.Count < 2) return true;
 
         var gameUser = gameInfo.GetGameUserByStringInput(args.Parameters[0], args.SenderGameUser);
         if (gameUser == null || gameUser.IsDisposed || gameUser.IsBot) return true;
@@ -268,17 +268,13 @@ internal static class ServerCommands
         var gameUserTag = gameUser.GetGameConnectionTag();
         if (gameUserTag == null || gameUserTag.IsDisposed || gameUserTag.GameUsers == null) return true;
 
-        var serverMovement = 0;
-        if (args.Parameters.Count >= 2)
-        {
-            int.TryParse(args.Parameters[1], out serverMovement);
-        }
+        var serverMovement = -1;
+        int.TryParse(args.Parameters[1], out serverMovement);
 
         gameUserTag.ForcedServerMovementToggleTime = serverMovement == 1 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE : serverMovement == 0 ? ServerHandler.SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE : Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS;
-        gameUserTag.ForceServerMovement = serverMovement == 1;
 
         string messageKey = "sfdct.command.servermovement.message";
-        string message = LanguageHelper.GetText(messageKey, gameUser.GetProfileName(), serverMovement == 0 ? LanguageHelper.GetText("properties.script.spawnFire.type.default") : LanguageHelper.GetBooleanText(serverMovement == 2));
+        string message = LanguageHelper.GetText(messageKey, gameUser.GetProfileName(), serverMovement == 1 ? LanguageHelper.GetBooleanText(true) : serverMovement == 0 ? LanguageHelper.GetBooleanText(false) : LanguageHelper.GetText("properties.script.spawnFire.type.default"));
         args.Feedback.Add(new(args.SenderGameUser, message, args.SenderGameUser));
 
         return true;

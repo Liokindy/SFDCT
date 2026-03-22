@@ -3,7 +3,6 @@ using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using SFD;
 using SFDCT.Game;
-using SFDCT.Helper;
 using SFDCT.Sync.Data;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -57,36 +56,40 @@ internal static class ServerHandler
                 var tag = connection.GameConnectionTag();
                 if (tag == null) continue;
 
-                var fromForce = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0;
+                var fromSetting = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0;
                 var fromPing = connection.AverageRoundtripTime > serverMovementPing || Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_PING == 0;
 
-                var useServerMovement = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK && (fromPing || fromForce);
-                useServerMovement = (tag.ForcedServerMovementToggleTime == SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE) || (tag.ForcedServerMovementToggleTime != SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE && useServerMovement);
+                var useServerMovement = Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_CHECK && (fromPing || fromSetting);
 
-                if (tag.ForceServerMovement == useServerMovement)
+                if (tag.ForcedServerMovementToggleTime == SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_TRUE)
                 {
-                    tag.ForcedServerMovementToggleTime = 0f;
-                    continue;
+                    useServerMovement = true;
+                }
+                else if (tag.ForcedServerMovementToggleTime == SERVER_MOVEMENT_TOGGLE_TIME_MS_FORCE_FALSE)
+                {
+                    useServerMovement = false;
+                }
+                else
+                {
+                    tag.ForcedServerMovementToggleTime += updateTime;
+
+                    if (tag.ForcedServerMovementToggleTime <= Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS) continue;
                 }
 
-                tag.ForcedServerMovementToggleTime += updateTime;
-                if (fromForce || tag.ForcedServerMovementToggleTime > Constants.HOST_GAME_FORCED_SERVER_MOVEMENT_TOGGLE_TIME_MS)
+                if (tag.ForceServerMovement == useServerMovement) continue;
+                if (useServerMovement) __instance.m_forcedServerMovementConnectionCount++;
+
+                tag.ForceServerMovement = useServerMovement;
+
+                if (tag.GameUsers == null) continue;
+
+                foreach (var user in tag.GameUsers)
                 {
-                    tag.ForceServerMovement = useServerMovement;
+                    user.ForceServerMovement = useServerMovement;
 
-                    if (tag.GameUsers != null)
-                    {
-                        foreach (var user in tag.GameUsers)
-                        {
-                            user.ForceServerMovement = useServerMovement;
-
-                            var player = __instance.GameInfo?.GameWorld?.GetPlayerByUserIdentifier(user.UserIdentifier);
-                            player?.UpdateCanDoPlayerAction();
-                        }
-                    }
+                    var player = __instance.GameInfo?.GameWorld?.GetPlayerByUserIdentifier(user.UserIdentifier);
+                    player?.UpdateCanDoPlayerAction();
                 }
-
-                if (tag.ForceServerMovement) __instance.m_forcedServerMovementConnectionCount++;
             }
         }
 
