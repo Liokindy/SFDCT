@@ -1,6 +1,6 @@
 ﻿namespace SFDCT.Assets;
 
-internal enum ContentOriginType
+internal enum ContentOriginType : byte
 {
     Official,
     Documents,

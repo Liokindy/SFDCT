@@ -1,13 +1,9 @@
 ﻿using HarmonyLib;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using SFD;
-using SFD.Code;
 using SFD.Colors;
-using SFD.Core;
 using SFD.Loading;
-using SFD.Parser;
 using SFD.Sounds;
 using SFD.Tiles;
 using SFDCT.Configuration;
@@ -15,64 +11,88 @@ using SFDCT.Helper;
 using SFDCT.Misc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Windows.Forms;
 
 namespace SFDCT.Assets;
 
 [HarmonyPatch]
 internal static class SubContentHandler
 {
-    internal const string FilterSeparator = "|";
-    internal static string[] Folders { get; private set; } = [];
+    internal const char FOLDER_SETTING_SEPARATOR = '|';
+
+    internal static bool IsEnabled()
+    {
+        return SFDCTConfig.Get<bool>(CTSettingKey.SubContent);
+    }
 
     internal static void Load()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return;
+        if (!IsEnabled()) return;
 
-        var enabled = new List<string>(GetEnabledFolders());
-        var disabled = new List<string>(GetDisabledFolders());
+        var enabledFolders = GetEnabled().ToList();
+        var disabledFolders = GetDisabled().ToList();
 
-        foreach (string folder in GetNewFolders())
+        var deletedFolders = new List<string>();
+        deletedFolders.AddRange(enabledFolders);
+        deletedFolders.AddRange(disabledFolders);
+        deletedFolders = deletedFolders.Where(p => !Directory.Exists(Path.Combine(Globals.Paths.SubContent, p))).ToList();
+
+        foreach (string folder in deletedFolders)
         {
-            Logger.LogInfo($"[SUB-CONTENT] Adding new folder: {folder}");
-            enabled.Add(folder);
+            disabledFolders.Remove(folder);
+            enabledFolders.Remove(folder);
+
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"SFDCT: Removing deleted sub-content folder: {folder}");
         }
 
-        foreach (string folder in GetDeletedFolders())
+        foreach (string folder in GetNew())
         {
-            if (disabled.Contains(folder)) disabled.Remove(folder);
-            if (enabled.Contains(folder)) enabled.Remove(folder);
+            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"SFDCT: Adding new sub-content folder: {folder}");
+
+            enabledFolders.Add(folder);
         }
 
-        SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, string.Join(FilterSeparator, enabled));
-        SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, string.Join(FilterSeparator, disabled));
+        SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, JoinFoldersInSettingLine(enabledFolders));
+        SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, JoinFoldersInSettingLine(disabledFolders));
         SFDCTConfig.Save();
-
-        Folders = enabled.ToArray();
     }
 
-    internal static string[] GetDeletedFolders()
+    internal static IEnumerable<string> SplitFoldersInSettingLine(string line)
     {
-        var known = GetKnownFolders();
-
-        return known.Where(folder => string.IsNullOrWhiteSpace(folder) || !Directory.Exists(Path.Combine(Globals.Paths.SubContent, folder))).ToArray();
+        return line.Split([FOLDER_SETTING_SEPARATOR], StringSplitOptions.RemoveEmptyEntries);
     }
 
-    internal static string[] GetNewFolders()
+    internal static string JoinFoldersInSettingLine(IEnumerable<string> folders)
     {
-        var known = GetKnownFolders();
-
-        return GetAllFolders().Where(folder => !known.Contains(folder)).ToArray();
+        return string.Join(FOLDER_SETTING_SEPARATOR.ToString(), folders);
     }
 
-    internal static string[] GetFoldersFromSetting(string setting) => setting.Trim(FilterSeparator.ToCharArray()).Split([FilterSeparator], StringSplitOptions.RemoveEmptyEntries);
-    internal static string[] GetAllFolders() => Directory.GetDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly).Select(Path.GetFileName).ToArray();
-    internal static string[] GetKnownFolders() => GetEnabledFolders().Concat(GetDisabledFolders()).ToArray();
-    internal static string[] GetEnabledFolders() => GetFoldersFromSetting(SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders));
-    internal static string[] GetDisabledFolders() => GetFoldersFromSetting(SFDCTConfig.Get<string>(CTSettingKey.SubContentDisabledFolders));
+    internal static IEnumerable<string> GetNew()
+    {
+        var knownFolders = GetEnabled().Concat(GetDisabled());
+
+        return GetAll()
+                .Where(p => !knownFolders.Contains(p) && !knownFolders.Contains(p));
+    }
+
+    internal static IEnumerable<string> GetAll()
+    {
+        return Directory.EnumerateDirectories(Globals.Paths.SubContent, "*", SearchOption.TopDirectoryOnly)
+                .Where(d => Directory.Exists(Path.Combine(d, Constants.Paths.DATA)));
+    }
+
+    internal static IEnumerable<string> GetEnabled()
+    {
+        return SplitFoldersInSettingLine(SFDCTConfig.Get<string>(CTSettingKey.SubContentEnabledFolders));
+    }
+
+    internal static IEnumerable<string> GetDisabled()
+    {
+        return SplitFoldersInSettingLine(SFDCTConfig.Get<string>(CTSettingKey.SubContentDisabledFolders));
+    }
 
     internal static void CopyAndReplaceDictionary<TKey, TValue>(Dictionary<TKey, TValue> fromDic, Dictionary<TKey, TValue> toDic)
     {
@@ -101,7 +121,7 @@ internal static class SubContentHandler
 
         var subContentFiles = new List<string>();
 
-        foreach (string subContentFolder in Folders)
+        foreach (string subContentFolder in GetEnabled())
         {
             string subContentPath = Path.Combine(Globals.Paths.SubContent, subContentFolder, "Content", Path.Combine(relativeToContentPath));
 
@@ -119,394 +139,277 @@ internal static class SubContentHandler
         return files;
     }
 
-    internal static List<SoundHandler.SoundEffectGroup> LoadSoundEffectGroups(string soundsFolderPath, string sfdsFilePath)
+    internal static IEnumerable<ContentData> GetContents()
     {
-        if (SoundHandler.m_soundsDisabled) return null;
+        var contents = new List<ContentData>();
 
-        List<SoundHandler.SoundEffectGroup> result = [];
-        foreach (var line in SFDSimpleReader.Read(sfdsFilePath))
+        var officialContent = new ContentData()
         {
-            var lineBits = SFDSimpleReader.Interpret(line);
+            Directory = Path.Combine(Constants.Paths.ContentPath),
+            OriginType = ContentOriginType.Official,
+        };
 
-            if (lineBits.Count < 3)
+        var documentsContent = new ContentData()
+        {
+            Directory = Path.Combine(Constants.Paths.UserDocumentsContentCustomPath),
+            OriginType = ContentOriginType.Documents
+        };
+
+        contents.Add(officialContent);
+        contents.Add(documentsContent);
+
+        foreach (var folder in GetEnabled())
+        {
+            var subContent = new ContentData()
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"Error: Invalid format in line '{line}' in file '{sfdsFilePath}'");
-                continue;
-            }
+                Directory = Path.Combine(Globals.Paths.SubContent, folder),
+                OriginType = ContentOriginType.SubContent
+            };
 
-            string key = lineBits[0];
-            float volume;
-            List<SoundEffect> variations;
-
-            try
-            {
-                volume = SFDXParser.ParseFloat(lineBits[1]);
-            }
-            catch
-            {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"Error: Could not parse volume modifier in line '{line}' in file '{sfdsFilePath}'");
-                continue;
-            }
-
-            variations = [];
-            for (int i = 0; i < lineBits.Count - 2; i++)
-            {
-                string variationPath = Path.Combine(soundsFolderPath, lineBits[i + 2]);
-
-                try
-                {
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound file: {variationPath}");
-
-                    SoundEffect variationSound = null;
-                    variationSound = Content.Load<SoundEffect>(variationPath);
-
-                    if (variationSound != null) variations.Add(variationSound);
-                }
-                catch (NoAudioHardwareException)
-                {
-                    SoundHandler.m_soundsDisabled = true;
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds aborted - no hardware or drivers");
-
-                    if (!SFD.Program.AutoStart)
-                    {
-                        MessageBox.Show("No audio hardware or drivers detected. Sounds will be disabled.", "No audio hardware or drivers!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    }
-                    return null;
-                }
-                catch
-                {
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"Error: Could not load sound '{variationPath}' in line '{line}' in file '{sfdsFilePath}");
-                }
-            }
-
-            var soundEffectGroup = new SoundHandler.SoundEffectGroup(key, volume, variations.ToArray());
-            if (!soundEffectGroup.IsValid) continue;
-
-            result.Add(soundEffectGroup);
+            contents.Add(subContent);
         }
 
-        return result;
-    }
-
-    //internal static AnimationsData LoadAnimationsFromTextFiles(string[] filePaths)
-    //{
-    //    AnimationData[] animations = new AnimationData[filePaths.Length];
-
-    //    for (int i = 0; i < animations.Length; i++)
-    //    {
-    //        string filePath = filePaths[i];
-    //        string[] fileLines = File.ReadAllLines(filePath);
-    //        string animName = Path.GetFileNameWithoutExtension(filePath);
-
-    //        int frameTime = 0;
-    //        string frameEvent = string.Empty;
-    //        List<AnimationFrameData> frames = [];
-    //        List<AnimationPartData> parts = [];
-    //        List<AnimationCollisionData> collisions = [];
-
-    //        for (int j = 0; j < fileLines.Length; j++)
-    //        {
-    //            string line = fileLines[j].Trim();
-    //            string[] lineBits = line.Split(' ');
-
-    //            if (!string.IsNullOrEmpty(line))
-    //            {
-    //                if (lineBits[0].Equals("FRAME", StringComparison.OrdinalIgnoreCase))
-    //                {
-    //                    frameTime = int.Parse(lineBits[1]);
-    //                    frameEvent = lineBits.Length > 2 ? lineBits[2] : string.Empty;
-    //                }
-    //                else if (lineBits[0].Equals("PART", StringComparison.OrdinalIgnoreCase))
-    //                {
-    //                    int id;
-    //                    if (!int.TryParse(lineBits[1], out id))
-    //                    {
-    //                        if (lineBits[1].Equals("SUBANIMATION", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_SUBANIMATION;
-    //                        }
-    //                        else if (lineBits[1].Equals("TAIL", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_TAIL;
-    //                        }
-    //                        else if (lineBits[1].Equals("SHEATHED_RIFLE", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_SHEATHED_RIFLE;
-    //                        }
-    //                        else if (lineBits[1].Equals("SHEATHED_MELEE", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_SHEATHED_MELEE;
-    //                        }
-    //                        else if (lineBits[1].Equals("SHEATHED_HANDGUN", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_SHEATHED_HANDGUN;
-    //                        }
-    //                        else if (lineBits[1].Equals("WPN_MAINHAND", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_WPN_MAINHAND;
-    //                        }
-    //                        else if (lineBits[1].Equals("WPN_OFFHAND", StringComparison.OrdinalIgnoreCase))
-    //                        {
-    //                            id = ItemPart.TYPE.M_WPN_OFFHAND;
-    //                        }
-    //                        else
-    //                        {
-    //                            int partID, textureID;
-    //                            string[] partIDBits = lineBits[1].Split('_');
-    //                            if (partIDBits.Length == 2 && int.TryParse(partIDBits[0], out partID) && int.TryParse(partIDBits[1], out textureID))
-    //                            {
-    //                                id = ItemPart.TYPE.PART_RANGE * partID + textureID;
-    //                            }
-    //                        }
-    //                    }
-
-    //                    float x = SFDXParser.ParseFloat(lineBits[2]);
-    //                    float y = SFDXParser.ParseFloat(lineBits[3]);
-    //                    float rotation = SFDXParser.ParseFloat(lineBits[4]);
-    //                    SpriteEffects flip = (SpriteEffects)int.Parse(lineBits[5]);
-    //                    float sx = SFDXParser.ParseFloat(lineBits[6]);
-    //                    float sy = SFDXParser.ParseFloat(lineBits[7]);
-    //                    string postFix = lineBits.ElementAtOrDefault(8);
-
-    //                    parts.Add(new(id, x, y, rotation, flip, sx, sy, postFix));
-    //                }
-    //                else if (lineBits[0].Equals("COLLISION", StringComparison.OrdinalIgnoreCase))
-    //                {
-    //                    int id = int.Parse(lineBits[1]);
-    //                    float x = SFDXParser.ParseFloat(lineBits[2]);
-    //                    float y = SFDXParser.ParseFloat(lineBits[3]);
-    //                    float width = SFDXParser.ParseFloat(lineBits[4]);
-    //                    float height = SFDXParser.ParseFloat(lineBits[5]);
-    //                    collisions.Add(new(id, x, y, width, height));
-    //                }
-
-    //                if (j == fileLines.Length - 1 || (j > 0 && lineBits[0].Equals("FRAME", StringComparison.OrdinalIgnoreCase)))
-    //                {
-    //                    frames.Add(new(parts.ToArray(), collisions.ToArray(), frameEvent, frameTime));
-    //                }
-    //            }
-    //        }
-
-    //        animations[i] = new(frames.ToArray(), animName);
-    //    }
-
-    //    return new AnimationsData(animations);
-    //}
-
-    internal static bool AnalyzeAnimation(AnimationData data, Animations.AnalyzeAnimation analyzeData)
-    {
-        if (data.Frames.Length != analyzeData.FrameTimes.Length) return false;
-
-        for (int j = 0; j < data.Frames.Length; j++)
-        {
-            if (data.Frames[j].Time != analyzeData.FrameTimes[j] || data.Frames[j].Event != analyzeData.FrameEvents[j])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    internal static string GetPath(string subContentFolder, params string[] path)
-    {
-        return Path.Combine(Globals.Paths.SubContent, subContentFolder, Path.Combine(path));
+        return contents;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Animations), nameof(Animations.Load))]
-    private static bool Animations_Load_Prefix_OverrideLoad(ref bool __result)
+    private static bool Animations_Load_Prefix_OverrideLoad(ref bool __result, GameSFD game)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        var analyzeDataDic = new Dictionary<string, Animations.AnalyzeAnimation>
-        {
-            { "BaseKick",               new("BaseKick",                 [25, 50, 50, 50, 100, 100],     ["STEP", "", "", "MELEESWING", "KICK", "STOP"]) },
-            { "FullCharge",             new("FullCharge",               [500, 100, 100, 100, 100, 100], ["TELEGRAPH", "", "", "", "", ""]) },
-            { "FullChargeA",            new("FullChargeA",              [500],                          ["TELEGRAPH"]) },
-            { "FullChargeB",            new("FullChargeB",              [100, 100, 100, 100],           ["", "", "", ""]) },
-            { "FullRoll",               new("FullRoll",                 [100, 100, 100, 100, 100],      ["", "", "", "", ""]) },
-            { "UpperBlock",             new("UpperBlock",               [50, 50, 200],                  ["", "", "STOP"]) },
-            { "UpperBlockChainsaw",     new("UpperBlockChainsaw",       [50, 50, 200],                  ["", "", "STOP"]) },
-            { "UpperBlockMelee",        new("UpperBlockMelee",          [50, 50, 200],                  ["", "", "STOP"]) },
-            { "UpperBlockMelee2H",      new("UpperBlockMelee2H",        [50, 50, 200],                  ["", "", "STOP"]) },
-            { "UpperBlockMelee2HEnd",   new("UpperBlockMelee2HEnd",     [200],                          [""]) },
-            { "UpperBlockMeleeEnd",     new("UpperBlockMeleeEnd",       [200],                          [""]) },
-            { "UpperMelee1H1",          new("UpperMelee1H1",            [100, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee1H1End",       new("UpperMelee1H1End",         [75, 200],                      ["", "STOP"]) },
-            { "UpperMelee1H2",          new("UpperMelee1H2",            [150, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee1H2End",       new("UpperMelee1H2End",         [75, 200],                      ["", "STOP"]) },
-            { "UpperMelee1H3",          new("UpperMelee1H3",            [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee1H3Chain",     new("UpperMelee1H3Chain",       [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee1H3ChainEnd",  new("UpperMelee1H3ChainEnd",    [75, 300],                      ["", "STOP"]) },
-            { "UpperMelee1H3End",       new("UpperMelee1H3End",         [75, 300],                      ["", "STOP"]) },
-            { "UpperMelee1H4",          new("UpperMelee1H4",            [100, 50, 50, 50, 250],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee2H1",          new("UpperMelee2H1",            [100, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee2H1End",       new("UpperMelee2H1End",         [75, 250],                      ["", "STOP"]) },
-            { "UpperMelee2H2",          new("UpperMelee2H2",            [150, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee2H2End",       new("UpperMelee2H2End",         [75, 250],                      ["", "STOP"]) },
-            { "UpperMelee2H3",          new("UpperMelee2H3",            [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMelee2H3End",       new("UpperMelee2H3End",         [75, 300],                      ["", "STOP"]) },
-            { "UpperMelee2H4",          new("UpperMelee2H4",            [100, 50, 50, 100],             ["", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperMeleeHit1",         new("UpperMeleeHit1",           [50, 50],                       ["", "STOP"]) },
-            { "UpperMeleeHit2",         new("UpperMeleeHit2",           [50, 50],                       ["", "STOP"]) },
-            { "UpperPunch1",            new("UpperPunch1",              [150, 25, 75, 250],             ["", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperPunch2",            new("UpperPunch2",              [150, 25, 75, 250],             ["", "MELEESWING", "HIT", "STOP"]) },
-            { "UpperPunch3",            new("UpperPunch3",              [200, 25, 75, 50, 250],         ["", "MELEESWING", "HIT", "", "STOP"]) },
-            { "UpperPunch4",            new("UpperPunch4",              [100, 25, 25, 200],             ["", "", "MELEESWING_HIT", "STOP"]) }
-        };
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        var animationsContent = GetContentFiles("char_anims", SearchOption.AllDirectories, Constants.Paths.DATA_ANIMATIONS);
-        var currentContent = 1;
-        var totalContent = animationsContent.Count();
-        var animations = new Dictionary<string, AnimationData>();
+        __result = AnimationsLoader.Load(game);
 
-        foreach (var kvp in animationsContent)
-        {
-            Logger.LogInfo($"LOADING [ANIMATIONS]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.animations")} ({currentContent}/{totalContent})");
+        //var analyzeAnimationsArray = new Animations.AnalyzeAnimation[]
+        //{
+        //    new("BaseKick",                 [25, 50, 50, 50, 100, 100],     ["STEP", "", "", "MELEESWING", "KICK", "STOP"]),
+        //    new("FullCharge",               [500, 100, 100, 100, 100, 100], ["TELEGRAPH", "", "", "", "", ""]),
+        //    new("FullChargeA",              [500],                          ["TELEGRAPH"]),
+        //    new("FullChargeB",              [100, 100, 100, 100],           ["", "", "", ""]),
+        //    new("FullRoll",                 [100, 100, 100, 100, 100],      ["", "", "", "", ""]),
+        //    new("UpperBlock",               [50, 50, 200],                  ["", "", "STOP"]),
+        //    new("UpperBlockChainsaw",       [50, 50, 200],                  ["", "", "STOP"]),
+        //    new("UpperBlockMelee",          [50, 50, 200],                  ["", "", "STOP"]),
+        //    new("UpperBlockMelee2H",        [50, 50, 200],                  ["", "", "STOP"]),
+        //    new("UpperBlockMelee2HEnd",     [200],                          [""]),
+        //    new("UpperBlockMeleeEnd",       [200],                          [""]),
+        //    new("UpperMelee1H1",            [100, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee1H1End",         [75, 200],                      ["", "STOP"]),
+        //    new("UpperMelee1H2",            [150, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee1H2End",         [75, 200],                      ["", "STOP"]),
+        //    new("UpperMelee1H3",            [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee1H3Chain",       [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee1H3ChainEnd",    [75, 300],                      ["", "STOP"]),
+        //    new("UpperMelee1H3End",         [75, 300],                      ["", "STOP"]),
+        //    new("UpperMelee1H4",            [100, 50, 50, 50, 250],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee2H1",            [100, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee2H1End",         [75, 250],                      ["", "STOP"]),
+        //    new("UpperMelee2H2",            [150, 50, 25, 75, 250],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee2H2End",         [75, 250],                      ["", "STOP"]),
+        //    new("UpperMelee2H3",            [200, 50, 25, 75, 300],         ["", "", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMelee2H3End",         [75, 300],                      ["", "STOP"]),
+        //    new("UpperMelee2H4",            [100, 50, 50, 100],             ["", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperMeleeHit1",           [50, 50],                       ["", "STOP"]),
+        //    new("UpperMeleeHit2",           [50, 50],                       ["", "STOP"]),
+        //    new("UpperPunch1",              [150, 25, 75, 250],             ["", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperPunch2",              [150, 25, 75, 250],             ["", "MELEESWING", "HIT", "STOP"]),
+        //    new("UpperPunch3",              [200, 25, 75, 50, 250],         ["", "MELEESWING", "HIT", "", "STOP"]),
+        //    new("UpperPunch4",              [100, 25, 25, 200],             ["", "", "MELEESWING_HIT", "STOP"])
+        //};
 
-            int current = 0;
-            int total = kvp.Value.Length;
+        //var animationsContent = GetContentFiles("char_anims", SearchOption.AllDirectories, Constants.Paths.DATA_ANIMATIONS);
+        //var currentContent = 1;
+        //var totalContent = animationsContent.Count();
+        //var animations = new Dictionary<string, AnimationData>();
 
-            foreach (var path in kvp.Value)
-            {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading animations file: {path}");
+        //foreach (var kvp in animationsContent)
+        //{
+        //    Logger.LogInfo($"LOADING [ANIMATIONS]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.animations")} ({currentContent}/{totalContent})");
 
-                AnimationsData animationsData = Content.Load<AnimationsData>(path);
-                CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
+        //    int current = 0;
+        //    int total = kvp.Value.Length;
 
-                current++;
-            }
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading animations file: {path}");
 
-            currentContent++;
-        }
+        //        AnimationsData animationsData = Content.Load<AnimationsData>(path);
+        //        CopyAndReplaceDictionary(animationsData.DicAnimations, animations);
 
-        foreach (var analyzeData in analyzeDataDic)
-        {
-            if (animations.ContainsKey(analyzeData.Key) && !AnalyzeAnimation(animations[analyzeData.Key], analyzeData.Value))
-            {
-                SFD.Program.ShowError(new Exception("Core animation data file has been modified in an unintended way. Restore your char_anims file."), "Core animation data modified!", true);
+        //        current++;
+        //    }
 
-                __result = false;
-                return false;
-            }
-        }
+        //    currentContent++;
+        //}
 
-        Animations.Data = new(animations.Values.ToArray());
+        //foreach (var analyzeData in analyzeAnimationsArray)
+        //{
+        //    if (!animations.ContainsKey(analyzeData.Animation)) continue;
 
-        __result = true;
+        //    var animationData = animations[analyzeData.Animation];
+        //    var analyzeResult = true;
+
+        //    if (animationData.Frames.Length != analyzeData.FrameTimes.Length)
+        //    {
+        //        analyzeResult = false;
+        //    }
+        //    else
+        //    {
+        //        for (int j = 0; j < animationData.Frames.Length; j++)
+        //        {
+        //            if (animationData.Frames[j].Time != analyzeData.FrameTimes[j] || animationData.Frames[j].Event != analyzeData.FrameEvents[j])
+        //            {
+        //                analyzeResult = false;
+        //                break;
+        //            }
+        //        }
+        //    }
+
+        //    if (!analyzeResult)
+        //    {
+        //        SFD.Program.ShowError(new Exception("Core animation data file has been modified in an unintended way. Restore your char_anims file."), "Core animation data modified!", true);
+
+        //        __result = false;
+        //        return false;
+        //    }
+        //}
+
+        //Animations.Data = new(animations.Values.ToArray());
+
+        //__result = true;
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded animations in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Textures), nameof(Textures.Load), [typeof(string)])]
+    [HarmonyPatch(typeof(Textures), nameof(Textures.Load), [])]
     private static bool Textures_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        // Reverse the order of textureContents because we use the default load
-        // method, it checks if the texture names exist before adding them
-        var textureContents = GetContentFiles("*.png", SearchOption.AllDirectories, Constants.Paths.DATA_IMAGES).Reverse();
-        var currentContent = 1;
-        var totalContent = textureContents.Count();
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        foreach (var kvp in textureContents)
-        {
-            Logger.LogInfo($"LOADING [TEXTURES]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.textures")} ({currentContent}/{totalContent})");
+        TexturesLoader.Load(GameSFD.Handle);
 
-            int current = 0;
-            int total = kvp.Value.Length;
+        //// Reverse the order of textureContents because we use the default load
+        //// method, it checks if the texture names exist before adding them
+        //var textureContents = GetContentFiles("*.png", SearchOption.AllDirectories, Constants.Paths.DATA_IMAGES).Reverse();
+        //var currentContent = 1;
+        //var totalContent = textureContents.Count();
 
-            foreach (var path in kvp.Value)
-            {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading texture file: {path}");
+        //foreach (var kvp in textureContents)
+        //{
+        //    Logger.LogInfo($"LOADING [TEXTURES]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.textures")} ({currentContent}/{totalContent})");
 
-                Textures.m_tileTextures.Load(path, kvp.Key != ContentOriginType.Official);
+        //    int current = 0;
+        //    int total = kvp.Value.Length;
 
-                current++;
-            }
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading texture file: {path}");
+
+        //        Textures.m_tileTextures.Load(path, kvp.Key != ContentOriginType.Official);
+
+        //        current++;
+        //    }
 
 
-            currentContent++;
-        }
+        //    currentContent++;
+        //}
 
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded textures in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Items), nameof(Items.Load), [typeof(GameSFD)])]
-    private static bool Items_Load_Prefix_OverrideLoad()
+    private static bool Items_Load_Prefix_OverrideLoad(GameSFD game)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        Items.m_allItems = [];
-        Items.m_allFemaleItems = [];
-        Items.m_allMaleItems = [];
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        Items.m_slotAllItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
-        Items.m_slotFemaleItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
-        Items.m_slotMaleItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
-        for (int i = 0; i < Equipment.TOTAL_INTERNAL_LAYERS; i++)
-        {
-            Items.m_slotAllItems[i] = [];
-            Items.m_slotFemaleItems[i] = [];
-            Items.m_slotMaleItems[i] = [];
-        }
+        ItemsLoader.Load(game);
 
-        var itemLoadedIDs = new HashSet<string>();
-        var itemContents = GetContentFiles("*.item", SearchOption.AllDirectories, Constants.Paths.DATA_ITEMS);
-        var currentContent = 1;
-        var totalContent = itemContents.Count();
+        //Items.m_allItems = [];
+        //Items.m_allFemaleItems = [];
+        //Items.m_allMaleItems = [];
 
-        foreach (var kvp in itemContents)
-        {
-            Logger.LogInfo($"LOADING [ITEMS]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.equipment")} ({currentContent}/{totalContent})");
+        //Items.m_slotAllItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
+        //Items.m_slotFemaleItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
+        //Items.m_slotMaleItems = new List<Item>[Equipment.TOTAL_INTERNAL_LAYERS];
+        //for (int i = 0; i < Equipment.TOTAL_INTERNAL_LAYERS; i++)
+        //{
+        //    Items.m_slotAllItems[i] = [];
+        //    Items.m_slotFemaleItems[i] = [];
+        //    Items.m_slotMaleItems[i] = [];
+        //}
 
-            int current = 0;
-            int total = kvp.Value.Length;
+        //var itemLoadedIDs = new HashSet<string>();
+        //var itemContents = GetContentFiles("*.item", SearchOption.AllDirectories, Constants.Paths.DATA_ITEMS);
+        //var currentContent = 1;
+        //var totalContent = itemContents.Count();
 
-            foreach (var path in kvp.Value)
-            {
-                if (GameSFD.Closing) return false;
+        //foreach (var kvp in itemContents)
+        //{
+        //    Logger.LogInfo($"LOADING [ITEMS]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.equipment")} ({currentContent}/{totalContent})");
 
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading item file: {path}");
+        //    int current = 0;
+        //    int total = kvp.Value.Length;
 
-                Item item = Content.Load<Item>(path);
-                item.PostProcess();
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        if (GameSFD.Closing) return false;
 
-                current++;
-                if (!itemLoadedIDs.Add(item.ID) && kvp.Key == ContentOriginType.Official)
-                {
-                    foreach (Item item2 in Items.m_allItems)
-                    {
-                        if (item2.ID == item.ID)
-                        {
-                            throw new Exception($"Error: Item ID collision between item '{item2}' and '{item}' while loading '{path}'");
-                        }
-                    }
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading item file: {path}");
 
-                    throw new Exception($"Error: Item ID collision, item with ID '{item.ID}' has already been loaded, cannot load item '{item}' from '{path}'");
-                }
+        //        Item item = Content.Load<Item>(path);
+        //        item.PostProcess();
 
-                Items.m_allItems.Add(item);
-                Items.m_slotAllItems[item.EquipmentLayer].Add(item);
-            }
+        //        current++;
+        //        if (!itemLoadedIDs.Add(item.ID) && kvp.Key == ContentOriginType.Official)
+        //        {
+        //            foreach (Item item2 in Items.m_allItems)
+        //            {
+        //                if (item2.ID == item.ID)
+        //                {
+        //                    throw new Exception($"Error: Item ID collision between item '{item2}' and '{item}' while loading '{path}'");
+        //                }
+        //            }
+
+        //            throw new Exception($"Error: Item ID collision, item with ID '{item.ID}' has already been loaded, cannot load item '{item}' from '{path}'");
+        //        }
+
+        //        Items.m_allItems.Add(item);
+        //        Items.m_slotAllItems[item.EquipmentLayer].Add(item);
+        //    }
 
 
-            currentContent++;
-        }
+        //    currentContent++;
+        //}
 
 
-        Items.PostProcessGenders();
+        //Items.PostProcessGenders();
 
-        Player.HurtLevel1 = Items.GetItem("HurtLevel1");
-        Player.HurtLevel2 = Items.GetItem("HurtLevel2");
-        Player.HurtLevel2 ??= Player.HurtLevel1;
+        //Player.HurtLevel1 = Items.GetItem("HurtLevel1");
+        //Player.HurtLevel2 = Items.GetItem("HurtLevel2");
+        //Player.HurtLevel2 ??= Player.HurtLevel1;
 
-        Items.IsLoaded = true;
+        //Items.IsLoaded = true;
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded items in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
@@ -514,32 +417,57 @@ internal static class SubContentHandler
     [HarmonyPatch(typeof(ColorPaletteDatabase), nameof(ColorPaletteDatabase.Load), [typeof(GameSFD)])]
     private static bool ColorPaletteDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        var colorPalettes = new Dictionary<string, ColorPalette>();
-        var colorPaletteContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_COLORS_PALETTES);
-        var currentContent = 1;
-        var totalContent = colorPaletteContents.Count();
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        foreach (var kvp in colorPaletteContents)
+        var totalColorPalettes = new Dictionary<string, ColorPalette>();
+        var contents = GetContents()
+                        .Where(content => Directory.Exists(Path.Combine(content.Directory, Constants.Paths.DATA_COLORS_PALETTES)))
+                        .Reverse();
+
+        foreach (var content in contents)
         {
-            Logger.LogInfo($"LOADING [COLOR-PALETTES]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.colors")} ({currentContent}/{totalContent})");
+            // need to specify TopDirectoryOnly because otherwise vanilla official content breaks
 
-            foreach (var path in kvp.Value)
+            foreach (var path in Directory.EnumerateFiles(Path.Combine(content.Directory, Constants.Paths.DATA_COLORS_PALETTES), "*.sfdx", SearchOption.TopDirectoryOnly))
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color-palette file: {path}");
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color palettes from file '{path}'");
 
-                SFDXReader.ReadDataFromSFDXFile(path);
-
-                CopyAndReplaceDictionary(ColorPaletteDatabase.m_palettes, colorPalettes);
-                ColorPaletteDatabase.m_palettes.Clear();
+                DatabaseLoader.Load(path, ref ColorPaletteDatabase.m_palettes, ref totalColorPalettes);
             }
-
-            currentContent++;
         }
 
-        ColorPaletteDatabase.m_palettes = colorPalettes;
+        ColorPaletteDatabase.m_palettes = totalColorPalettes;
+
+        //var colorPalettes = new Dictionary<string, ColorPalette>();
+        //var colorPaletteContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_COLORS_PALETTES);
+        //var currentContent = 1;
+        //var totalContent = colorPaletteContents.Count();
+
+        //foreach (var kvp in colorPaletteContents)
+        //{
+        //    Logger.LogInfo($"LOADING [COLOR-PALETTES]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.colors")} ({currentContent}/{totalContent})");
+
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color-palette file: {path}");
+
+        //        SFDXReader.ReadDataFromSFDXFile(path);
+
+        //        CopyAndReplaceDictionary(ColorPaletteDatabase.m_palettes, colorPalettes);
+        //        ColorPaletteDatabase.m_palettes.Clear();
+        //    }
+
+        //    currentContent++;
+        //}
+
+        //ColorPaletteDatabase.m_palettes = colorPalettes;
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded color palettes in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
@@ -547,32 +475,57 @@ internal static class SubContentHandler
     [HarmonyPatch(typeof(ColorDatabase), nameof(ColorDatabase.Load), [typeof(GameSFD)])]
     private static bool ColorDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        var colors = new Dictionary<string, Color[]>();
-        var colorsContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_COLORS_COLORS);
-        var currentContent = 1;
-        var totalContent = colorsContents.Count();
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        foreach (var kvp in colorsContents)
+        var totalColors = new Dictionary<string, Color[]>();
+        var contents = GetContents()
+                        .Where(content => Directory.Exists(Path.Combine(content.Directory, Constants.Paths.DATA_COLORS_COLORS)))
+                        .Reverse();
+
+        foreach (var content in contents)
         {
-            Logger.LogInfo($"LOADING [COLORS]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.colors")} ({currentContent}/{totalContent})");
+            // need to specify TopDirectoryOnly because otherwise vanilla official content breaks
 
-            foreach (var path in kvp.Value)
+            foreach (var path in Directory.EnumerateFiles(Path.Combine(content.Directory, Constants.Paths.DATA_COLORS_COLORS), "*.sfdx", SearchOption.TopDirectoryOnly))
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color file: {path}");
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading colors from file '{path}'");
 
-                SFDXReader.ReadDataFromSFDXFile(path);
-
-                CopyAndReplaceDictionary(ColorDatabase.m_colors, colors);
-                ColorDatabase.m_colors.Clear();
+                DatabaseLoader.Load(path, ref ColorDatabase.m_colors, ref totalColors);
             }
-
-            currentContent++;
         }
 
-        ColorDatabase.m_colors = colors;
+        ColorDatabase.m_colors = totalColors;
+
+        //var colors = new Dictionary<string, Color[]>();
+        //var colorsContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_COLORS_COLORS);
+        //var currentContent = 1;
+        //var totalContent = colorsContents.Count();
+
+        //foreach (var kvp in colorsContents)
+        //{
+        //    Logger.LogInfo($"LOADING [COLORS]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.colors")} ({currentContent}/{totalContent})");
+
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading color file: {path}");
+
+        //        SFDXReader.ReadDataFromSFDXFile(path);
+
+        //        CopyAndReplaceDictionary(ColorDatabase.m_colors, colors);
+        //        ColorDatabase.m_colors.Clear();
+        //    }
+
+        //    currentContent++;
+        //}
+
+        //ColorDatabase.m_colors = colors;
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded colors in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
@@ -580,90 +533,97 @@ internal static class SubContentHandler
     [HarmonyPatch(typeof(SoundHandler), nameof(SoundHandler.Load), [typeof(GameSFD)])]
     private static bool SoundHandler_Load_Prefix_OverrideLoad(GameSFD game)
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds...");
-        SoundHandler.game = game;
-        SoundHandler.soundEffects = new SoundHandler.SoundEffectGroups();
-        SoundHandler.m_recentlyPlayedSoundClassPool = new GenericClassPool<SoundHandler.RecentlyPlayedSound>(() => new SoundHandler.RecentlyPlayedSound(), 1, 0);
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        for (int i = 0; i < 30; i++)
-        {
-            SoundHandler.RecentlyPlayedSound recentlyPlayedSound = SoundHandler.m_recentlyPlayedSoundClassPool.GetFreeItem();
+        SoundsLoader.Load(game);
 
-            recentlyPlayedSound.InUse = false;
-            SoundHandler.m_recentlyPlayedSoundClassPool.FlagFreeItem(recentlyPlayedSound);
-        }
+        //ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds...");
+        //SoundHandler.game = game;
+        //SoundHandler.soundEffects = new SoundHandler.SoundEffectGroups();
+        //SoundHandler.m_recentlyPlayedSoundClassPool = new GenericClassPool<SoundHandler.RecentlyPlayedSound>(() => new SoundHandler.RecentlyPlayedSound(), 1, 0);
 
-        var soundContents = GetContentFiles("*.sfds", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_SOUNDS);
-        var sounds = new Dictionary<string, SoundHandler.SoundEffectGroup>();
-        var soundFileCount = 0;
+        //for (int i = 0; i < 30; i++)
+        //{
+        //    SoundHandler.RecentlyPlayedSound recentlyPlayedSound = SoundHandler.m_recentlyPlayedSoundClassPool.GetFreeItem();
 
-        foreach (var kvp in soundContents)
-        {
-            Logger.LogInfo($"LOADING [SOUNDS]: {kvp.Key}");
+        //    recentlyPlayedSound.InUse = false;
+        //    SoundHandler.m_recentlyPlayedSoundClassPool.FlagFreeItem(recentlyPlayedSound);
+        //}
 
-            if (kvp.Key == ContentOriginType.Official)
-            {
-                foreach (var path in kvp.Value)
-                {
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
+        //var soundContents = GetContentFiles("*.sfds", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_SOUNDS);
+        //var sounds = new Dictionary<string, SoundHandler.SoundEffectGroup>();
+        //var soundFileCount = 0;
 
-                    var folderPath = Path.GetDirectoryName(path);
-                    var soundGroups = LoadSoundEffectGroups(folderPath, path);
+        //foreach (var kvp in soundContents)
+        //{
+        //    Logger.LogInfo($"LOADING [SOUNDS]: {kvp.Key}");
 
-                    if (soundGroups == null) continue;
+        //    if (kvp.Key == ContentOriginType.Official)
+        //    {
+        //        foreach (var path in kvp.Value)
+        //        {
+        //            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
 
-                    foreach (var group in soundGroups)
-                    {
-                        if (sounds.ContainsKey(group.Key))
-                        {
-                            throw new Exception($"Error: Invalid sound key '{group.Key}' - it's already taken");
-                        }
+        //            var folderPath = Path.GetDirectoryName(path);
+        //            var soundGroups = LoadSoundEffectGroups(folderPath, path);
 
-                        sounds.Add(group.Key, group);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var path in kvp.Value)
-                {
-                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
+        //            if (soundGroups == null) continue;
 
-                    var folderPath = Path.GetDirectoryName(path);
-                    var soundGroups = LoadSoundEffectGroups(folderPath, path);
+        //            foreach (var group in soundGroups)
+        //            {
+        //                if (sounds.ContainsKey(group.Key))
+        //                {
+        //                    throw new Exception($"Error: Invalid sound key '{group.Key}' - it's already taken");
+        //                }
 
-                    if (soundGroups == null) continue;
+        //                sounds.Add(group.Key, group);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        foreach (var path in kvp.Value)
+        //        {
+        //            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading sound definitions file: {path}");
 
-                    foreach (var group in soundGroups)
-                    {
-                        sounds[group.Key] = group;
-                    }
-                }
-            }
+        //            var folderPath = Path.GetDirectoryName(path);
+        //            var soundGroups = LoadSoundEffectGroups(folderPath, path);
 
-            soundFileCount++;
-        }
+        //            if (soundGroups == null) continue;
 
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds finilizing");
+        //            foreach (var group in soundGroups)
+        //            {
+        //                sounds[group.Key] = group;
+        //            }
+        //        }
+        //    }
 
-        foreach (var soundEffectGroup in sounds.Values)
-        {
-            if (soundEffectGroup.Key == "CHAINSAW") SoundHandler.GlobalLoopSounds.Chainsaw = new SoundHandler.GlobalLoopSound(soundEffectGroup.Key, soundEffectGroup.SoundEffects[0].CreateInstance(), soundEffectGroup.VolumeModifier);
-            if (soundEffectGroup.Key == "STREETSWEEPERPROPELLER") SoundHandler.GlobalLoopSounds.StreetsweeperPropeller = new SoundHandler.GlobalLoopSound(soundEffectGroup.Key, soundEffectGroup.SoundEffects[0].CreateInstance(), soundEffectGroup.VolumeModifier);
+        //    soundFileCount++;
+        //}
 
-            SoundHandler.soundEffects.Add(soundEffectGroup);
-            ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Sound added: {soundEffectGroup.Key}");
-        }
+        //ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds finilizing");
 
-        if (soundFileCount == 0 || SoundHandler.soundEffects.Count == 0)
-        {
-            SoundHandler.m_soundsDisabled = true;
-        }
+        //foreach (var soundEffectGroup in sounds.Values)
+        //{
+        //    if (soundEffectGroup.Key == "CHAINSAW") SoundHandler.GlobalLoopSounds.Chainsaw = new SoundHandler.GlobalLoopSound(soundEffectGroup.Key, soundEffectGroup.SoundEffects[0].CreateInstance(), soundEffectGroup.VolumeModifier);
+        //    if (soundEffectGroup.Key == "STREETSWEEPERPROPELLER") SoundHandler.GlobalLoopSounds.StreetsweeperPropeller = new SoundHandler.GlobalLoopSound(soundEffectGroup.Key, soundEffectGroup.SoundEffects[0].CreateInstance(), soundEffectGroup.VolumeModifier);
 
-        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds completed");
+        //    SoundHandler.soundEffects.Add(soundEffectGroup);
+        //    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Sound added: {soundEffectGroup.Key}");
+        //}
 
+        //if (soundFileCount == 0 || SoundHandler.soundEffects.Count == 0)
+        //{
+        //    SoundHandler.m_soundsDisabled = true;
+        //}
+
+        //ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, "Loading sounds completed");
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded sounds in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
@@ -671,142 +631,227 @@ internal static class SubContentHandler
     [HarmonyPatch(typeof(TileDatabase), nameof(TileDatabase.Load), [typeof(GameSFD)])]
     private static bool TileDatabase_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
-        var tiles = new Dictionary<string, Tile>();
-        var tilesContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_TILES);
-        var weaponTilesContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_WEAPONS);
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        int currentContent = 1;
-        int totalContent = tilesContents.Count();
+        var totalTiles = new Dictionary<string, Tile>();
+        var contents = GetContents()
+                        .Where(content =>
+                            Directory.Exists(Path.Combine(content.Directory, Constants.Paths.DATA_TILES)) ||
+                            Directory.Exists(Path.Combine(content.Directory, Constants.Paths.DATA_WEAPONS)))
+                        .Reverse();
 
-        foreach (var kvp in tilesContents)
+        foreach (var content in contents)
         {
-            Logger.LogInfo($"LOADING [TILES]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
+            // tiles are divided into 2 separate folders,
+            // the main tile folders and the tiles reserved for weapons
 
-            foreach (var path in kvp.Value)
+            var contentTilesFolderPath = Path.Combine(content.Directory, Constants.Paths.DATA_TILES);
+            var contentWeaponTilesFolderPath = Path.Combine(content.Directory, Constants.Paths.DATA_WEAPONS);
+
+            // need to specify TopDirectoryOnly because otherwise vanilla official content breaks
+            if (Directory.Exists(contentTilesFolderPath))
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading tile file: {path}");
+                foreach (var path in Directory.EnumerateFiles(contentTilesFolderPath, "*.sfdx", SearchOption.TopDirectoryOnly))
+                {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading tiles from file '{path}'");
 
-                SFDXReader.ReadDataFromSFDXFile(path);
-
-                CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
-                TileDatabase.m_tiles.Clear();
-                TileDatabase.m_categorizedTiles.Clear();
+                    DatabaseLoader.Load(path, ref TileDatabase.m_tiles, ref totalTiles);
+                }
             }
 
-            currentContent++;
-        }
-
-        currentContent = 1;
-        totalContent = weaponTilesContents.Count();
-
-        foreach (var kvp in weaponTilesContents)
-        {
-            Logger.LogInfo($"LOADING [WEAPON-TILES]: {kvp.Key}");
-            GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
-
-            foreach (var path in kvp.Value)
+            if (Directory.Exists(contentWeaponTilesFolderPath))
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading weapon tile file: {path}");
+                foreach (var path in Directory.EnumerateFiles(contentWeaponTilesFolderPath, "*.sfdx", SearchOption.TopDirectoryOnly))
+                {
+                    ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading tiles from file '{path}'");
 
-                SFDXReader.ReadDataFromSFDXFile(path);
+                    DatabaseLoader.Load(path, ref TileDatabase.m_tiles, ref totalTiles);
+                }
             }
 
-            CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
-            TileDatabase.m_tiles.Clear();
+            // loading tiles also adds entries to TileDatabase.m_categorizedTiles,
+            // this is handled later by individually adding back all the found unique tiles
             TileDatabase.m_categorizedTiles.Clear();
-
-            currentContent++;
         }
 
-        foreach (var tile in tiles.Values)
+        // this is so TileDatabase.m_categorizedTiles gets properly constructed again
+        foreach (var tile in totalTiles.Values)
         {
             TileDatabase.Add(tile);
         }
 
+        // the player tile needs to override any conflicting tile
         var playerTile = new Tile(TileStructure.GetPlayerTileStructure());
         TileDatabase.Remove(playerTile.Key);
-        TileDatabase.Add(playerTile);
+        TileDatabase.Add(playerTile, true);
+
+        //var tiles = new Dictionary<string, Tile>();
+        //var tilesContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_TILES);
+        //var weaponTilesContents = GetContentFiles("*.sfdx", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_WEAPONS);
+
+        //int currentContent = 1;
+        //int totalContent = tilesContents.Count();
+
+        //foreach (var kvp in tilesContents)
+        //{
+        //    Logger.LogInfo($"LOADING [TILES]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
+
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading tile file: {path}");
+
+        //        SFDXReader.ReadDataFromSFDXFile(path);
+
+        //        CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
+        //        TileDatabase.m_tiles.Clear();
+        //        TileDatabase.m_categorizedTiles.Clear();
+        //    }
+
+        //    currentContent++;
+        //}
+
+        //currentContent = 1;
+        //totalContent = weaponTilesContents.Count();
+
+        //foreach (var kvp in weaponTilesContents)
+        //{
+        //    Logger.LogInfo($"LOADING [WEAPON-TILES]: {kvp.Key}");
+        //    GameSFD.Handle.ShowLoadingText($"{LanguageHelper.GetText("loading.tiles")} ({currentContent}/{totalContent})");
+
+        //    foreach (var path in kvp.Value)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading weapon tile file: {path}");
+
+        //        SFDXReader.ReadDataFromSFDXFile(path);
+        //    }
+
+        //    CopyAndReplaceDictionary(TileDatabase.m_tiles, tiles);
+        //    TileDatabase.m_tiles.Clear();
+        //    TileDatabase.m_categorizedTiles.Clear();
+
+        //    currentContent++;
+        //}
+
+        //foreach (var tile in tiles.Values)
+        //{
+        //    TileDatabase.Add(tile);
+        //}
+
+        //var playerTile = new Tile(TileStructure.GetPlayerTileStructure());
+        //TileDatabase.Remove(playerTile.Key);
+        //TileDatabase.Add(playerTile);
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded tiles in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(BackgroundImage), nameof(BackgroundImage.LoadTexture))]
-    private static bool BackgroundImage_LoadTexture_Prefix_OverrideLoad()
+    [HarmonyPatch(typeof(BackgroundImage), nameof(BackgroundImage.Load))]
+    private static bool BackgroundImage_Load_Prefix_OverrideLoad()
     {
-        if (!SFDCTConfig.Get<bool>(CTSettingKey.SubContent)) return true;
+        if (!IsEnabled()) return true;
 
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        // only a single file matters so check it here
+        var contents = GetContents()
+                        .Where(content => File.Exists(Path.Combine(content.Directory, "SFD.jpg")))
+                        .Reverse();
+
+        // SFD vanilla check
         if (BackgroundImage.m_image != null && !BackgroundImage.m_image.IsDisposed)
         {
             BackgroundImage.m_image.Dispose();
             BackgroundImage.m_image = null;
         }
 
-        var backgroundImageContents = GetContentFiles("SFD.jpg", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_MISC);
-        string SFDjpgImagePath = null;
-
-        foreach (var kvp in backgroundImageContents)
+        foreach (var content in contents)
         {
-            if (kvp.Value.Length <= 0) continue;
+            var contentBackgroundImagePath = Path.Combine(content.Directory, "SFD.jpg");
 
-            Logger.LogInfo($"LOADING [BACKGROUND-IMAGE]: {kvp.Key}");
-            SFDjpgImagePath = kvp.Value.Last();
-        }
-
-        if (SFDjpgImagePath != null && File.Exists(SFDjpgImagePath))
-        {
             try
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image file: {SFDjpgImagePath}");
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image file: {contentBackgroundImagePath}");
 
-                using (FileStream fileStream = File.OpenRead(SFDjpgImagePath))
+                using (FileStream fileStream = File.OpenRead(contentBackgroundImagePath))
                 {
                     Utils.WaitForGraphicsDevice();
                     BackgroundImage.m_image = Texture2D.FromStream(GameSFD.Handle.GraphicsDevice, fileStream);
 
                     fileStream.Close();
                 }
+
+                // stop here if the image loaded correctly,
+                // otherwise move to the next content
+                break;
             }
             catch (Exception ex)
             {
-                ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"file '{SFDjpgImagePath}' could not be loaded: " + ex.Message);
+                ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"file '{contentBackgroundImagePath}' could not be loaded: " + ex.Message);
+                BackgroundImage.m_image = null;
             }
         }
 
+        //if (BackgroundImage.m_image != null && !BackgroundImage.m_image.IsDisposed)
+        //{
+        //    BackgroundImage.m_image.Dispose();
+        //    BackgroundImage.m_image = null;
+        //}
+
+        //var backgroundImageContents = GetContentFiles("SFD.jpg", SearchOption.TopDirectoryOnly, Constants.Paths.DATA_MISC);
+        //string SFDjpgImagePath = null;
+
+        //foreach (var kvp in backgroundImageContents)
+        //{
+        //    if (kvp.Value.Length <= 0) continue;
+
+        //    Logger.LogInfo($"LOADING [BACKGROUND-IMAGE]: {kvp.Key}");
+        //    SFDjpgImagePath = kvp.Value.Last();
+        //}
+
+        //if (SFDjpgImagePath != null && File.Exists(SFDjpgImagePath))
+        //{
+        //    try
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Loading, $"Loading background image file: {SFDjpgImagePath}");
+
+        //        using (FileStream fileStream = File.OpenRead(SFDjpgImagePath))
+        //        {
+        //            Utils.WaitForGraphicsDevice();
+        //            BackgroundImage.m_image = Texture2D.FromStream(GameSFD.Handle.GraphicsDevice, fileStream);
+
+        //            fileStream.Close();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ConsoleOutput.ShowMessage(ConsoleOutputType.Error, $"file '{SFDjpgImagePath}' could not be loaded: " + ex.Message);
+        //    }
+        //}
+
+        stopwatch.Stop();
+        Logger.LogDebug($"Loaded background image in {stopwatch.ElapsedMilliseconds}ms");
         return false;
     }
 
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(TileTextures), nameof(TileTextures.Load))]
-    private static IEnumerable<CodeInstruction> TileTextures_Load_Prefix_PathChange(IEnumerable<CodeInstruction> instructions)
+    private static IEnumerable<CodeInstruction> TileTextures_Load_Prefix_MinorChanges(IEnumerable<CodeInstruction> instructions)
     {
         // These tiny changes allows re-using the method without too many changes.
 
-        // Do not call 'Constants.Paths.GetContentAssetPathFromFullPath' and use full path instead
+        // change 'Constants.Paths.GetContentAssetPathFromFullPath' to use the unmodified path instead
         instructions.ElementAt(23).opcode = OpCodes.Nop;
 
-        // Don't check here for custom PNG textures in documents
-        // Assume the PNG texture in documents never exists, always branch
+        // assume the PNG texture in documents never exists
         instructions.ElementAt(69).opcode = OpCodes.Nop;
         instructions.ElementAt(70).opcode = OpCodes.Ldc_I4_0;
-
-        return instructions;
-    }
-
-    [HarmonyTranspiler]
-    [HarmonyPatch(typeof(TileTextures), nameof(TileTextures.AddTexture))]
-    private static IEnumerable<CodeInstruction> TileTextures_AddTexture_Prefix_DuplicateTextureMessage(IEnumerable<CodeInstruction> instructions)
-    {
-        // Remove this line to avoid clutter when loading sub-content
-        // 'ConsoleOutput.ShowMessage(ConsoleOutputType.Error, string.Format("Error: A texture with name '{0}' already exist.", name));'
-
-        instructions.ElementAt(8).opcode = OpCodes.Nop;
-        instructions.ElementAt(9).opcode = OpCodes.Nop;
-        instructions.ElementAt(10).opcode = OpCodes.Nop;
-        instructions.ElementAt(11).opcode = OpCodes.Nop;
-        instructions.ElementAt(12).opcode = OpCodes.Nop;
 
         return instructions;
     }

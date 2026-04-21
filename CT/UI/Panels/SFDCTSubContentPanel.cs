@@ -33,28 +33,21 @@ internal class SFDCTSubContentPanel : Panel
         members.Add(m_disabledMenu);
         m_menu.SelectFirst();
 
-        string[] disabledFolders = SubContentHandler.GetDisabledFolders();
-        string[] enabledFolders = SubContentHandler.GetEnabledFolders();
-        string[] newFolders = SubContentHandler.GetNewFolders();
-
         m_enabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.on")));
-        for (int i = 0; i < enabledFolders.Length; i++)
+        foreach (var folderName in SubContentHandler.GetEnabled())
         {
-            var folderName = enabledFolders[i];
-            m_enabledMenu.Add(new MenuItemButton(folderName, folder));
+            m_enabledMenu.Add(new MenuItemButton(folderName, folderAction));
         }
 
-        for (int i = 0; i < newFolders.Length; i++)
+        foreach (var folderName in SubContentHandler.GetNew())
         {
-            var folderName = newFolders[i];
-            m_enabledMenu.Add(new MenuItemButton(folderName, folder));
+            m_enabledMenu.Add(new MenuItemButton(folderName, folderAction));
         }
 
         m_disabledMenu.Add(new MenuItemSeparator(LanguageHelper.GetText("general.off")));
-        for (int i = 0; i < disabledFolders.Length; i++)
+        foreach (var folderName in SubContentHandler.GetDisabled())
         {
-            var folderName = disabledFolders[i];
-            m_disabledMenu.Add(new MenuItemButton(folderName, folder));
+            m_disabledMenu.Add(new MenuItemButton(folderName, folderAction));
         }
     }
 
@@ -83,7 +76,7 @@ internal class SFDCTSubContentPanel : Panel
         item.Deselect();
     }
 
-    private void folder(object obj)
+    private void folderAction(object obj)
     {
         if (obj is not MenuItemButton menuItem) return;
 
@@ -227,19 +220,14 @@ internal class SFDCTSubContentPanel : Panel
         }
     }
 
-    private static string ConcatFolderString(Menu menu)
-    {
-        var folderNames = menu.Items.Where(b => b is not MenuItemSeparator).OfType<MenuItemButton>().Select(b => b.lblName.Text);
-
-        return SubContentHandler.FilterSeparator + string.Join(SubContentHandler.FilterSeparator, folderNames) + SubContentHandler.FilterSeparator;
-    }
-
     private void ok(object _)
     {
         if (m_changed)
         {
-            string enabledFolders = ConcatFolderString(m_enabledMenu);
-            string disabledFolders = ConcatFolderString(m_disabledMenu);
+            // join and format the names of all
+            // the buttons in each menu as folder names
+            string enabledFolders = SubContentHandler.JoinFoldersInSettingLine(m_enabledMenu.Items.Where(b => b is MenuItemButton && b is not MenuItemSeparator).Select(b => ((MenuItemButton)b).lblName.Text));
+            string disabledFolders = SubContentHandler.JoinFoldersInSettingLine(m_disabledMenu.Items.Where(b => b is MenuItemButton && b is not MenuItemSeparator).Select(b => ((MenuItemButton)b).lblName.Text));
 
             SFDCTConfig.Set(CTSettingKey.SubContentEnabledFolders, enabledFolders);
             SFDCTConfig.Set(CTSettingKey.SubContentDisabledFolders, disabledFolders);

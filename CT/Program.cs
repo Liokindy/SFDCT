@@ -30,12 +30,10 @@ internal static class Program
         Logger.LogInfo("Thanks for downloading my mod! -Liokindy");
         Logger.LogInfo("Official repository: https://github.com/Liokindy/SFDCT");
 
-#if DEBUG
         Logger.LogDebug("--------------------------------");
         Logger.LogDebug("RUNNING IN DEBUG MODE");
         Logger.LogDebug("DEBUG MESSAGES WILL APPEAR");
         Logger.LogDebug("--------------------------------");
-#endif
 
         bool skipUpdateCheck = false;
         bool skipProgramChoice = false;
@@ -230,7 +228,7 @@ internal static class Program
             Logger.LogError(ex.Message);
             return false;
         }
-      
+
         Logger.LogWarn($"- Current: {Globals.Version.SFDCT}, Repository: {repositoryVersionString}");
 
         switch (currentVersion.CompareTo(repositoryVersion))
